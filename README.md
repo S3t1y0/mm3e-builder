@@ -192,4 +192,3 @@ This software is an unofficial, fan-created utility tool intended for personal t
 
 - *Mutants & Masterminds*, the *d20 Hero System*, and associated trademarks are copyright of Green Ronin Publishing, LLC.
 - Game rules, system mechanics, and terminology referenced herein are utilized under the terms of the Open Game License (OGL v1.0a).
-- Character names, likenesses, and lore referenced in sample datasets (such as Spider-Man) are trademarks and copyright of Marvel Characters, Inc. and are used solely for illustrative and demonstration purposes.
