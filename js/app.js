@@ -114,6 +114,35 @@ function setupGlobalActions() {
       showToast('New character ready.', 'success');
     }
   });
+
+  // Mobile Drawer Actions
+  const drawerOverlay = document.getElementById('mobile-drawer-overlay');
+  const openDrawerBtn = document.getElementById('btn-mobile-menu');
+  const closeDrawerBtn = document.getElementById('btn-close-drawer');
+
+  const openDrawer = () => drawerOverlay?.classList.add('open');
+  const closeDrawer = () => drawerOverlay?.classList.remove('open');
+
+  openDrawerBtn?.addEventListener('click', openDrawer);
+  closeDrawerBtn?.addEventListener('click', closeDrawer);
+  drawerOverlay?.addEventListener('click', (e) => {
+    if (e.target === drawerOverlay) closeDrawer();
+  });
+
+  const bindDrawerAction = (id, targetId) => {
+    document.getElementById(id)?.addEventListener('click', () => {
+      closeDrawer();
+      document.getElementById(targetId)?.click();
+    });
+  };
+
+  bindDrawerAction('drawer-btn-new', 'btn-new-char');
+  bindDrawerAction('drawer-btn-clear', 'btn-clear');
+  bindDrawerAction('drawer-btn-export', 'btn-export');
+  bindDrawerAction('drawer-btn-excel', 'btn-excel');
+  bindDrawerAction('drawer-btn-import', 'btn-import');
+  bindDrawerAction('drawer-btn-roll20', 'btn-roll20-preview');
+  bindDrawerAction('drawer-btn-print', 'btn-pdf');
 }
 
 function setupKeyboardShortcuts() {
@@ -200,22 +229,55 @@ function renderHeaderPoints() {
     }
   }
 
-  // Bottom stats footer summary
+  // Bottom stats footer summary (Responsive Mobile Dock)
   const spent = store.getTotalSpentPP();
   const budget = store.getTotalBudgetPP();
   const remaining = store.getRemainingPP();
 
+  const drawerName = document.getElementById('drawer-char-name');
+  const drawerPL = document.getElementById('drawer-char-pl');
+  if (drawerName) drawerName.textContent = store.character.name || 'Hero Name';
+  if (drawerPL) drawerPL.textContent = `PL ${store.character.powerLevel} • Mutants & Masterminds 3e`;
+
   const statsFooter = document.getElementById('points-breakdown-footer');
   if (statsFooter) {
+    const wasOpen = statsFooter.querySelector('#pp-dock-details')?.classList.contains('open');
     statsFooter.innerHTML = `
-      <div class="breakdown-item"><span>Abilities:</span> <strong>${store.getTotalAbilityPP()} PP</strong></div>
-      <div class="breakdown-item"><span>Defenses:</span> <strong>${store.getTotalDefensePP()} PP</strong></div>
-      <div class="breakdown-item"><span>Skills:</span> <strong>${store.getTotalSkillPP()} PP</strong></div>
-      <div class="breakdown-item"><span>Advantages:</span> <strong>${store.getTotalAdvantagePP()} PP</strong></div>
-      <div class="breakdown-item"><span>Powers:</span> <strong>${store.getTotalPowerPP()} PP</strong></div>
-      <div class="breakdown-item total"><span>Total Spent:</span> <strong>${spent} / ${budget} PP</strong></div>
-      <div class="breakdown-item remaining ${remaining < 0 ? 'negative' : ''}"><span>Remaining:</span> <strong>${remaining} PP</strong></div>
+      <div class="pp-dock-summary">
+        <div class="dock-summary-left">
+          <span class="dock-label">TOTAL SPENT</span>
+          <strong class="dock-val">${spent} / ${budget} PP</strong>
+        </div>
+        <div class="dock-summary-right">
+          <div class="dock-rem-badge ${remaining < 0 ? 'negative' : ''}">
+            <span>Rem:</span> <strong>${remaining} PP</strong>
+          </div>
+          <button id="btn-toggle-dock-details" class="dock-toggle-btn" aria-label="Toggle PP Details" title="Toggle PP Breakdown">
+            <i class="${wasOpen ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line'}"></i>
+          </button>
+        </div>
+      </div>
+      <div class="pp-dock-details ${wasOpen ? 'open' : ''}" id="pp-dock-details">
+        <div class="breakdown-item"><span>Abilities:</span> <strong>${store.getTotalAbilityPP()} PP</strong></div>
+        <div class="breakdown-item"><span>Defenses:</span> <strong>${store.getTotalDefensePP()} PP</strong></div>
+        <div class="breakdown-item"><span>Skills:</span> <strong>${store.getTotalSkillPP()} PP</strong></div>
+        <div class="breakdown-item"><span>Advantages:</span> <strong>${store.getTotalAdvantagePP()} PP</strong></div>
+        <div class="breakdown-item"><span>Powers:</span> <strong>${store.getTotalPowerPP()} PP</strong></div>
+        <div class="breakdown-item total"><span>Total Spent:</span> <strong>${spent} / ${budget} PP</strong></div>
+        <div class="breakdown-item remaining ${remaining < 0 ? 'negative' : ''}"><span>Remaining:</span> <strong>${remaining} PP</strong></div>
+      </div>
     `;
+
+    statsFooter.querySelector('#btn-toggle-dock-details')?.addEventListener('click', () => {
+      const details = statsFooter.querySelector('#pp-dock-details');
+      const icon = statsFooter.querySelector('#btn-toggle-dock-details i');
+      if (details) {
+        details.classList.toggle('open');
+        if (icon) {
+          icon.className = details.classList.contains('open') ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line';
+        }
+      }
+    });
   }
 }
 

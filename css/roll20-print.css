@@ -903,10 +903,37 @@
   border-bottom: 1px dotted #ccc;
 }
 
-/* ==========================================================================
-   PRINT MEDIA RULES (A4 / US LETTER CLEAN PAGINATION)
-   ========================================================================== */
+@media (max-width: 768px) {
+  #roll20-preview-modal {
+    padding: 8px;
+  }
+  .r20-modal-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+    padding: 8px 12px;
+    margin-bottom: 12px;
+  }
+  .r20-modal-title {
+    font-size: 1.15rem;
+    justify-content: center;
+  }
+  .r20-modal-actions {
+    justify-content: stretch;
+  }
+  .r20-modal-actions .r20-btn {
+    flex: 1;
+    text-align: center;
+  }
+  #roll20-preview-content {
+    width: 100%;
+    overflow-x: auto;
+  }
+}
 
+/* ==========================================================================
+   PRINT MEDIA - High-Fidelity Tabletop Export
+   ========================================================================== */
 @media print {
   @page {
     size: A4 portrait;
