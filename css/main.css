@@ -66,6 +66,8 @@
 html {
   color-scheme: dark;
   scroll-behavior: smooth;
+  overflow-y: scroll;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -392,8 +394,10 @@ p {
 .points-breakdown-bar {
   position: fixed;
   bottom: 1rem;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin-left: auto;
+  margin-right: auto;
   width: calc(100% - 3rem);
   max-width: 1400px;
   z-index: 80;

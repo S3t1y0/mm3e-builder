@@ -166,16 +166,7 @@ function render() {
 }
 
 function renderHeaderPoints() {
-  const spent = store.getTotalSpentPP();
-  const budget = store.getTotalBudgetPP();
-  const remaining = store.getRemainingPP();
   const caps = store.getTradeOffCaps();
-
-  const counterEl = document.getElementById('pp-counter-display');
-  if (counterEl) {
-    counterEl.innerHTML = `<strong>${spent}</strong> / ${budget} PP`;
-    counterEl.className = remaining < 0 ? 'pp-badge over-budget' : 'pp-badge';
-  }
 
   // Undo / Redo states
   const undoBtn = document.getElementById('btn-undo');
@@ -206,6 +197,10 @@ function renderHeaderPoints() {
   }
 
   // Bottom stats footer summary
+  const spent = store.getTotalSpentPP();
+  const budget = store.getTotalBudgetPP();
+  const remaining = store.getRemainingPP();
+
   const statsFooter = document.getElementById('points-breakdown-footer');
   if (statsFooter) {
     statsFooter.innerHTML = `
@@ -726,12 +721,12 @@ function renderResourcesTab(container) {
                     </div>
                   </div>
                   <div class="res-top-actions">
-                    <span class="ep-tag">${r.epCost} EP</span>
+                    <span class="ep-tag">${r.epCost ?? r.cost ?? 0} EP</span>
                     <button class="btn-icon-subtle" data-edit-res="${r.id || i}" title="Edit Item"><i class="ri-edit-line"></i></button>
                     <button class="btn-icon-subtle text-danger" data-del-res="${r.id || i}" title="Delete Item"><i class="ri-delete-bin-line"></i></button>
                   </div>
                 </div>
-                <p class="res-card-desc">${r.desc || '<span class="text-muted">No description notes.</span>'}</p>
+                <p class="res-card-desc">${r.desc || r.notes || '<span class="text-muted">No description notes.</span>'}</p>
               </div>
             `).join('')}
           </div>

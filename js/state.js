@@ -333,7 +333,7 @@ class Store {
 
   // --- Resources & Equipment Budget ---
   getTotalEP() {
-    return this.character.resources.reduce((sum, r) => sum + (parseInt(r.epCost, 10) || 0), 0);
+    return this.character.resources.reduce((sum, r) => sum + (parseInt(r.epCost ?? r.cost, 10) || 0), 0);
   }
 
   getEquipmentBudgetInfo() {
