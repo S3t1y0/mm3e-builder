@@ -37,68 +37,18 @@
     </div>
 
     <div class="menubar-right">
-      <div class="menubar-quick-actions">
-        <button id="btn-undo" class="btn btn-ghost btn-xs" title="Undo (Ctrl+Z)" disabled><i class="ri-arrow-go-back-line"></i> <span class="btn-text">Undo</span></button>
-        <button id="btn-redo" class="btn btn-ghost btn-xs" title="Redo (Ctrl+Shift+Z)" disabled><i class="ri-arrow-go-forward-line"></i> <span class="btn-text">Redo</span></button>
-      </div>
-      <div class="menubar-desktop-actions">
-        <button id="btn-clear" class="btn btn-ghost btn-xs" title="Clear Sheet"><i class="ri-delete-bin-line"></i> Clear</button>
-        <button id="btn-export" class="btn btn-secondary btn-xs" title="Export JSON"><i class="ri-download-2-line"></i> Export</button>
-        <button id="btn-excel" class="btn btn-secondary btn-xs" title="Export Excel / CSV"><i class="ri-file-excel-2-line"></i> Excel</button>
-        <button id="btn-roll20-preview" class="btn btn-primary btn-xs" title="Roll20 Official Sheet Preview"><i class="ri-file-user-line"></i> Roll20 Sheet</button>
-        <button id="btn-pdf" class="btn btn-secondary btn-xs" title="Print to PDF (Roll20)"><i class="ri-printer-line"></i> Print</button>
-        <button id="btn-import" class="btn btn-secondary btn-xs" title="Import JSON"><i class="ri-folder-upload-line"></i> Import</button>
-        <button id="btn-new-char" class="btn btn-primary btn-xs" title="New Character"><i class="ri-user-add-line"></i> New</button>
-      </div>
-      <button id="btn-mobile-menu" class="btn btn-ghost btn-xs mobile-menu-toggle" aria-label="Open Menu" title="Open Menu">
-        <i class="ri-menu-line"></i>
-      </button>
+      <button id="btn-undo" class="btn btn-ghost btn-xs" title="Undo (Ctrl+Z)" disabled><i class="ri-arrow-go-back-line"></i> Undo</button>
+      <button id="btn-redo" class="btn btn-ghost btn-xs" title="Redo (Ctrl+Shift+Z)" disabled><i class="ri-arrow-go-forward-line"></i> Redo</button>
+      <button id="btn-clear" class="btn btn-ghost btn-xs" title="Clear Sheet"><i class="ri-delete-bin-line"></i> Clear</button>
+      <button id="btn-export" class="btn btn-secondary btn-xs" title="Export JSON"><i class="ri-download-2-line"></i> Export</button>
+      <button id="btn-excel" class="btn btn-secondary btn-xs" title="Export Excel / CSV"><i class="ri-file-excel-2-line"></i> Excel</button>
+      <button id="btn-roll20-preview" class="btn btn-primary btn-xs" title="Roll20 Official Sheet Preview"><i class="ri-file-user-line"></i> Roll20 Sheet</button>
+      <button id="btn-pdf" class="btn btn-secondary btn-xs" title="Print to PDF (Roll20)"><i class="ri-printer-line"></i> Print</button>
+      <button id="btn-import" class="btn btn-secondary btn-xs" title="Import JSON"><i class="ri-folder-upload-line"></i> Import</button>
+      <button id="btn-new-char" class="btn btn-primary btn-xs" title="New Character"><i class="ri-user-add-line"></i> New</button>
       <input type="file" id="file-import-input" accept=".json" style="display: none;">
     </div>
   </header>
-
-  <!-- MOBILE ACTION DRAWER -->
-  <div id="mobile-drawer-overlay" class="mobile-drawer-overlay">
-    <div id="mobile-action-drawer" class="mobile-action-drawer">
-      <div class="drawer-header">
-        <div class="drawer-title-group">
-          <i class="ri-shield-user-fill drawer-icon"></i>
-          <div>
-            <h3 class="drawer-title" id="drawer-char-name">Hero Name</h3>
-            <p class="drawer-sub" id="drawer-char-pl">PL 10 • Mutants & Masterminds 3e</p>
-          </div>
-        </div>
-        <button id="btn-close-drawer" class="btn btn-ghost btn-sm" aria-label="Close Menu"><i class="ri-close-line"></i></button>
-      </div>
-
-      <div class="drawer-content">
-        <div class="drawer-section">
-          <span class="drawer-section-label">SHEET MANAGEMENT</span>
-          <div class="drawer-actions-grid">
-            <button id="drawer-btn-new" class="drawer-action-btn primary"><i class="ri-user-add-line"></i> New Character</button>
-            <button id="drawer-btn-clear" class="drawer-action-btn danger"><i class="ri-delete-bin-line"></i> Reset Sheet</button>
-          </div>
-        </div>
-
-        <div class="drawer-section">
-          <span class="drawer-section-label">DATA & BACKUP</span>
-          <div class="drawer-actions-grid">
-            <button id="drawer-btn-export" class="drawer-action-btn"><i class="ri-download-2-line"></i> Export JSON</button>
-            <button id="drawer-btn-excel" class="drawer-action-btn"><i class="ri-file-excel-2-line"></i> Export CSV / Excel</button>
-            <button id="drawer-btn-import" class="drawer-action-btn"><i class="ri-folder-upload-line"></i> Import JSON</button>
-          </div>
-        </div>
-
-        <div class="drawer-section">
-          <span class="drawer-section-label">ROLL20 & TABLETOP EXPORT</span>
-          <div class="drawer-actions-grid">
-            <button id="drawer-btn-roll20" class="drawer-action-btn accent"><i class="ri-file-user-line"></i> Roll20 Official Sheet</button>
-            <button id="drawer-btn-print" class="drawer-action-btn"><i class="ri-printer-line"></i> Print to PDF</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
   <!-- MAIN VIEWPORT -->
   <main class="app-container">
