@@ -57,17 +57,8 @@ export function closeSkillModal() {
   }
 }
 
-function renderModal() {
-  const modal = document.getElementById('skill-modal');
-  if (!modal) return;
-
-  const abKey = selectedSkill ? selectedSkill.ability : 'INT';
-  const abVal = store.getAbility(abKey);
-  const totalBonus = abVal + currentRanks;
-  const costPP = (currentRanks / 2).toFixed(1);
-
-  // Filter skills
-  const filteredSkills = SKILLS.filter(s => {
+function getFilteredSkills() {
+  return SKILLS.filter(s => {
     const matchesSearch = !searchQuery ||
       s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.desc.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -82,6 +73,11 @@ function renderModal() {
 
     return matchesSearch && matchesCat;
   });
+}
+
+function renderModal() {
+  const modal = document.getElementById('skill-modal');
+  if (!modal) return;
 
   modal.innerHTML = `
     <div class="modal-dialog modal-lg">
@@ -90,7 +86,7 @@ function renderModal() {
           <span class="icon"><i class="ri-focus-3-line"></i></span>
           <div>
             <h3>${editingSkillId ? 'Edit Skill' : 'Add New Skill'}</h3>
-            <p class="modal-subtitle">Choose trained abilities for your character (0.5 PP / rank)</p>
+            <p class="modal-subtitle">Choose trained abilities for your character (0.5 PP / Rank)</p>
           </div>
         </div>
         <button class="modal-close-btn" id="btn-close-skill-modal"><i class="ri-close-line"></i></button>
@@ -119,105 +115,11 @@ function renderModal() {
             <button class="filter-chip ${activeCategory === 'Social' ? 'active' : ''}" data-cat="Social">Social</button>
           </div>
 
-          <div class="skill-picker-list">
-            ${filteredSkills.length === 0 ? `
-              <div class="empty-hint">No skills matching "${searchQuery}".</div>
-            ` : filteredSkills.map(s => {
-              const isSelected = selectedSkill && selectedSkill.name === s.name;
-              const alreadyCount = store.character.skills.filter(cs => cs.name === s.name).length;
-              return `
-                <div class="skill-picker-item ${isSelected ? 'selected' : ''}" data-select-skill="${s.name}">
-                  <div class="skill-item-main">
-                    <strong>${s.name}</strong>
-                    <span class="skill-item-desc">${s.desc}</span>
-                  </div>
-                  <div class="skill-item-badges">
-                    <span class="badge-text">${s.ability}</span>
-                    ${alreadyCount > 0 ? `<span class="badge-active-dot" title="Already on sheet (${alreadyCount})"><i class="ri-check-line"></i> ${alreadyCount}</span>` : ''}
-                  </div>
-                </div>
-              `;
-            }).join('')}
-          </div>
+          <div class="skill-picker-list" id="skill-picker-list"></div>
         </div>
 
         <!-- RIGHT: CONFIGURATION FORM -->
-        <div class="skill-config-panel">
-          ${selectedSkill ? `
-            <div class="config-header-card">
-              <div class="skill-detail-title-row">
-                <h4>${selectedSkill.name}</h4>
-                <span class="badge badge-primary">Ability: ${selectedSkill.ability} (${abVal >= 0 ? '+' : ''}${abVal})</span>
-              </div>
-              <p class="skill-detail-desc">${selectedSkill.desc}</p>
-            </div>
-
-            ${selectedSkill.requiresSubtype ? `
-              <div class="config-section">
-                <label class="config-label">
-                  <strong>Specialization / Subtype:</strong>
-                  <span class="text-danger">* Required</span>
-                </label>
-                <input
-                  type="text"
-                  id="skill-subtype-input"
-                  class="text-input"
-                  placeholder="e.g.: ${selectedSkill.commonSubtypes ? selectedSkill.commonSubtypes[0] : 'Specialization'}"
-                  value="${currentSubtype}"
-                />
-
-                ${selectedSkill.commonSubtypes ? `
-                  <div class="subtype-quick-pills">
-                    <span class="quick-pills-label">Quick Suggestions:</span>
-                    <div class="pills-wrap">
-                      ${selectedSkill.commonSubtypes.map(sub => `
-                        <button type="button" class="quick-pill-btn" data-fill-subtype="${sub}">${sub}</button>
-                      `).join('')}
-                    </div>
-                  </div>
-                ` : ''}
-              </div>
-            ` : ''}
-
-            <div class="config-section">
-              <label class="config-label">
-                <strong>Trained Ranks:</strong>
-                <span class="text-muted">(1 PP = 2 Ranks)</span>
-              </label>
-
-              <div class="rank-stepper-large">
-                <button type="button" class="step-btn-large" id="btn-rank-minus">-</button>
-                <div class="stepper-center-info">
-                  <span class="stepper-rank-val">${currentRanks}</span>
-                  <span class="stepper-rank-label">Rank</span>
-                </div>
-                <button type="button" class="step-btn-large" id="btn-rank-plus">+</button>
-              </div>
-
-              <!-- Live Formula Preview -->
-              <div class="skill-calc-preview">
-                <div class="calc-row">
-                  <span>Base Bonus (${selectedSkill.ability}):</span>
-                  <strong>${abVal >= 0 ? '+' : ''}${abVal}</strong>
-                </div>
-                <div class="calc-row">
-                  <span>Trained Ranks:</span>
-                  <strong>+${currentRanks}</strong>
-                </div>
-                <div class="calc-row highlight">
-                  <span>Total d20 Check Bonus:</span>
-                  <span class="total-bonus-badge">${totalBonus >= 0 ? '+' : ''}${totalBonus}</span>
-                </div>
-                <div class="calc-row cost">
-                  <span>Character Cost:</span>
-                  <span class="cost-badge">${costPP} PP</span>
-                </div>
-              </div>
-            </div>
-          ` : `
-            <div class="empty-hint">Select a skill from the list on the left.</div>
-          `}
-        </div>
+        <div class="skill-config-panel" id="skill-config-panel"></div>
       </div>
 
       <div class="modal-footer">
@@ -229,21 +131,17 @@ function renderModal() {
     </div>
   `;
 
-  // Attach event listeners
+  // Attach shell event listeners
   modal.querySelector('#btn-close-skill-modal')?.addEventListener('click', closeSkillModal);
   modal.querySelector('#btn-cancel-skill-modal')?.addEventListener('click', closeSkillModal);
+  modal.querySelector('#btn-save-skill')?.addEventListener('click', saveSkill);
 
   // Search input
   const searchInput = modal.querySelector('#skill-search-input');
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value;
-      renderModal();
-      const updatedInput = modal.querySelector('#skill-search-input');
-      if (updatedInput) {
-        updatedInput.focus();
-        updatedInput.setSelectionRange(searchQuery.length, searchQuery.length);
-      }
+      renderSkillList(false);
     });
   }
 
@@ -251,12 +149,53 @@ function renderModal() {
   modal.querySelectorAll('[data-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
       activeCategory = btn.dataset.cat;
-      renderModal();
+      modal.querySelectorAll('[data-cat]').forEach(b => {
+        b.classList.toggle('active', b.dataset.cat === activeCategory);
+      });
+      renderSkillList(true);
     });
   });
 
-  // Select skill
-  modal.querySelectorAll('[data-select-skill]').forEach(el => {
+  renderSkillList(false);
+  renderConfigPanel();
+}
+
+function renderSkillList(animate = false) {
+  const modal = document.getElementById('skill-modal');
+  if (!modal) return;
+
+  const listContainer = modal.querySelector('#skill-picker-list');
+  if (!listContainer) return;
+
+  const filteredSkills = getFilteredSkills();
+
+  listContainer.innerHTML = filteredSkills.length === 0 ? `
+    <div class="empty-hint">No skills matching "${searchQuery}".</div>
+  ` : filteredSkills.map(s => {
+    const isSelected = selectedSkill && selectedSkill.name === s.name;
+    const alreadyCount = store.character.skills.filter(cs => cs.name === s.name).length;
+    return `
+      <div class="skill-picker-item ${isSelected ? 'selected' : ''}" data-select-skill="${s.name}">
+        <div class="skill-item-main">
+          <strong>${s.name}</strong>
+          <span class="skill-item-desc">${s.desc}</span>
+        </div>
+        <div class="skill-item-badges">
+          <span class="badge-text">${s.ability}</span>
+          ${alreadyCount > 0 ? `<span class="badge-active-dot" title="Already on sheet (${alreadyCount})"><i class="ri-check-line"></i> ${alreadyCount}</span>` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (animate) {
+    listContainer.classList.remove('category-content-animate');
+    void listContainer.offsetWidth; // Trigger reflow
+    listContainer.classList.add('category-content-animate');
+  }
+
+  // Re-bind click selection
+  listContainer.querySelectorAll('[data-select-skill]').forEach(el => {
     el.addEventListener('click', () => {
       const match = SKILLS.find(s => s.name === el.dataset.selectSkill);
       if (match) {
@@ -264,13 +203,107 @@ function renderModal() {
         if (!selectedSkill.requiresSubtype) {
           currentSubtype = '';
         }
-        renderModal();
+        listContainer.querySelectorAll('.skill-picker-item').forEach(item => {
+          item.classList.toggle('selected', item.dataset.selectSkill === selectedSkill.name);
+        });
+        renderConfigPanel();
       }
     });
   });
+}
+
+function renderConfigPanel() {
+  const modal = document.getElementById('skill-modal');
+  if (!modal) return;
+
+  const panel = modal.querySelector('#skill-config-panel');
+  if (!panel) return;
+
+  if (!selectedSkill) {
+    panel.innerHTML = `<div class="empty-hint">Select a skill from the list on the left.</div>`;
+    return;
+  }
+
+  const abKey = selectedSkill.ability || 'INT';
+  const abVal = store.getAbility(abKey);
+  const totalBonus = abVal + currentRanks;
+  const costPP = (currentRanks / 2).toFixed(1);
+
+  panel.innerHTML = `
+    <div class="config-header-card">
+      <div class="skill-detail-title-row">
+        <h4>${selectedSkill.name}</h4>
+        <span class="badge badge-primary">Ability: ${selectedSkill.ability} (${abVal >= 0 ? '+' : ''}${abVal})</span>
+      </div>
+      <p class="skill-detail-desc">${selectedSkill.desc}</p>
+    </div>
+
+    ${selectedSkill.requiresSubtype ? `
+      <div class="config-section">
+        <label class="config-label">
+          <strong>Specialization / Subtype:</strong>
+          <span class="text-danger">* Required</span>
+        </label>
+        <input
+          type="text"
+          id="skill-subtype-input"
+          class="text-input"
+          placeholder="e.g.: ${selectedSkill.commonSubtypes ? selectedSkill.commonSubtypes[0] : 'Specialization'}"
+          value="${currentSubtype}"
+        />
+
+        ${selectedSkill.commonSubtypes ? `
+          <div class="subtype-quick-pills">
+            <span class="quick-pills-label">Quick Suggestions:</span>
+            <div class="pills-wrap">
+              ${selectedSkill.commonSubtypes.map(sub => `
+                <button type="button" class="quick-pill-btn" data-fill-subtype="${sub}">${sub}</button>
+              `).join('')}
+            </div>
+          </div>
+        ` : ''}
+      </div>
+    ` : ''}
+
+    <div class="config-section">
+      <label class="config-label">
+        <strong>Trained Ranks:</strong>
+        <span class="text-muted">(1 PP = 2 Ranks)</span>
+      </label>
+
+      <div class="rank-stepper-large">
+        <button type="button" class="step-btn-large" id="btn-rank-minus">-</button>
+        <div class="stepper-center-info">
+          <span class="stepper-rank-val">${currentRanks}</span>
+          <span class="stepper-rank-label">Rank</span>
+        </div>
+        <button type="button" class="step-btn-large" id="btn-rank-plus">+</button>
+      </div>
+
+      <!-- Live Formula Preview -->
+      <div class="skill-calc-preview">
+        <div class="calc-row">
+          <span>Base Bonus (${selectedSkill.ability}):</span>
+          <strong>${abVal >= 0 ? '+' : ''}${abVal}</strong>
+        </div>
+        <div class="calc-row">
+          <span>Trained Ranks:</span>
+          <strong>+${currentRanks}</strong>
+        </div>
+        <div class="calc-row highlight">
+          <span>Total d20 Check Bonus:</span>
+          <span class="total-bonus-badge">${totalBonus >= 0 ? '+' : ''}${totalBonus}</span>
+        </div>
+        <div class="calc-row cost">
+          <span>Character Cost:</span>
+          <span class="cost-badge">${costPP} PP</span>
+        </div>
+      </div>
+    </div>
+  `;
 
   // Subtype input
-  const subtypeInput = modal.querySelector('#skill-subtype-input');
+  const subtypeInput = panel.querySelector('#skill-subtype-input');
   if (subtypeInput) {
     subtypeInput.addEventListener('input', (e) => {
       currentSubtype = e.target.value;
@@ -283,10 +316,10 @@ function renderModal() {
   }
 
   // Quick subtype pills
-  modal.querySelectorAll('[data-fill-subtype]').forEach(btn => {
+  panel.querySelectorAll('[data-fill-subtype]').forEach(btn => {
     btn.addEventListener('click', () => {
       currentSubtype = btn.dataset.fillSubtype;
-      const subIn = modal.querySelector('#skill-subtype-input');
+      const subIn = panel.querySelector('#skill-subtype-input');
       if (subIn) {
         subIn.value = currentSubtype;
         subIn.focus();
@@ -295,20 +328,17 @@ function renderModal() {
   });
 
   // Stepper
-  modal.querySelector('#btn-rank-minus')?.addEventListener('click', () => {
+  panel.querySelector('#btn-rank-minus')?.addEventListener('click', () => {
     if (currentRanks > 1) {
       currentRanks--;
-      renderModal();
+      renderConfigPanel();
     }
   });
 
-  modal.querySelector('#btn-rank-plus')?.addEventListener('click', () => {
+  panel.querySelector('#btn-rank-plus')?.addEventListener('click', () => {
     currentRanks++;
-    renderModal();
+    renderConfigPanel();
   });
-
-  // Save button
-  modal.querySelector('#btn-save-skill')?.addEventListener('click', saveSkill);
 }
 
 function saveSkill() {

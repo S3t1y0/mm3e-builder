@@ -46,8 +46,8 @@ The M&M 3E Character Builder simplifies the complex math of character creation i
 ### Modular Power Builder
 - Interactive Power Builder with support for standard M&M 3E effect types, descriptors, ranges, and action types.
 - Modifiers Engine:
-  - Extras: Adjust cost per rank (+1 to +5 PP/rank) or flat cost bonuses.
-  - Flaws: Reduce cost per rank (-1 to -5 PP/rank) with support for fractional costs (e.g., 1 PP per 2 ranks) down to rule minimums.
+  - Extras: Adjust cost per rank (+1 to +5 PP/Rank) or flat cost bonuses.
+  - Flaws: Reduce cost per rank (-1 to -5 PP/Rank) with support for fractional costs (e.g., 1 PP per 2 Ranks) down to rule minimums.
   - Flat Modifiers: Dynamic flat cost adjustments for power feats and minor drawbacks.
 - Real-time total point calculation with automated cost breakdown.
 

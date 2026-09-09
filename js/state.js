@@ -1,5 +1,4 @@
-// js/state.js
-import { calculatePowerTotalCost } from './rules/powers.js';
+import { calculatePowerTotalCost, normalizePower } from './rules/powers.js';
 
 const STORAGE_KEY = 'mm3e_builder_character_data';
 const MAX_HISTORY = 50;
@@ -47,7 +46,13 @@ class Store {
   loadFromStorage() {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) return JSON.parse(raw);
+      if (raw) {
+        const char = JSON.parse(raw);
+        if (char && Array.isArray(char.powers)) {
+          char.powers = char.powers.map(p => normalizePower(p));
+        }
+        return char;
+      }
     } catch (e) {
       console.warn('Failed to load character from storage:', e);
     }
@@ -406,8 +411,9 @@ class Store {
   }
 
   addPower(power) {
-    power.id = 'pow_' + Date.now() + Math.random().toString(36).substr(2, 4);
-    this.character.powers.push(power);
+    const normalized = normalizePower(power);
+    normalized.id = 'pow_' + Date.now() + Math.random().toString(36).substr(2, 4);
+    this.character.powers.push(normalized);
     this.pushHistory();
     this.notify();
   }
@@ -415,7 +421,7 @@ class Store {
   updatePower(id, power) {
     const idx = this.character.powers.findIndex(p => p.id === id);
     if (idx !== -1) {
-      this.character.powers[idx] = { ...power, id };
+      this.character.powers[idx] = normalizePower({ ...power, id });
       this.pushHistory();
       this.notify();
     }
@@ -488,9 +494,15 @@ class Store {
 
   loadCharacter(data) {
     this.character = { ...createDefaultCharacter(), ...data };
+    if (this.character && Array.isArray(this.character.powers)) {
+      this.character.powers = this.character.powers.map(p => normalizePower(p));
+    }
     this.pushHistory();
     this.notify();
   }
 }
 
 export const store = new Store();
+if (typeof window !== 'undefined') {
+  window.store = store;
+}

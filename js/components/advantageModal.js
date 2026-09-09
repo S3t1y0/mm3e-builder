@@ -27,15 +27,18 @@ export function closeAdvantageModal() {
   }
 }
 
-function renderModal() {
-  const modal = document.getElementById('advantage-modal');
-  if (!modal) return;
+function getCategoryIcon(cat) {
+  switch (cat) {
+    case 'Combat': return '<i class="ri-sword-line"></i>';
+    case 'Fortune': return '<i class="ri-clover-line"></i>';
+    case 'Skill': return '<i class="ri-focus-3-line"></i>';
+    case 'General': return '<i class="ri-shield-line"></i>';
+    default: return '<i class="ri-star-line"></i>';
+  }
+}
 
-  const charAdvs = store.character.advantages;
-  const totalAdvPP = store.getTotalAdvantagePP();
-
-  // Filter advantages
-  const filtered = ADVANTAGES.filter(a => {
+function getFilteredAdvantages() {
+  return ADVANTAGES.filter(a => {
     const matchesSearch = !searchQuery ||
       a.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.desc.toLowerCase().includes(searchQuery.toLowerCase());
@@ -45,16 +48,14 @@ function renderModal() {
 
     return matchesSearch && matchesCat;
   });
+}
 
-  const getCategoryIcon = (cat) => {
-    switch (cat) {
-      case 'Combat': return '<i class="ri-sword-line"></i>';
-      case 'Fortune': return '<i class="ri-clover-line"></i>';
-      case 'Skill': return '<i class="ri-focus-3-line"></i>';
-      case 'General': return '<i class="ri-shield-line"></i>';
-      default: return '<i class="ri-star-line"></i>';
-    }
-  };
+function renderModal() {
+  const modal = document.getElementById('advantage-modal');
+  if (!modal) return;
+
+  const charAdvs = store.character.advantages;
+  const totalAdvPP = store.getTotalAdvantagePP();
 
   modal.innerHTML = `
     <div class="modal-dialog modal-xl">
@@ -63,11 +64,11 @@ function renderModal() {
           <span class="icon"><i class="ri-star-line"></i></span>
           <div>
             <h3>M&M 3e Advantages Catalog</h3>
-            <p class="modal-subtitle">Talents, combat maneuvers, and special perks (1 PP / rank)</p>
+            <p class="modal-subtitle">Talents, combat maneuvers, and special perks (1 PP / Rank)</p>
           </div>
         </div>
         <div class="modal-header-actions">
-          <span class="badge badge-accent">Total: ${charAdvs.length} Selected (${totalAdvPP} PP)</span>
+          <span class="badge badge-accent" id="adv-total-badge">Total: ${charAdvs.length} Selected (${totalAdvPP} PP)</span>
           <button class="modal-close-btn" id="btn-close-adv-modal"><i class="ri-close-line"></i></button>
         </div>
       </div>
@@ -99,51 +100,7 @@ function renderModal() {
         </div>
 
         <!-- ADVANTAGES GRID -->
-        <div class="adv-catalog-grid">
-          ${filtered.length === 0 ? `
-            <div class="empty-hint" style="grid-column: 1 / -1;">
-              No advantages matching "${searchQuery}".
-            </div>
-          ` : filtered.map(a => {
-            const onSheet = charAdvs.find(ca => ca.name === a.name);
-            const isAdded = !!onSheet;
-            const currentRanks = onSheet ? onSheet.ranks : 0;
-
-            return `
-              <div class="adv-catalog-card ${isAdded ? 'added' : ''}">
-                <div class="adv-card-header">
-                  <div class="adv-card-title-wrap">
-                    <span class="adv-cat-tag ${a.category?.toLowerCase()}">
-                      ${getCategoryIcon(a.category)} ${a.category || 'General'}
-                    </span>
-                    <strong class="adv-card-title">${a.name}</strong>
-                  </div>
-                  ${a.ranked ? `<span class="badge-ranked" title="Can be increased multiple times">Ranked</span>` : ''}
-                </div>
-
-                <p class="adv-card-desc">${a.desc}</p>
-
-                <div class="adv-card-footer">
-                  ${isAdded ? `
-                    <div class="adv-card-active-controls">
-                      <span class="badge-in-sheet"><i class="ri-check-line"></i> On Sheet (${currentRanks} Rank${currentRanks > 1 ? 's' : ''})</span>
-                      <div class="stepper-compact">
-                        <button class="step-btn-xs" data-card-dec="${a.name}">-</button>
-                        <span class="step-val-xs">${currentRanks}</span>
-                        <button class="step-btn-xs" data-card-inc="${a.name}" ${a.maxRanks && currentRanks >= a.maxRanks ? 'disabled' : ''}>+</button>
-                        <button class="del-btn-tiny" data-card-del="${a.name}" title="Remove from Sheet"><i class="ri-close-line"></i></button>
-                      </div>
-                    </div>
-                  ` : `
-                    <button class="btn btn-secondary btn-xs btn-add-adv" data-card-add="${a.name}">
-                      <i class="ri-add-line"></i> Add (${a.ranked ? '1 Rank' : '1 PP'})
-                    </button>
-                  `}
-                </div>
-              </div>
-            `;
-          }).join('')}
-        </div>
+        <div class="adv-catalog-grid" id="adv-catalog-grid"></div>
       </div>
 
       <div class="modal-footer">
@@ -153,7 +110,7 @@ function renderModal() {
     </div>
   `;
 
-  // Attach event handlers
+  // Attach shell event handlers
   modal.querySelector('#btn-close-adv-modal')?.addEventListener('click', closeAdvantageModal);
   modal.querySelector('#btn-done-adv-modal')?.addEventListener('click', closeAdvantageModal);
 
@@ -162,62 +119,135 @@ function renderModal() {
   if (searchInput) {
     searchInput.addEventListener('input', (e) => {
       searchQuery = e.target.value;
-      renderModal();
-      const updatedInput = modal.querySelector('#adv-search-input');
-      if (updatedInput) {
-        updatedInput.focus();
-        updatedInput.setSelectionRange(searchQuery.length, searchQuery.length);
-      }
+      renderGrid(false);
     });
   }
 
-  // Category filter
+  // Category filter chips
   modal.querySelectorAll('[data-adv-cat]').forEach(btn => {
     btn.addEventListener('click', () => {
       activeCategory = btn.dataset.advCat;
-      renderModal();
+      modal.querySelectorAll('[data-adv-cat]').forEach(b => {
+        b.classList.toggle('active', b.dataset.advCat === activeCategory);
+      });
+      renderGrid(true);
     });
   });
 
-  // Add advantage
-  modal.querySelectorAll('[data-card-add]').forEach(btn => {
+  renderGrid(false);
+}
+
+function updateAdvantageHeaderBadge() {
+  const modal = document.getElementById('advantage-modal');
+  if (!modal) return;
+  const badge = modal.querySelector('#adv-total-badge');
+  if (badge) {
+    const charAdvs = store.character.advantages;
+    const totalAdvPP = store.getTotalAdvantagePP();
+    badge.textContent = `Total: ${charAdvs.length} Selected (${totalAdvPP} PP)`;
+  }
+}
+
+function renderGrid(animate = false) {
+  const modal = document.getElementById('advantage-modal');
+  if (!modal) return;
+
+  const grid = modal.querySelector('#adv-catalog-grid');
+  if (!grid) return;
+
+  const charAdvs = store.character.advantages;
+  const filtered = getFilteredAdvantages();
+
+  grid.innerHTML = filtered.length === 0 ? `
+    <div class="empty-hint" style="grid-column: 1 / -1;">
+      No advantages matching "${searchQuery}".
+    </div>
+  ` : filtered.map(a => {
+    const onSheet = charAdvs.find(ca => ca.name === a.name);
+    const isAdded = !!onSheet;
+    const currentRanks = onSheet ? onSheet.ranks : 0;
+
+    return `
+      <div class="adv-catalog-card ${isAdded ? 'added' : ''}">
+        <div class="adv-card-header">
+          <div class="adv-card-title-wrap">
+            <span class="adv-cat-tag ${a.category?.toLowerCase()}">
+              ${getCategoryIcon(a.category)} ${a.category || 'General'}
+            </span>
+            <strong class="adv-card-title">${a.name}</strong>
+          </div>
+          ${a.ranked ? `<span class="badge-ranked" title="Can be increased multiple times">Ranked</span>` : ''}
+        </div>
+
+        <p class="adv-card-desc">${a.desc}</p>
+
+        <div class="adv-card-footer">
+          ${isAdded ? `
+            <div class="adv-card-active-controls">
+              <span class="badge-in-sheet"><i class="ri-check-line"></i> On Sheet (${currentRanks} Rank${currentRanks > 1 ? 's' : ''})</span>
+              <div class="stepper-compact">
+                <button class="step-btn-xs" data-card-dec="${a.name}">-</button>
+                <span class="step-val-xs">${currentRanks}</span>
+                <button class="step-btn-xs" data-card-inc="${a.name}" ${a.maxRanks && currentRanks >= a.maxRanks ? 'disabled' : ''}>+</button>
+                <button class="del-btn-tiny" data-card-del="${a.name}" title="Remove from Sheet"><i class="ri-close-line"></i></button>
+              </div>
+            </div>
+          ` : `
+            <button class="btn btn-secondary btn-xs btn-add-adv" data-card-add="${a.name}">
+              <i class="ri-add-line"></i> Add (${a.ranked ? '1 Rank' : '1 PP'})
+            </button>
+          `}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  if (animate) {
+    grid.classList.remove('category-content-animate');
+    void grid.offsetWidth; // Trigger reflow
+    grid.classList.add('category-content-animate');
+  }
+
+  // Bind card action events inside grid
+  grid.querySelectorAll('[data-card-add]').forEach(btn => {
     btn.addEventListener('click', () => {
       const advName = btn.dataset.cardAdd;
       store.addAdvantage(advName, 1);
-      renderModal();
+      updateAdvantageHeaderBadge();
+      renderGrid(false);
     });
   });
 
-  // Increment advantage
-  modal.querySelectorAll('[data-card-inc]').forEach(btn => {
+  grid.querySelectorAll('[data-card-inc]').forEach(btn => {
     btn.addEventListener('click', () => {
       const advName = btn.dataset.cardInc;
-      const cur = charAdvs.find(a => a.name === advName);
+      const cur = store.character.advantages.find(a => a.name === advName);
       if (cur) {
         store.updateAdvantage(advName, cur.ranks + 1);
-        renderModal();
+        updateAdvantageHeaderBadge();
+        renderGrid(false);
       }
     });
   });
 
-  // Decrement advantage
-  modal.querySelectorAll('[data-card-dec]').forEach(btn => {
+  grid.querySelectorAll('[data-card-dec]').forEach(btn => {
     btn.addEventListener('click', () => {
       const advName = btn.dataset.cardDec;
-      const cur = charAdvs.find(a => a.name === advName);
+      const cur = store.character.advantages.find(a => a.name === advName);
       if (cur) {
         store.updateAdvantage(advName, cur.ranks - 1);
-        renderModal();
+        updateAdvantageHeaderBadge();
+        renderGrid(false);
       }
     });
   });
 
-  // Delete advantage
-  modal.querySelectorAll('[data-card-del]').forEach(btn => {
+  grid.querySelectorAll('[data-card-del]').forEach(btn => {
     btn.addEventListener('click', () => {
       const advName = btn.dataset.cardDel;
       store.removeAdvantage(advName);
-      renderModal();
+      updateAdvantageHeaderBadge();
+      renderGrid(false);
     });
   });
 }

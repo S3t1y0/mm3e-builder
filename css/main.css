@@ -592,7 +592,6 @@ p {
   flex-direction: column;
   gap: 1.25rem;
   box-shadow: var(--shadow-lg), var(--shadow-glow);
-  animation: modalPopIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .confirm-header {

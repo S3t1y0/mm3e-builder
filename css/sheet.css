@@ -532,6 +532,16 @@
   font-weight: 800;
 }
 
+/* ADD CUSTOM ATTACK ROW */
+.targeted-actions {
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 /* ROLL TOAST BANNER */
 .roll-result-banner {
   margin-top: 1rem;

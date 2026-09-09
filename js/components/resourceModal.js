@@ -55,20 +55,21 @@ export function closeResourceModal() {
   }
 }
 
-function renderModal() {
-  const modal = document.getElementById('resource-modal');
-  if (!modal) return;
-
-  const budget = store.getEquipmentBudgetInfo();
-
-  // Filter presets
-  const filteredPresets = RESOURCE_PRESETS.filter(p => {
+function getFilteredPresets() {
+  return RESOURCE_PRESETS.filter(p => {
     const matchesCat = presetCategory === 'all' || p.type === presetCategory;
     const matchesSearch = !presetSearchQuery ||
       p.name.toLowerCase().includes(presetSearchQuery.toLowerCase()) ||
       p.desc.toLowerCase().includes(presetSearchQuery.toLowerCase());
     return matchesCat && matchesSearch;
   });
+}
+
+function renderModal() {
+  const modal = document.getElementById('resource-modal');
+  if (!modal) return;
+
+  const budget = store.getEquipmentBudgetInfo();
 
   modal.innerHTML = `
     <div class="modal-dialog modal-lg">
@@ -98,163 +99,277 @@ function renderModal() {
         </button>
       </div>
 
-      <div class="modal-body">
-        ${activeTab === 'presets' ? `
-          <!-- TAB 1: PRESETS -->
-          <div class="presets-toolbar">
-            <div class="palette-search-box flex-1">
-              <span class="search-icon"><i class="ri-search-line"></i></span>
-              <input
-                type="text"
-                id="res-preset-search"
-                class="palette-search"
-                placeholder="Search weapon presets, armor, vehicles, headquarters..."
-                value="${presetSearchQuery}"
-              />
-            </div>
+      <div class="modal-body" id="res-modal-body"></div>
 
-            <div class="filter-pills-bar">
-              ${RESOURCE_CATEGORIES.map(c => `
-                <button class="filter-chip ${presetCategory === c.id ? 'active' : ''}" data-res-cat="${c.id}">
-                  <i class="${c.icon}"></i> ${c.label}
-                </button>
-              `).join('')}
-            </div>
-          </div>
-
-          <div class="presets-cards-grid">
-            ${filteredPresets.length === 0 ? `
-              <div class="empty-hint" style="grid-column: 1 / -1;">
-                No presets matching "${presetSearchQuery}".
-              </div>
-            ` : filteredPresets.map((p, idx) => `
-              <div class="preset-item-card">
-                <div class="preset-card-top">
-                  <span class="badge badge-subtle">${p.type}</span>
-                  <strong class="preset-name">${p.name}</strong>
-                  <span class="ep-badge-pill">${p.epCost} EP</span>
-                </div>
-                <p class="preset-desc">${p.desc}</p>
-                <div class="preset-card-actions">
-                  <button class="btn btn-secondary btn-xs" data-preset-customize="${idx}"><i class="ri-edit-line"></i> Customize</button>
-                  <button class="btn btn-primary btn-xs" data-preset-add="${idx}"><i class="ri-add-line"></i> Add</button>
-                </div>
-              </div>
-            `).join('')}
-          </div>
-        ` : `
-          <!-- TAB 2: CUSTOM BUILDER -->
-          <div class="custom-res-form">
-            <div class="field-row-grid">
-              <div class="field-group flex-2">
-                <label class="form-label">Item / Equipment Name:</label>
-                <input
-                  type="text"
-                  id="input-res-name"
-                  class="text-input"
-                  placeholder="e.g., Tactical Katana, Stealth Drone, Jet Cruiser..."
-                  value="${formName}"
-                />
-              </div>
-
-              <div class="field-group flex-1">
-                <label class="form-label">Item Category:</label>
-                <select id="select-res-type" class="text-input">
-                  <option value="Gear" ${formType === 'Gear' ? 'selected' : ''}>Gear & Weapons</option>
-                  <option value="Gadget" ${formType === 'Gadget' ? 'selected' : ''}>Gadget & Tech</option>
-                  <option value="Vehicle" ${formType === 'Vehicle' ? 'selected' : ''}>Vehicles</option>
-                  <option value="Headquarters" ${formType === 'Headquarters' ? 'selected' : ''}>Headquarters (HQ)</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="field-row-grid mt-3">
-              <div class="field-group flex-1">
-                <label class="form-label">Equipment Point (EP) Cost:</label>
-                <div class="ep-stepper-wrap">
-                  <button type="button" class="step-btn-large" id="btn-ep-dec">-</button>
-                  <div class="ep-val-display">
-                    <span class="ep-num">${formEpCost}</span>
-                    <span class="ep-unit">EP</span>
-                  </div>
-                  <button type="button" class="step-btn-large" id="btn-ep-inc">+</button>
-                </div>
-                <span class="text-muted text-xs mt-1">
-                  <i class="ri-lightbulb-line"></i> 5 EP = 1 Power Point (PP) via "Equipment" Advantage (~${Math.ceil(formEpCost / 5)} PP equivalent)
-                </span>
-              </div>
-            </div>
-
-            <div class="field-group mt-3">
-              <label class="form-label">Description, Features & Rules Effects:</label>
-              <textarea
-                id="textarea-res-desc"
-                class="text-input"
-                rows="4"
-                placeholder="Enter specifications, damage effects, defensive features, or item capabilities..."
-              >${formDesc}</textarea>
-            </div>
-          </div>
-        `}
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn btn-ghost" id="btn-cancel-res-modal">Close</button>
-        ${activeTab === 'custom' ? `
-          <button class="btn btn-primary" id="btn-save-custom-res">
-            ${editingResourceId ? 'Save Changes' : '+ Save to Library'}
-          </button>
-        ` : `
-          <button class="btn btn-secondary" id="btn-goto-custom">
-            + Create New Custom Item
-          </button>
-        `}
-      </div>
+      <div class="modal-footer" id="res-modal-footer"></div>
     </div>
   `;
 
   // Modal close handlers
   modal.querySelector('#btn-close-res-modal')?.addEventListener('click', closeResourceModal);
-  modal.querySelector('#btn-cancel-res-modal')?.addEventListener('click', closeResourceModal);
 
   // Tab switching
   modal.querySelector('#tab-res-presets')?.addEventListener('click', () => {
-    activeTab = 'presets';
-    renderModal();
-  });
-  modal.querySelector('#tab-res-custom')?.addEventListener('click', () => {
-    activeTab = 'custom';
-    renderModal();
-  });
-  modal.querySelector('#btn-goto-custom')?.addEventListener('click', () => {
-    activeTab = 'custom';
-    renderModal();
+    if (activeTab !== 'presets') {
+      activeTab = 'presets';
+      updateSubtabButtons();
+      renderModalBody(true);
+    }
   });
 
-  // Presets search
-  const presetSearch = modal.querySelector('#res-preset-search');
-  if (presetSearch) {
-    presetSearch.addEventListener('input', (e) => {
-      presetSearchQuery = e.target.value;
-      renderModal();
-      const updatedSearch = modal.querySelector('#res-preset-search');
-      if (updatedSearch) {
-        updatedSearch.focus();
-        updatedSearch.setSelectionRange(presetSearchQuery.length, presetSearchQuery.length);
+  modal.querySelector('#tab-res-custom')?.addEventListener('click', () => {
+    if (activeTab !== 'custom') {
+      activeTab = 'custom';
+      updateSubtabButtons();
+      renderModalBody(true);
+    }
+  });
+
+  renderModalBody(false);
+}
+
+function updateSubtabButtons() {
+  const modal = document.getElementById('resource-modal');
+  if (!modal) return;
+  modal.querySelector('#tab-res-presets')?.classList.toggle('active', activeTab === 'presets');
+  modal.querySelector('#tab-res-custom')?.classList.toggle('active', activeTab === 'custom');
+}
+
+function renderModalBody(animate = false) {
+  const modal = document.getElementById('resource-modal');
+  if (!modal) return;
+
+  const body = modal.querySelector('#res-modal-body');
+  const footer = modal.querySelector('#res-modal-footer');
+  if (!body || !footer) return;
+
+  if (activeTab === 'presets') {
+    body.innerHTML = `
+      <div class="presets-toolbar">
+        <div class="palette-search-box flex-1">
+          <span class="search-icon"><i class="ri-search-line"></i></span>
+          <input
+            type="text"
+            id="res-preset-search"
+            class="palette-search"
+            placeholder="Search weapon presets, armor, vehicles, headquarters..."
+            value="${presetSearchQuery}"
+          />
+        </div>
+
+        <div class="filter-pills-bar">
+          ${RESOURCE_CATEGORIES.map(c => `
+            <button class="filter-chip ${presetCategory === c.id ? 'active' : ''}" data-res-cat="${c.id}">
+              <i class="${c.icon}"></i> ${c.label}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <div class="presets-cards-grid" id="presets-cards-grid"></div>
+    `;
+
+    footer.innerHTML = `
+      <button class="btn btn-ghost" id="btn-cancel-res-modal">Close</button>
+      <button class="btn btn-secondary" id="btn-goto-custom">
+        + Create New Custom Item
+      </button>
+    `;
+
+    // Presets search
+    const presetSearch = body.querySelector('#res-preset-search');
+    if (presetSearch) {
+      presetSearch.addEventListener('input', (e) => {
+        presetSearchQuery = e.target.value;
+        renderPresetsGrid(false);
+      });
+    }
+
+    // Category filter pills
+    body.querySelectorAll('[data-res-cat]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        presetCategory = btn.dataset.resCat;
+        body.querySelectorAll('[data-res-cat]').forEach(b => {
+          b.classList.toggle('active', b.dataset.resCat === presetCategory);
+        });
+        renderPresetsGrid(true);
+      });
+    });
+
+    renderPresetsGrid(animate);
+  } else {
+    // Custom tab
+    body.innerHTML = `
+      <div class="custom-res-form ${animate ? 'category-content-animate' : ''}" id="custom-res-form">
+        <div class="field-row-grid">
+          <div class="field-group flex-2">
+            <label class="form-label">Item / Equipment Name:</label>
+            <input
+              type="text"
+              id="input-res-name"
+              class="text-input"
+              placeholder="e.g., Tactical Katana, Stealth Drone, Jet Cruiser..."
+              value="${formName}"
+            />
+          </div>
+
+          <div class="field-group flex-1">
+            <label class="form-label">Item Category:</label>
+            <select id="select-res-type" class="text-input">
+              <option value="Gear" ${formType === 'Gear' ? 'selected' : ''}>Gear & Weapons</option>
+              <option value="Gadget" ${formType === 'Gadget' ? 'selected' : ''}>Gadget & Tech</option>
+              <option value="Vehicle" ${formType === 'Vehicle' ? 'selected' : ''}>Vehicles</option>
+              <option value="Headquarters" ${formType === 'Headquarters' ? 'selected' : ''}>Headquarters (HQ)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field-row-grid mt-3">
+          <div class="field-group flex-1">
+            <label class="form-label">Equipment Point (EP) Cost:</label>
+            <div class="ep-stepper-wrap">
+              <button type="button" class="step-btn-large" id="btn-ep-dec">-</button>
+              <div class="ep-val-display">
+                <span class="ep-num" id="display-ep-num">${formEpCost}</span>
+                <span class="ep-unit">EP</span>
+              </div>
+              <button type="button" class="step-btn-large" id="btn-ep-inc">+</button>
+            </div>
+            <span class="text-muted text-xs mt-1">
+              <i class="ri-lightbulb-line"></i> 5 EP = 1 Power Point (PP) via "Equipment" Advantage (~${Math.ceil(formEpCost / 5)} PP equivalent)
+            </span>
+          </div>
+        </div>
+
+        <div class="field-group mt-3">
+          <label class="form-label">Description, Features & Rules Effects:</label>
+          <textarea
+            id="textarea-res-desc"
+            class="text-input"
+            rows="4"
+            placeholder="Enter specifications, damage effects, defensive features, or item capabilities..."
+          >${formDesc}</textarea>
+        </div>
+      </div>
+    `;
+
+    footer.innerHTML = `
+      <button class="btn btn-ghost" id="btn-cancel-res-modal">Close</button>
+      <button class="btn btn-primary" id="btn-save-custom-res">
+        ${editingResourceId ? 'Save Changes' : '+ Save to Library'}
+      </button>
+    `;
+
+    // Custom form inputs
+    const inputName = body.querySelector('#input-res-name');
+    if (inputName) {
+      inputName.addEventListener('input', (e) => {
+        formName = e.target.value;
+      });
+    }
+
+    const selectType = body.querySelector('#select-res-type');
+    if (selectType) {
+      selectType.addEventListener('change', (e) => {
+        formType = e.target.value;
+      });
+    }
+
+    const textDesc = body.querySelector('#textarea-res-desc');
+    if (textDesc) {
+      textDesc.addEventListener('input', (e) => {
+        formDesc = e.target.value;
+      });
+    }
+
+    const epDisplay = body.querySelector('#display-ep-num');
+    body.querySelector('#btn-ep-dec')?.addEventListener('click', () => {
+      if (formEpCost > 1) {
+        formEpCost--;
+        if (epDisplay) epDisplay.textContent = formEpCost;
       }
+    });
+
+    body.querySelector('#btn-ep-inc')?.addEventListener('click', () => {
+      formEpCost++;
+      if (epDisplay) epDisplay.textContent = formEpCost;
+    });
+
+    footer.querySelector('#btn-save-custom-res')?.addEventListener('click', () => {
+      if (!formName.trim()) {
+        showToast('Please enter an item / equipment name!', 'warning');
+        body.querySelector('#input-res-name')?.focus();
+        return;
+      }
+
+      const trimmedName = formName.trim();
+      if (editingResourceId) {
+        store.updateResource(editingResourceId, {
+          name: trimmedName,
+          type: formType,
+          epCost: formEpCost,
+          desc: formDesc.trim()
+        });
+        showToast(`"${trimmedName}" updated successfully!`, 'success');
+      } else {
+        store.addResource({
+          name: trimmedName,
+          type: formType,
+          epCost: formEpCost,
+          desc: formDesc.trim()
+        });
+        showToast(`"${trimmedName}" added successfully!`, 'success');
+      }
+
+      closeResourceModal();
     });
   }
 
-  // Preset category pills
-  modal.querySelectorAll('[data-res-cat]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      presetCategory = btn.dataset.resCat;
-      renderModal();
-    });
+  // Footer events
+  footer.querySelector('#btn-cancel-res-modal')?.addEventListener('click', closeResourceModal);
+  footer.querySelector('#btn-goto-custom')?.addEventListener('click', () => {
+    activeTab = 'custom';
+    updateSubtabButtons();
+    renderModalBody(true);
   });
+}
+
+function renderPresetsGrid(animate = false) {
+  const modal = document.getElementById('resource-modal');
+  if (!modal) return;
+
+  const grid = modal.querySelector('#presets-cards-grid');
+  if (!grid) return;
+
+  const filteredPresets = getFilteredPresets();
+
+  grid.innerHTML = filteredPresets.length === 0 ? `
+    <div class="empty-hint" style="grid-column: 1 / -1;">
+      No presets matching "${presetSearchQuery}".
+    </div>
+  ` : filteredPresets.map((p, idx) => `
+    <div class="preset-item-card">
+      <div class="preset-card-top">
+        <span class="badge badge-subtle">${p.type}</span>
+        <strong class="preset-name">${p.name}</strong>
+        <span class="ep-badge-pill">${p.epCost} EP</span>
+      </div>
+      <p class="preset-desc">${p.desc}</p>
+      <div class="preset-card-actions">
+        <button class="btn btn-secondary btn-xs" data-preset-customize="${idx}"><i class="ri-edit-line"></i> Customize</button>
+        <button class="btn btn-primary btn-xs" data-preset-add="${idx}"><i class="ri-add-line"></i> Add</button>
+      </div>
+    </div>
+  `).join('');
+
+  if (animate) {
+    grid.classList.remove('category-content-animate');
+    void grid.offsetWidth; // Trigger reflow
+    grid.classList.add('category-content-animate');
+  }
 
   // Preset 1-click Add
-  modal.querySelectorAll('[data-preset-add]').forEach(btn => {
+  grid.querySelectorAll('[data-preset-add]').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = parseInt(btn.dataset.presetAdd, 10);
       const preset = filteredPresets[idx];
@@ -271,8 +386,8 @@ function renderModal() {
     });
   });
 
-  // Preset Customize (load into custom tab)
-  modal.querySelectorAll('[data-preset-customize]').forEach(btn => {
+  // Preset Customize
+  grid.querySelectorAll('[data-preset-customize]').forEach(btn => {
     btn.addEventListener('click', () => {
       const idx = parseInt(btn.dataset.presetCustomize, 10);
       const preset = filteredPresets[idx];
@@ -282,71 +397,9 @@ function renderModal() {
         formEpCost = preset.epCost;
         formDesc = preset.desc;
         activeTab = 'custom';
-        renderModal();
+        updateSubtabButtons();
+        renderModalBody(true);
       }
     });
-  });
-
-  // Custom Form handlers
-  const inputName = modal.querySelector('#input-res-name');
-  if (inputName) {
-    inputName.addEventListener('input', (e) => {
-      formName = e.target.value;
-    });
-  }
-
-  const selectType = modal.querySelector('#select-res-type');
-  if (selectType) {
-    selectType.addEventListener('change', (e) => {
-      formType = e.target.value;
-    });
-  }
-
-  const textDesc = modal.querySelector('#textarea-res-desc');
-  if (textDesc) {
-    textDesc.addEventListener('input', (e) => {
-      formDesc = e.target.value;
-    });
-  }
-
-  modal.querySelector('#btn-ep-dec')?.addEventListener('click', () => {
-    if (formEpCost > 1) {
-      formEpCost--;
-      renderModal();
-    }
-  });
-
-  modal.querySelector('#btn-ep-inc')?.addEventListener('click', () => {
-    formEpCost++;
-    renderModal();
-  });
-
-  modal.querySelector('#btn-save-custom-res')?.addEventListener('click', () => {
-    if (!formName.trim()) {
-      showToast('Please enter an item / equipment name!', 'warning');
-      modal.querySelector('#input-res-name')?.focus();
-      return;
-    }
-
-    const trimmedName = formName.trim();
-    if (editingResourceId) {
-      store.updateResource(editingResourceId, {
-        name: trimmedName,
-        type: formType,
-        epCost: formEpCost,
-        desc: formDesc.trim()
-      });
-      showToast(`"${trimmedName}" updated successfully!`, 'success');
-    } else {
-      store.addResource({
-        name: trimmedName,
-        type: formType,
-        epCost: formEpCost,
-        desc: formDesc.trim()
-      });
-      showToast(`"${trimmedName}" added successfully!`, 'success');
-    }
-
-    closeResourceModal();
   });
 }

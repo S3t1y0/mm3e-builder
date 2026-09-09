@@ -18,9 +18,13 @@ import { initRoll20Print, openRoll20Preview } from './components/roll20Print.js'
 
 let activeTab = 'sheet'; // 'sheet', 'resources', 'references'
 
-document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    initApp();
+  });
+} else {
   initApp();
-});
+}
 
 function initApp() {
   setupNavigation();
@@ -611,21 +615,6 @@ function renderResourcesTab(container) {
   const char = store.character;
   const budget = store.getEquipmentBudgetInfo();
 
-  const filtered = char.resources.filter(r => {
-    if (activeResourceCategory === 'all') return true;
-    return r.type === activeResourceCategory;
-  });
-
-  const getResIcon = (type) => {
-    switch (type) {
-      case 'Gear': return '<i class="ri-sword-line"></i>';
-      case 'Gadget': return '<i class="ri-smartphone-line"></i>';
-      case 'Vehicle': return '<i class="ri-car-line"></i>';
-      case 'Headquarters': return '<i class="ri-building-line"></i>';
-      default: return '<i class="ri-archive-line"></i>';
-    }
-  };
-
   container.innerHTML = `
     <div class="resources-page">
       <div class="res-header">
@@ -701,41 +690,11 @@ function renderResourcesTab(container) {
         </div>
       </div>
 
-      <div class="resources-list-wrap">
-        ${filtered.length === 0 ? `
-          <div class="empty-hint">
-            ${char.resources.length === 0
-              ? 'Equipment library is empty. Click "+ Add Item / Preset" above to choose official M&M 3e weapons, gadgets, vehicles, or secret headquarters!'
-              : `No items in category ${activeResourceCategory}.`}
-          </div>
-        ` : `
-          <div class="res-grid">
-            ${filtered.map((r, i) => `
-              <div class="res-card">
-                <div class="res-card-top">
-                  <div class="res-title-box">
-                    <span class="res-icon">${getResIcon(r.type)}</span>
-                    <div>
-                      <span class="badge badge-subtle">${r.type.toUpperCase()}</span>
-                      <strong class="res-card-name">${r.name}</strong>
-                    </div>
-                  </div>
-                  <div class="res-top-actions">
-                    <span class="ep-tag">${r.epCost ?? r.cost ?? 0} EP</span>
-                    <button class="btn-icon-subtle" data-edit-res="${r.id || i}" title="Edit Item"><i class="ri-edit-line"></i></button>
-                    <button class="btn-icon-subtle text-danger" data-del-res="${r.id || i}" title="Delete Item"><i class="ri-delete-bin-line"></i></button>
-                  </div>
-                </div>
-                <p class="res-card-desc">${r.desc || r.notes || '<span class="text-muted">No description notes.</span>'}</p>
-              </div>
-            `).join('')}
-          </div>
-        `}
-      </div>
+      <div class="resources-list-wrap" id="resources-list-wrap"></div>
     </div>
   `;
 
-  // Attach event handlers
+  // Attach top-level event handlers
   container.querySelector('#btn-main-add-res')?.addEventListener('click', () => {
     openResourceModal(null, activeResourceCategory !== 'all' ? activeResourceCategory : 'Gear');
   });
@@ -747,7 +706,10 @@ function renderResourcesTab(container) {
   container.querySelectorAll('[data-res-filter]').forEach(btn => {
     btn.addEventListener('click', () => {
       activeResourceCategory = btn.dataset.resFilter;
-      renderResourcesTab(container);
+      container.querySelectorAll('[data-res-filter]').forEach(b => {
+        b.classList.toggle('active', b.dataset.resFilter === activeResourceCategory);
+      });
+      renderResourcesList(container, true);
     });
   });
 
@@ -757,7 +719,67 @@ function renderResourcesTab(container) {
     });
   });
 
-  container.querySelectorAll('[data-edit-res]').forEach(btn => {
+  renderResourcesList(container, false);
+}
+
+function renderResourcesList(container, animate = false) {
+  const char = store.character;
+  const listWrap = container.querySelector('#resources-list-wrap');
+  if (!listWrap) return;
+
+  const filtered = char.resources.filter(r => {
+    if (activeResourceCategory === 'all') return true;
+    return r.type === activeResourceCategory;
+  });
+
+  const getResIcon = (type) => {
+    switch (type) {
+      case 'Gear': return '<i class="ri-sword-line"></i>';
+      case 'Gadget': return '<i class="ri-smartphone-line"></i>';
+      case 'Vehicle': return '<i class="ri-car-line"></i>';
+      case 'Headquarters': return '<i class="ri-building-line"></i>';
+      default: return '<i class="ri-archive-line"></i>';
+    }
+  };
+
+  listWrap.innerHTML = filtered.length === 0 ? `
+    <div class="empty-hint">
+      ${char.resources.length === 0
+        ? 'Equipment library is empty. Click "+ Add Item / Preset" above to choose official M&M 3e weapons, gadgets, vehicles, or secret headquarters!'
+        : `No items in category ${activeResourceCategory}.`}
+    </div>
+  ` : `
+    <div class="res-grid">
+      ${filtered.map((r, i) => `
+        <div class="res-card">
+          <div class="res-card-top">
+            <div class="res-title-box">
+              <span class="res-icon">${getResIcon(r.type)}</span>
+              <div>
+                <span class="badge badge-subtle">${r.type.toUpperCase()}</span>
+                <strong class="res-card-name">${r.name}</strong>
+              </div>
+            </div>
+            <div class="res-top-actions">
+              <span class="ep-tag">${r.epCost ?? r.cost ?? 0} EP</span>
+              <button class="btn-icon-subtle" data-edit-res="${r.id || i}" title="Edit Item"><i class="ri-edit-line"></i></button>
+              <button class="btn-icon-subtle text-danger" data-del-res="${r.id || i}" title="Delete Item"><i class="ri-delete-bin-line"></i></button>
+            </div>
+          </div>
+          <p class="res-card-desc">${r.desc || r.notes || '<span class="text-muted">No description notes.</span>'}</p>
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  if (animate) {
+    listWrap.classList.remove('category-content-animate');
+    void listWrap.offsetWidth; // Trigger reflow
+    listWrap.classList.add('category-content-animate');
+  }
+
+  // Bind edit and delete handlers
+  listWrap.querySelectorAll('[data-edit-res]').forEach(btn => {
     btn.addEventListener('click', () => {
       const idOrIdx = btn.dataset.editRes;
       const resItem = char.resources.find(r => r.id === idOrIdx) || char.resources[parseInt(idOrIdx, 10)];
@@ -767,7 +789,7 @@ function renderResourcesTab(container) {
     });
   });
 
-  container.querySelectorAll('[data-del-res]').forEach(btn => {
+  listWrap.querySelectorAll('[data-del-res]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const idOrIdx = btn.dataset.delRes;
       const item = char.resources.find(r => r.id === idOrIdx) || char.resources[parseInt(idOrIdx, 10)];
