@@ -136,6 +136,8 @@ function setupGlobalActions() {
     });
   };
 
+  bindDrawerAction('drawer-btn-undo', 'btn-undo');
+  bindDrawerAction('drawer-btn-redo', 'btn-redo');
   bindDrawerAction('drawer-btn-new', 'btn-new-char');
   bindDrawerAction('drawer-btn-clear', 'btn-clear');
   bindDrawerAction('drawer-btn-export', 'btn-export');
@@ -143,6 +145,25 @@ function setupGlobalActions() {
   bindDrawerAction('drawer-btn-import', 'btn-import');
   bindDrawerAction('drawer-btn-roll20', 'btn-roll20-preview');
   bindDrawerAction('drawer-btn-print', 'btn-pdf');
+
+  // Swipe-to-dismiss gesture for mobile drawer (swipe right >= 50px)
+  let touchStartX = 0;
+  let touchStartY = 0;
+  const drawerEl = document.getElementById('mobile-action-drawer');
+  drawerEl?.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].clientX;
+    touchStartY = e.changedTouches[0].clientY;
+  }, { passive: true });
+
+  drawerEl?.addEventListener('touchend', (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const diffX = touchEndX - touchStartX;
+    const diffY = Math.abs(touchEndY - touchStartY);
+    if (diffX > 50 && diffY < 100) {
+      closeDrawer();
+    }
+  }, { passive: true });
 }
 
 function setupKeyboardShortcuts() {

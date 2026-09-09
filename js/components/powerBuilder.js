@@ -200,6 +200,15 @@ function renderPowerStudio(resetScroll = false) {
 
   // Render Left Canvas
   canvasContainer.innerHTML = `
+    <!-- Mobile Quick Status Strip -->
+    <div class="pb-mobile-status-strip">
+      <span class="mobile-pl-status ${metrics.plCompliance.isCompliant ? 'compliant' : 'violated'}">
+        <i class="${metrics.plCompliance.isCompliant ? 'ri-checkbox-circle-fill' : 'ri-error-warning-fill'}"></i>
+        ${metrics.plCompliance.isCompliant ? 'PL ' + heroPL + ' Compliant' : 'PL Cap Exceeded!'}
+      </span>
+      <span class="mobile-combat-quick">${metrics.isOffensive ? `Attack +${metrics.attackBonus} • DC ${metrics.difficultyClass}` : 'Utility Effect'}</span>
+    </div>
+
     <!-- 1. Identity & Structure Card -->
     <div class="pb-card pb-identity-card">
       <div class="form-row">

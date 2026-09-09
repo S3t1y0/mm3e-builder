@@ -288,14 +288,14 @@ export function openCustomAttackModal(attackIdToEdit = null) {
           <input type="text" id="custom-atk-name" class="text-input" placeholder="e.g. Plasma Pistol, Katana, Sniper Rifle, Psionic Blast" value="${escapeHtml(data.name)}" required autofocus style="font-size: 0.95rem; font-weight: 600;">
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+        <div class="custom-atk-grid">
           <div class="field-group">
             <label for="custom-atk-bonus" style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
               <i class="ri-focus-2-line"></i> Attack Check Bonus (+X)
             </label>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
               <button type="button" class="btn btn-secondary btn-xs" id="atk-bonus-dec" style="width: 32px; height: 32px; padding: 0;">-</button>
-              <input type="number" id="custom-atk-bonus" class="text-input" value="${data.attackBonus}" style="text-align: center; font-weight: 800; font-size: 1rem; width: 80px;">
+              <input type="number" id="custom-atk-bonus" class="text-input" value="${data.attackBonus}" style="text-align: center; font-weight: 800; font-size: 1rem; width: 60px; min-width: 44px;">
               <button type="button" class="btn btn-secondary btn-xs" id="atk-bonus-inc" style="width: 32px; height: 32px; padding: 0;">+</button>
             </div>
           </div>
@@ -304,15 +304,15 @@ export function openCustomAttackModal(attackIdToEdit = null) {
             <label for="custom-atk-rank" style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
               <i class="ri-flashlight-line"></i> Effect / Damage Rank
             </label>
-            <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <div style="display: flex; align-items: center; gap: 0.4rem;">
               <button type="button" class="btn btn-secondary btn-xs" id="atk-rank-dec" style="width: 32px; height: 32px; padding: 0;">-</button>
-              <input type="number" id="custom-atk-rank" class="text-input" value="${data.effectRank}" min="0" max="25" style="text-align: center; font-weight: 800; font-size: 1rem; width: 80px;">
+              <input type="number" id="custom-atk-rank" class="text-input" value="${data.effectRank}" min="0" max="25" style="text-align: center; font-weight: 800; font-size: 1rem; width: 60px; min-width: 44px;">
               <button type="button" class="btn btn-secondary btn-xs" id="atk-rank-inc" style="width: 32px; height: 32px; padding: 0;">+</button>
             </div>
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem;">
+        <div class="custom-atk-grid">
           <div class="field-group">
             <label for="custom-atk-range" style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
               <i class="ri-compass-3-line"></i> Range
@@ -337,7 +337,7 @@ export function openCustomAttackModal(attackIdToEdit = null) {
           </div>
         </div>
 
-        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.25rem;">
+        <div class="custom-atk-grid-desc">
           <div class="field-group">
             <label for="custom-atk-descriptor" style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase;">
               <i class="ri-price-tag-3-line"></i> Descriptors / Type

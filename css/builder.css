@@ -1493,6 +1493,10 @@
   min-width: 0;
 }
 
+.pb-mobile-status-strip {
+  display: none;
+}
+
 .pb-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -2719,7 +2723,9 @@
   .power-studio-dialog {
     width: 100vw;
     height: 100vh;
+    height: 100dvh;
     max-height: 100vh;
+    max-height: 100dvh;
     border-radius: 0;
   }
 
@@ -2876,7 +2882,74 @@
     padding: 0.85rem;
   }
 
-  /* Resources & Advantages Grids on Mobile */
+  .effect-explorer-dialog {
+    width: 100vw;
+    height: 100vh;
+    height: 100dvh;
+    max-height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  /* Skill Picker Modal Mobile (Stacked Responsive Layout) */
+  .skill-modal-layout {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    max-height: 82vh;
+    overflow-y: auto;
+  }
+
+  .skill-picker-sidebar {
+    border-right: none;
+    border-bottom: 1px solid var(--border-color);
+    padding: 0.85rem;
+    max-height: 240px;
+    flex-shrink: 0;
+  }
+
+  .skill-picker-sidebar .filter-pills-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .skill-picker-sidebar .filter-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .skill-picker-list {
+    max-height: 130px;
+  }
+
+  .skill-config-panel {
+    padding: 0.85rem;
+    flex: 1;
+  }
+
+  /* Advantage Modal Mobile (Swipeable Filter Bar & 1-Column Cards) */
+  .adv-filter-toolbar .filter-pills-bar {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 4px;
+  }
+
+  .adv-filter-toolbar .filter-chip {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .adv-catalog-grid {
+    grid-template-columns: 1fr;
+    gap: 0.75rem;
+    padding-right: 0;
+    max-height: 55vh;
+  }
+
+  /* Resources & Conditions Grids on Mobile */
   .res-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;
@@ -2890,6 +2963,48 @@
   .conditions-ref-grid {
     grid-template-columns: 1fr;
     gap: 1rem;
+  }
+
+  /* Mobile Quick Status Strip in Power Studio */
+  .pb-mobile-status-strip {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.65rem 0.95rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    margin-bottom: 0.25rem;
+  }
+
+  .mobile-pl-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.76rem;
+    font-weight: 800;
+    padding: 0.2rem 0.6rem;
+    border-radius: var(--radius-pill);
+  }
+
+  .mobile-pl-status.compliant {
+    background: rgba(16, 185, 129, 0.15);
+    border: 1px solid rgba(16, 185, 129, 0.4);
+    color: #6ee7b7;
+  }
+
+  .mobile-pl-status.violated {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #fca5a5;
+  }
+
+  .mobile-combat-quick {
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: var(--accent-secondary);
+    font-variant-numeric: tabular-nums;
   }
 }
 
