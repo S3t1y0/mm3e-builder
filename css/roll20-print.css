@@ -1,0 +1,971 @@
+/* ==========================================================================
+   Roll20 Mutants & Masterminds 3E Character Sheet - Print & Preview Styles
+   Faithfully styled after Roll20 Official M&M 3E Character Sheet
+   ========================================================================== */
+
+@import url("https://fonts.googleapis.com/css2?family=Bangers&family=Kalam:wght@400;700&family=Oswald:wght@400;600;700&family=Patrick+Hand+SC&display=swap");
+
+:root {
+  --r20-black: #2a2522;
+  --r20-black-t: rgba(42, 37, 34, 0.65);
+  --r20-gray: #66615f;
+  --r20-light-gray: #e0dedc;
+  --r20-white: #f5f5f5;
+  --r20-white-t: rgba(245, 245, 245, 0.85);
+  --r20-blue: #6f92dc;
+  --r20-green: #4fc9a1;
+  --r20-green-dark: #2a8b6a;
+  --r20-red: #f14236;
+  --r20-orange: #ff862f;
+  --r20-yellow: #f0bd17;
+  --r20-yellow-b: #ffcd29;
+  --r20-purple: #7e627f;
+  --r20-purple-dark: #583f59;
+  --r20-stroke: #2a2522;
+
+  --r20-font-normal: "Patrick Hand SC", cursive, sans-serif;
+  --r20-font-header: "Bangers", cursive, sans-serif;
+  --r20-font-comic: "Oswald", sans-serif;
+  --r20-font-numbers: "Kalam", cursive;
+
+  --r20-gra-punch: linear-gradient(360deg, #da762f 0%, #fce036 100%);
+  --r20-gra-bluebox: linear-gradient(0deg, #778db6 0%, #9ac8f0 30%, #c2ecf5 70%, #ebebeb 100%);
+  --r20-gra-metal: linear-gradient(180deg, #443e3c 0%, #2a2522 100%);
+  --r20-gra-badge: radial-gradient(circle at 35% 35%, #ffcd29, #f0bd17 60%, #da762f 100%);
+
+  --r20-fx-stroke: -1px -1px 0 var(--r20-stroke), 1px -1px 0 var(--r20-stroke),
+                   -1px 1px 0 var(--r20-stroke), 1px 1px 0 var(--r20-stroke),
+                   0 -1px 0 var(--r20-stroke), 0 1px 0 var(--r20-stroke),
+                   -1px 0 0 var(--r20-stroke), 1px 0 0 var(--r20-stroke);
+  
+  --r20-fx-stroke2: -2px -2px 0 var(--r20-stroke), 2px -2px 0 var(--r20-stroke),
+                    -2px 2px 0 var(--r20-stroke), 2px 2px 0 var(--r20-stroke),
+                    3px 3px 0 var(--r20-stroke);
+}
+
+/* ==========================================================================
+   CONTAINER & VISIBILITY ON SCREEN
+   ========================================================================== */
+
+#roll20-print-sheet {
+  display: none;
+}
+
+/* ==========================================================================
+   ROLL20 PREVIEW MODAL
+   ========================================================================== */
+
+#roll20-preview-modal {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(10, 10, 15, 0.85);
+  backdrop-filter: blur(8px);
+  z-index: 9999;
+  overflow-y: auto;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+#roll20-preview-modal.active {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.r20-modal-bar {
+  position: sticky;
+  top: 0;
+  width: 100%;
+  max-width: 1100px;
+  background: #1e1b19;
+  border: 2px solid var(--r20-yellow);
+  border-radius: 8px;
+  padding: 10px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  z-index: 10;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+}
+
+.r20-modal-title {
+  font-family: var(--r20-font-header);
+  font-size: 1.5rem;
+  letter-spacing: 1px;
+  color: var(--r20-yellow);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.r20-modal-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.r20-btn {
+  font-family: var(--r20-font-comic);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  padding: 6px 16px;
+  border-radius: 6px;
+  border: 2px solid var(--r20-black);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+
+.r20-btn-primary {
+  background: var(--r20-gra-punch);
+  color: var(--r20-black);
+}
+
+.r20-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+}
+
+.r20-btn-close {
+  background: #3a3430;
+  color: #fff;
+  border-color: #554e48;
+}
+
+.r20-btn-close:hover {
+  background: #4a423d;
+}
+
+/* ==========================================================================
+   ROLL20 SHEET CORE LAYOUT
+   ========================================================================== */
+
+.roll20-sheet {
+  font-family: var(--r20-font-comic);
+  color: var(--r20-black);
+  background: var(--r20-purple) url('../assets/roll20/textured_purple.gif');
+  border: 12px solid var(--r20-black);
+  border-radius: 24px;
+  padding: 20px;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1080px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.7), inset 0 0 20px rgba(0,0,0,0.3);
+  margin-bottom: 30px;
+  position: relative;
+}
+
+/* Header Area */
+.r20-header {
+  display: grid;
+  grid-template-columns: 100px 1fr 280px;
+  gap: 15px;
+  align-items: center;
+  margin-bottom: 15px;
+  background: var(--r20-white-t);
+  border: 3px solid var(--r20-black);
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: inset 0 0 10px rgba(0,0,0,0.1), 4px 4px 0 var(--r20-black);
+}
+
+/* Price Stamp (Top Left) */
+.r20-price-stamp {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  background: var(--r20-gra-badge);
+  border: 3px dashed var(--r20-black);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 2px 2px 0 var(--r20-black);
+  transform: rotate(-8deg);
+}
+
+.r20-price-stamp .price-num {
+  font-family: var(--r20-font-header);
+  font-size: 1.8rem;
+  line-height: 1;
+  color: var(--r20-red);
+  text-shadow: 1px 1px 0 #fff;
+}
+
+.r20-price-stamp .price-label {
+  font-family: var(--r20-font-normal);
+  font-size: 0.75rem;
+  font-weight: bold;
+  text-transform: uppercase;
+  color: var(--r20-black);
+  line-height: 1;
+}
+
+/* Center Titles & Logo */
+.r20-title-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.r20-logo {
+  max-height: 54px;
+  max-width: 260px;
+  object-fit: contain;
+  filter: drop-shadow(2px 2px 0 var(--r20-black));
+}
+
+.r20-real-name-bar {
+  background: var(--r20-black);
+  color: var(--r20-white);
+  font-family: var(--r20-font-comic);
+  font-weight: 700;
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 14px;
+  border-radius: 4px;
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+}
+
+.r20-hero-name {
+  font-family: var(--r20-font-header);
+  font-size: 2.8rem;
+  line-height: 1;
+  color: var(--r20-red);
+  text-shadow: var(--r20-fx-stroke2);
+  transform: skew(-6deg);
+  margin: 2px 0;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+.r20-pp-equation {
+  font-family: var(--r20-font-normal);
+  font-size: 0.9rem;
+  font-weight: bold;
+  background: #fff;
+  border: 2px solid var(--r20-black);
+  border-radius: 6px;
+  padding: 4px 10px;
+  width: 100%;
+  text-align: center;
+  box-sizing: border-box;
+  box-shadow: 2px 2px 0 var(--r20-black);
+}
+
+.r20-pp-equation span.highlight {
+  color: var(--r20-red);
+  font-family: var(--r20-font-comic);
+  font-weight: 700;
+}
+
+/* Header Right: Complications / Hero Points */
+.r20-header-right {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.r20-hero-points-badge {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--r20-gra-punch);
+  border: 2px solid var(--r20-black);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-family: var(--r20-font-header);
+  font-size: 1.1rem;
+  color: var(--r20-black);
+  box-shadow: 2px 2px 0 var(--r20-black);
+}
+
+.r20-hero-points-val {
+  background: var(--r20-black);
+  color: #fff;
+  font-family: var(--r20-font-numbers);
+  font-weight: bold;
+  font-size: 1.2rem;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #fff;
+}
+
+.r20-complications-box {
+  background: #fff;
+  border: 2px solid var(--r20-black);
+  border-radius: 6px;
+  overflow: hidden;
+  box-shadow: 2px 2px 0 var(--r20-black);
+}
+
+.r20-complications-header {
+  background: #2a2522 url('../assets/roll20/complications.gif') center / cover no-repeat;
+  color: #fff;
+  font-family: var(--r20-font-header);
+  font-size: 0.95rem;
+  letter-spacing: 1px;
+  padding: 4px 8px;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.r20-complications-content {
+  padding: 6px 8px;
+  font-size: 0.8rem;
+  max-height: 60px;
+  overflow-y: auto;
+  line-height: 1.25;
+}
+
+/* ==========================================================================
+   CONDITIONS & MOVEMENT ROW
+   ========================================================================== */
+
+.r20-cond-move-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.r20-panel {
+  background: var(--r20-white-t);
+  border: 3px solid var(--r20-black);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 4px 4px 0 var(--r20-black);
+}
+
+.r20-panel-title {
+  background: #2a2522;
+  color: #fff;
+  font-family: var(--r20-font-header);
+  font-size: 1.2rem;
+  letter-spacing: 1px;
+  padding: 4px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 2px solid var(--r20-black);
+}
+
+.r20-panel-title.conditions-title {
+  background: #2a2522 url('../assets/roll20/conditions.gif') center / cover no-repeat;
+}
+
+.r20-panel-title.movement-title {
+  background: #2a2522 url('../assets/roll20/roller.gif') center / cover no-repeat;
+}
+
+.r20-panel-title.defenses-title {
+  background: #2a2522 url('../assets/roll20/battle.gif') center / cover no-repeat;
+}
+
+.r20-panel-title.attacks-title {
+  background: #2a2522 url('../assets/roll20/pow.png') center / cover no-repeat;
+}
+
+.r20-panel-title.advantages-title {
+  background: #2a2522 url('../assets/roll20/advantages.gif') center / cover no-repeat;
+}
+
+.r20-panel-title.skills-title {
+  background: #2a2522 url('../assets/roll20/skills.gif') center / cover no-repeat;
+}
+
+.r20-conditions-body {
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.r20-damage-track {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border-bottom: 1px dashed #aaa;
+  padding-bottom: 4px;
+}
+
+.r20-condition-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 4px 8px;
+  font-size: 0.78rem;
+  text-transform: capitalize;
+}
+
+.r20-cond-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.r20-cond-chip input[type="checkbox"] {
+  accent-color: var(--r20-red);
+}
+
+.r20-movement-body {
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.85rem;
+}
+
+.r20-move-item {
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 1px dotted #ccc;
+  padding: 2px 0;
+}
+
+.r20-move-item strong {
+  text-transform: uppercase;
+}
+
+/* ==========================================================================
+   DEFENSES & ATTACKS ROW
+   ========================================================================== */
+
+.r20-defense-attack-row {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+/* Defenses */
+.r20-defense-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+  margin: 4px 0;
+}
+
+.r20-defense-table th {
+  font-family: var(--r20-font-comic);
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  color: #777;
+  padding: 2px 4px;
+  text-align: center;
+}
+
+.r20-defense-table td {
+  padding: 4px 6px;
+  text-align: center;
+}
+
+.r20-def-name-cell {
+  text-align: left !important;
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--r20-black);
+}
+
+.r20-def-sub {
+  font-size: 0.7rem;
+  color: #777;
+  font-weight: normal;
+}
+
+.r20-def-total-badge {
+  background: var(--r20-gra-punch);
+  color: var(--r20-black);
+  font-family: var(--r20-font-numbers);
+  font-weight: bold;
+  font-size: 1.1rem;
+  border-radius: 6px;
+  border: 1.5px solid var(--r20-black);
+  padding: 2px 8px;
+  display: inline-block;
+  min-width: 24px;
+}
+
+.r20-def-pill {
+  background: #fff;
+  border: 1px solid #aaa;
+  border-radius: 4px;
+  padding: 1px 6px;
+  font-size: 0.85rem;
+}
+
+.r20-hits-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #2a2522;
+  color: #fff;
+  border-radius: 6px;
+  padding: 4px 10px;
+  margin: 6px 8px;
+  font-family: var(--r20-font-header);
+}
+
+.r20-hits-val {
+  background: var(--r20-red);
+  color: #fff;
+  font-family: var(--r20-font-numbers);
+  font-size: 1.1rem;
+  border-radius: 50%;
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #fff;
+}
+
+/* Attacks Table */
+.r20-attack-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 12px;
+  background: #eae6e1;
+  border-bottom: 2px solid var(--r20-black);
+}
+
+.r20-init-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--r20-yellow-b);
+  border: 2px solid var(--r20-black);
+  border-radius: 6px;
+  padding: 2px 10px;
+  font-family: var(--r20-font-header);
+  font-size: 1.1rem;
+  box-shadow: 2px 2px 0 var(--r20-black);
+}
+
+.r20-init-val {
+  font-family: var(--r20-font-numbers);
+  font-weight: bold;
+  font-size: 1.2rem;
+  color: var(--r20-black);
+}
+
+.r20-attack-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.r20-attack-table th {
+  background: #d6d0ca;
+  font-family: var(--r20-font-comic);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 4px 6px;
+  text-align: center;
+  border-bottom: 1.5px solid var(--r20-black);
+}
+
+.r20-attack-table td {
+  padding: 4px 6px;
+  text-align: center;
+  border-bottom: 1px dotted #ccc;
+}
+
+.r20-attack-table tr:nth-child(even) td {
+  background: rgba(0,0,0,0.02);
+}
+
+.r20-attack-name-cell {
+  text-align: left !important;
+  font-weight: 700;
+  color: var(--r20-black);
+}
+
+.r20-attack-bonus-badge {
+  background: var(--r20-green);
+  color: #fff;
+  border: 1px solid var(--r20-black);
+  border-radius: 4px;
+  font-weight: bold;
+  padding: 1px 6px;
+  display: inline-block;
+}
+
+.r20-dc-badge {
+  background: var(--r20-red);
+  color: #fff;
+  border: 1px solid var(--r20-black);
+  border-radius: 4px;
+  font-weight: bold;
+  padding: 1px 6px;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   8 ABILITIES CAPSULES ROW
+   ========================================================================== */
+
+.r20-abilities-row {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 8px;
+  margin-bottom: 15px;
+}
+
+.r20-ability-capsule {
+  background: var(--r20-gra-metal);
+  border: 2px solid var(--r20-black);
+  border-radius: 12px;
+  padding: 6px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 2px 2px 0 var(--r20-black);
+  color: #fff;
+  text-align: center;
+}
+
+.r20-abl-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--r20-red);
+  border: 2px solid #fff;
+  color: #fff;
+  font-family: var(--r20-font-header);
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.5), 1px 1px 0 var(--r20-black);
+}
+
+.r20-abl-name {
+  font-family: var(--r20-font-header);
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  color: var(--r20-yellow);
+  line-height: 1;
+}
+
+.r20-abl-pill {
+  font-size: 0.72rem;
+  font-family: var(--r20-font-comic);
+  color: #bbb;
+  background: rgba(0,0,0,0.4);
+  border-radius: 4px;
+  padding: 1px 4px;
+  width: 80%;
+}
+
+/* ==========================================================================
+   3-COLUMN LOWER SECTION (ADVANTAGES, POWERS, SKILLS)
+   ========================================================================== */
+
+.r20-three-col-row {
+  display: grid;
+  grid-template-columns: 1fr 1.35fr 1fr;
+  gap: 15px;
+  align-items: start;
+}
+
+/* Column 1: Advantages */
+.r20-adv-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.r20-adv-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #2a2522;
+  color: #fff;
+  border-radius: 6px;
+  padding: 4px 8px;
+  border: 1px solid #443e3c;
+  font-size: 0.82rem;
+  box-shadow: 1px 1px 0 rgba(0,0,0,0.3);
+}
+
+.r20-adv-name {
+  font-family: var(--r20-font-comic);
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.r20-adv-rank {
+  background: var(--r20-yellow);
+  color: var(--r20-black);
+  font-family: var(--r20-font-numbers);
+  font-weight: bold;
+  font-size: 0.85rem;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Column 2: Powers */
+.r20-powers-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.r20-power-card {
+  background: #fff;
+  border: 2px solid var(--r20-black);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 2px 2px 0 var(--r20-black);
+}
+
+.r20-power-header {
+  background: var(--r20-gra-punch);
+  padding: 4px 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1.5px solid var(--r20-black);
+}
+
+.r20-power-name {
+  font-family: var(--r20-font-header);
+  font-size: 1.15rem;
+  color: var(--r20-black);
+  letter-spacing: 0.5px;
+}
+
+.r20-power-cost {
+  background: var(--r20-black);
+  color: #fff;
+  font-family: var(--r20-font-comic);
+  font-weight: 700;
+  font-size: 0.78rem;
+  padding: 1px 6px;
+  border-radius: 4px;
+}
+
+.r20-power-body {
+  padding: 6px 8px;
+  font-size: 0.78rem;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.r20-power-tags {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.r20-tag {
+  background: #eaeaea;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.r20-power-desc {
+  font-style: italic;
+  color: #444;
+  line-height: 1.25;
+}
+
+/* Column 3: Skills */
+.r20-skills-list {
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.r20-skill-item {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 6px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 3px 6px;
+  font-size: 0.8rem;
+  box-shadow: 1px 1px 0 rgba(0,0,0,0.1);
+}
+
+.r20-skill-bonus {
+  background: var(--r20-green);
+  color: #fff;
+  font-family: var(--r20-font-numbers);
+  font-weight: bold;
+  font-size: 0.9rem;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--r20-green-dark);
+}
+
+.r20-skill-name {
+  font-weight: 700;
+  color: var(--r20-black);
+  text-transform: capitalize;
+}
+
+.r20-skill-breakdown {
+  font-size: 0.7rem;
+  color: #666;
+  background: #eee;
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+/* ==========================================================================
+   PAGE 2: DETAILS, EQUIPMENT, NOTES
+   ========================================================================== */
+
+.r20-page-2 {
+  margin-top: 20px;
+}
+
+.r20-bio-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  padding: 8px 12px;
+  font-size: 0.82rem;
+}
+
+.r20-bio-item {
+  border-bottom: 1px dotted #ccc;
+  padding: 2px 0;
+}
+
+.r20-bio-item strong {
+  text-transform: uppercase;
+  color: #555;
+}
+
+.r20-equip-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  padding: 8px 12px;
+}
+
+.r20-equip-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+}
+
+.r20-equip-table th {
+  background: #e2deda;
+  padding: 3px 6px;
+  text-align: left;
+  border-bottom: 1.5px solid var(--r20-black);
+  font-family: var(--r20-font-comic);
+}
+
+.r20-equip-table td {
+  padding: 3px 6px;
+  border-bottom: 1px dotted #ccc;
+}
+
+/* ==========================================================================
+   PRINT MEDIA RULES (A4 / US LETTER CLEAN PAGINATION)
+   ========================================================================== */
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 6mm;
+  }
+
+  body {
+    background: #fff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* Hide regular web app interface */
+  .app-container,
+  .menubar,
+  .modal-overlay,
+  #roll20-preview-modal .r20-modal-bar,
+  #toast-container,
+  .warning-banner {
+    display: none !important;
+  }
+
+  /* Show Roll20 print sheet container */
+  #roll20-print-sheet {
+    display: block !important;
+    position: static !important;
+    width: 100% !important;
+    visibility: visible !important;
+  }
+
+  .roll20-sheet {
+    max-width: 100% !important;
+    box-shadow: none !important;
+    border-width: 8px !important;
+    padding: 12px !important;
+    margin-bottom: 0 !important;
+    page-break-after: always;
+    break-after: page;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  .r20-page-2 {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  /* Adjust font sizes slightly for crisp printing */
+  .r20-hero-name {
+    font-size: 2.2rem !important;
+  }
+
+  .r20-abilities-row {
+    gap: 4px !important;
+  }
+
+  .r20-panel {
+    box-shadow: 2px 2px 0 var(--r20-black) !important;
+  }
+}
