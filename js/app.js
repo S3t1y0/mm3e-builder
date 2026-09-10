@@ -15,8 +15,9 @@ import { renderReferencesTab } from './components/references.js';
 import { exportToJson, importFromJson, exportToCsv, printSheet } from './storage/exportImport.js';
 import { showToast, showConfirmModal } from './components/notifications.js';
 import { initRoll20Print, openRoll20Preview } from './components/roll20Print.js';
+import { renderWizard } from './components/wizard/wizardController.js';
 
-let activeTab = 'sheet'; // 'sheet', 'resources', 'references'
+let activeTab = 'sheet'; // 'sheet', 'wizard', 'resources', 'references'
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
@@ -146,6 +147,13 @@ function setupGlobalActions() {
   bindDrawerAction('drawer-btn-roll20', 'btn-roll20-preview');
   bindDrawerAction('drawer-btn-print', 'btn-pdf');
 
+  document.getElementById('drawer-btn-wizard')?.addEventListener('click', () => {
+    closeDrawer();
+    activeTab = 'wizard';
+    document.querySelectorAll('.nav-tab-btn').forEach(t => t.classList.toggle('active', t.dataset.tab === 'wizard'));
+    render();
+  });
+
   // Swipe-to-dismiss gesture for mobile drawer (swipe right >= 50px)
   let touchStartX = 0;
   let touchStartY = 0;
@@ -188,12 +196,28 @@ function render() {
 
   // Tab switching
   const sheetView = document.getElementById('view-character-sheet');
+  const wizardView = document.getElementById('view-wizard');
   const resourcesView = document.getElementById('view-resources');
   const referencesView = document.getElementById('view-references');
+  const statsFooter = document.getElementById('points-breakdown-footer');
 
   if (sheetView) sheetView.style.display = activeTab === 'sheet' ? 'block' : 'none';
+  if (wizardView) wizardView.style.display = activeTab === 'wizard' ? 'block' : 'none';
   if (resourcesView) resourcesView.style.display = activeTab === 'resources' ? 'block' : 'none';
   if (referencesView) referencesView.style.display = activeTab === 'references' ? 'block' : 'none';
+
+  if (statsFooter) {
+    statsFooter.style.display = activeTab === 'wizard' ? 'none' : 'flex';
+  }
+
+  if (activeTab === 'wizard') {
+    renderWizard(wizardView, (newTab) => {
+      activeTab = newTab || 'sheet';
+      document.querySelectorAll('.nav-tab-btn').forEach(t => t.classList.toggle('active', t.dataset.tab === activeTab));
+      render();
+    });
+    return;
+  }
 
   if (activeTab === 'references') {
     renderReferencesTab(referencesView);

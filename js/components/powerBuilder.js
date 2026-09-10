@@ -122,6 +122,19 @@ function getCategoryClass(category) {
   }
 }
 
+function getModifierCategoryClass(category) {
+  if (!category) return 'cat-mod-general';
+  const c = category.toLowerCase();
+  if (c.includes('combat')) return 'cat-mod-combat';
+  if (c.includes('range') || c.includes('targeting') || c.includes('area')) return 'cat-mod-range';
+  if (c.includes('action') || c.includes('activation') || c.includes('duration')) return 'cat-mod-action';
+  if (c.includes('sensory')) return 'cat-mod-sensory';
+  if (c.includes('utility')) return 'cat-mod-utility';
+  if (c.includes('limitation') || c.includes('flaw')) return 'cat-mod-limitation';
+  if (c.includes('device')) return 'cat-mod-device';
+  return 'cat-mod-general';
+}
+
 function getFilteredModifiers() {
   const sourceList = activeModifierTab === 'extras' ? EXTRAS : FLAWS;
   return sourceList.filter(m => {
@@ -418,11 +431,14 @@ function renderPowerStudio(resetScroll = false) {
 
         <!-- Category Pills -->
         <div class="palette-category-pills">
-          ${MODIFIER_CATEGORIES.map(cat => `
-            <button class="category-pill ${activeCategory === cat ? 'active' : ''}" data-mod-cat="${cat}" type="button">
-              ${cat}
-            </button>
-          `).join('')}
+          ${MODIFIER_CATEGORIES.map(cat => {
+            const catClass = getModifierCategoryClass(cat);
+            return `
+              <button class="category-pill ${activeCategory === cat ? 'active' : ''} ${catClass}" data-mod-cat="${cat}" type="button">
+                <span class="pill-dot ${catClass}"></span> ${cat}
+              </button>
+            `;
+          }).join('')}
         </div>
 
         <!-- Modifiers List -->
@@ -801,20 +817,100 @@ function renderAppliedModifierCard(mod, idx, type) {
   const hasRanks = Boolean(mod.hasRanks || mod.type === 'flat_per_rank');
   const typeClass = mod.type === 'per_rank' ? 'type-per-rank' : (hasRanks ? 'type-ranked' : 'type-flat');
   const typeLabel = mod.type === 'per_rank' ? 'Per Rank' : (hasRanks ? 'Ranked Flat' : 'Flat');
+  const typeIcon = mod.type === 'per_rank' ? '⟳' : (hasRanks ? '★' : '◆');
+  const catClass = getModifierCategoryClass(mod.category || (isExtra ? 'Combat' : 'Limitations'));
+  const costClass = isExtra
+    ? (mod.cost > 0 ? 'cost-extra' : 'cost-neutral')
+    : (mod.cost < 0 ? 'cost-flaw' : 'cost-neutral');
+
+  // Configurable options / 'or' costs
+  let configHtml = '';
+  if (mod.options && mod.options.length > 0) {
+    const selected = mod.config?.selectedOption || mod.options[0].id;
+    configHtml = `
+      <div class="mod-config-row">
+        <div class="mod-config-header">
+          <span class="mod-config-label"><i class="ri-sound-module-line"></i> Select Cost & Mode:</span>
+        </div>
+        <div class="mod-segmented-options">
+          ${mod.options.map(opt => `
+            <button class="mod-opt-btn ${selected === opt.id ? 'active' : ''}" 
+                    data-mod-type="${type}" 
+                    data-mod-idx="${idx}" 
+                    data-mod-option="${opt.id}" 
+                    title="${escapeHtml(opt.desc || '')}" 
+                    type="button">
+              ${escapeHtml(opt.label)}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  } else if (mod.configType === 'area_shape' && mod.shapes) {
+    const selected = mod.config?.shape || mod.shapes[0];
+    configHtml = `
+      <div class="mod-config-row">
+        <div class="mod-config-header">
+          <span class="mod-config-label"><i class="ri-shape-line"></i> Area Shape:</span>
+        </div>
+        <select class="mod-config-select" data-mod-type="${type}" data-mod-idx="${idx}" data-mod-config-field="shape">
+          ${mod.shapes.map(s => `<option value="${escapeHtml(s)}" ${selected === s ? 'selected' : ''}>${escapeHtml(s)}</option>`).join('')}
+        </select>
+      </div>
+    `;
+  } else if (mod.configType === 'skill_select' && mod.skills) {
+    const selected = mod.config?.skill || mod.skills[0];
+    const dc = 10 + (mod.ranks || 1);
+    configHtml = `
+      <div class="mod-config-row">
+        <div class="mod-config-header">
+          <span class="mod-config-label"><i class="ri-file-list-3-line"></i> Required Check:</span>
+        </div>
+        <select class="mod-config-select" data-mod-type="${type}" data-mod-idx="${idx}" data-mod-config-field="skill">
+          ${mod.skills.map(s => `<option value="${escapeHtml(s)}" ${selected === s ? 'selected' : ''}>${escapeHtml(s)} (DC ${dc})</option>`).join('')}
+        </select>
+      </div>
+    `;
+  } else if (mod.configType === 'sense_select' && mod.senses) {
+    const selected = mod.config?.sense || mod.senses[0];
+    configHtml = `
+      <div class="mod-config-row">
+        <div class="mod-config-header">
+          <span class="mod-config-label"><i class="ri-eye-line"></i> Target Sense:</span>
+        </div>
+        <select class="mod-config-select" data-mod-type="${type}" data-mod-idx="${idx}" data-mod-config-field="sense">
+          ${mod.senses.map(s => `<option value="${escapeHtml(s)}" ${selected === s ? 'selected' : ''}>${escapeHtml(s)} Sense</option>`).join('')}
+        </select>
+      </div>
+    `;
+  } else if (mod.configType === 'text_note') {
+    const note = mod.config?.note || '';
+    const placeholder = mod.name === 'Limited' ? 'e.g. Only vs Metal, Only at night...' : (mod.name === 'Quirk' ? 'Describe drawback...' : 'Describe capability...');
+    configHtml = `
+      <div class="mod-config-row">
+        <div class="mod-config-header">
+          <span class="mod-config-label"><i class="ri-edit-line"></i> Specification:</span>
+        </div>
+        <input type="text" class="mod-config-input" data-mod-type="${type}" data-mod-idx="${idx}" data-mod-config-field="note" value="${escapeHtml(note)}" placeholder="${placeholder}">
+      </div>
+    `;
+  }
 
   return `
     <div class="applied-mod-card ${isExtra ? 'extra' : 'flaw'}">
       <div class="mod-top-bar">
         <span class="mod-title">${escapeHtml(mod.name)}</span>
-        <span class="mod-cost-tag ${isExtra ? 'cost-extra' : 'cost-flaw'}">${costLabel}</span>
+        <span class="mod-cost-tag ${costClass}">${costLabel}</span>
       </div>
 
       <div class="pal-card-tags" style="margin-bottom:0.15rem;">
-        <span class="pal-tag">${escapeHtml(mod.category || (isExtra ? 'Combat' : 'Limitations'))}</span>
-        <span class="pal-tag ${typeClass}">${typeLabel}</span>
+        <span class="pal-tag ${catClass}">${escapeHtml(mod.category || (isExtra ? 'Combat' : 'Limitations'))}</span>
+        <span class="pal-tag ${typeClass}">${typeIcon} ${typeLabel}</span>
       </div>
 
       ${mod.desc ? `<p class="applied-mod-desc">${escapeHtml(mod.desc)}</p>` : ''}
+
+      ${configHtml}
 
       <div class="mod-controls-row">
         ${hasRanks ? `
@@ -841,25 +937,31 @@ function renderPaletteCards() {
 
   return filtered.map(m => {
     const isExtra = activeModifierTab === 'extras';
-    const costLabel = m.type === 'per_rank'
+    const costLabel = m.costDisplay || (m.type === 'per_rank'
       ? `${m.cost > 0 ? '+' : ''}${m.cost} PP/Rank`
-      : `${m.cost > 0 ? '+' : ''}${m.cost} PP flat`;
+      : `${m.cost > 0 ? '+' : ''}${m.cost} PP flat`);
 
-    const typeClass = m.type === 'per_rank' ? 'type-per-rank' : (m.hasRanks ? 'type-ranked' : 'type-flat');
-    const typeLabel = m.type === 'per_rank' ? 'Per Rank' : (m.hasRanks ? 'Ranked Flat' : 'Flat');
+    const hasRanks = Boolean(m.hasRanks || m.type === 'flat_per_rank');
+    const typeClass = m.type === 'per_rank' ? 'type-per-rank' : (hasRanks ? 'type-ranked' : 'type-flat');
+    const typeLabel = m.type === 'per_rank' ? 'Per Rank' : (hasRanks ? 'Ranked Flat' : 'Flat');
+    const typeIcon = m.type === 'per_rank' ? '⟳' : (hasRanks ? '★' : '◆');
+    const catClass = getModifierCategoryClass(m.category);
+    const costClass = isExtra
+      ? (m.cost > 0 ? 'cost-extra' : 'cost-neutral')
+      : (m.cost < 0 ? 'cost-flaw' : 'cost-neutral');
 
     return `
       <div class="palette-card">
         <div class="pal-card-main">
           <div class="pal-card-title-row">
             <span class="pal-name">${escapeHtml(m.name)}</span>
-            <span class="pal-cost ${isExtra ? 'cost-extra' : 'cost-flaw'}">${costLabel}</span>
+            <span class="pal-cost ${costClass}">${costLabel}</span>
           </div>
 
           <div class="pal-card-tags">
-            <span class="pal-tag">${escapeHtml(m.category || 'General')}</span>
-            <span class="pal-tag ${typeClass}">${typeLabel}</span>
-            ${m.hasConfig ? '<span class="pal-tag" style="color:#fbbf24;">Options</span>' : ''}
+            <span class="pal-tag ${catClass}">${escapeHtml(m.category || 'General')}</span>
+            <span class="pal-tag ${typeClass}">${typeIcon} ${typeLabel}</span>
+            ${m.hasConfig ? '<span class="pal-tag cat-mod-action" style="color:#fbbf24;">⚙ Options</span>' : ''}
           </div>
 
           <p class="pal-desc">${escapeHtml(m.desc || '')}</p>
@@ -1102,6 +1204,54 @@ function attachStudioEventHandlers(modal) {
       } else {
         currentPower.mainEffect.flaws.splice(idx, 1);
       }
+      renderPowerStudio();
+    });
+  });
+
+  // Modifier 'or' cost option buttons
+  modal.querySelectorAll('[data-mod-option]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.modIdx, 10);
+      const isExtra = btn.dataset.modType === 'extra';
+      const optionId = btn.dataset.modOption;
+      const list = isExtra ? currentPower.mainEffect.extras : currentPower.mainEffect.flaws;
+      if (list[idx]) {
+        list[idx].config = list[idx].config || {};
+        list[idx].config.selectedOption = optionId;
+        normalizeModifier(list[idx]);
+        renderPowerStudio();
+      }
+    });
+  });
+
+  // Modifier dropdown selects (e.g. Area shape, skill, sense)
+  modal.querySelectorAll('.mod-config-select').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const idx = parseInt(sel.dataset.modIdx, 10);
+      const isExtra = sel.dataset.modType === 'extra';
+      const field = sel.dataset.modConfigField;
+      const list = isExtra ? currentPower.mainEffect.extras : currentPower.mainEffect.flaws;
+      if (list[idx]) {
+        list[idx].config = list[idx].config || {};
+        list[idx].config[field] = e.target.value;
+        renderPowerStudio();
+      }
+    });
+  });
+
+  // Modifier text note input
+  modal.querySelectorAll('.mod-config-input').forEach(inp => {
+    inp.addEventListener('input', (e) => {
+      const idx = parseInt(inp.dataset.modIdx, 10);
+      const isExtra = inp.dataset.modType === 'extra';
+      const field = inp.dataset.modConfigField;
+      const list = isExtra ? currentPower.mainEffect.extras : currentPower.mainEffect.flaws;
+      if (list[idx]) {
+        list[idx].config = list[idx].config || {};
+        list[idx].config[field] = e.target.value;
+      }
+    });
+    inp.addEventListener('change', () => {
       renderPowerStudio();
     });
   });

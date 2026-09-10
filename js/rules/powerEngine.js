@@ -59,67 +59,974 @@ export const BASE_EFFECTS = [
 ];
 
 export const EXTRAS = [
-  { name: 'Accurate', category: 'Combat', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: '+2 attack roll bonus with this power per rank. Allows fine-tuning attack bonus vs effect rank trade-offs under Power Level cap.' },
-  { name: 'Affects Corporeal', category: 'Combat', type: 'flat_per_rank', cost: 1, desc: 'Allows an Insubstantial or incorporeal character to physically strike and affect solid corporeal targets.' },
-  { name: 'Affects Insubstantial', category: 'Combat', type: 'flat_per_rank', cost: 1, desc: 'Power affects incorporeal and insubstantial targets at full effectiveness without penalty.' },
-  { name: 'Affects Objects', category: 'Utility', type: 'per_rank', cost: 0, desc: 'Allows powers that normally target only living creatures to also affect inanimate objects.' },
-  { name: 'Affects Others', category: 'Utility', type: 'per_rank', cost: 1, desc: 'Grant a personal-range beneficial effect (e.g. Flight, Protection, Insubstantial) to another willing character.' },
-  { name: 'Alternate Resistance', category: 'Combat', type: 'per_rank', cost: 0, desc: 'Change the defense check used to resist the effect (e.g., Damage resisted by Fortitude or Will instead of Toughness).' },
-  { name: 'Area', category: 'Range & Area', type: 'per_rank', cost: 1, hasConfig: true, desc: 'Affects all targets in an area (Burst 30-ft radius, Cone 60-ft, Line 30-ft, Cylinder). Targets make Dodge check (DC 10 + rank) for half effect; no attack roll required.' },
-  { name: 'Attack', category: 'Combat', type: 'per_rank', cost: 0, desc: 'Convert a personal or beneficial power into an offensive attack against unwilling targets (e.g., Teleport Attack).' },
-  { name: 'Contagious', category: 'Combat', type: 'per_rank', cost: 1, desc: 'Effect spreads to anyone making physical contact with the affected target while active.' },
-  { name: 'Dimensional', category: 'Sensory', type: 'flat', cost: 1, desc: 'Power can perceive or affect targets across alternate dimensions and astral planes.' },
-  { name: 'Extended Range', category: 'Range & Area', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Double the normal range increments of the effect per rank.' },
-  { name: 'Feature', category: 'Utility', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Minor beneficial quirk, thematic capability, or cosmetic utility (+1 PP flat per rank).' },
-  { name: 'Homing', category: 'Combat', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Missed attack check automatically repeats on the subsequent round for each rank of Homing.' },
-  { name: 'Impervious', category: 'Combat', type: 'per_rank', cost: 1, desc: 'Attacks with damage or effect ranks equal to or less than half this Impervious rank (rounded up) have no effect whatsoever.' },
-  { name: 'Increased Duration', category: 'Duration & Action', type: 'per_rank', cost: 1, desc: 'Shift duration up one step (Instant -> Concentration -> Sustained -> Continuous).' },
-  { name: 'Increased Mass', category: 'Utility', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Exponentially increase the mass that can be carried, moved, or affected by the power.' },
-  { name: 'Increased Range', category: 'Range & Area', type: 'per_rank', cost: 1, desc: 'Shift range up one step (Close -> Ranged -> Perception). Perception range attacks never miss.' },
-  { name: 'Incurable', category: 'Combat', type: 'flat', cost: 1, desc: 'Harm inflicted cannot be healed or removed without a Counter effect specifically countering this descriptor.' },
-  { name: 'Indirect', category: 'Range & Area', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Attack originates away from the user (from above, behind, or ricocheting around obstacles), bypassing cover.' },
-  { name: 'Innate', category: 'Utility', type: 'flat', cost: 1, desc: 'Power is biological, natural, or inborn trait; it cannot be nullified or dispelled.' },
-  { name: 'Insidious', category: 'Sensory', type: 'flat', cost: 1, desc: 'Target is completely unaware that the effect is acting upon them until a condition manifests.' },
-  { name: 'Linked', category: 'Utility', type: 'flat', cost: 0, desc: 'Combined with another effect to activate simultaneously as a single combined action.' },
-  { name: 'Multiattack', category: 'Combat', type: 'per_rank', cost: 1, desc: 'Fire rapid-fire volleys at multiple targets, or concentrate fire on one for +2/+5 bonus damage on high attack rolls.' },
-  { name: 'Penetrating', category: 'Combat', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Bypasses Impervious defense ranks up to the rank of Penetrating.' },
-  { name: 'Precise', category: 'Utility', type: 'flat', cost: 1, desc: 'Surgical accuracy, fine manipulation, and microscopic control over the manifestation of the power.' },
-  { name: 'Reach', category: 'Range & Area', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Extend close combat melee attack range by +5 feet per rank.' },
-  { name: 'Reaction', category: 'Duration & Action', type: 'per_rank', cost: 3, desc: 'Triggers automatically in response to a defined circumstance or trigger without requiring an action.' },
-  { name: 'Reversible', category: 'Utility', type: 'flat', cost: 1, desc: 'Can immediately end or undo the effects created by the power as a free action.' },
-  { name: 'Ricochet', category: 'Combat', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Bounce attacks off walls, ceilings, and obstacles to strike targets around corners.' },
-  { name: 'Secondary Effect', category: 'Combat', type: 'per_rank', cost: 1, desc: 'Effect strikes target again on the subsequent turn at full potency with no action required.' },
-  { name: 'Selective', category: 'Range & Area', type: 'per_rank', cost: 1, desc: 'Choose exactly which targets are affected in an area, avoiding allies.' },
-  { name: 'Sleep', category: 'Combat', type: 'per_rank', cost: 0, desc: 'Causes targets to fall into deep sleep rather than standard physical incapacitation.' },
-  { name: 'Split', category: 'Combat', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Divide ranks among multiple distinct targets within range on a single attack.' },
-  { name: 'Subtle', category: 'Sensory', type: 'flat', cost: 1, hasConfig: true, desc: 'Effect is hard to notice (Rank 1: DC 20 Perception check needed) or completely undetectable (Rank 2).' },
-  { name: 'Sustained', category: 'Duration & Action', type: 'per_rank', cost: 0, desc: 'Maintain an instant or continuous power by spending a free action each round.' },
-  { name: 'Triggered', category: 'Duration & Action', type: 'flat_per_rank', cost: 1, hasRanks: true, desc: 'Set the power like a trap or delayed trigger to discharge automatically when specific condition is met.' },
-  { name: 'Variable Descriptor', category: 'Utility', type: 'flat', cost: 1, desc: 'Freely change power descriptors (Rank 1: narrow group like elements; Rank 2: any broad descriptor).' }
+  {
+    "name": "Accurate",
+    "category": "Combat",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Provides a +2 bonus to attack checks per rank when using this power.\n\nLike all attack bonuses, this modifier is subject to the series Power Level cap for total attack bonus plus effect rank."
+  },
+  {
+    "name": "Affects Corporeal",
+    "category": "Combat",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Allows an incorporeal character (using Insubstantial) to use this effect on the normal physical world at its full rank.\n\nIf you have fewer ranks in Affects Corporeal than the effect's rank, the effect operates at a maximum rank equal to your Affects Corporeal rank."
+  },
+  {
+    "name": "Affects Insubstantial",
+    "category": "Combat",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1-2 flat points",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Allows this effect to affect insubstantial targets. At rank 1 (1 PP flat), the effect works at half rank against incorporeal targets.\n\nAt rank 2 (2 PP flat), the effect works at its full rank against incorporeal targets with no reduction.",
+    "options": [
+      {
+        "id": "half",
+        "label": "Half Effect (1 PP)",
+        "cost": 1,
+        "type": "flat",
+        "desc": "Rank 1: Effect works at half its normal rank against insubstantial targets."
+      },
+      {
+        "id": "full",
+        "label": "Full Effect (2 PP)",
+        "cost": 2,
+        "type": "flat",
+        "desc": "Rank 2: Effect functions at its full rank against insubstantial targets."
+      }
+    ]
+  },
+  {
+    "name": "Affects Objects",
+    "category": "Utility",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+0-1 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Allows effects normally resisted by Fortitude to affect inanimate objects (which have no Stamina). The object gets a Toughness check or Dodge defense where appropriate.\n\nCan be taken at +1 PP/Rank to affect both living beings and objects, or +0 PP/Rank to affect objects only.",
+    "options": [
+      {
+        "id": "both",
+        "label": "Living & Objects (+1/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "+1 PP/Rank: Fortitude-resisted effect works on inanimate objects in addition to living creatures."
+      },
+      {
+        "id": "only_objects",
+        "label": "Affects Only Objects (+0/Rank)",
+        "cost": 0,
+        "type": "per_rank",
+        "desc": "+0 PP/Rank: Effect works ONLY on inanimate objects, not on living creatures."
+      }
+    ]
+  },
+  {
+    "name": "Affects Others",
+    "category": "Utility",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+0-1 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Allows you to grant the benefits of a personal-range effect to another person by touching them as a standard action.\n\nCosts +1 PP/Rank to grant the effect to others while still using it yourself, or +0 PP/Rank if you can only grant it to others.",
+    "options": [
+      {
+        "id": "both",
+        "label": "Self & Others (+1/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "+1 PP/Rank: Both you and your subject(s) can use the personal effect simultaneously."
+      },
+      {
+        "id": "only_others",
+        "label": "Affects Only Others (+0/Rank)",
+        "cost": 0,
+        "type": "per_rank",
+        "desc": "+0 PP/Rank: Effect works ONLY on others, and not on you."
+      }
+    ]
+  },
+  {
+    "name": "Alternate Effect",
+    "category": "Utility",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1-2 flat points",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Creates an alternate configuration (slot) within a power array. You can switch between alternate slots as a free action once per turn.\n\nStandard slots cost 1 flat PP (mutually exclusive). Dynamic slots cost 2 flat PP and can share points simultaneously.",
+    "options": [
+      {
+        "id": "standard",
+        "label": "Standard Slot (1 PP)",
+        "cost": 1,
+        "type": "flat",
+        "desc": "1 flat point: Swappable setting in an array (mutually exclusive)."
+      },
+      {
+        "id": "dynamic",
+        "label": "Dynamic Slot (2 PP)",
+        "cost": 2,
+        "type": "flat",
+        "desc": "2 flat points: Can share power point pool dynamically with other dynamic effects."
+      }
+    ]
+  },
+  {
+    "name": "Alternate Resistance",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+0-1 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Changes the defense used to resist the effect (e.g., from Toughness to Fortitude or Will). The DC formula remains 10 + rank (or 15 + rank for Damage).\n\nCosts +1 PP/Rank if switching to a generally lower or more advantageous defense, or +0 PP/Rank for an equivalent defense.",
+    "options": [
+      {
+        "id": "advantageous",
+        "label": "Advantageous Defense (+1/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "+1 PP/Rank: Change is to a generally lower, more advantageous resistance (e.g. Will or Fortitude)."
+      },
+      {
+        "id": "standard",
+        "label": "Similar Defense (+0/Rank)",
+        "cost": 0,
+        "type": "per_rank",
+        "desc": "+0 PP/Rank: Resistance differs with no significant increase in effectiveness."
+      }
+    ]
+  },
+  {
+    "name": "Area",
+    "category": "Range & Area",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Expands a single-target effect into an area effect that requires no attack check. Targets inside the area make a Dodge check (DC 10 + rank) for half effect.\n\nAvailable shapes include 30-ft Burst, 60-ft Cone, 30x5-ft Line, 15-ft Cloud, 30-ft Cylinder, Perception Area, or 30 cu. ft. Shapeable.",
+    "configType": "area_shape",
+    "shapes": [
+      "Burst (30-ft radius)",
+      "Cone (60-ft)",
+      "Line (30-ft x 5-ft)",
+      "Cloud (15-ft radius, lingers)",
+      "Cylinder (30-ft radius & height)",
+      "Perception (Sense-dependent)",
+      "Shapeable (30 cu ft)"
+    ]
+  },
+  {
+    "name": "Attack",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 0,
+    "costDisplay": "+0 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Converts a personal-range effect (such as Teleport or Concealment) into an offensive close-range effect used against unwilling targets.\n\nRequires a standard action and an attack check. The target receives a resistance check (typically Dodge or Will) to negate the effect entirely."
+  },
+  {
+    "name": "Contagious",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Causes the effect to spread to anyone who comes into physical contact with the primary target while the effect is active.\n\nSecondary targets make the normal resistance check against the effect. The contagion continues until cured or its duration expires."
+  },
+  {
+    "name": "Dimensional",
+    "category": "Sensory",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1-3 flat points",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Allows the effect to work across dimensional boundaries into other planes of existence.\n\nCosts 1 flat PP for a single specific dimension, 2 flat PP for a related group of dimensions, or 3 flat PP for any dimension.",
+    "options": [
+      {
+        "id": "single",
+        "label": "1 Dimension (1 PP)",
+        "cost": 1,
+        "type": "flat",
+        "desc": "1 flat point: Can reach a single other specified dimension."
+      },
+      {
+        "id": "group",
+        "label": "Related Dimensions (2 PP)",
+        "cost": 2,
+        "type": "flat",
+        "desc": "2 flat points: Can reach any of a related group of dimensions (e.g. mystic dimensions, astral planes)."
+      },
+      {
+        "id": "any",
+        "label": "Any Dimension (3 PP)",
+        "cost": 3,
+        "type": "flat",
+        "desc": "3 flat points: Can reach into any other dimension in the setting."
+      }
+    ]
+  },
+  {
+    "name": "Extended Range",
+    "category": "Range & Area",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Doubles the short, medium, and maximum distance increments of a ranged effect for each rank applied.\n\nFor example, two ranks of Extended Range quadruple the effect's base range increments."
+  },
+  {
+    "name": "Feature",
+    "category": "Utility",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": true,
+    "desc": "Adds a minor, situational utility or cosmetic benefit that does not duplicate an existing effect or advantage.\n\nEach rank costs 1 flat point and provides one distinct minor capability approved by the Gamemaster.",
+    "configType": "text_note"
+  },
+  {
+    "name": "Homing",
+    "category": "Combat",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Grants a ranged attack an additional attack check on subsequent rounds if it misses the target on the initial check.\n\nEach rank gives the attack one additional attempt on your turn until it hits, runs out of attempts, or is destroyed."
+  },
+  {
+    "name": "Impervious",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Causes you to automatically ignore and suffer no harm from damaging effects whose rank is equal to or less than half your Impervious rank.\n\nEffects with the Penetrating extra can bypass Impervious defense up to the Penetrating rank."
+  },
+  {
+    "name": "Increased Duration",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Increases the duration step of an effect: Instant to Concentration (+1 PP/Rank), Sustained to Continuous (+1 PP/Rank), or Instant to Continuous (+2 PP/Rank).\n\nContinuous effects remain active even if you are stunned or unconscious until you choose to dismiss them.",
+    "options": [
+      {
+        "id": "concentration",
+        "label": "Instant -> Concentration (+1/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "+1 PP/Rank: Makes an instant duration effect maintainable with standard action concentration."
+      },
+      {
+        "id": "continuous",
+        "label": "Sustained -> Continuous (+1/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "+1 PP/Rank: Makes a sustained duration effect continuous."
+      },
+      {
+        "id": "instant_to_continuous",
+        "label": "Instant -> Continuous (+2/Rank)",
+        "cost": 2,
+        "type": "per_rank",
+        "desc": "+2 PP/Rank: Two steps of duration increase, taking an instant effect directly to continuous."
+      }
+    ]
+  },
+  {
+    "name": "Increased Mass",
+    "category": "Utility",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Increases the maximum mass capacity of a movement or manipulation effect by 1 rank on the Measurements Table per rank applied.\n\nFor example, 3 ranks of Increased Mass allow you to carry or affect 8 times your base mass limit."
+  },
+  {
+    "name": "Increased Range",
+    "category": "Range & Area",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Improves the range step of an effect: Close to Ranged (+1 PP/Rank), Ranged to Perception (+1 PP/Rank), or Close to Perception (+2 PP/Rank).\n\nPerception range effects require no attack check and can hit any target you can accurately perceive.",
+    "options": [
+      {
+        "id": "ranged",
+        "label": "Close -> Ranged (+1/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "+1 PP/Rank: Increases range from Close to Ranged."
+      },
+      {
+        "id": "perception",
+        "label": "Ranged -> Perception (+1/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "+1 PP/Rank: Increases range from Ranged to Perception (no attack roll needed)."
+      },
+      {
+        "id": "close_to_perception",
+        "label": "Close -> Perception (+2/Rank)",
+        "cost": 2,
+        "type": "per_rank",
+        "desc": "+2 PP/Rank: Two applications of Increased Range, taking a Close effect directly to Perception."
+      }
+    ]
+  },
+  {
+    "name": "Incurable",
+    "category": "Combat",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Prevents damage or conditions inflicted by this effect from being healed or removed by normal Healing or Regeneration effects.\n\nSuch damage can only be treated naturally through rest or by a healing effect with the Persistent advantage."
+  },
+  {
+    "name": "Indirect",
+    "category": "Range & Area",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": true,
+    "desc": "Allows a ranged attack to originate from a direction or point other than yourself, bypassing cover and obstacles.\n\nCosts 1 to 4 flat PP depending on origin and directional flexibility (e.g. from above, behind cover, or any vector).",
+    "options": [
+      {
+        "id": "indirect_1",
+        "label": "Fixed Point Away (1 PP)",
+        "cost": 1,
+        "type": "flat",
+        "desc": "1 flat point: Effect originates from a fixed point away from you."
+      },
+      {
+        "id": "indirect_2",
+        "label": "Any Point Away / Fixed Dir (2 PP)",
+        "cost": 2,
+        "type": "flat",
+        "desc": "2 flat points: Comes from any point away from you or a fixed point in a fixed direction."
+      },
+      {
+        "id": "indirect_3",
+        "label": "Any Point in Fixed Dir (3 PP)",
+        "cost": 3,
+        "type": "flat",
+        "desc": "3 flat points: Comes from any point in a fixed direction, or fixed point in any direction."
+      },
+      {
+        "id": "indirect_4",
+        "label": "Any Point, Any Direction (4 PP)",
+        "cost": 4,
+        "type": "flat",
+        "desc": "4 flat points: Originates from any point and aims in any direction (including towards you from behind)."
+      }
+    ]
+  },
+  {
+    "name": "Innate",
+    "category": "Utility",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Marks the effect as a natural, biological, or intrinsic part of your character's species that cannot be countered by Nullify.\n\nThis extra costs 1 flat point and requires GM approval that the trait is truly inborn."
+  },
+  {
+    "name": "Insidious",
+    "category": "Sensory",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Hides the result or onset of an effect so the victim does not realize they have been harmed or weakened.\n\nDetecting the effect requires a DC 20 skill check (Perception or Insight) or a suitable exotic awareness sense."
+  },
+  {
+    "name": "Linked",
+    "category": "Utility",
+    "type": "flat",
+    "cost": 0,
+    "costDisplay": "0 flat points",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Ties two or more effects together so they always trigger simultaneously as a single standard action.\n\nBoth effects must have the same range and use a single attack check, but targets make separate resistance checks for each effect."
+  },
+  {
+    "name": "Multiattack",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Allows you to hit multiple targets in an arc or concentrate rapid hits on a single target for extra damage bonus (+2 or +5 DC).\n\nCan also provide covering fire to grant an ally defense against attacks."
+  },
+  {
+    "name": "Penetrating",
+    "category": "Combat",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Allows an attack to overcome Impervious resistance. The target must resist at least an effect rank equal to your Penetrating rank.\n\nPenetrating rank cannot exceed the base rank of the effect."
+  },
+  {
+    "name": "Precise",
+    "category": "Utility",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Grants fine motor control and delicate precision to the effect, such as carving initials, picking locks, or manipulating fine tools.\n\nCosts 1 flat point and eliminates clumsy side effects from high-rank power output."
+  },
+  {
+    "name": "Reach",
+    "category": "Range & Area",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Extends the physical melee range of a close effect by 5 feet per rank.\n\nUseful for long limbs, tentacles, whips, polearms, or extended energy constructs."
+  },
+  {
+    "name": "Reaction",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 3,
+    "costDisplay": "+1 or 3 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Changes the required action to use an effect from standard or free to an automatic reaction triggered by a specific circumstance.\n\nCosts +1 PP/Rank if upgrading from a Free action, or +3 PP/Rank if upgrading from a Standard action.",
+    "options": [
+      {
+        "id": "from_standard",
+        "label": "From Standard Action (+3/Rank)",
+        "cost": 3,
+        "type": "per_rank",
+        "desc": "+3 PP/Rank: Applied to effects with a default action of Standard."
+      },
+      {
+        "id": "from_free",
+        "label": "From Free Action (+1/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "+1 PP/Rank: Applied to effects with a default action of Free."
+      }
+    ]
+  },
+  {
+    "name": "Reversible",
+    "category": "Utility",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Allows you to instantly remove or reverse the ongoing conditions caused by your effect as a free action.\n\nCosts 1 flat point and lets you dispel your own Afflictions, transforms, or sensory alterations at will."
+  },
+  {
+    "name": "Ricochet",
+    "category": "Combat",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Allows a ranged attack to bounce off solid surfaces to bypass cover and reach hidden targets.\n\nEach rank allows one bounce before reaching the target, with no penalty on the attack check."
+  },
+  {
+    "name": "Secondary Effect",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Causes the effect to automatically hit the target a second time on the round following a successful attack at the same rank.\n\nThe target makes a second resistance check on their turn; does not stack with itself on subsequent rounds."
+  },
+  {
+    "name": "Selective",
+    "category": "Range & Area",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Allows you to pick and choose which targets in an area effect are affected and which are completely spared.\n\nInvaluable for area attacks to prevent hitting allies, innocent bystanders, or critical equipment."
+  },
+  {
+    "name": "Sleep",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 0,
+    "costDisplay": "+0 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Causes an Affliction or Damage effect to render the target asleep or unconscious rather than incapacitated or dying.\n\nSleeping targets can be awakened early by loud noise, rough handling, or an ally taking a standard action."
+  },
+  {
+    "name": "Split",
+    "category": "Combat",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Allows you to split the ranks of an effect between multiple targets with a single attack action.\n\nEach rank of Split allows you to target one additional creature, dividing your total rank among all targets (minimum 1 rank each)."
+  },
+  {
+    "name": "Subtle",
+    "category": "Sensory",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1-2 flat points",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Makes the activation and operation of an effect difficult or impossible for observers to notice.\n\nRank 1 (1 flat PP) requires a DC 20 Perception check to detect. Rank 2 (2 flat PP) is completely undetectable to normal senses.",
+    "options": [
+      {
+        "id": "subtle_1",
+        "label": "Subtle 1: DC 20 (1 PP)",
+        "cost": 1,
+        "type": "flat",
+        "desc": "1 flat point: Difficult to notice; DC 20 Perception check or exotic sense required."
+      },
+      {
+        "id": "subtle_2",
+        "label": "Subtle 2: Undetectable (2 PP)",
+        "cost": 2,
+        "type": "flat",
+        "desc": "2 flat points: Completely undetectable by standard human senses."
+      }
+    ]
+  },
+  {
+    "name": "Sustained",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 0,
+    "costDisplay": "+0 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Changes a permanent duration effect to sustained, allowing you to turn it on and off as a free action.\n\nYou can also modify the effect with extras and feats that cannot normally be applied to permanent traits."
+  },
+  {
+    "name": "Triggered",
+    "category": "Duration & Action",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Sets an effect to activate automatically when a specific trigger condition occurs (such as proximity, touch, or a timer).\n\nCosts 1 flat PP per trigger instance. You can reset a spent trigger as a standard action."
+  },
+  {
+    "name": "Variable Descriptor",
+    "category": "Utility",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1-2 flat points",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Allows you to alter the power's descriptive theme and energy type on the fly.\n\nCosts 1 flat PP for a narrow group of descriptors (e.g., weather, elements) or 2 flat PP for a broad group (e.g., any energy, magic).",
+    "options": [
+      {
+        "id": "narrow",
+        "label": "Narrow Group (1 PP)",
+        "cost": 1,
+        "type": "flat",
+        "desc": "1 flat point: Closely related group of descriptors (e.g. weather, electricity, temperature)."
+      },
+      {
+        "id": "broad",
+        "label": "Broad Group (2 PP)",
+        "cost": 2,
+        "type": "flat",
+        "desc": "2 flat points: Any broad group (e.g. all magic, all mental, or all technological)."
+      }
+    ]
+  }
 ];
 
 export const FLAWS = [
-  { name: 'Activation', category: 'Action & Activation', type: 'flat', cost: -1, hasConfig: true, desc: 'Requires a Move action (-1 PP) or Standard action (-2 PP) to activate before use; deactivates if incapacitated.' },
-  { name: 'Check Required', category: 'Limitations', type: 'flat_per_rank', cost: -1, hasRanks: true, hasConfig: true, desc: 'Must pass a skill check DC 10 + rank to activate the power. Failure wastes the action.' },
-  { name: 'Concentration', category: 'Action & Activation', type: 'per_rank', cost: -1, desc: 'Requires a standard action each round to maintain, preventing other standard actions.' },
-  { name: 'Diminished Range', category: 'Range & Targeting', type: 'flat_per_rank', cost: -1, hasRanks: true, desc: 'Reduces normal range increments by one step per rank.' },
-  { name: 'Distracting', category: 'Action & Activation', type: 'per_rank', cost: -1, desc: 'Character becomes Vulnerable (halved active defenses) while using this power.' },
-  { name: 'Fades', category: 'Limitations', type: 'per_rank', cost: -1, desc: 'Power loses 1 rank of potency each time it is used until recovered through rest or recharge.' },
-  { name: 'Feedback', category: 'Limitations', type: 'per_rank', cost: -1, desc: 'Attacks targeting remote manifestations or projected energy forms harm the character directly.' },
-  { name: 'Grab-Based', category: 'Range & Targeting', type: 'per_rank', cost: -1, desc: 'Requires a successful grab or hold on the target before the effect can be applied.' },
-  { name: 'Inaccurate', category: 'Range & Targeting', type: 'flat_per_rank', cost: -1, hasRanks: true, desc: '-2 attack check penalty with this power per rank.' },
-  { name: 'Limited', category: 'Limitations', type: 'per_rank', cost: -1, hasConfig: true, desc: 'Only effective in specific circumstances or against certain targets (e.g. Only vs Metal, Only in Sunlight).' },
-  { name: 'Noticeable', category: 'Limitations', type: 'flat', cost: -1, desc: 'Power has an unmistakable, obvious visual, sonic, or olfactory tell that cannot be disguised.' },
-  { name: 'Permanent', category: 'Action & Activation', type: 'per_rank', cost: 0, desc: 'Continuous duration, cannot be deactivated at will, and cannot be improved by extra effort.' },
-  { name: 'Quirk', category: 'Limitations', type: 'flat', cost: -1, hasRanks: true, hasConfig: true, desc: 'Minor disadvantage, thematic restriction, or drawback (-1 PP flat).' },
-  { name: 'Reduced Range', category: 'Range & Targeting', type: 'per_rank', cost: -1, desc: 'Shift range down one step (Perception -> Ranged -> Close).' },
-  { name: 'Removable', category: 'Device', type: 'flat', cost: -1, hasConfig: true, desc: 'Power comes from equipment/item that can be taken away (-1 PP per 5 PP, or -2 per 5 for Easily Removable disarmable in combat).' },
-  { name: 'Resistible', category: 'Limitations', type: 'per_rank', cost: -1, desc: 'Grants the target an extra resistance check (e.g., Dodge or Fortitude) to avoid or lessen the effect.' },
-  { name: 'Sense-Dependent', category: 'Range & Targeting', type: 'per_rank', cost: -1, desc: 'Target must be able to perceive the effect with a specific sensory sense (sight, hearing, etc.).' },
-  { name: 'Side Effect', category: 'Limitations', type: 'per_rank', cost: -1, desc: 'Failing a check or using the power triggers automatic negative backlash or damage to the user.' },
-  { name: 'Tiring', category: 'Action & Activation', type: 'per_rank', cost: -1, desc: 'Using power causes a level of Fatigue, requiring recovery action or Extra Effort to withstand.' },
-  { name: 'Uncontrolled', category: 'Limitations', type: 'per_rank', cost: -1, desc: 'GM or narrative circumstance dictates when the power triggers and manifests.' },
-  { name: 'Unreliable', category: 'Limitations', type: 'per_rank', cost: -1, desc: '50% chance power fails to activate (roll 11+ on d20 required) or power has 5 uses per day.' }
+  {
+    "name": "Activation",
+    "category": "Action & Activation",
+    "type": "flat",
+    "cost": -1,
+    "costDisplay": "–1-2 flat points",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "The power requires a preparation action before any of its effects can be used in an encounter.\n\nCosts -1 flat point if it requires a move action to activate, or -2 flat points if it requires a full standard action.",
+    "options": [
+      {
+        "id": "move",
+        "label": "Move Action (-1 PP)",
+        "cost": -1,
+        "type": "flat",
+        "desc": "Requires a Move action to prepare/activate before power can be used (-1 PP flat)."
+      },
+      {
+        "id": "standard",
+        "label": "Standard Action (-2 PP)",
+        "cost": -2,
+        "type": "flat",
+        "desc": "Requires a Standard action to prepare/activate before power can be used (-2 PP flat)."
+      }
+    ]
+  },
+  {
+    "name": "Check Required",
+    "category": "Limitations",
+    "type": "flat_per_rank",
+    "cost": -1,
+    "costDisplay": "–1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": true,
+    "desc": "Requires a successful skill or ability check before the power activates. The DC equals 10 + ranks applied.\n\nIf the check fails, the power does not activate and the action is wasted. Each rank in this flaw reduces cost by -1 flat point.",
+    "configType": "skill_select",
+    "skills": [
+      "Expertise",
+      "Technology",
+      "Acrobatics",
+      "Athletics",
+      "Deception",
+      "Insight",
+      "Intimidation",
+      "Perception",
+      "Sleight of Hand",
+      "Stealth",
+      "Treatment"
+    ]
+  },
+  {
+    "name": "Concentration",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Reduces the duration step of an effect (such as sustained to concentration). You must spend a standard action each round to maintain it.\n\nIf you take any other standard action or are stunned, the effect immediately ends."
+  },
+  {
+    "name": "Diminished Range",
+    "category": "Range & Targeting",
+    "type": "flat_per_rank",
+    "cost": -1,
+    "costDisplay": "–1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Reduces the range increments of a ranged effect. Short range becomes 5 ft per rank, medium 10 ft, and maximum 25 ft per rank.\n\nEach rank of Diminished Range reduces the effect's total cost by -1 flat point."
+  },
+  {
+    "name": "Distracting",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Using this effect requires intense focus, leaving you vulnerable (halving your active defenses Dodge and Parry) until your next turn.\n\nThis flaw reduces the cost of the effect by -1 PP/Rank."
+  },
+  {
+    "name": "Fades",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "The effect loses 1 rank of potency each round or use until it reaches rank 0.\n\nYou must spend time recharging, resting, or satisfying a condition to restore the effect to full rank."
+  },
+  {
+    "name": "Feedback",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "You suffer damage whenever the manifestations of your power (such as a projected illusion, duplicate, or sensory probe) are attacked.\n\nYou must make a Toughness resistance check against attacks directed at the manifested power."
+  },
+  {
+    "name": "Grab-Based",
+    "category": "Range & Targeting",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "The effect can only be used on a target you have successfully grabbed or restrained.\n\nIf the grab attempt fails or the target escapes, the effect cannot be applied."
+  },
+  {
+    "name": "Increased Action",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1-3 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Increases the action time needed to use the effect by one or more steps (Standard to Full-Round, Free to Move, etc.).\n\nEach step increase in required action reduces the cost by -1 PP/Rank (up to -3 PP/Rank for 3 steps).",
+    "options": [
+      {
+        "id": "one_step",
+        "label": "1 Step Increase (-1/Rank)",
+        "cost": -1,
+        "type": "per_rank",
+        "desc": "-1 PP/Rank: Free to Move action, or Standard to Full action."
+      },
+      {
+        "id": "two_steps",
+        "label": "2 Steps Increase (-2/Rank)",
+        "cost": -2,
+        "type": "per_rank",
+        "desc": "-2 PP/Rank: Free to Standard action."
+      },
+      {
+        "id": "three_steps",
+        "label": "3 Steps Increase (-3/Rank)",
+        "cost": -3,
+        "type": "per_rank",
+        "desc": "-3 PP/Rank: Free to Full round action."
+      }
+    ]
+  },
+  {
+    "name": "Limited",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "The effect only functions under specific, restricted circumstances or against a limited class of targets (e.g., only against metal, only in direct sunlight).\n\nThe limitation must remove about half of the effect's usual utility to qualify for this -1 PP/Rank flaw.",
+    "configType": "text_note"
+  },
+  {
+    "name": "Noticeable",
+    "category": "Limitations",
+    "type": "flat",
+    "cost": -1,
+    "costDisplay": "–1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "A continuous or permanent effect has an obvious, undeniable physical sign that gives it away (such as glowing skin, hum, or stony bulk).\n\nCosts -1 flat point and prevents the effect from ever being subtle or concealed."
+  },
+  {
+    "name": "Permanent",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "The effect cannot be turned off voluntarily and is always active. You cannot use extra effort or stunt alternate effects from it.\n\nCosts -1 PP/Rank and is only applied to sustained personal effects like Protection or Enhanced Traits."
+  },
+  {
+    "name": "Quirk",
+    "category": "Limitations",
+    "type": "flat_per_rank",
+    "cost": -1,
+    "costDisplay": "–1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": true,
+    "desc": "A minor nuisance, cosmetic flaw, or situational drawback that is slightly inconvenient but less severe than a Complication.\n\nEach Quirk reduces the effect's cost by -1 flat point.",
+    "configType": "text_note"
+  },
+  {
+    "name": "Reduced Range",
+    "category": "Range & Targeting",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1-2 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "Decreases the range step of an effect by one step (Ranged to Close) for -1 PP/Rank, or by two steps (Perception to Close) for -2 PP/Rank.\n\nClose range effects require an attack check to physically touch the target.",
+    "options": [
+      {
+        "id": "one_step",
+        "label": "1 Step: Ranged->Close (-1/Rank)",
+        "cost": -1,
+        "type": "per_rank",
+        "desc": "-1 PP/Rank: Decreases range by one step (Perception to Ranged, or Ranged to Close)."
+      },
+      {
+        "id": "two_steps",
+        "label": "2 Steps: Perception->Close (-2/Rank)",
+        "cost": -2,
+        "type": "per_rank",
+        "desc": "-2 PP/Rank: Decreases range two steps from Perception to Close."
+      }
+    ]
+  },
+  {
+    "name": "Removable",
+    "category": "Device",
+    "type": "flat",
+    "cost": -1,
+    "costDisplay": "–1-2/5 flat points",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "The power is an external item or device that can be taken away from you.\n\nRemovable items (like armor or shields) give a -1 PP discount per 5 PP. Easily Removable items (held weapons or wands) give a -2 PP discount per 5 PP.",
+    "options": [
+      {
+        "id": "removable",
+        "label": "Removable (-1 PP / 5 PP)",
+        "cost": -1,
+        "type": "flat",
+        "desc": "-1 PP per 5 PP of final cost: Removed only when stunned & defenseless / out of combat."
+      },
+      {
+        "id": "easily_removable",
+        "label": "Easily Removable (-2 PP / 5 PP)",
+        "cost": -2,
+        "type": "flat",
+        "desc": "-2 PP per 5 PP of final cost: Can be snatched or disarmed in combat with an attack check."
+      }
+    ]
+  },
+  {
+    "name": "Resistible",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Adds an additional resistance check (or allows a check where none was previously allowed) to negate or halve the effect.\n\nFor example, a Teleport Attack might allow both a Dodge and Will check to escape."
+  },
+  {
+    "name": "Sense-Dependent",
+    "category": "Range & Targeting",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "The target must be able to perceive the effect with a specific sense (Sight, Sound, Scent, Touch, or Mental) for it to work.\n\nTargets who lack that sense, have it shielded, or successfully avert their eyes/ears are completely immune.",
+    "configType": "sense_select",
+    "senses": [
+      "Visual",
+      "Auditory",
+      "Olfactory",
+      "Tactile",
+      "Mental"
+    ]
+  },
+  {
+    "name": "Side Effect",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1-2 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "A catastrophic failure or complication occurs whenever you use the power or fail an attack check with it.\n\nCosts -1 PP/Rank if the side effect only occurs on a failure, or -2 PP/Rank if it happens every time the power is activated.",
+    "options": [
+      {
+        "id": "on_failure",
+        "label": "On Failure Only (-1/Rank)",
+        "cost": -1,
+        "type": "per_rank",
+        "desc": "-1 PP/Rank: Problematic side effect occurs only if attack check misses or target resists."
+      },
+      {
+        "id": "always",
+        "label": "Always Occurs on Use (-2/Rank)",
+        "cost": -2,
+        "type": "per_rank",
+        "desc": "-2 PP/Rank: Problematic side effect triggers every time power is used regardless of success."
+      }
+    ]
+  },
+  {
+    "name": "Tiring",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "Using the power leaves you fatigued. You must spend extra effort or rest to recover from the exhaustion.\n\nIf you are already fatigued when using the power, you become exhausted, and then incapacitated."
+  },
+  {
+    "name": "Uncontrolled",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "desc": "You have no direct influence over when or how the power manifests; its activation and targets are determined by the Gamemaster.\n\nReduces the cost of the effect by -1 PP/Rank."
+  },
+  {
+    "name": "Unreliable",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "–1 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "desc": "The power either only works 5 times before needing to be recharged, or requires an 11+ on a d20 roll each time you try to activate it.\n\nReduces the cost of the effect by -1 PP/Rank.",
+    "options": [
+      {
+        "id": "roll",
+        "label": "Roll 11+ on d20 (-1/Rank)",
+        "cost": -1,
+        "type": "per_rank",
+        "desc": "50% chance to work each round; on 10 or less on d20, action is wasted."
+      },
+      {
+        "id": "five_uses",
+        "label": "5 Uses per Day/Scene (-1/Rank)",
+        "cost": -1,
+        "type": "per_rank",
+        "desc": "Functions normally for 5 uses, then stops working until recovered/recharged."
+      }
+    ]
+  },
+  {
+    "name": "Inaccurate",
+    "category": "Range & Targeting",
+    "type": "flat_per_rank",
+    "cost": -1,
+    "costDisplay": "-1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Imposes a -2 penalty to attack checks per rank when using this power.\n\nEach rank of Inaccurate reduces the cost of the effect by -1 flat point."
+  }
 ];
 
 export const MODIFIER_CATEGORIES = [
@@ -293,25 +1200,43 @@ export function normalizeModifier(rawMod) {
   if (!rawMod) return { name: 'Unknown', cost: 0, type: 'per_rank', ranks: 1 };
   const mod = typeof rawMod === 'string' ? { name: rawMod } : { ...rawMod };
 
-  // Look up master definitions if cost/type missing
+  // Look up master definitions if cost/type/desc missing
   const ref = EXTRAS.find(e => e.name === mod.name) || FLAWS.find(f => f.name === mod.name);
   if (ref) {
-    if (mod.cost === undefined) mod.cost = ref.cost;
-    if (mod.type === undefined) mod.type = ref.type;
     if (!mod.desc) mod.desc = ref.desc;
     if (!mod.category) mod.category = ref.category;
+    if (ref.options) mod.options = ref.options;
+    if (ref.configType) mod.configType = ref.configType;
+    if (ref.shapes) mod.shapes = ref.shapes;
+    if (ref.skills) mod.skills = ref.skills;
+    if (ref.senses) mod.senses = ref.senses;
+    if (ref.costDisplay) mod.costDisplay = ref.costDisplay;
+    if (ref.hasRanks !== undefined && mod.hasRanks === undefined) mod.hasRanks = ref.hasRanks;
+    if (ref.hasConfig !== undefined && mod.hasConfig === undefined) mod.hasConfig = ref.hasConfig;
   }
 
   mod.ranks = Math.max(1, Number(mod.ranks) || 1);
-  mod.cost = Number(mod.cost) || 0;
-  mod.type = mod.type || 'per_rank';
   mod.config = mod.config || {};
+
+  // If modifier has options and an option is selected, sync cost and type from selected option
+  if (ref && ref.options && ref.options.length > 0) {
+    let chosenOpt = ref.options.find(o => o.id === mod.config.selectedOption);
+    if (!chosenOpt) {
+      chosenOpt = ref.options[0];
+      mod.config.selectedOption = chosenOpt.id;
+    }
+    mod.cost = chosenOpt.cost;
+    mod.type = chosenOpt.type || ref.type || 'per_rank';
+  } else {
+    if (mod.cost === undefined) mod.cost = ref ? ref.cost : 0;
+    if (mod.type === undefined) mod.type = ref ? ref.type : 'per_rank';
+  }
+
+  mod.cost = Number(mod.cost);
+  mod.type = mod.type || 'per_rank';
   return mod;
 }
 
-/**
- * Normalizes an alternate effect (array slot).
- */
 export function normalizeAlternateSlot(rawSlot) {
   if (!rawSlot) return { id: 'alt_' + Date.now(), name: 'Alternate Slot', isDynamic: false, effect: createEmptyEffect() };
   const slot = { ...rawSlot };

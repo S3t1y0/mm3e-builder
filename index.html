@@ -1,15 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>M&M 3e Builder — Character Sheet Manager & Power Builder</title>
-  <meta name="description" content="Character Sheet Manager and Modular Power Builder for Mutants & Masterminds 3rd Edition.">
+  <meta name="description"
+    content="Character Sheet Manager and Modular Power Builder for Mutants & Masterminds 3rd Edition.">
 
   <!-- Google Font: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
 
   <!-- Open-Source Icons: Remix Icon (Apache 2.0) -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/remixicon@4.3.0/fonts/remixicon.min.css">
@@ -18,8 +21,10 @@
   <link rel="stylesheet" href="css/main.css">
   <link rel="stylesheet" href="css/sheet.css">
   <link rel="stylesheet" href="css/builder.css">
+  <link rel="stylesheet" href="css/wizard.css">
   <link rel="stylesheet" href="css/roll20-print.css">
 </head>
+
 <body>
 
   <!-- TOP MENUBAR -->
@@ -30,6 +35,7 @@
         <span class="brand-gradient">M&M 3e Builder</span>
       </a>
       <nav class="nav-tabs">
+        <button class="nav-tab-btn" data-tab="wizard"><i class="ri-magic-line"></i> Character Wizard</button>
         <button class="nav-tab-btn active" data-tab="sheet">Character Sheet</button>
         <button class="nav-tab-btn" data-tab="resources">Resources</button>
         <button class="nav-tab-btn" data-tab="references">References</button>
@@ -38,19 +44,29 @@
 
     <div class="menubar-right">
       <div class="menubar-quick-actions">
-        <button id="btn-undo" class="btn btn-ghost btn-xs" title="Undo (Ctrl+Z)" disabled><i class="ri-arrow-go-back-line"></i> <span class="btn-text">Undo</span></button>
-        <button id="btn-redo" class="btn btn-ghost btn-xs" title="Redo (Ctrl+Shift+Z)" disabled><i class="ri-arrow-go-forward-line"></i> <span class="btn-text">Redo</span></button>
+        <button id="btn-undo" class="btn btn-ghost btn-xs" title="Undo (Ctrl+Z)" disabled><i
+            class="ri-arrow-go-back-line"></i> <span class="btn-text">Undo</span></button>
+        <button id="btn-redo" class="btn btn-ghost btn-xs" title="Redo (Ctrl+Shift+Z)" disabled><i
+            class="ri-arrow-go-forward-line"></i> <span class="btn-text">Redo</span></button>
       </div>
       <div class="menubar-desktop-actions">
-        <button id="btn-clear" class="btn btn-ghost btn-xs" title="Clear Sheet"><i class="ri-delete-bin-line"></i> Clear</button>
-        <button id="btn-export" class="btn btn-secondary btn-xs" title="Export JSON"><i class="ri-download-2-line"></i> Export</button>
-        <button id="btn-excel" class="btn btn-secondary btn-xs" title="Export Excel / CSV"><i class="ri-file-excel-2-line"></i> Excel</button>
-        <button id="btn-roll20-preview" class="btn btn-primary btn-xs" title="Roll20 Official Sheet Preview"><i class="ri-file-user-line"></i> Roll20 Sheet</button>
-        <button id="btn-pdf" class="btn btn-secondary btn-xs" title="Print to PDF (Roll20)"><i class="ri-printer-line"></i> Print</button>
-        <button id="btn-import" class="btn btn-secondary btn-xs" title="Import JSON"><i class="ri-folder-upload-line"></i> Import</button>
-        <button id="btn-new-char" class="btn btn-primary btn-xs" title="New Character"><i class="ri-user-add-line"></i> New</button>
+        <button id="btn-clear" class="btn btn-ghost btn-xs" title="Clear Sheet"><i class="ri-delete-bin-line"></i>
+          Clear</button>
+        <button id="btn-export" class="btn btn-secondary btn-xs" title="Export JSON"><i class="ri-download-2-line"></i>
+          Export</button>
+        <button id="btn-excel" class="btn btn-secondary btn-xs" title="Export Excel / CSV"><i
+            class="ri-file-excel-2-line"></i> Excel</button>
+        <button id="btn-roll20-preview" class="btn btn-primary btn-xs" title="Roll20 Official Sheet Preview"><i
+            class="ri-file-user-line"></i> Roll20 Sheet</button>
+        <button id="btn-pdf" class="btn btn-secondary btn-xs" title="Print to PDF (Roll20)"><i
+            class="ri-printer-line"></i> Print</button>
+        <button id="btn-import" class="btn btn-secondary btn-xs" title="Import JSON"><i
+            class="ri-folder-upload-line"></i> Import</button>
+        <button id="btn-new-char" class="btn btn-primary btn-xs" title="New Character"><i class="ri-user-add-line"></i>
+          New</button>
       </div>
-      <button id="btn-mobile-menu" class="btn btn-ghost btn-xs mobile-menu-toggle" aria-label="Open Menu" title="Open Menu">
+      <button id="btn-mobile-menu" class="btn btn-ghost btn-xs mobile-menu-toggle" aria-label="Open Menu"
+        title="Open Menu">
         <i class="ri-menu-line"></i>
       </button>
       <input type="file" id="file-import-input" accept=".json" style="display: none;">
@@ -68,15 +84,20 @@
             <p class="drawer-sub" id="drawer-char-pl">PL 10 • Mutants & Masterminds 3e</p>
           </div>
         </div>
-        <button id="btn-close-drawer" class="btn btn-ghost btn-sm" aria-label="Close Menu"><i class="ri-close-line"></i></button>
+        <button id="btn-close-drawer" class="btn btn-ghost btn-sm" aria-label="Close Menu"><i
+            class="ri-close-line"></i></button>
       </div>
 
       <div class="drawer-content">
         <div class="drawer-section">
           <span class="drawer-section-label">SHEET MANAGEMENT</span>
           <div class="drawer-actions-grid">
-            <button id="drawer-btn-new" class="drawer-action-btn primary"><i class="ri-user-add-line"></i> New Character</button>
-            <button id="drawer-btn-clear" class="drawer-action-btn danger"><i class="ri-delete-bin-line"></i> Reset Sheet</button>
+            <button id="drawer-btn-wizard" class="drawer-action-btn primary"><i class="ri-magic-line"></i> Character
+              Wizard</button>
+            <button id="drawer-btn-new" class="drawer-action-btn"><i class="ri-user-add-line"></i> New
+              Character</button>
+            <button id="drawer-btn-clear" class="drawer-action-btn danger"><i class="ri-delete-bin-line"></i> Reset
+              Sheet</button>
           </div>
         </div>
 
@@ -84,24 +105,30 @@
           <span class="drawer-section-label">HISTORY & EDITING</span>
           <div class="drawer-actions-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem;">
             <button id="drawer-btn-undo" class="drawer-action-btn"><i class="ri-arrow-go-back-line"></i> Undo</button>
-            <button id="drawer-btn-redo" class="drawer-action-btn"><i class="ri-arrow-go-forward-line"></i> Redo</button>
+            <button id="drawer-btn-redo" class="drawer-action-btn"><i class="ri-arrow-go-forward-line"></i>
+              Redo</button>
           </div>
         </div>
 
         <div class="drawer-section">
           <span class="drawer-section-label">DATA & BACKUP</span>
           <div class="drawer-actions-grid">
-            <button id="drawer-btn-export" class="drawer-action-btn"><i class="ri-download-2-line"></i> Export JSON</button>
-            <button id="drawer-btn-excel" class="drawer-action-btn"><i class="ri-file-excel-2-line"></i> Export CSV / Excel</button>
-            <button id="drawer-btn-import" class="drawer-action-btn"><i class="ri-folder-upload-line"></i> Import JSON</button>
+            <button id="drawer-btn-export" class="drawer-action-btn"><i class="ri-download-2-line"></i> Export
+              JSON</button>
+            <button id="drawer-btn-excel" class="drawer-action-btn"><i class="ri-file-excel-2-line"></i> Export CSV /
+              Excel</button>
+            <button id="drawer-btn-import" class="drawer-action-btn"><i class="ri-folder-upload-line"></i> Import
+              JSON</button>
           </div>
         </div>
 
         <div class="drawer-section">
           <span class="drawer-section-label">ROLL20 & TABLETOP EXPORT</span>
           <div class="drawer-actions-grid">
-            <button id="drawer-btn-roll20" class="drawer-action-btn accent"><i class="ri-file-user-line"></i> Roll20 Official Sheet</button>
-            <button id="drawer-btn-print" class="drawer-action-btn"><i class="ri-printer-line"></i> Print to PDF</button>
+            <button id="drawer-btn-roll20" class="drawer-action-btn accent"><i class="ri-file-user-line"></i> Roll20
+              Official Sheet</button>
+            <button id="drawer-btn-print" class="drawer-action-btn"><i class="ri-printer-line"></i> Print to
+              PDF</button>
           </div>
         </div>
       </div>
@@ -113,6 +140,9 @@
     <!-- Caps Warning Banner -->
     <div id="caps-warning-banner" class="warning-banner" style="display: none;"></div>
 
+    <!-- VIEW 0: CHARACTER WIZARD (STEP-BY-STEP GUIDED BUILDER) -->
+    <div id="view-wizard" class="view-tab-content" style="display: none;"></div>
+
     <!-- VIEW 1: CHARACTER SHEET -->
     <div id="view-character-sheet" class="view-tab-content">
       <!-- HERO IDENTITY -->
@@ -121,7 +151,8 @@
           <div class="identity-grid">
             <div class="field-group">
               <label for="input-hero-name"><i class="ri-shield-user-line"></i> Hero Name</label>
-              <input type="text" id="input-hero-name" class="text-input hero-name-field" placeholder="e.g. Apex, Chronos, Valkyrie" value="Hero Name">
+              <input type="text" id="input-hero-name" class="text-input hero-name-field"
+                placeholder="e.g. Apex, Chronos, Valkyrie" value="Hero Name">
             </div>
             <div class="field-group">
               <label for="input-identity"><i class="ri-user-line"></i> Real Name</label>
@@ -197,7 +228,8 @@
           </div>
           <div class="header-action-group">
             <span class="cost-tag-badge" id="skills-pp-badge">0 PP</span>
-            <button class="btn btn-secondary btn-xs" id="btn-open-skill-modal"><i class="ri-add-line"></i> Add Skill</button>
+            <button class="btn btn-secondary btn-xs" id="btn-open-skill-modal"><i class="ri-add-line"></i> Add
+              Skill</button>
           </div>
         </div>
         <div id="skills-list-container"></div>
@@ -212,7 +244,8 @@
           </div>
           <div class="header-action-group">
             <span class="cost-tag-badge" id="advantages-pp-badge">0 PP</span>
-            <button class="btn btn-secondary btn-xs" id="btn-open-adv-modal"><i class="ri-add-line"></i> Add Advantage</button>
+            <button class="btn btn-secondary btn-xs" id="btn-open-adv-modal"><i class="ri-add-line"></i> Add
+              Advantage</button>
           </div>
         </div>
         <div id="advantages-list-container"></div>
@@ -275,4 +308,5 @@
     <div id="roll20-preview-content"></div>
   </div>
 </body>
+
 </html>
