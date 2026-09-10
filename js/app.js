@@ -4,7 +4,16 @@ import { ABILITIES } from './rules/abilities.js';
 import { DEFENSES } from './rules/defenses.js';
 import { SKILLS } from './rules/skills.js';
 import { ADVANTAGES } from './rules/advantages.js';
-import { calculatePowerTotalCost } from './rules/powers.js';
+import {
+  calculatePowerTotalCost,
+  calculateEffectCost,
+  calculatePowerCombatMetrics,
+  calculatePowerDetailedBreakdown,
+  BASE_EFFECTS,
+  CONFIGURABLE_EFFECTS,
+  EXTRAS,
+  FLAWS
+} from './rules/powers.js';
 import { renderTargetedEffects } from './components/targetedEffects.js';
 import { renderConditionsTracker } from './components/conditionsTracker.js';
 import { openPowerBuilder } from './components/powerBuilder.js';
@@ -18,6 +27,8 @@ import { initRoll20Print, openRoll20Preview } from './components/roll20Print.js'
 import { renderWizard } from './components/wizard/wizardController.js';
 
 let activeTab = 'sheet'; // 'sheet', 'wizard', 'resources', 'references'
+let activeSheetSkillCategory = 'All';
+let sheetSkillSearchQuery = '';
 
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
@@ -438,105 +449,685 @@ function renderDefenses() {
   });
 }
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function getAdvCategoryIcon(category) {
+  switch ((category || '').toLowerCase()) {
+    case 'combat': return 'ri-sword-line';
+    case 'fortune': return 'ri-clover-line';
+    case 'skill': return 'ri-tools-line';
+    case 'general': default: return 'ri-medal-line';
+  }
+}
+
+function renderEffectDetailedSubOptions(effect) {
+  if (!effect) return '';
+  const baseName = effect.baseEffect || effect.name;
+  const cfg = effect.config || {};
+  const cards = [];
+
+  if (baseName === 'Senses' && Array.isArray(cfg.selectedFaculties) && cfg.selectedFaculties.length > 0) {
+    const facultyList = CONFIGURABLE_EFFECTS?.Senses?.faculties || [];
+    cfg.selectedFaculties.forEach(f => {
+      const fId = typeof f === 'object' && f !== null ? (f.id || f.name) : f;
+      const def = facultyList.find(x => x.id === fId || x.name === fId);
+      const name = def?.name || (typeof f === 'object' ? f.name : f);
+      const pts = def?.pts || (typeof f === 'object' ? f.pts : 1);
+      const icon = def?.icon || 'ri-eye-line';
+      const desc = def?.desc || 'Superhuman sensory faculty expanded beyond normal limits.';
+      cards.push(`
+        <div class="power-option-explain-card">
+          <div class="power-option-explain-header">
+            <span class="power-option-title"><i class="${icon}"></i> ${escapeHtml(name)}</span>
+            <span class="power-option-cost-tag">${pts} PP</span>
+          </div>
+          <p class="power-option-desc">${escapeHtml(desc)}</p>
+        </div>
+      `);
+    });
+  } else if (baseName === 'Immunity' && Array.isArray(cfg.selectedPresets) && cfg.selectedPresets.length > 0) {
+    const presetList = CONFIGURABLE_EFFECTS?.Immunity?.presets || [];
+    cfg.selectedPresets.forEach(p => {
+      const pId = typeof p === 'object' && p !== null ? (p.id || p.name) : p;
+      const def = presetList.find(x => x.id === pId || x.name === pId);
+      const name = def?.name || (typeof p === 'object' ? p.name : p);
+      const ranks = def?.ranks || (typeof p === 'object' ? p.ranks : 1);
+      const icon = def?.icon || 'ri-shield-check-line';
+      const desc = def?.desc || 'Complete immunity requiring no resistance check against matching hazards.';
+      cards.push(`
+        <div class="power-option-explain-card">
+          <div class="power-option-explain-header">
+            <span class="power-option-title"><i class="${icon}"></i> ${escapeHtml(name)}</span>
+            <span class="power-option-cost-tag">${ranks} PP (${ranks} R)</span>
+          </div>
+          <p class="power-option-desc">${escapeHtml(desc)}</p>
+        </div>
+      `);
+    });
+  } else if (baseName === 'Movement' && Array.isArray(cfg.selectedModes) && cfg.selectedModes.length > 0) {
+    const modeList = CONFIGURABLE_EFFECTS?.Movement?.modes || [];
+    cfg.selectedModes.forEach(m => {
+      const mId = typeof m === 'object' && m !== null ? (m.id || m.name) : m;
+      const def = modeList.find(x => x.id === mId || x.name === mId);
+      const name = def?.name || (typeof m === 'object' ? m.name : m);
+      const mRanks = typeof m === 'object' && m !== null && m.ranks ? Number(m.ranks) : (def?.ranks || 1);
+      const icon = def?.icon || 'ri-footprint-line';
+      const desc = def?.desc || 'Superhuman locomotion mode traversing specialized obstacles or terrain.';
+      cards.push(`
+        <div class="power-option-explain-card">
+          <div class="power-option-explain-header">
+            <span class="power-option-title"><i class="${icon}"></i> ${escapeHtml(name)}</span>
+            <span class="power-option-cost-tag">${mRanks * 2} PP (Rank ${mRanks})</span>
+          </div>
+          <p class="power-option-desc">${escapeHtml(desc)}</p>
+        </div>
+      `);
+    });
+  } else if (baseName === 'Environment' && Array.isArray(cfg.selectedElements) && cfg.selectedElements.length > 0) {
+    const elemList = CONFIGURABLE_EFFECTS?.Environment?.elements || [];
+    cfg.selectedElements.forEach(e => {
+      const eId = typeof e === 'object' && e !== null ? (e.id || e.name) : e;
+      const def = elemList.find(x => x.id === eId || x.name === eId);
+      const name = def?.name || (typeof e === 'object' ? e.name : e);
+      const cost = def?.cost || (typeof e === 'object' ? e.cost : 1);
+      const icon = def?.icon || 'ri-sun-line';
+      const desc = def?.desc || 'Localized weather hazard or ambient environmental disruption.';
+      cards.push(`
+        <div class="power-option-explain-card">
+          <div class="power-option-explain-header">
+            <span class="power-option-title"><i class="${icon}"></i> ${escapeHtml(name)}</span>
+            <span class="power-option-cost-tag">${cost} PP</span>
+          </div>
+          <p class="power-option-desc">${escapeHtml(desc)}</p>
+        </div>
+      `);
+    });
+  } else if (baseName === 'Illusion' && Array.isArray(cfg.senses) && cfg.senses.length > 0) {
+    cfg.senses.forEach(s => {
+      cards.push(`
+        <div class="power-option-explain-card">
+          <div class="power-option-explain-header">
+            <span class="power-option-title"><i class="ri-sparkling-line"></i> ${escapeHtml(s)} Impression</span>
+            <span class="power-option-cost-tag">1 PP/sense</span>
+          </div>
+          <p class="power-option-desc">Creates convincing phantom sensory impressions for ${escapeHtml(s)}. Observers make an Insight check to recognize the illusion.</p>
+        </div>
+      `);
+    });
+  } else if (baseName === 'Enhanced Trait' && cfg.traitName) {
+    cards.push(`
+      <div class="power-option-explain-card">
+        <div class="power-option-explain-header">
+          <span class="power-option-title"><i class="ri-arrow-up-circle-line"></i> Enhanced ${escapeHtml(cfg.traitName)}</span>
+          <span class="power-option-cost-tag">+${effect.ranks || 1} Ranks</span>
+        </div>
+        <p class="power-option-desc">Increases ${escapeHtml(cfg.traitCategory || 'trait')} ${escapeHtml(cfg.traitName)} by +${effect.ranks || 1} rank while this power is active.</p>
+      </div>
+    `);
+  } else if (baseName === 'Affliction' && (cfg.firstDegree || cfg.secondDegree || cfg.thirdDegree)) {
+    const res = cfg.resistance || effect.resistance || 'Fortitude';
+    cards.push(`
+      <div class="power-option-explain-card">
+        <div class="power-option-explain-header">
+          <span class="power-option-title"><i class="ri-pulse-line"></i> 1st Degree: ${escapeHtml(cfg.firstDegree || 'Dazed')}</span>
+          <span class="power-option-cost-tag">Failed by 1-5 vs ${res}</span>
+        </div>
+        <p class="power-option-desc">Initial debilitating condition inflicted when target fails resistance check.</p>
+      </div>
+      <div class="power-option-explain-card">
+        <div class="power-option-explain-header">
+          <span class="power-option-title"><i class="ri-alert-line"></i> 2nd Degree: ${escapeHtml(cfg.secondDegree || 'Stunned')}</span>
+          <span class="power-option-cost-tag">Failed by 6-10 vs ${res}</span>
+        </div>
+        <p class="power-option-desc">Severe intermediate condition (e.g. defenseless, immobilized, or losing actions).</p>
+      </div>
+      <div class="power-option-explain-card">
+        <div class="power-option-explain-header">
+          <span class="power-option-title"><i class="ri-skull-line"></i> 3rd Degree: ${escapeHtml(cfg.thirdDegree || 'Paralyzed')}</span>
+          <span class="power-option-cost-tag">Failed by 11+ vs ${res}</span>
+        </div>
+        <p class="power-option-desc">Completely incapacitating condition lasting until recovery or treated.</p>
+      </div>
+    `);
+  } else if (baseName === 'Comprehend' && Array.isArray(cfg.selectedModes) && cfg.selectedModes.length > 0) {
+    cfg.selectedModes.forEach(m => {
+      cards.push(`
+        <div class="power-option-explain-card">
+          <div class="power-option-explain-header">
+            <span class="power-option-title"><i class="ri-translate-2"></i> ${escapeHtml(m)}</span>
+            <span class="power-option-cost-tag">Comprehend Mode</span>
+          </div>
+          <p class="power-option-desc">Ability to understand, speak, or read through the medium of ${escapeHtml(m)}.</p>
+        </div>
+      `);
+    });
+  } else if (baseName === 'Morph' && cfg.scope) {
+    const scopes = ['', 'Single Form (1 R)', 'Narrow Group (2 R)', 'Broad Group (3 R)', 'Any Form (4 R)'];
+    cards.push(`
+      <div class="power-option-explain-card">
+        <div class="power-option-explain-header">
+          <span class="power-option-title"><i class="ri-user-shared-line"></i> Scope: ${escapeHtml(scopes[cfg.scope] || 'Form')}</span>
+          <span class="power-option-cost-tag">${cfg.scope * 5} PP</span>
+        </div>
+        <p class="power-option-desc">Alters cosmetic appearance and physical form with a +20 circumstance bonus to Deception checks to disguise.</p>
+      </div>
+    `);
+  } else if (baseName === 'Weaken' && cfg.traitName) {
+    cards.push(`
+      <div class="power-option-explain-card">
+        <div class="power-option-explain-header">
+          <span class="power-option-title"><i class="ri-arrow-down-circle-line"></i> Weaken ${escapeHtml(cfg.traitName)}</span>
+          <span class="power-option-cost-tag">vs ${cfg.resistance || effect.resistance || 'Fortitude'}</span>
+        </div>
+        <p class="power-option-desc">Lowers target's ${escapeHtml(cfg.traitName)} by 1 point per degree of failure on save check. Recovers 1 point per round.</p>
+      </div>
+    `);
+  } else if (baseName === 'Nullify' && (cfg.descriptor || cfg.customDescriptor)) {
+    const desc = cfg.customDescriptor || cfg.descriptor;
+    cards.push(`
+      <div class="power-option-explain-card">
+        <div class="power-option-explain-header">
+          <span class="power-option-title"><i class="ri-prohibited-line"></i> Counter: ${escapeHtml(desc)}</span>
+          <span class="power-option-cost-tag">Opposed vs Will/Rank</span>
+        </div>
+        <p class="power-option-desc">Counters and shuts down active powers matching the ${escapeHtml(desc)} descriptor.</p>
+      </div>
+    `);
+  }
+
+  if (cards.length === 0) return '';
+  return `
+    <div class="power-explained-options-grid">
+      ${cards.join('')}
+    </div>
+  `;
+}
+
+function renderEffectSubOptionsSummary(effect) {
+  return renderEffectDetailedSubOptions(effect);
+}
+
+function openSheetSpecializationModal(initialBaseSkill = 'Close Combat') {
+  let selectedBase = initialBaseSkill;
+  let customSubtype = '';
+  let initialRanks = 2;
+  const mount = document.getElementById('sheet-spec-modal-mount');
+  if (!mount) return;
+
+  const baseSkillOptions = [
+    { name: 'Close Combat', ability: 'FGT', icon: 'ri-sword-line', desc: 'Melee weapon or attack form accuracy (e.g. Swords, Unarmed, Claws).' },
+    { name: 'Ranged Combat', ability: 'DEX', icon: 'ri-crosshair-2-line', desc: 'Ranged weapon accuracy (e.g. Guns, Bows, Energy Blasts).' },
+    { name: 'Expertise', ability: 'INT', icon: 'ri-book-open-line', desc: 'Field of professional or academic knowledge (e.g. Science, Criminology, Magic).' }
+  ];
+
+  function updateModalView() {
+    const rule = SKILLS.find(s => s.name === selectedBase) || baseSkillOptions[0];
+    const abilityKey = rule.ability || 'INT';
+    const abilityVal = store.getAbility(abilityKey);
+    const totalBonus = abilityVal + initialRanks;
+    const ppCost = Math.ceil(initialRanks / 2);
+    const commonSubtypes = rule.commonSubtypes || [];
+
+    mount.innerHTML = `
+      <div class="wizard-spec-modal-overlay open" id="sheet-spec-overlay">
+        <div class="wizard-spec-modal">
+          <div class="wizard-spec-modal-header">
+            <div style="display:flex;align-items:center;gap:0.75rem;">
+              <span style="font-size:1.4rem;color:var(--accent-secondary);"><i class="ri-focus-3-line"></i></span>
+              <div>
+                <h3 style="margin:0;font-size:1.1rem;color:var(--text-primary);">Add Skill Specialization</h3>
+                <p style="margin:0.2rem 0 0 0;font-size:0.75rem;color:var(--text-muted);">
+                  Configure specialized combat technique or expertise field (1 PP = 2 Ranks)
+                </p>
+              </div>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="btn-close-sheet-spec-modal" style="padding:0.25rem 0.5rem;" type="button"><i class="ri-close-line"></i></button>
+          </div>
+
+          <div class="wizard-spec-modal-body">
+            <!-- 1. Select Base Skill -->
+            <div>
+              <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.4rem;display:block;">
+                1. Select Base Subtype Skill
+              </label>
+              <div class="spec-base-cards-grid">
+                ${baseSkillOptions.map(opt => {
+                  const isSel = opt.name.toLowerCase() === selectedBase.toLowerCase();
+                  const abMod = store.getAbility(opt.ability);
+                  return `
+                    <div class="spec-base-card ${isSel ? 'active' : ''}" data-select-base="${opt.name}">
+                      <i class="${opt.icon}"></i>
+                      <h5>${escapeHtml(opt.name)}</h5>
+                      <span>${opt.ability} (${abMod >= 0 ? '+' : ''}${abMod})</span>
+                    </div>
+                  `;
+                }).join('')}
+              </div>
+            </div>
+
+            <!-- 2. Popular Presets -->
+            <div>
+              <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.4rem;display:block;">
+                2. Choose Popular Preset (Or Enter Custom Below)
+              </label>
+              <div class="spec-quick-chips">
+                ${commonSubtypes.map(sub => `
+                  <button class="spec-quick-chip modal-preset-chip ${customSubtype.toLowerCase() === sub.toLowerCase() ? 'active' : ''}" 
+                          data-preset-val="${escapeHtml(sub)}" type="button">
+                    ${escapeHtml(sub)}
+                  </button>
+                `).join('')}
+              </div>
+            </div>
+
+            <!-- 3. Name Input -->
+            <div class="form-group" style="margin:0;">
+              <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.4rem;display:block;">
+                3. Specialization Name
+              </label>
+              <input type="text" class="text-input" id="sheet-spec-name-input" 
+                     placeholder="e.g. Swords, Firearms, Forensic Science..." 
+                     value="${escapeHtml(customSubtype)}" autofocus>
+            </div>
+
+            <!-- 4. Preview & Ranks -->
+            <div>
+              <label style="font-size:0.72rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;margin-bottom:0.4rem;display:block;">
+                4. Starting Ranks & Check Bonus Preview
+              </label>
+              <div class="spec-preview-callout">
+                <div>
+                  <div style="font-size:0.9rem;font-weight:800;color:var(--text-primary);">
+                    ${escapeHtml(selectedBase)}: <span style="color:var(--accent-secondary);">${escapeHtml(customSubtype || 'Specialization')}</span>
+                  </div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.2rem;">
+                    Key Ability: <strong>${abilityKey}</strong> (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal}) + <strong>${initialRanks} Ranks</strong> = 
+                    <strong style="color:var(--accent-secondary);font-size:0.85rem;">${totalBonus >= 0 ? `+${totalBonus}` : totalBonus} Check Bonus</strong>
+                  </div>
+                </div>
+
+                <div style="display:flex;align-items:center;gap:0.75rem;">
+                  <div class="stepper">
+                    <button class="step-btn" id="sheet-spec-rank-dec" ${initialRanks <= 1 ? 'disabled' : ''} type="button">-</button>
+                    <span class="step-val" style="min-width:2rem;">${initialRanks}</span>
+                    <button class="step-btn" id="sheet-spec-rank-inc" ${initialRanks >= 20 ? 'disabled' : ''} type="button">+</button>
+                  </div>
+                  <span style="font-size:0.75rem;font-weight:700;color:var(--accent-primary);min-width:48px;">
+                    ${ppCost} PP
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="wizard-spec-modal-footer">
+            <button class="btn btn-ghost" id="btn-cancel-sheet-spec-modal" type="button">Cancel</button>
+            <button class="btn btn-primary" id="btn-confirm-add-sheet-spec" ${customSubtype.trim() ? '' : 'disabled'} type="button">
+              <i class="ri-add-line"></i> Add Specialization (${ppCost} PP)
+            </button>
+          </div>
+        </div>
+      </div>
+    `;
+
+    // Attach Modal Listeners
+    const overlay = mount.querySelector('#sheet-spec-overlay');
+    const closeBtn = mount.querySelector('#btn-close-sheet-spec-modal');
+    const cancelBtn = mount.querySelector('#btn-cancel-sheet-spec-modal');
+    const confirmBtn = mount.querySelector('#btn-confirm-add-sheet-spec');
+    const input = mount.querySelector('#sheet-spec-name-input');
+
+    const closeModal = () => {
+      mount.innerHTML = '';
+    };
+
+    closeBtn?.addEventListener('click', closeModal);
+    cancelBtn?.addEventListener('click', closeModal);
+    overlay?.addEventListener('click', (e) => {
+      if (e.target === overlay) closeModal();
+    });
+
+    mount.querySelectorAll('.spec-base-card').forEach(card => {
+      card.addEventListener('click', () => {
+        selectedBase = card.dataset.selectBase;
+        updateModalView();
+      });
+    });
+
+    mount.querySelectorAll('.modal-preset-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        customSubtype = chip.dataset.presetVal;
+        updateModalView();
+        const inp = mount.querySelector('#sheet-spec-name-input');
+        if (inp) {
+          inp.focus();
+          inp.setSelectionRange(inp.value.length, inp.value.length);
+        }
+      });
+    });
+
+    input?.addEventListener('input', (e) => {
+      customSubtype = e.target.value;
+      if (confirmBtn) confirmBtn.disabled = !customSubtype.trim();
+      const namePreview = mount.querySelector('.spec-preview-callout span[style*="color:var(--accent-secondary)"]');
+      if (namePreview) namePreview.textContent = customSubtype || 'Specialization';
+    });
+
+    mount.querySelector('#sheet-spec-rank-dec')?.addEventListener('click', () => {
+      if (initialRanks > 1) {
+        initialRanks--;
+        updateModalView();
+      }
+    });
+
+    mount.querySelector('#sheet-spec-rank-inc')?.addEventListener('click', () => {
+      if (initialRanks < 20) {
+        initialRanks++;
+        updateModalView();
+      }
+    });
+
+    confirmBtn?.addEventListener('click', () => {
+      if (!customSubtype.trim()) return;
+      store.addSkill({
+        name: selectedBase,
+        subtype: customSubtype.trim(),
+        ranks: initialRanks
+      });
+      showToast(`Added ${selectedBase}: ${customSubtype.trim()} (${initialRanks} Ranks)`, 'success');
+      closeModal();
+    });
+  }
+
+  updateModalView();
+  setTimeout(() => {
+    const inp = mount.querySelector('#sheet-spec-name-input');
+    inp?.focus();
+  }, 50);
+}
+
 function renderSkills() {
   const container = document.getElementById('skills-list-container');
   const countBadge = document.getElementById('skills-pp-badge');
   if (!container) return;
 
-  const skills = store.character.skills;
   const totalPP = store.getTotalSkillPP();
   if (countBadge) countBadge.textContent = `${totalPP} PP`;
 
-  // Wire header "+ Add Skill" button
-  const addBtn = document.getElementById('btn-open-skill-modal');
-  if (addBtn && !addBtn._wired) {
-    addBtn.addEventListener('click', () => openSkillModal());
-    addBtn._wired = true;
-  }
+  const addedSkills = store.character.skills;
+  const categories = ['All', 'Combat', 'Physical', 'Mental', 'Interaction'];
 
-  if (skills.length === 0) {
-    container.innerHTML = `
-      <div class="empty-hint">
-        No skills added yet.
-        <button class="btn btn-secondary btn-xs mt-2" onclick="openSkillModal()">+ Add First Skill</button>
+  // Filter skills
+  const filteredSkills = SKILLS.filter(s => {
+    // 1. Category match
+    const catMatch = activeSheetSkillCategory === 'All' || s.category.toLowerCase() === activeSheetSkillCategory.toLowerCase();
+    if (!catMatch) return false;
+
+    // 2. Search query match
+    if (!sheetSkillSearchQuery.trim()) return true;
+    const q = sheetSkillSearchQuery.toLowerCase().trim();
+    if (s.name.toLowerCase().includes(q)) return true;
+    if (s.desc && s.desc.toLowerCase().includes(q)) return true;
+
+    // Check if any matching specializations exist
+    if (s.requiresSubtype) {
+      const matchingSub = addedSkills.some(inst =>
+        inst.name.toLowerCase() === s.name.toLowerCase() &&
+        inst.subtype &&
+        inst.subtype.toLowerCase().includes(q)
+      );
+      if (matchingSub) return true;
+      if (s.commonSubtypes && s.commonSubtypes.some(cs => cs.toLowerCase().includes(q))) return true;
+    }
+
+    return false;
+  });
+
+  let html = `
+    <div class="sheet-skills-toolbar">
+      <div class="skills-cat-pills">
+        ${categories.map(cat => `
+          <button class="skill-cat-pill ${activeSheetSkillCategory === cat ? 'active' : ''}" data-cat="${cat}" type="button">
+            ${cat}
+          </button>
+        `).join('')}
       </div>
-    `;
-    return;
-  }
-
-  container.innerHTML = `
-    <div class="skills-table-wrap">
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>Skill & Subtype</th>
-            <th>Governing Ability</th>
-            <th>Check Bonus</th>
-            <th>Trained Ranks</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${skills.map(s => {
-            const rule = SKILLS.find(r => r.name === s.name);
-            const abKey = rule?.ability || 'INT';
-            const abVal = store.getAbility(abKey);
-            const totalBonus = abVal + s.ranks;
-            return `
-              <tr>
-                <td>
-                  <strong class="clickable-skill-name" data-skill-edit="${s.id}" title="Click to edit">${s.name}</strong>
-                  ${s.subtype ? `<span class="subtype">(${s.subtype})</span>` : ''}
-                </td>
-                <td><span class="badge-text">${abKey} (${abVal >= 0 ? '+' : ''}${abVal})</span></td>
-                <td><span class="highlight-val">${totalBonus >= 0 ? '+' : ''}${totalBonus}</span></td>
-                <td>
-                  <div class="stepper-compact">
-                    <button class="step-btn-xs" data-skill-dec="${s.id}">-</button>
-                    <span class="step-val-xs">${s.ranks}</span>
-                    <button class="step-btn-xs" data-skill-inc="${s.id}">+</button>
-                  </div>
-                </td>
-                <td>
-                  <div class="row-actions-group">
-                    <button class="btn-action-icon" data-skill-edit="${s.id}" title="Edit Subtype / Ranks"><i class="ri-edit-line"></i></button>
-                    <button class="btn-delete-row" data-skill-del="${s.id}" title="Remove Skill"><i class="ri-close-line"></i></button>
-                  </div>
-                </td>
-              </tr>
-            `;
-          }).join('')}
-        </tbody>
-      </table>
+      <div class="skills-search-wrap">
+        <i class="ri-search-line"></i>
+        <input type="text" id="sheet-skill-search" placeholder="Search 16 skills & specializations..." value="${escapeHtml(sheetSkillSearchQuery)}">
+      </div>
     </div>
+
+    <div class="sheet-skills-list">
   `;
 
-  container.querySelectorAll('[data-skill-dec]').forEach(btn => {
+  if (filteredSkills.length === 0) {
+    html += `
+      <div class="empty-hint">
+        No skills found matching "${escapeHtml(sheetSkillSearchQuery)}".
+      </div>
+    `;
+  } else {
+    filteredSkills.forEach(ruleSkill => {
+      const abilityKey = ruleSkill.ability;
+      const abilityVal = store.getAbility(abilityKey);
+
+      if (ruleSkill.requiresSubtype) {
+        // Subtype Skill (Close Combat, Ranged Combat, Expertise)
+        const instances = addedSkills.filter(s => s.name.toLowerCase() === ruleSkill.name.toLowerCase());
+
+        // 1. Show existing active specializations
+        if (instances.length > 0) {
+          instances.forEach(inst => {
+            const ranks = inst.ranks;
+            const totalBonus = abilityVal + ranks;
+            html += `
+              <div class="sheet-skill-row is-trained is-specialization">
+                <div class="sheet-skill-main-col">
+                  <div class="sheet-skill-title-line">
+                    <span class="sheet-skill-name">
+                      ${escapeHtml(ruleSkill.name)}: <span class="spec-highlight">${escapeHtml(inst.subtype || 'General')}</span>
+                    </span>
+                    <span class="sheet-skill-ab-tag">${abilityKey} (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal})</span>
+                    <span class="sheet-skill-trained-badge spec"><i class="ri-shield-star-line"></i> Specialization</span>
+                  </div>
+                  <p class="sheet-skill-desc">${escapeHtml(ruleSkill.desc)}</p>
+                </div>
+
+                <div class="sheet-skill-calc-col">
+                  <span class="sheet-skill-formula-hint">${abilityKey} (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal}) + ${ranks} Ranks</span>
+                  <span class="sheet-skill-total-bonus ${totalBonus >= 0 ? 'positive' : 'negative'}">
+                    ${totalBonus >= 0 ? `+${totalBonus}` : totalBonus}
+                  </span>
+                </div>
+
+                <div class="sheet-skill-stepper-col">
+                  <div class="stepper-compact">
+                    <button class="step-btn-xs" data-sheet-sk-dec="${inst.id}" title="Decrease Rank">-</button>
+                    <span class="step-val-xs">${ranks}</span>
+                    <button class="step-btn-xs" data-sheet-sk-inc="${inst.id}" title="Increase Rank">+</button>
+                  </div>
+                  <button class="btn-delete-row" data-sheet-sk-del="${inst.id}" title="Remove Specialization">
+                    <i class="ri-close-line"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          });
+        }
+
+        // 2. Integrated Wizard-Style Specialization Card
+        const commonSubtypes = ruleSkill.commonSubtypes || [];
+        html += `
+          <div class="wizard-spec-prompt-card sheet-spec-card">
+            <div class="spec-prompt-header">
+              <div class="spec-prompt-info">
+                <span class="spec-prompt-title">
+                  <i class="ri-add-circle-fill"></i> Add ${escapeHtml(ruleSkill.name)} Specialization
+                </span>
+                <span class="spec-prompt-sub">
+                  Key Ability: <strong>${abilityKey}</strong> (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal}) • Rate: 1 PP = 2 Ranks
+                </span>
+              </div>
+              <button class="btn btn-secondary btn-xs btn-open-sheet-spec-modal" data-base="${escapeHtml(ruleSkill.name)}" type="button">
+                <i class="ri-sound-module-line"></i> Custom Specialization...
+              </button>
+            </div>
+
+            <div class="spec-quick-chips">
+              <span class="spec-chips-label">Popular Presets:</span>
+              ${commonSubtypes.map(sub => {
+                const isAlreadyAdded = instances.some(inst => (inst.subtype || '').toLowerCase() === sub.toLowerCase());
+                if (isAlreadyAdded) {
+                  return `
+                    <span class="spec-quick-chip added" title="${escapeHtml(sub)} already active on sheet">
+                      <i class="ri-check-line"></i> ${escapeHtml(sub)}
+                    </span>
+                  `;
+                }
+                return `
+                  <button class="spec-quick-chip btn-sheet-quick-add" 
+                          data-base="${escapeHtml(ruleSkill.name)}" 
+                          data-sub="${escapeHtml(sub)}" 
+                          title="Instantly add ${escapeHtml(ruleSkill.name)}: ${escapeHtml(sub)} (+2 Ranks)" 
+                          type="button">
+                    <i class="ri-add-line"></i> ${escapeHtml(sub)}
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      } else {
+        // Standard Skill without subtypes (Always displayed, trained or untrained)
+        const match = addedSkills.find(s => s.name.toLowerCase() === ruleSkill.name.toLowerCase());
+        const ranks = match ? match.ranks : 0;
+        const skillId = match ? match.id : null;
+        const isTrained = ranks > 0;
+        const totalBonus = abilityVal + ranks;
+
+        html += `
+          <div class="sheet-skill-row ${isTrained ? 'is-trained' : ''}">
+            <div class="sheet-skill-main-col">
+              <div class="sheet-skill-title-line">
+                <span class="sheet-skill-name">${escapeHtml(ruleSkill.name)}</span>
+                <span class="sheet-skill-ab-tag">${abilityKey} (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal})</span>
+                ${isTrained ? `
+                  <span class="sheet-skill-trained-badge"><i class="ri-checkbox-circle-line"></i> Trained</span>
+                ` : `
+                  <span class="sheet-skill-untrained-badge">Untrained</span>
+                `}
+              </div>
+              <p class="sheet-skill-desc">${escapeHtml(ruleSkill.desc)}</p>
+            </div>
+
+            <div class="sheet-skill-calc-col">
+              <span class="sheet-skill-formula-hint">${abilityKey} (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal}) + ${ranks} Ranks</span>
+              <span class="sheet-skill-total-bonus ${totalBonus >= 0 ? 'positive' : 'negative'}">
+                ${totalBonus >= 0 ? `+${totalBonus}` : totalBonus}
+              </span>
+            </div>
+
+            <div class="sheet-skill-stepper-col">
+              <div class="stepper-compact">
+                <button class="step-btn-xs" data-sheet-sk-dec="${skillId || ''}" title="Decrease Rank" ${ranks <= 0 ? 'disabled' : ''}>-</button>
+                <span class="step-val-xs">${ranks}</span>
+                <button class="step-btn-xs" data-sheet-sk-inc="${skillId || ''}" data-base="${escapeHtml(ruleSkill.name)}" title="Increase Rank">+</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    });
+  }
+
+  html += `</div>`;
+  container.innerHTML = html;
+
+  // Search input listeners
+  const searchInput = container.querySelector('#sheet-skill-search');
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      sheetSkillSearchQuery = e.target.value;
+      renderSkills();
+      const newInp = container.querySelector('#sheet-skill-search');
+      if (newInp) {
+        newInp.focus();
+        const len = newInp.value.length;
+        newInp.setSelectionRange(len, len);
+      }
+    });
+  }
+
+  // Category filter listeners
+  container.querySelectorAll('.skill-cat-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      activeSheetSkillCategory = pill.dataset.cat;
+      renderSkills();
+    });
+  });
+
+  // Rank Decrements
+  container.querySelectorAll('[data-sheet-sk-dec]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const s = skills.find(x => x.id === btn.dataset.skillDec);
+      const id = btn.dataset.sheetSkDec;
+      if (!id) return;
+      const s = addedSkills.find(x => x.id === id);
       if (s) store.updateSkill(s.id, s.ranks - 1);
     });
   });
 
-  container.querySelectorAll('[data-skill-inc]').forEach(btn => {
+  // Rank Increments
+  container.querySelectorAll('[data-sheet-sk-inc]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      const s = skills.find(x => x.id === btn.dataset.skillInc);
-      if (s) store.updateSkill(s.id, s.ranks + 1);
+      const id = btn.dataset.sheetSkInc;
+      const baseName = btn.dataset.base;
+      if (id) {
+        const s = addedSkills.find(x => x.id === id);
+        if (s) store.updateSkill(s.id, s.ranks + 1);
+      } else if (baseName) {
+        store.addSkill({ name: baseName, subtype: '', ranks: 1 });
+      }
     });
   });
 
-  container.querySelectorAll('[data-skill-del]').forEach(btn => {
-    btn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      store.removeSkill(btn.dataset.skillDel);
+  // Quick Preset Add Chips
+  container.querySelectorAll('.btn-sheet-quick-add').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const baseName = btn.dataset.base;
+      const subName = btn.dataset.sub;
+      store.addSkill({ name: baseName, subtype: subName, ranks: 2 });
+      showToast(`Added ${baseName}: ${subName} (2 Ranks)`, 'success');
     });
   });
 
-  container.querySelectorAll('[data-skill-edit]').forEach(el => {
-    el.addEventListener('click', () => {
-      openSkillModal(el.dataset.skillEdit);
+  // Open Specialization Modal
+  container.querySelectorAll('.btn-open-sheet-spec-modal').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const baseName = btn.dataset.base;
+      openSheetSpecializationModal(baseName);
+    });
+  });
+
+  // Delete Specialization
+  container.querySelectorAll('[data-sheet-sk-del]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.sheetSkDel;
+      const match = addedSkills.find(x => x.id === id);
+      const label = match ? `${match.name}: ${match.subtype}` : 'Specialization';
+      store.removeSkill(id);
+      showToast(`Removed ${label}`, 'info');
     });
   });
 }
@@ -550,7 +1141,7 @@ function renderAdvantages() {
   const totalPP = store.getTotalAdvantagePP();
   if (countBadge) countBadge.textContent = `${totalPP} PP`;
 
-  // Wire header "+ Add Advantage" button
+  // Wire header "+ Browse & Add Advantages" button
   const addBtn = document.getElementById('btn-open-adv-modal');
   if (addBtn && !addBtn._wired) {
     addBtn.addEventListener('click', () => openAdvantageModal());
@@ -561,25 +1152,53 @@ function renderAdvantages() {
     container.innerHTML = `
       <div class="empty-hint">
         No advantages added yet.
-        <button class="btn btn-secondary btn-xs mt-2" onclick="openAdvantageModal()">+ Open Advantages Catalog (56 Choices)</button>
+        <button class="btn btn-secondary btn-xs mt-2" onclick="openAdvantageModal()">
+          <i class="ri-add-line"></i> Open Advantages Catalog (56 Choices)
+        </button>
       </div>
     `;
     return;
   }
 
   container.innerHTML = `
-    <div class="tags-grid">
+    <div class="sheet-advantages-library">
       ${advs.map(a => {
-        const rule = ADVANTAGES.find(r => r.name === a.name);
+        const rule = ADVANTAGES.find(r => r.name.toLowerCase() === a.name.toLowerCase());
+        const category = rule?.category || 'General';
+        const iconClass = getAdvCategoryIcon(category);
+        const desc = rule?.desc || 'Rules description unavailable.';
+        const isRanked = Boolean(rule?.ranked);
+
         return `
-          <div class="adv-chip" title="${rule?.desc || ''}">
-            <span class="adv-name clickable-adv" data-adv-click="${a.name}">
-              ${a.name} ${a.ranks > 1 ? `(${a.ranks})` : ''}
-            </span>
-            <div class="adv-actions">
-              <button class="step-btn-tiny" data-adv-dec="${a.name}" title="Decrease Rank">-</button>
-              <button class="step-btn-tiny" data-adv-inc="${a.name}" title="Increase Rank">+</button>
-              <button class="del-btn-tiny" data-adv-del="${a.name}" title="Remove from Sheet"><i class="ri-close-line"></i></button>
+          <div class="sheet-adv-card">
+            <div class="adv-card-header">
+              <div class="adv-card-title-group">
+                <i class="${iconClass} adv-card-icon"></i>
+                <h4 class="adv-card-name">${escapeHtml(a.name)}</h4>
+              </div>
+              <div class="adv-card-badges">
+                <span class="adv-cat-tag ${category.toLowerCase()}">${escapeHtml(category)}</span>
+                <span class="adv-cost-tag">${a.ranks} PP</span>
+              </div>
+            </div>
+
+            <p class="adv-card-desc">${escapeHtml(desc)}</p>
+
+            <div class="adv-card-footer">
+              <div class="adv-card-stepper-wrap">
+                ${isRanked ? `
+                  <div class="stepper-compact">
+                    <button class="step-btn-xs" data-adv-dec="${escapeHtml(a.name)}" title="Decrease Rank" ${a.ranks <= 1 ? 'disabled' : ''}>-</button>
+                    <span class="step-val-xs">Rank ${a.ranks}</span>
+                    <button class="step-btn-xs" data-adv-inc="${escapeHtml(a.name)}" title="Increase Rank">+</button>
+                  </div>
+                ` : `
+                  <span class="adv-status-tag"><i class="ri-check-line"></i> Active Trait</span>
+                `}
+              </div>
+              <button class="btn-adv-del" data-adv-del="${escapeHtml(a.name)}" title="Remove ${escapeHtml(a.name)} from Sheet">
+                <i class="ri-delete-bin-line"></i>
+              </button>
             </div>
           </div>
         `;
@@ -587,6 +1206,7 @@ function renderAdvantages() {
     </div>
   `;
 
+  // Decrement
   container.querySelectorAll('[data-adv-dec]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -595,6 +1215,7 @@ function renderAdvantages() {
     });
   });
 
+  // Increment
   container.querySelectorAll('[data-adv-inc]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -603,18 +1224,155 @@ function renderAdvantages() {
     });
   });
 
+  // Delete
   container.querySelectorAll('[data-adv-del]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
-      store.removeAdvantage(btn.dataset.advDel);
+      const name = btn.dataset.advDel;
+      store.removeAdvantage(name);
+      showToast(`Removed Advantage: ${name}`, 'info');
     });
+  });
+}
+
+/* ==========================================================================
+   SELF-EXPLANATORY POWERS ARCHITECTURE HELPERS
+   ========================================================================== */
+
+function getActionExplanation(action) {
+  const map = {
+    'Standard': 'Requires a standard action on your turn (used to attack or activate an effect).',
+    'Move': 'Requires a move action on your turn.',
+    'Free': 'Can be activated freely at any time during your turn without using an action.',
+    'Reaction': 'Triggers automatically in response to a specific condition, even outside your turn.',
+    'None': 'Permanent or passive trait that is always active without requiring an activation action.'
+  };
+  return map[action] || 'Power activation action per Mutants & Masterminds 3e rules.';
+}
+
+function getRangeExplanation(range, ranks = 1) {
+  const r = Number(ranks) || 1;
+  const map = {
+    'Close': 'Requires physical contact or melee reach (5 ft) with the target.',
+    'Ranged': `Effective range: Short (${r * 25} ft), Medium (${r * 50} ft, -2 penalty), Long (${r * 100} ft, -5 penalty).`,
+    'Perception': 'Affects any target you can accurately perceive without requiring an attack check.',
+    'Personal': 'Applies only to the character using the power.',
+    'Rank': `Effective range scales with measurement ranks (${r} ranks on the Measurements Table).`
+  };
+  return map[range] || `Effective power range: ${range}.`;
+}
+
+function getDurationExplanation(duration) {
+  const map = {
+    'Instant': 'Occurs immediately upon hitting and ends once the effect has been resolved.',
+    'Concentration': 'Requires a Standard Action each turn to sustain the effect.',
+    'Sustained': 'Lasts round to round as long as you spend a Free Action each turn to maintain it.',
+    'Continuous': 'Remains active continuously even if the character is stunned or incapacitated.',
+    'Permanent': 'Always active without needing maintenance, cannot be turned off, and cannot be used with Extra Effort.'
+  };
+  return map[duration] || `Effect duration: ${duration}.`;
+}
+
+function getResistanceExplanation(resistance, dcDescription = '') {
+  if (!resistance || resistance === 'None') {
+    return 'No resistance check required; the effect applies automatically on contact.';
+  }
+  const cleanRes = String(resistance).trim();
+  if (cleanRes.toLowerCase() === 'toughness') {
+    return 'Target rolls d20 + Toughness vs. the effect DC to resist damage and physical trauma.';
+  }
+  if (cleanRes.toLowerCase() === 'fortitude') {
+    return 'Target rolls d20 + Fortitude vs. the effect DC to resist biological, poison, or physiological effects.';
+  }
+  if (cleanRes.toLowerCase() === 'will') {
+    return 'Target rolls d20 + Will vs. the effect DC to resist mental, psychic, or sensory assault.';
+  }
+  if (cleanRes.toLowerCase() === 'dodge') {
+    return 'Target rolls d20 + Dodge vs. the effect DC to evade or reduce area effect impact.';
+  }
+  if (/fortitude\s+or\s+will/i.test(cleanRes)) {
+    return 'Target rolls d20 + Fortitude or Will (depending on effect configuration) to resist.';
+  }
+  return `Target rolls d20 + ${cleanRes} vs. the effect DC to resist or mitigate the effect.`;
+}
+
+function renderEffectExplainedModifiers(mainEff) {
+  const rawExtras = Array.isArray(mainEff.extras) ? mainEff.extras : [];
+  const rawFlaws = Array.isArray(mainEff.flaws) ? mainEff.flaws : [];
+  if (rawExtras.length === 0 && rawFlaws.length === 0) return '';
+
+  // Properly categorize even if legacy data placed negative modifier in extras
+  const extras = [];
+  const flaws = [...rawFlaws];
+
+  rawExtras.forEach(e => {
+    if (Number(e.cost) < 0 || (typeof FLAWS !== 'undefined' ? FLAWS : []).some(f => f.name.toLowerCase() === (e.name || '').toLowerCase())) {
+      flaws.push(e);
+    } else {
+      extras.push(e);
+    }
   });
 
-  container.querySelectorAll('[data-adv-click]').forEach(el => {
-    el.addEventListener('click', () => {
-      openAdvantageModal();
-    });
+  const extraCards = extras.map(e => {
+    const def = (typeof EXTRAS !== 'undefined' ? EXTRAS : []).find(x => x.name.toLowerCase() === (e.name || '').toLowerCase());
+    const desc = e.desc || def?.desc || 'Enhances power versatility, impact, or operational scope.';
+    const costTag = e.costDisplay || (e.cost !== undefined ? (e.cost >= 0 ? `+${e.cost} PP` : `${e.cost} PP`) : '+1/Rank');
+    return `
+      <div class="power-mod-explain-card extra">
+        <div class="power-mod-explain-header">
+          <span class="power-mod-name"><i class="ri-add-circle-fill"></i> ${escapeHtml(e.name)}</span>
+          <span class="power-mod-rate-tag">${escapeHtml(costTag)}</span>
+        </div>
+        <p class="power-mod-desc-text">${escapeHtml(desc)}</p>
+      </div>
+    `;
   });
+
+  const flawCards = flaws.map(f => {
+    const def = (typeof FLAWS !== 'undefined' ? FLAWS : []).find(x => x.name.toLowerCase() === (f.name || '').toLowerCase());
+    const desc = f.desc || def?.desc || 'Restricts power usage or conditions to reduce Power Point cost.';
+    const costTag = f.costDisplay || (f.cost !== undefined ? (Number(f.cost) <= 0 ? `${f.cost} PP` : `-${f.cost} PP`) : '-1/Rank');
+    return `
+      <div class="power-mod-explain-card flaw">
+        <div class="power-mod-explain-header">
+          <span class="power-mod-name"><i class="ri-indeterminate-circle-fill"></i> ${escapeHtml(f.name)}</span>
+          <span class="power-mod-rate-tag">${escapeHtml(costTag)}</span>
+        </div>
+        <p class="power-mod-desc-text">${escapeHtml(desc)}</p>
+      </div>
+    `;
+  });
+
+  return `
+    <div class="power-tier-section">
+      <div class="tier-badge-line">
+        <span class="tier-label">Applied Modifiers (Extras &amp; Flaws):</span>
+        <span class="tier-sub-hint" style="font-size: 0.72rem; color: var(--text-muted);">
+          Rules modifying how the power functions (green = Extra / red = Flaw)
+        </span>
+      </div>
+      <div class="power-explained-mod-grid">
+        ${extraCards.join('')}
+        ${flawCards.join('')}
+      </div>
+    </div>
+  `;
+}
+
+
+
+function getCostBreakdownFormula(power, mainEff, totalCost) {
+  try {
+    const breakdown = calculatePowerDetailedBreakdown(power);
+    if (breakdown && breakdown.formulaString) {
+      return breakdown.formulaString;
+    }
+  } catch (e) {
+    console.warn('Error calculating detailed breakdown:', e);
+  }
+  const ranks = Number(mainEff.ranks || power.ranks || 1);
+  const baseCost = Number(mainEff.baseCost !== undefined ? mainEff.baseCost : 1);
+  return `[Base ${baseCost} PP/Rank × ${ranks} Ranks] = ${totalCost} PP`;
 }
 
 function renderPowers() {
@@ -627,67 +1385,213 @@ function renderPowers() {
   if (countBadge) countBadge.textContent = `${totalPP} PP`;
 
   if (powers.length === 0) {
-    container.innerHTML = `<div class="empty-hint">No powers created yet. Click "+ New Power (Power Builder)" to design custom superpowers!</div>`;
+    container.innerHTML = `<div class="empty-hint">No powers created yet. Click "+ New Power" to build superpowers!</div>`;
     return;
   }
 
   container.innerHTML = `
-    <div class="powers-cards-grid">
+    <div class="powers-linear-stack">
       ${powers.map(p => {
         const cost = calculatePowerTotalCost(p);
+        const metrics = calculatePowerCombatMetrics(p, store.character.powerLevel, store.character.abilities, store.character.skills);
+        const mainEff = p.mainEffect || p;
+        const baseDef = BASE_EFFECTS.find(b => b.name === (mainEff.baseEffect || p.baseEffect));
+        const subOptionsHtml = renderEffectDetailedSubOptions(mainEff);
+        const modifiersHtml = renderEffectExplainedModifiers(mainEff);
+
         return `
-          <div class="power-card">
-            <div class="power-header">
-              <div class="power-name-group">
-                <span class="power-icon"><i class="ri-flashlight-line"></i></span>
-                <h4 class="power-name">${p.name}</h4>
-                <span class="power-cost-tag">${cost} PP</span>
+          <div class="power-cascade-card">
+            <!-- HEADER & TOP METRICS -->
+            <div class="power-cascade-top">
+              <div class="power-top-left">
+                <span class="power-glyph"><i class="ri-flashlight-line"></i></span>
+                <div>
+                  <h3 class="power-name-title">${escapeHtml(p.name || mainEff.baseEffect || 'Custom Power')}</h3>
+                  <div class="power-tags-row">
+                    <span class="power-tag"><i class="ri-magic-line"></i> ${escapeHtml(mainEff.baseEffect || p.baseEffect || 'Effect')} Rank ${mainEff.ranks || p.ranks || 1}</span>
+                    ${(p.descriptors || []).map(d => `<span class="power-tag"><i class="ri-hashtag"></i> ${escapeHtml(d)}</span>`).join('')}
+                    ${p.deviceConfig?.type && p.deviceConfig.type !== 'none' ? `
+                      <span class="power-tag device"><i class="ri-shield-user-line"></i> Device (${p.deviceConfig.type === 'easily_removable' ? 'Easily Removable' : 'Removable'})</span>
+                    ` : ''}
+                  </div>
+                </div>
               </div>
-              <div class="power-card-actions">
-                <button class="btn btn-ghost btn-xs" data-power-edit="${p.id}"><i class="ri-edit-line"></i> Edit</button>
-                <button class="btn btn-ghost btn-xs text-danger" data-power-del="${p.id}"><i class="ri-delete-bin-line"></i></button>
+
+              <div class="power-top-right">
+                <div class="power-cost-badge-box">
+                  <span class="power-total-pp-val">${cost} PP</span>
+                  <span class="power-cost-sub">Total Power Points</span>
+                </div>
+                <div class="power-actions-group">
+                  <button class="btn btn-secondary btn-xs" data-power-edit="${p.id}" title="Open Power Studio / Builder">
+                    <i class="ri-edit-line"></i> Edit
+                  </button>
+                  <button class="btn btn-ghost btn-xs text-danger" data-power-del="${p.id}" title="Delete Power">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <div class="power-main-desc">
-              <strong>${p.baseEffect} ${p.ranks}</strong>
-              <span class="power-meta-info">(${p.range || 'Close'}, ${p.activation || 'Standard'})</span>
+            <!-- ZONA 1: ACTION & TARGETING PLAYBOOK -->
+            <div class="power-targeting-playbook">
+              <div class="playbook-metric-card">
+                <div class="playbook-metric-header">
+                  <span class="playbook-metric-label"><i class="ri-time-line"></i> Action</span>
+                  <span class="playbook-metric-val action">${escapeHtml(mainEff.action || p.action || 'Standard')}</span>
+                </div>
+                <p class="playbook-metric-explain">${getActionExplanation(mainEff.action || p.action || 'Standard')}</p>
+              </div>
+
+              <div class="playbook-metric-card">
+                <div class="playbook-metric-header">
+                  <span class="playbook-metric-label"><i class="ri-map-pin-range-line"></i> Range</span>
+                  <span class="playbook-metric-val range">${escapeHtml(mainEff.range || p.range || 'Close')}</span>
+                </div>
+                <p class="playbook-metric-explain">${getRangeExplanation(mainEff.range || p.range || 'Close', mainEff.ranks || p.ranks || 1)}</p>
+              </div>
+
+              <div class="playbook-metric-card">
+                <div class="playbook-metric-header">
+                  <span class="playbook-metric-label"><i class="ri-timer-line"></i> Duration</span>
+                  <span class="playbook-metric-val duration">${escapeHtml(mainEff.duration || p.duration || 'Instant')}</span>
+                </div>
+                <p class="playbook-metric-explain">${getDurationExplanation(mainEff.duration || p.duration || 'Instant')}</p>
+              </div>
+
+              <div class="playbook-metric-card">
+                <div class="playbook-metric-header">
+                  <span class="playbook-metric-label"><i class="ri-shield-line"></i> Resistance Check</span>
+                  <span class="playbook-metric-val res">${escapeHtml(mainEff.resistance || p.resistance || 'None')}</span>
+                </div>
+                <p class="playbook-metric-explain">${getResistanceExplanation(mainEff.resistance || p.resistance, metrics.dcDescription)}</p>
+              </div>
             </div>
 
-            ${p.descriptors && p.descriptors.length > 0 ? `
-              <div class="power-descriptors">
-                ${p.descriptors.map(d => `<span class="desc-pill">${d}</span>`).join('')}
+            <!-- ZONA 2: PRIMARY EFFECT & SUBOPTIONS -->
+            <div class="power-tier-section">
+              <div class="tier-badge-line">
+                <span class="tier-label">Primary Effect:</span>
+                <span class="tier-main-pill">${escapeHtml(mainEff.baseEffect || p.baseEffect || 'Effect')} Rank ${mainEff.ranks || p.ranks || 1}</span>
+                <span class="tier-cost-rate">(${mainEff.baseCost !== undefined ? mainEff.baseCost : 1} PP/Rank base)</span>
+              </div>
+              ${baseDef?.desc ? `<p class="tier-rule-desc">${escapeHtml(baseDef.desc)}</p>` : ''}
+              ${subOptionsHtml}
+            </div>
+
+            <!-- ZONA 3: EXTRAS & FLAWS (IF ANY) -->
+            ${modifiersHtml}
+
+            <!-- ZONA 4: LINKED EFFECTS CHAIN TREE -->
+            ${(p.linkedEffects && p.linkedEffects.length > 0) ? `
+              <div class="power-tier-section">
+                <div class="power-guidance-banner">
+                  <i class="ri-information-fill"></i>
+                  <span><strong>Linked Effects Chain:</strong> All effects below trigger simultaneously on the same target with <strong>1 action &amp; 1 attack check</strong> without requiring separate actions.</span>
+                </div>
+                <div class="linked-cascade-list" style="margin-top: 0.65rem;">
+                  ${p.linkedEffects.map(le => {
+                    const leCost = calculateEffectCost(le).totalCost;
+                    const leDef = BASE_EFFECTS.find(b => b.name === (le.baseEffect || le.name));
+                    const leSub = renderEffectDetailedSubOptions(le);
+                    const leMods = renderEffectExplainedModifiers(le);
+                    return `
+                      <div class="linked-cascade-item">
+                        <span class="linked-item-branch">&#x21B3;</span>
+                        <div class="linked-item-content">
+                          <div class="linked-item-header">
+                            <strong>${escapeHtml(le.baseEffect || le.name)} Rank ${le.ranks || 1}</strong>
+                            <span class="linked-item-cost">${leCost} PP</span>
+                            <span class="power-tag action"><i class="ri-time-line"></i> ${escapeHtml(le.action || 'Standard')}</span>
+                            <span class="power-tag range"><i class="ri-map-pin-range-line"></i> ${escapeHtml(le.range || 'Close')}</span>
+                            ${le.resistance ? `<span class="power-tag res"><i class="ri-shield-line"></i> vs ${escapeHtml(le.resistance)}</span>` : ''}
+                          </div>
+                          ${leDef?.desc ? `<p class="tier-rule-desc" style="margin-top: 0.35rem;">${escapeHtml(leDef.desc)}</p>` : ''}
+                          ${leSub}
+                          ${leMods}
+                        </div>
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
               </div>
             ` : ''}
 
-            ${(p.extras.length > 0 || p.flaws.length > 0) ? `
-              <div class="power-modifiers-summary">
-                ${p.extras.map(e => `<span class="mod-tag extra">+${e.name}</span>`).join('')}
-                ${p.flaws.map(f => `<span class="mod-tag flaw">-${f.name}</span>`).join('')}
+            <!-- ZONA 5: ARRAY ALTERNATE SLOTS GROUP -->
+            ${(p.alternateEffects && p.alternateEffects.length > 0) ? `
+              <div class="power-tier-section">
+                <div class="power-guidance-banner" style="background: rgba(56, 189, 248, 0.1); border-left: 3px solid #38bdf8;">
+                  <i class="ri-stack-line" style="color: #38bdf8;"></i>
+                  <span><strong>Array Alternate Slots (${p.alternateEffects.length} configured):</strong> Cost-effective power pool sharing points. You may switch to another slot configuration <strong>once per turn as a Free Action</strong>.</span>
+                </div>
+                <div class="array-cascade-list" style="margin-top: 0.75rem;">
+                  ${p.alternateEffects.map((ae, aIdx) => {
+                    const eff = ae.effect || ae;
+                    const isDynamic = Boolean(ae.isDynamic);
+                    const effDef = BASE_EFFECTS.find(b => b.name === (eff.baseEffect || eff.name));
+                    const effCost = calculateEffectCost(eff).totalCost;
+                    const aeSub = renderEffectDetailedSubOptions(eff);
+                    const aeMods = renderEffectExplainedModifiers(eff);
+                    return `
+                      <div class="array-slot-card ${isDynamic ? 'dynamic' : 'alternate'}">
+                        <div class="slot-header">
+                          <div class="slot-title-wrap">
+                            <span class="slot-index-pill">Slot ${aIdx + 1}</span>
+                            <span class="slot-type-pill ${isDynamic ? 'dynamic' : 'alternate'}">
+                              <i class="${isDynamic ? 'ri-shuffle-line' : 'ri-swap-box-line'}"></i>
+                              ${isDynamic ? 'Dynamic Slot (2 PP)' : 'Alternate Slot (1 PP)'}
+                            </span>
+                            <h4 class="slot-name">${escapeHtml(ae.name || eff.baseEffect || 'Slot')}</h4>
+                            <span class="power-tag"><i class="ri-magic-line"></i> ${escapeHtml(eff.baseEffect || 'Effect')}</span>
+                          </div>
+                          <div class="slot-badges-right">
+                            <span class="slot-ranks-badge"><i class="ri-award-line"></i> Rank ${eff.ranks || 1}</span>
+                            <span class="slot-cost-badge" title="Equivalent standalone power point value"><i class="ri-copper-coin-line"></i> ${effCost} PP Value</span>
+                          </div>
+                        </div>
+
+                        <div class="slot-meta-row">
+                          <div class="slot-tags-group">
+                            <span class="power-tag action"><i class="ri-time-line"></i> ${escapeHtml(eff.action || 'Standard')}</span>
+                            ${eff.range ? `<span class="power-tag range"><i class="ri-map-pin-range-line"></i> ${escapeHtml(eff.range)}</span>` : ''}
+                            ${eff.duration ? `<span class="power-tag duration"><i class="ri-timer-line"></i> ${escapeHtml(eff.duration)}</span>` : ''}
+                            ${eff.resistance ? `<span class="power-tag res"><i class="ri-shield-line"></i> vs ${escapeHtml(eff.resistance)}</span>` : ''}
+                          </div>
+                          <span class="slot-mode-hint">
+                            <i class="${isDynamic ? 'ri-links-line' : 'ri-checkbox-blank-circle-line'}"></i>
+                            ${isDynamic ? 'Dynamic: Flexibly shares rank points with other dynamic slots' : 'Alternate: Mutually exclusive (only one slot active at a time)'}
+                          </span>
+                        </div>
+
+                        ${effDef?.desc ? `<p class="tier-rule-desc" style="margin: 0.4rem 0;">${escapeHtml(effDef.desc)}</p>` : ''}
+                        ${aeSub}
+                        ${aeMods}
+                      </div>
+                    `;
+                  }).join('')}
+                </div>
               </div>
             ` : ''}
 
-            ${p.linkedEffects && p.linkedEffects.length > 0 ? `
-              <div class="linked-summary">
-                <span class="linked-label">Linked:</span>
-                ${p.linkedEffects.map(l => `${l.baseEffect} ${l.ranks}`).join(', ')}
+            <!-- ZONA 6: COST BREAKDOWN & NOTES -->
+            <div class="power-tier-footer">
+              <!-- Transparent Cost Breakdown Bar -->
+              <div class="power-cost-formula-bar">
+                <span class="formula-label"><i class="ri-calculator-line"></i> Cost Breakdown Formula:</span>
+                <span class="formula-math">${getCostBreakdownFormula(p, mainEff, cost)}</span>
               </div>
-            ` : ''}
 
-            ${p.alternateEffects && p.alternateEffects.length > 0 ? `
-              <div class="array-summary">
-                <span class="array-label">Array:</span>
-                ${p.alternateEffects.map(a => a.name || a.baseEffect).join(' | ')}
-              </div>
-            ` : ''}
-
-            ${p.notes ? `<p class="power-notes-text">${p.notes}</p>` : ''}
+              ${p.notes ? `
+                <p class="power-notes-quote"><i class="ri-chat-1-line"></i> "${escapeHtml(p.notes)}"</p>
+              ` : ''}
+            </div>
           </div>
         `;
       }).join('')}
     </div>
   `;
 
+  // Bind Edit
   container.querySelectorAll('[data-power-edit]').forEach(btn => {
     btn.addEventListener('click', () => {
       const p = powers.find(x => x.id === btn.dataset.powerEdit);
@@ -695,6 +1599,7 @@ function renderPowers() {
     });
   });
 
+  // Bind Delete
   container.querySelectorAll('[data-power-del]').forEach(btn => {
     btn.addEventListener('click', async () => {
       const pId = btn.dataset.powerDel;
