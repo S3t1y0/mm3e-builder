@@ -433,6 +433,38 @@ class Store {
     this.notify();
   }
 
+  togglePowerActive(id) {
+    const power = this.character.powers.find(p => p.id === id);
+    if (power) {
+      power.active = power.active === false ? true : false;
+      this.pushHistory();
+      this.notify();
+      return power.active;
+    }
+    return false;
+  }
+
+  setPowerActive(id, isActive) {
+    const power = this.character.powers.find(p => p.id === id);
+    if (power) {
+      power.active = Boolean(isActive);
+      this.pushHistory();
+      this.notify();
+    }
+  }
+
+  setActiveArraySlot(powerId, slotId) {
+    const power = this.character.powers.find(p => p.id === powerId);
+    if (power) {
+      power.activeSlotId = slotId || 'main';
+      if (power.active === false) {
+        power.active = true;
+      }
+      this.pushHistory();
+      this.notify();
+    }
+  }
+
   toggleCondition(conditionName) {
     const idx = this.character.activeConditions.indexOf(conditionName);
     if (idx !== -1) {

@@ -3205,6 +3205,91 @@
   border-left: 3px solid #a855f7;
 }
 
+/* Array Suite Name Config Row */
+.array-name-row {
+  background: rgba(168, 85, 247, 0.08);
+  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+}
+
+.array-name-row label {
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #d8b4fe;
+  letter-spacing: var(--letter-spacing-caps);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.35rem;
+}
+
+.array-name-row .field-hint {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  margin-top: 0.3rem;
+  display: block;
+}
+
+/* Slot Name Editable Inputs */
+.slot-title-line {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.slot-name-edit-box,
+.main-slot-name-edit-box {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xs);
+  padding: 0.2rem 0.55rem;
+  transition: all var(--trans-fast);
+}
+
+.slot-name-edit-box:hover,
+.main-slot-name-edit-box:hover {
+  border-color: rgba(168, 85, 247, 0.45);
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.slot-name-edit-box:focus-within,
+.main-slot-name-edit-box:focus-within {
+  border-color: #a855f7;
+  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.25);
+  background: rgba(15, 23, 42, 0.85);
+}
+
+.pb-slot-name-input {
+  background: transparent;
+  border: none;
+  outline: none;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fff;
+  min-width: 170px;
+  max-width: 280px;
+  font-family: inherit;
+}
+
+.pb-slot-name-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.slot-name-edit-icon {
+  font-size: 0.8rem;
+  color: #c084fc;
+  opacity: 0.8;
+  pointer-events: none;
+}
+
 /* Array Rules Callout Banner */
 .array-rules-banner {
   background: rgba(168, 85, 247, 0.1);

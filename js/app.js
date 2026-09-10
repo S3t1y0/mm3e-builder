@@ -30,6 +30,10 @@ let activeTab = 'sheet'; // 'sheet', 'wizard', 'resources', 'references'
 let activeSheetSkillCategory = 'All';
 let sheetSkillSearchQuery = '';
 
+if (typeof window !== 'undefined') {
+  window.store = store;
+}
+
 if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', () => {
     initApp();
@@ -1398,9 +1402,13 @@ function renderPowers() {
         const baseDef = BASE_EFFECTS.find(b => b.name === (mainEff.baseEffect || p.baseEffect));
         const subOptionsHtml = renderEffectDetailedSubOptions(mainEff);
         const modifiersHtml = renderEffectExplainedModifiers(mainEff);
+        const isPowerActive = p.active !== false;
+        const isArray = p.type === 'array' || (p.alternateEffects && p.alternateEffects.length > 0);
+        const activeSlotId = p.activeSlotId || 'main';
+        const isPrimaryActive = isPowerActive && (!isArray || activeSlotId === 'main' || !p.alternateEffects.some(s => s.id === activeSlotId));
 
         return `
-          <div class="power-cascade-card">
+          <div class="power-cascade-card ${isPowerActive ? 'power-active' : 'power-deactivated'}">
             <!-- HEADER & TOP METRICS -->
             <div class="power-cascade-top">
               <div class="power-top-left">
@@ -1418,6 +1426,15 @@ function renderPowers() {
               </div>
 
               <div class="power-top-right">
+                <div class="power-active-toggle-wrap">
+                  <button class="btn-power-master-toggle ${isPowerActive ? 'active' : 'inactive'}"
+                          data-toggle-power="${p.id}"
+                          type="button"
+                          title="${isPowerActive ? 'Power is Active (Click to Deactivate)' : 'Power is Inactive (Click to Activate)'}">
+                    <span class="power-toggle-dot"></span>
+                    <span class="power-toggle-text">${isPowerActive ? 'ACTIVE' : 'INACTIVE'}</span>
+                  </button>
+                </div>
                 <div class="power-cost-badge-box">
                   <span class="power-total-pp-val">${cost} PP</span>
                   <span class="power-cost-sub">Total Power Points</span>
@@ -1432,6 +1449,19 @@ function renderPowers() {
                 </div>
               </div>
             </div>
+
+            <!-- Deactivated Power Notification Banner -->
+            ${!isPowerActive ? `
+              <div class="power-deactivated-banner">
+                <div class="deact-banner-left">
+                  <i class="ri-shut-down-line"></i>
+                  <span><strong>Power Deactivated:</strong> This power is currently turned off. Its effects and associated attacks are inactive.</span>
+                </div>
+                <button class="btn btn-primary btn-xs" data-toggle-power="${p.id}" type="button">
+                  <i class="ri-flashlight-fill"></i> Activate Power
+                </button>
+              </div>
+            ` : ''}
 
             <!-- ZONA 1: ACTION & TARGETING PLAYBOOK -->
             <div class="power-targeting-playbook">
@@ -1472,8 +1502,19 @@ function renderPowers() {
             <div class="power-tier-section">
               <div class="tier-badge-line">
                 <span class="tier-label">Primary Effect:</span>
-                <span class="tier-main-pill">${escapeHtml(mainEff.baseEffect || p.baseEffect || 'Effect')} Rank ${mainEff.ranks || p.ranks || 1}</span>
+                <span class="tier-main-pill">${escapeHtml(mainEff.name && mainEff.name !== mainEff.baseEffect ? `${mainEff.name} [${mainEff.baseEffect}]` : (mainEff.baseEffect || p.baseEffect || 'Effect'))} Rank ${mainEff.ranks || p.ranks || 1}</span>
                 <span class="tier-cost-rate">(${mainEff.baseCost !== undefined ? mainEff.baseCost : 1} PP/Rank base)</span>
+                ${isArray ? `
+                  <div class="primary-slot-active-wrap" style="margin-left: auto;">
+                    ${isPrimaryActive ? `
+                      <span class="slot-active-status-badge active"><i class="ri-flashlight-fill"></i> ACTIVE PRIMARY</span>
+                    ` : `
+                      <button class="btn-slot-activate ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:main" type="button" title="Switch active power to Primary (Free Action)" ${!isPowerActive ? 'disabled' : ''}>
+                        <i class="ri-checkbox-blank-circle-line"></i> Switch to Primary (Free Action)
+                      </button>
+                    `}
+                  </div>
+                ` : ''}
               </div>
               ${baseDef?.desc ? `<p class="tier-rule-desc">${escapeHtml(baseDef.desc)}</p>` : ''}
               ${subOptionsHtml}
@@ -1532,8 +1573,10 @@ function renderPowers() {
                     const effCost = calculateEffectCost(eff).totalCost;
                     const aeSub = renderEffectDetailedSubOptions(eff);
                     const aeMods = renderEffectExplainedModifiers(eff);
+                    const isThisSlotActive = isPowerActive && (activeSlotId === ae.id);
+
                     return `
-                      <div class="array-slot-card ${isDynamic ? 'dynamic' : 'alternate'}">
+                      <div class="array-slot-card ${isThisSlotActive ? 'active-slot' : 'standby-slot'} ${isDynamic ? 'dynamic' : 'alternate'}">
                         <div class="slot-header">
                           <div class="slot-title-wrap">
                             <span class="slot-index-pill">Slot ${aIdx + 1}</span>
@@ -1545,6 +1588,13 @@ function renderPowers() {
                             <span class="power-tag"><i class="ri-magic-line"></i> ${escapeHtml(eff.baseEffect || 'Effect')}</span>
                           </div>
                           <div class="slot-badges-right">
+                            ${isThisSlotActive ? `
+                              <span class="slot-active-status-badge active"><i class="ri-flashlight-fill"></i> ACTIVE IN USE</span>
+                            ` : `
+                              <button class="btn-slot-activate ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:${ae.id}" type="button" title="Switch active power to this slot (Free Action)" ${!isPowerActive ? 'disabled' : ''}>
+                                <i class="ri-checkbox-blank-circle-line"></i> Activate Slot (Free Action)
+                              </button>
+                            `}
                             <span class="slot-ranks-badge"><i class="ri-award-line"></i> Rank ${eff.ranks || 1}</span>
                             <span class="slot-cost-badge" title="Equivalent standalone power point value"><i class="ri-copper-coin-line"></i> ${effCost} PP Value</span>
                           </div>
@@ -1558,8 +1608,8 @@ function renderPowers() {
                             ${eff.resistance ? `<span class="power-tag res"><i class="ri-shield-line"></i> vs ${escapeHtml(eff.resistance)}</span>` : ''}
                           </div>
                           <span class="slot-mode-hint">
-                            <i class="${isDynamic ? 'ri-links-line' : 'ri-checkbox-blank-circle-line'}"></i>
-                            ${isDynamic ? 'Dynamic: Flexibly shares rank points with other dynamic slots' : 'Alternate: Mutually exclusive (only one slot active at a time)'}
+                            <i class="${isDynamic ? 'ri-links-line' : (isThisSlotActive ? 'ri-radio-button-fill' : 'ri-checkbox-blank-circle-line')}"></i>
+                            ${isDynamic ? 'Dynamic: Flexibly shares rank points with other dynamic slots' : (isThisSlotActive ? 'Currently active in combat (100% capacity)' : 'Alternate: Mutually exclusive standby (Free action to switch)')}
                           </span>
                         </div>
 
@@ -1590,6 +1640,36 @@ function renderPowers() {
       }).join('')}
     </div>
   `;
+
+  // Bind Master Power Toggle (Activate / Deactivate)
+  container.querySelectorAll('[data-toggle-power]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const pId = btn.dataset.togglePower;
+      const power = powers.find(x => x.id === pId);
+      const nowActive = store.togglePowerActive(pId);
+      const name = power ? (power.name || power.baseEffect || 'Power') : 'Power';
+      showToast(nowActive ? `Power "${name}" activated!` : `Power "${name}" deactivated.`, 'info');
+    });
+  });
+
+  // Bind Array Slot Switcher
+  container.querySelectorAll('[data-set-array-slot]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const [powerId, slotId] = btn.dataset.setArraySlot.split(':');
+      const power = powers.find(x => x.id === powerId);
+      if (!power) return;
+
+      store.setActiveArraySlot(powerId, slotId);
+      let slotTitle = 'Primary Effect';
+      if (slotId !== 'main') {
+        const slot = power.alternateEffects?.find(s => s.id === slotId);
+        slotTitle = slot ? (slot.name || slot.effect?.baseEffect || 'Alternate Slot') : 'Alternate Slot';
+      }
+      showToast(`Switched active slot to "${slotTitle}" (Free Action)`, 'success');
+    });
+  });
 
   // Bind Edit
   container.querySelectorAll('[data-power-edit]').forEach(btn => {

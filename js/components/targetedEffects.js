@@ -32,44 +32,109 @@ export function renderTargetedEffects(container) {
   });
 
   // 2. Attacks derived from Powers
+  const buildPowerAttack = ({ power, eff, slotId = 'main', slotName = null }) => {
+    if (!eff) return null;
+    const baseEffect = eff.baseEffect || eff.name || 'Damage';
+    const isAttackEffect = ['Damage', 'Blast', 'Affliction', 'Weaken'].includes(baseEffect);
+    if (!isAttackEffect) return null;
+
+    const isArray = power.type === 'array' || (Array.isArray(power.alternateEffects) && power.alternateEffects.length > 0);
+    const isPowerActive = power.active !== false;
+    const activeSlot = power.activeSlotId || 'main';
+
+    let isActiveSlot = true;
+    let isStandby = false;
+    if (isArray) {
+      if (slotId === 'main') {
+        isActiveSlot = isPowerActive && (activeSlot === 'main' || !power.alternateEffects.some(s => s.id === activeSlot));
+      } else {
+        isActiveSlot = isPowerActive && (activeSlot === slotId);
+      }
+      isStandby = isPowerActive && !isActiveSlot;
+    }
+
+    const isInactive = !isPowerActive;
+
+    let rollBonus = fgt;
+    const isRanged = baseEffect === 'Blast' || eff.range === 'Ranged';
+    if (isRanged) {
+      const dex = store.getAbility('DEX');
+      const searchPattern = slotName || power.name;
+      const rangedSkill = char.skills.find(s => s.name === 'Ranged Combat' && (new RegExp(searchPattern, 'i').test(s.subtype || '') || /blast/i.test(s.subtype || '')));
+      rollBonus = dex + (rangedSkill ? rangedSkill.ranks : 0);
+    }
+
+    const extras = eff.extras || [];
+    const accurate = extras.find(e => e.name === 'Accurate');
+    if (accurate) {
+      rollBonus += (accurate.ranks || 1) * 2;
+    }
+
+    const tags = ['Attack roll', 'Resistance'];
+    if (extras.some(e => e.name === 'Area')) tags.push('Area');
+    if (extras.some(e => e.name === 'Affects Others')) tags.push('Affects Others');
+
+    const resistance = eff.resistance || (baseEffect === 'Affliction' ? 'Fortitude' : 'Toughness');
+    const dcBase = baseEffect === 'Affliction' ? 10 : 15;
+    const ranks = eff.ranks || 1;
+
+    let displayName = slotName || eff.name || power.name || baseEffect;
+    if (isArray && slotId !== 'main' && power.name && !displayName.startsWith(power.name)) {
+      displayName = `${power.name}: ${displayName}`;
+    }
+
+    return {
+      id: slotId === 'main' ? power.id : `${power.id}_${slotId}`,
+      powerId: power.id,
+      slotId,
+      type: 'power',
+      name: displayName,
+      rollBonus,
+      range: eff.range || (baseEffect === 'Blast' ? 'Ranged' : 'Close'),
+      effectName: baseEffect,
+      effectRank: ranks,
+      dc: dcBase + ranks,
+      resistance,
+      crit: '20',
+      tags,
+      isArray,
+      isActiveSlot,
+      isStandby,
+      isInactive
+    };
+  };
+
   for (const power of char.powers) {
-    const isAttackEffect = ['Damage', 'Blast', 'Affliction', 'Weaken'].includes(power.baseEffect);
-    if (isAttackEffect) {
-      let rollBonus = fgt;
-      if (power.baseEffect === 'Blast' || power.range === 'Ranged') {
-        const dex = store.getAbility('DEX');
-        const rangedSkill = char.skills.find(s => s.name === 'Ranged Combat' && (new RegExp(power.name, 'i').test(s.subtype || '') || /blast/i.test(s.subtype || '')));
-        rollBonus = dex + (rangedSkill ? rangedSkill.ranks : 0);
+    const mainEff = power.mainEffect || {
+      baseEffect: power.baseEffect,
+      ranks: power.ranks,
+      range: power.range,
+      action: power.action,
+      duration: power.duration,
+      resistance: power.resistance,
+      extras: power.extras,
+      flaws: power.flaws,
+      name: power.mainEffect?.name || power.name
+    };
+    const mainAtk = buildPowerAttack({
+      power,
+      eff: mainEff,
+      slotId: 'main',
+      slotName: power.name || mainEff.name
+    });
+    if (mainAtk) attacks.push(mainAtk);
+
+    if (Array.isArray(power.alternateEffects)) {
+      for (const slot of power.alternateEffects) {
+        const slotEff = slot.effect || slot;
+        const slotAtk = buildPowerAttack({
+          power,
+          eff: slotEff,
+          slotId: slot.id,
+          slotName: slot.name || slotEff.name
+        });
+        if (slotAtk) attacks.push(slotAtk);
       }
-      
-      // Check for accurate extra
-      const accurate = (power.extras || []).find(e => e.name === 'Accurate');
-      if (accurate) {
-        rollBonus += (accurate.ranks || 1) * 2;
-      }
-
-      const tags = ['Attack roll', 'Resistance'];
-      const hasArea = (power.extras || []).some(e => e.name === 'Area');
-      if (hasArea) tags.push('Area');
-      const hasAffectsOthers = (power.extras || []).some(e => e.name === 'Affects Others');
-      if (hasAffectsOthers) tags.push('Affects Others');
-
-      const resistance = power.resistance || (power.baseEffect === 'Affliction' ? 'Fortitude' : 'Toughness');
-      const dcBase = power.baseEffect === 'Affliction' ? 10 : 15;
-
-      attacks.push({
-        id: power.id,
-        type: 'power',
-        name: power.name || power.baseEffect,
-        rollBonus,
-        range: power.range || (power.baseEffect === 'Blast' ? 'Ranged' : 'Close'),
-        effectName: power.baseEffect,
-        effectRank: power.ranks,
-        dc: dcBase + power.ranks,
-        resistance,
-        crit: '20',
-        tags
-      });
     }
   }
 
@@ -117,13 +182,28 @@ export function renderTargetedEffects(container) {
       <div class="attacks-list">
         ${filtered.length === 0 ? `<div class="empty-hint">No attacks matching filter "${activeFilter}".</div>` : ''}
         ${filtered.map(atk => `
-          <div class="attack-card ${atk.type}">
+          <div class="attack-card ${atk.type} ${atk.isInactive ? 'inactive-attack' : ''} ${atk.isStandby ? 'standby-attack' : ''}">
             <div class="attack-main">
-              <span class="attack-badge ${atk.type}">${atk.type.toUpperCase()}</span>
+              <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
+                <span class="attack-badge ${atk.type}">${atk.slotId && atk.slotId !== 'main' ? 'ARRAY SLOT' : atk.type.toUpperCase()}</span>
+                ${atk.isInactive ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35);"><i class="ri-forbid-line"></i> DEACTIVATED</span>` : ''}
+                ${atk.isStandby ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35);"><i class="ri-pause-circle-line"></i> STANDBY</span>` : ''}
+                ${atk.type === 'power' && !atk.isInactive && !atk.isStandby ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);"><i class="ri-flashlight-fill"></i> ACTIVE</span>` : ''}
+              </div>
               <h4 class="attack-name">${escapeHtml(atk.name)}</h4>
-              <button class="roll-btn" data-attack-id="${atk.id}" data-bonus="${atk.rollBonus}" title="Roll d20 + Attack">
-                <i class="ri-dice-line"></i> Roll d20${atk.rollBonus >= 0 ? '+' + atk.rollBonus : atk.rollBonus}
-              </button>
+              ${atk.isInactive ? `
+                <button class="roll-btn" disabled style="opacity: 0.45; cursor: not-allowed;" title="Power is deactivated on Character Sheet">
+                  <i class="ri-forbid-line"></i> Deactivated
+                </button>
+              ` : atk.isStandby ? `
+                <button class="btn-switch-and-roll" data-switch-power="${atk.powerId}" data-switch-slot="${atk.slotId}" data-bonus="${atk.rollBonus}" title="Switch Array active slot to this attack (Free Action) and roll">
+                  <i class="ri-flashlight-line"></i> Switch & Roll d20${atk.rollBonus >= 0 ? '+' + atk.rollBonus : atk.rollBonus}
+                </button>
+              ` : `
+                <button class="roll-btn" data-attack-id="${atk.id}" data-bonus="${atk.rollBonus}" title="Roll d20 + Attack">
+                  <i class="ri-dice-line"></i> Roll d20${atk.rollBonus >= 0 ? '+' + atk.rollBonus : atk.rollBonus}
+                </button>
+              `}
             </div>
             <div class="attack-metrics">
               <div class="metric">
@@ -193,6 +273,41 @@ export function renderTargetedEffects(container) {
       banner.querySelector('.close-roll-btn').addEventListener('click', () => {
         banner.style.display = 'none';
       });
+    });
+  });
+
+  // Switch array active slot and roll
+  container.querySelectorAll('.btn-switch-and-roll').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const powerId = btn.dataset.switchPower;
+      const slotId = btn.dataset.switchSlot;
+      const bonus = parseInt(btn.dataset.bonus, 10) || 0;
+
+      if (powerId && slotId) {
+        store.setActiveArraySlot(powerId, slotId);
+        showToast('Switched active Array slot (Free Action)', 'info');
+      }
+
+      // Roll d20
+      const d20 = Math.floor(Math.random() * 20) + 1;
+      const total = d20 + bonus;
+      const isCrit = d20 === 20;
+
+      const banner = container.querySelector('#attack-roll-result');
+      if (banner) {
+        banner.style.display = 'flex';
+        banner.innerHTML = `
+          <div class="roll-box ${isCrit ? 'crit' : ''}">
+            <span class="d20-die"><i class="ri-dice-line"></i> ${d20}</span>
+            <span class="roll-formula">+ ${bonus} = <strong>${total}</strong></span>
+            ${isCrit ? '<span class="crit-badge">NATURAL 20! CRITICAL HIT!</span>' : ''}
+          </div>
+          <button class="close-roll-btn" title="Close roll result"><i class="ri-close-line"></i></button>
+        `;
+        banner.querySelector('.close-roll-btn').addEventListener('click', () => {
+          banner.style.display = 'none';
+        });
+      }
     });
   });
 

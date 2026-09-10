@@ -79,7 +79,7 @@ export function openPowerBuilder(powerToEdit = null) {
   activeCategory = 'All';
   modifierSearchQuery = '';
   isAddingAltSlot = false;
-  activeSlotId = currentPower.alternateEffects[0]?.id || null;
+  activeSlotId = currentPower.activeSlotId || currentPower.alternateEffects[0]?.id || 'main';
   expandedLinkedIdx = null;
   expandedSlotIdx = null;
   expandedLinkedLibIdx = null;
@@ -398,7 +398,15 @@ function renderPowerStudio(resetScroll = false) {
       <div class="card-section-header">
         <div class="section-title">
           <span class="badge badge-primary">MAIN EFFECT</span>
-          <span class="main-effect-name">${escapeHtml(currentPower.mainEffect.name || currentPower.mainEffect.baseEffect)}</span>
+          <div class="main-slot-name-edit-box">
+            <input type="text"
+                   id="pb-main-slot-name-input"
+                   class="pb-slot-name-input"
+                   value="${escapeHtml(currentPower.mainEffect.name || currentPower.mainEffect.baseEffect || 'Main Effect')}"
+                   placeholder="Main Slot Name (e.g. Solar Blast)"
+                   title="Click to rename main effect slot" />
+            <i class="ri-edit-line slot-name-edit-icon" title="Editable slot name"></i>
+          </div>
         </div>
         <div class="card-header-badge">
           <span class="effect-cost-badge">${breakdown.mainCost} PP</span>
@@ -653,6 +661,17 @@ function renderPowerStudio(resetScroll = false) {
           </div>
         </div>
 
+        <!-- Array Suite Name Config Row -->
+        <div class="array-name-row">
+          <label for="pb-array-name-input"><i class="ri-edit-2-line"></i> ARRAY NAME / POWER SUITE TITLE</label>
+          <input type="text"
+                 id="pb-array-name-input"
+                 class="form-control"
+                 value="${escapeHtml(currentPower.name || '')}"
+                 placeholder="e.g., Elemental Arsenal, Utility Belt, Martial Arts Matrix" />
+          <span class="field-hint">Rename the entire array suite. This syncs with the power name and displays at the top of the array card on the character sheet.</span>
+        </div>
+
         <!-- M&M 3e Alternate Effects Rule Callout Banner -->
         <div class="array-rules-banner">
           <div class="rules-banner-icon"><i class="ri-book-open-line"></i></div>
@@ -783,8 +802,16 @@ function renderPowerStudio(resetScroll = false) {
                       <i class="${isActive ? 'ri-radio-button-fill' : 'ri-checkbox-blank-circle-line'}"></i>
                     </button>
                     <div class="slot-info-box">
-                      <div style="display:flex;align-items:center;gap:0.5rem;">
-                        <span class="slot-title-text">${escapeHtml(slot.name || 'Alternate Slot')}</span>
+                      <div class="slot-title-line">
+                        <div class="slot-name-edit-box">
+                          <input type="text"
+                                 class="pb-slot-name-input"
+                                 data-slot-name-idx="${aIdx}"
+                                 value="${escapeHtml(slot.name || slot.effect?.name || slot.effect?.baseEffect || 'Alternate Slot')}"
+                                 placeholder="Slot Name (e.g. Solar Flare)"
+                                 title="Click to rename this slot" />
+                          <i class="ri-edit-line slot-name-edit-icon" title="Editable slot name"></i>
+                        </div>
                         ${isActive ? '<span class="badge badge-primary" style="font-size:0.65rem;"><i class="ri-flashlight-fill"></i> ACTIVE</span>' : '<span class="badge badge-subtle" style="font-size:0.65rem;">STANDBY</span>'}
                       </div>
                       <div class="slot-specs-row">
@@ -1951,6 +1978,11 @@ function attachStudioEventHandlers(modal) {
       currentPower.name = currentPower.mainEffect.baseEffect;
     }
 
+    currentPower.activeSlotId = activeSlotId || 'main';
+    if (currentPower.active === undefined) {
+      currentPower.active = true;
+    }
+
     const powerName = currentPower.name;
     if (editingPowerId) {
       store.updatePower(editingPowerId, currentPower);
@@ -1967,9 +1999,27 @@ function attachStudioEventHandlers(modal) {
   modal.querySelector('#pb-close-btn')?.addEventListener('click', closePowerBuilder);
   modal.querySelector('#pb-cancel-inspector-btn')?.addEventListener('click', closePowerBuilder);
 
-  // Power Name
+  // Power Name (synced with #pb-array-name-input)
   modal.querySelector('#pb-power-name')?.addEventListener('input', (e) => {
     currentPower.name = e.target.value;
+    const arrayNameInput = modal.querySelector('#pb-array-name-input');
+    if (arrayNameInput && arrayNameInput.value !== e.target.value) {
+      arrayNameInput.value = e.target.value;
+    }
+  });
+
+  // Array Suite Name input (synced with #pb-power-name)
+  modal.querySelector('#pb-array-name-input')?.addEventListener('input', (e) => {
+    currentPower.name = e.target.value;
+    const powerNameInput = modal.querySelector('#pb-power-name');
+    if (powerNameInput && powerNameInput.value !== e.target.value) {
+      powerNameInput.value = e.target.value;
+    }
+  });
+
+  // Main Effect Slot Name input
+  modal.querySelector('#pb-main-slot-name-input')?.addEventListener('input', (e) => {
+    currentPower.mainEffect.name = e.target.value;
   });
 
   // Power Structure Type
@@ -2484,6 +2534,19 @@ function attachStudioEventHandlers(modal) {
     });
   });
 
+  // Array Slot Name inputs (inline rename per slot)
+  modal.querySelectorAll('.pb-slot-name-input[data-slot-name-idx]').forEach(input => {
+    input.addEventListener('input', (e) => {
+      const idx = parseInt(input.dataset.slotNameIdx, 10);
+      if (currentPower.alternateEffects[idx]) {
+        currentPower.alternateEffects[idx].name = e.target.value;
+        if (currentPower.alternateEffects[idx].effect) {
+          currentPower.alternateEffects[idx].effect.name = e.target.value;
+        }
+      }
+    });
+  });
+
   // Notes
   modal.querySelector('#pb-notes')?.addEventListener('input', (e) => {
     currentPower.notes = e.target.value;
@@ -2735,6 +2798,7 @@ function bindEmbeddedSelectButtons(modal) {
           slot.effect = normalizeEffect(slot.effect);
           if (!slot.name || BASE_EFFECTS.some(b => b.name === slot.name)) {
             slot.name = chosen.name;
+            slot.effect.name = chosen.name;
           }
         }
         expandedSlotLibIdx = null;

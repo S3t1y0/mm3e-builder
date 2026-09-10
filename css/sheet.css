@@ -2577,4 +2577,233 @@
   color: #fff;
 }
 
+/* ==========================================================================
+   POWER & ARRAY ACTIVATION / DEACTIVATION CONTROLS
+   ========================================================================== */
+.power-active-toggle-wrap {
+  display: flex;
+  align-items: center;
+}
+
+.btn-power-master-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  user-select: none;
+}
+
+.btn-power-master-toggle.active {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  color: #34d399;
+}
+
+.btn-power-master-toggle.active:hover {
+  background: rgba(16, 185, 129, 0.25);
+  border-color: #10b981;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+}
+
+.btn-power-master-toggle.inactive {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  color: #f87171;
+}
+
+.btn-power-master-toggle.inactive:hover {
+  background: rgba(239, 68, 68, 0.22);
+  border-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
+}
+
+.power-toggle-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  transition: all var(--trans-fast);
+}
+
+.btn-power-master-toggle.active .power-toggle-dot {
+  background: #10b981;
+  box-shadow: 0 0 6px #10b981;
+}
+
+.btn-power-master-toggle.inactive .power-toggle-dot {
+  background: #ef4444;
+  box-shadow: none;
+}
+
+/* Deactivated Power Card Styling */
+.power-cascade-card.power-deactivated {
+  border-style: dashed;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: linear-gradient(135deg, rgba(15, 23, 42, 0.6) 0%, rgba(30, 41, 59, 0.3) 100%);
+  box-shadow: none;
+}
+
+.power-cascade-card.power-deactivated .power-name-title {
+  color: var(--text-muted);
+}
+
+.power-cascade-card.power-deactivated .power-glyph {
+  opacity: 0.5;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+}
+
+.power-cascade-card.power-deactivated .power-targeting-playbook,
+.power-cascade-card.power-deactivated .power-tier-section,
+.power-cascade-card.power-deactivated .power-cascade-bottom {
+  opacity: 0.55;
+  filter: grayscale(40%);
+  transition: opacity var(--trans-fast);
+}
+
+.power-cascade-card.power-deactivated:hover .power-targeting-playbook,
+.power-cascade-card.power-deactivated:hover .power-tier-section {
+  opacity: 0.75;
+}
+
+/* Deactivated Banner */
+.power-deactivated-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-left: 3px solid #ef4444;
+  border-radius: var(--radius-sm);
+  color: #fca5a5;
+  font-size: 0.76rem;
+  flex-wrap: wrap;
+}
+
+.deact-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.deact-banner-left i {
+  font-size: 1rem;
+  color: #ef4444;
+}
+
+/* Slot Active Status Badges & Buttons */
+.slot-active-status-badge {
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-pill);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  letter-spacing: 0.4px;
+}
+
+.slot-active-status-badge.active {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+  border: 1px solid rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
+}
+
+.btn-slot-activate {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.6rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  user-select: none;
+}
+
+.btn-slot-activate:hover:not(:disabled) {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: #38bdf8;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+  transform: translateY(-1px);
+}
+
+.btn-slot-activate:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Array Slot Active vs Standby Styling */
+.array-slot-card.active-slot {
+  border-color: rgba(16, 185, 129, 0.45);
+  border-left: 4px solid #10b981;
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.9) 100%);
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.12);
+}
+
+.array-slot-card.standby-slot {
+  border-left-color: rgba(148, 163, 184, 0.3);
+  opacity: 0.85;
+}
+
+.array-slot-card.standby-slot:hover {
+  opacity: 1;
+  border-left-color: #38bdf8;
+}
+
+/* Targeted Effects Inactive Attack Styling */
+.attack-card.inactive-attack {
+  opacity: 0.55;
+  border-style: dashed;
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.attack-card.inactive-attack .roll-btn {
+  opacity: 0.45;
+  pointer-events: none;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: transparent;
+  color: var(--text-muted);
+}
+
+.attack-card.standby-attack {
+  border-color: rgba(56, 189, 248, 0.25);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.btn-switch-and-roll {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-switch-and-roll:hover {
+  background: rgba(56, 189, 248, 0.3);
+  color: #fff;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+}
+
 

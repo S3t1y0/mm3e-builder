@@ -1423,6 +1423,8 @@ export function createEmptyPower() {
       descriptor: '',
       toughness: 10
     },
+    active: true,
+    activeSlotId: 'main',
     notes: ''
   };
 }
@@ -1443,6 +1445,8 @@ export function normalizePower(rawPower) {
   power.type = power.type || 'standard';
   power.descriptors = Array.isArray(power.descriptors) ? [...power.descriptors] : [];
   power.notes = power.notes || '';
+  power.active = power.active !== undefined ? Boolean(power.active) : true;
+  power.activeSlotId = power.activeSlotId || 'main';
   power.activation = power.activation || 'none';
   power.activationCost = power.activationCost !== undefined ? Number(power.activationCost) : (power.activation === 'move' ? -1 : power.activation === 'standard' ? -2 : 0);
 
