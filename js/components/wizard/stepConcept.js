@@ -8,9 +8,66 @@ const ORIGINS = [
   'Training', 'Divine', 'Cosmic', 'Psionic', 'Accident'
 ];
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export function renderStepConcept(container) {
   const char = store.character;
 
+  // 1. Non-destructive update: If inputs already exist, update them without destroying focus
+  const heroNameInput = container.querySelector('#wiz-hero-name');
+  if (heroNameInput) {
+    if (document.activeElement !== heroNameInput) {
+      heroNameInput.value = char.name || '';
+    }
+    const realNameInput = container.querySelector('#wiz-real-name');
+    if (realNameInput && document.activeElement !== realNameInput) {
+      realNameInput.value = char.identity || '';
+    }
+    const playerInput = container.querySelector('#wiz-player-name');
+    if (playerInput && document.activeElement !== playerInput) {
+      playerInput.value = char.player || '';
+    }
+    const baseInput = container.querySelector('#wiz-base');
+    if (baseInput && document.activeElement !== baseInput) {
+      baseInput.value = char.baseOfOperations || '';
+    }
+
+    const badge = container.querySelector('.wizard-stage-badge');
+    if (badge) {
+      badge.textContent = `PL ${char.powerLevel} • ${char.powerLevel * 15} PP Budget`;
+    }
+
+    container.querySelectorAll('.pl-preset-btn').forEach(btn => {
+      const pl = parseInt(btn.dataset.pl, 10);
+      btn.className = `btn btn-xs ${char.powerLevel === pl ? 'btn-primary' : 'btn-secondary'} pl-preset-btn`;
+    });
+
+    const plVal = container.querySelector('#wiz-pl-val');
+    if (plVal) plVal.textContent = char.powerLevel;
+    const plBudget = container.querySelector('#wiz-pl-budget');
+    if (plBudget) plBudget.textContent = char.powerLevel * 15;
+    const plDec = container.querySelector('#wiz-pl-dec');
+    if (plDec) plDec.disabled = char.powerLevel <= 1;
+    const plInc = container.querySelector('#wiz-pl-inc');
+    if (plInc) plInc.disabled = char.powerLevel >= 20;
+
+    container.querySelectorAll('.origin-chip').forEach(chip => {
+      const orig = chip.dataset.origin;
+      chip.classList.toggle('selected', (char.notes || '').includes(orig));
+    });
+
+    return;
+  }
+
+  // 2. Initial render: Build template when navigating to Step 1
   container.innerHTML = `
     <div class="wizard-stage-header">
       <div class="wizard-stage-header-title">
@@ -31,19 +88,19 @@ export function renderStepConcept(container) {
       <div class="identity-grid">
         <div class="field-group">
           <label for="wiz-hero-name"><i class="ri-shield-user-line"></i> Hero / Codename</label>
-          <input type="text" id="wiz-hero-name" class="text-input" placeholder="e.g. Apex, Chronos, Valkyrie" value="${char.name || ''}">
+          <input type="text" id="wiz-hero-name" class="text-input" placeholder="e.g. Apex, Chronos, Valkyrie" value="${escapeHtml(char.name || '')}">
         </div>
         <div class="field-group">
           <label for="wiz-real-name"><i class="ri-user-line"></i> Real Name / Alter Ego</label>
-          <input type="text" id="wiz-real-name" class="text-input" placeholder="e.g. Clark Kent, Bruce Wayne" value="${char.identity || ''}">
+          <input type="text" id="wiz-real-name" class="text-input" placeholder="e.g. Clark Kent, Bruce Wayne" value="${escapeHtml(char.identity || '')}">
         </div>
         <div class="field-group">
           <label for="wiz-player-name"><i class="ri-user-smile-line"></i> Player</label>
-          <input type="text" id="wiz-player-name" class="text-input" placeholder="Your Name" value="${char.player || ''}">
+          <input type="text" id="wiz-player-name" class="text-input" placeholder="Your Name" value="${escapeHtml(char.player || '')}">
         </div>
         <div class="field-group">
           <label for="wiz-base"><i class="ri-building-4-line"></i> Base of Operations</label>
-          <input type="text" id="wiz-base" class="text-input" placeholder="e.g. Freedom City, Metro Tower" value="${char.baseOfOperations || ''}">
+          <input type="text" id="wiz-base" class="text-input" placeholder="e.g. Freedom City, Metro Tower" value="${escapeHtml(char.baseOfOperations || '')}">
         </div>
       </div>
     </div>
@@ -110,16 +167,16 @@ export function renderStepConcept(container) {
             <div class="archetype-card-head">
               <div class="archetype-card-icon"><i class="${arch.icon}"></i></div>
               <div>
-                <h4>${arch.name}</h4>
-                <span style="font-size: 0.7rem; color: var(--accent-secondary);">${arch.origin}</span>
+                <h4>${escapeHtml(arch.name)}</h4>
+                <span style="font-size: 0.7rem; color: var(--accent-secondary);">${escapeHtml(arch.origin)}</span>
               </div>
             </div>
-            <p class="archetype-card-tagline">${arch.tagline}</p>
+            <p class="archetype-card-tagline">${escapeHtml(arch.tagline)}</p>
             <div class="archetype-card-stats">
-              <strong>Trade-off:</strong> ${arch.tradeoffStyle}
+              <strong>Trade-off:</strong> ${escapeHtml(arch.tradeoffStyle)}
             </div>
             <button class="btn btn-secondary btn-xs archetype-apply-btn" data-arch-id="${arch.id}">
-              <i class="ri-flashlight-line"></i> Apply ${arch.name} Template
+              <i class="ri-flashlight-line"></i> Apply ${escapeHtml(arch.name)} Template
             </button>
           </div>
         `).join('')}
@@ -127,17 +184,17 @@ export function renderStepConcept(container) {
     </div>
   `;
 
-  // Bind Events
-  document.getElementById('wiz-hero-name')?.addEventListener('input', (e) => {
+  // Bind Events for Text Inputs
+  container.querySelector('#wiz-hero-name')?.addEventListener('input', (e) => {
     store.updateHeader({ name: e.target.value });
   });
-  document.getElementById('wiz-real-name')?.addEventListener('input', (e) => {
+  container.querySelector('#wiz-real-name')?.addEventListener('input', (e) => {
     store.updateHeader({ identity: e.target.value });
   });
-  document.getElementById('wiz-player-name')?.addEventListener('input', (e) => {
+  container.querySelector('#wiz-player-name')?.addEventListener('input', (e) => {
     store.updateHeader({ player: e.target.value });
   });
-  document.getElementById('wiz-base')?.addEventListener('input', (e) => {
+  container.querySelector('#wiz-base')?.addEventListener('input', (e) => {
     store.updateHeader({ baseOfOperations: e.target.value });
   });
 
@@ -146,21 +203,18 @@ export function renderStepConcept(container) {
     btn.addEventListener('click', () => {
       const pl = parseInt(btn.dataset.pl, 10);
       store.updateHeader({ powerLevel: pl });
-      renderStepConcept(container);
     });
   });
 
-  document.getElementById('wiz-pl-dec')?.addEventListener('click', () => {
+  container.querySelector('#wiz-pl-dec')?.addEventListener('click', () => {
     if (store.character.powerLevel > 1) {
       store.updateHeader({ powerLevel: store.character.powerLevel - 1 });
-      renderStepConcept(container);
     }
   });
 
-  document.getElementById('wiz-pl-inc')?.addEventListener('click', () => {
+  container.querySelector('#wiz-pl-inc')?.addEventListener('click', () => {
     if (store.character.powerLevel < 20) {
       store.updateHeader({ powerLevel: store.character.powerLevel + 1 });
-      renderStepConcept(container);
     }
   });
 
@@ -170,12 +224,11 @@ export function renderStepConcept(container) {
       const orig = chip.dataset.origin;
       let notes = store.character.notes || '';
       if (notes.includes(orig)) {
-        notes = notes.replace(orig, '').trim();
+        notes = notes.replace(orig, '').replace(/,\s*,/g, ',').replace(/^,\s*|,\s*$/g, '').trim();
       } else {
         notes = notes ? `${notes}, ${orig}` : orig;
       }
       store.updateHeader({ notes });
-      chip.classList.toggle('selected');
     });
   });
 
@@ -223,7 +276,6 @@ export function renderStepConcept(container) {
           }
         }
         showToast(`${arch.name} template applied successfully!`, 'success');
-        renderStepConcept(container);
       }
     });
   });
