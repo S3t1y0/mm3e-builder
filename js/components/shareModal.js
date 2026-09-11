@@ -38,7 +38,7 @@ export async function openShareModal() {
         </div>
         <div class="share-title-group">
           <h3 class="share-title">Share Character Link</h3>
-          <p class="share-sub">Generating compressed serverless URL...</p>
+          <p class="share-sub">Preparing shareable link...</p>
         </div>
       </div>
       <div class="share-modal-body" style="padding: 2rem 0; text-align: center;">
@@ -65,8 +65,8 @@ export async function openShareModal() {
           <i class="ri-share-forward-fill"></i>
         </div>
         <div class="share-title-group">
-          <h3 class="share-title" id="share-modal-title">Share Hero Registry Link</h3>
-          <p class="share-sub">100% Serverless and GitHub Pages Compatible</p>
+          <h3 class="share-title" id="share-modal-title">Share Character Sheet</h3>
+          <p class="share-sub">Send this hero profile directly to other players or Game Masters</p>
         </div>
         <button id="btn-close-share-modal" class="modal-close-btn" type="button" aria-label="Close Share Modal">
           <i class="ri-close-line"></i>
@@ -83,13 +83,13 @@ export async function openShareModal() {
             <div class="share-hero-chips">
               <span class="share-pill pl">PL ${pl}</span>
               <span class="share-pill pp">${spentPP} / ${budgetPP} PP</span>
-              <span class="share-pill slug">${shareUrl.length} chars</span>
+              <span class="share-pill slug"><i class="ri-link-m"></i> Ready to Share</span>
             </div>
           </div>
         </div>
 
         <div class="share-input-section">
-          <label class="share-input-label" for="share-url-input">Direct Shareable URL (Contains Full Compressed Data):</label>
+          <label class="share-input-label" for="share-url-input">Direct Share Link:</label>
           <div class="share-input-row">
             <input type="text" id="share-url-input" class="share-url-input" value="${shareUrl}" readonly spellcheck="false">
             <button id="btn-copy-share-url" class="btn btn-primary" type="button">
@@ -99,7 +99,7 @@ export async function openShareModal() {
         </div>
 
         <p class="share-explainer">
-          <i class="ri-information-line"></i> Anyone opening this link on GitHub Pages will be automatically prompted to load this exact character into their sheet without requiring any backend server or account.
+          <i class="ri-information-line"></i> Anyone opening this link will be prompted to load this character profile directly into their sheet.
         </p>
       </div>
 

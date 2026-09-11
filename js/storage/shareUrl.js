@@ -1,8 +1,8 @@
 // js/storage/shareUrl.js
 /**
- * 100% Serverless Character Sharing via Compressed URL Slugs
+ * Direct Character Sharing via Compressed URL Slugs
  * Uses native browser CompressionStream / DecompressionStream ('deflate-raw')
- * with Base64URL encoding for compact, permanent GitHub Pages links.
+ * with Base64URL encoding for compact, permanent links.
  */
 
 /**
