@@ -1,6 +1,6 @@
-// js/components/targetedEffects.js
 import { store } from '../state.js';
 import { showToast, showConfirmModal } from './notifications.js';
+import { rollCheck } from './quickDiceRoller.js';
 
 let activeFilter = 'All';
 
@@ -256,23 +256,39 @@ export function renderTargetedEffects(container) {
   container.querySelectorAll('.roll-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       const bonus = parseInt(btn.dataset.bonus, 10) || 0;
-      const d20 = Math.floor(Math.random() * 20) + 1;
-      const total = d20 + bonus;
-      const isCrit = d20 === 20;
+      const atkId = btn.dataset.attackId;
+      const atk = attacks.find(a => a.id === atkId);
+      const atkName = atk?.name || 'Attack';
+      const dcMatch = atk?.resistance?.match(/DC\s*(\d+)/i);
+      const defaultDC = dcMatch ? parseInt(dcMatch[1], 10) : (atk?.dc || 15);
+
+      // Universal Quick Roll HUD
+      const res = rollCheck({
+        name: atkName,
+        type: 'attack',
+        bonus,
+        subtitle: `Targeted Effect Attack Check • ${atk?.range || 'Close'} • ${atk?.resistance || 'Toughness'}`
+      });
+
+      const d20 = res.d20;
+      const total = res.total;
+      const isCrit = res.isCrit;
 
       const banner = container.querySelector('#attack-roll-result');
-      banner.style.display = 'flex';
-      banner.innerHTML = `
-        <div class="roll-box ${isCrit ? 'crit' : ''}">
-          <span class="d20-die"><i class="ri-dice-line"></i> ${d20}</span>
-          <span class="roll-formula">+ ${bonus} = <strong>${total}</strong></span>
-          ${isCrit ? '<span class="crit-badge">NATURAL 20! CRITICAL HIT!</span>' : ''}
-        </div>
-        <button class="close-roll-btn" title="Close roll result"><i class="ri-close-line"></i></button>
-      `;
-      banner.querySelector('.close-roll-btn').addEventListener('click', () => {
-        banner.style.display = 'none';
-      });
+      if (banner) {
+        banner.style.display = 'flex';
+        banner.innerHTML = `
+          <div class="roll-box ${isCrit ? 'crit' : ''}">
+            <span class="d20-die"><i class="ri-dice-line"></i> ${d20}</span>
+            <span class="roll-formula">+ ${bonus} = <strong>${total}</strong></span>
+            ${isCrit ? '<span class="crit-badge">NATURAL 20! CRITICAL HIT!</span>' : ''}
+          </div>
+          <button class="close-roll-btn" title="Close roll result"><i class="ri-close-line"></i></button>
+        `;
+        banner.querySelector('.close-roll-btn').addEventListener('click', () => {
+          banner.style.display = 'none';
+        });
+      }
     });
   });
 
@@ -288,10 +304,17 @@ export function renderTargetedEffects(container) {
         showToast('Switched active Array slot (Free Action)', 'info');
       }
 
-      // Roll d20
-      const d20 = Math.floor(Math.random() * 20) + 1;
-      const total = d20 + bonus;
-      const isCrit = d20 === 20;
+      // Universal Quick Roll HUD
+      const res = rollCheck({
+        name: 'Array Attack',
+        type: 'attack',
+        bonus,
+        subtitle: `Switched Array Slot (Free Action) • Attack Check`
+      });
+
+      const d20 = res.d20;
+      const total = res.total;
+      const isCrit = res.isCrit;
 
       const banner = container.querySelector('#attack-roll-result');
       if (banner) {

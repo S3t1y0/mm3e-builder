@@ -25,10 +25,16 @@ import { exportToJson, importFromJson, exportToCsv, printSheet } from './storage
 import { showToast, showConfirmModal } from './components/notifications.js';
 import { initRoll20Print, openRoll20Preview } from './components/roll20Print.js';
 import { renderWizard } from './components/wizard/wizardController.js';
+import { rollCheck } from './components/quickDiceRoller.js';
 
 let activeTab = 'sheet'; // 'sheet', 'wizard', 'resources', 'references'
+let activeDndbHubTab = 'actions'; // 'actions', 'powers', 'advantages', 'conditions'
 let activeSheetSkillCategory = 'All';
 let sheetSkillSearchQuery = '';
+
+// Collapsed sections tracking
+const collapsedPowerIds = new Set();
+const collapsedAdvantageNames = new Set();
 
 if (typeof window !== 'undefined') {
   window.store = store;
@@ -42,8 +48,24 @@ if (document.readyState === 'loading') {
   initApp();
 }
 
+function syncSheetHeights() {
+  const colLeft = document.querySelector('.dndb-col-left');
+  const sheetGrid = document.querySelector('.dndb-sheet-grid');
+  if (!colLeft || !sheetGrid) return;
+
+  if (window.innerWidth > 768) {
+    const h = colLeft.offsetHeight;
+    if (h > 300) {
+      sheetGrid.style.setProperty('--dndb-col1-height', `${h}px`);
+    }
+  } else {
+    sheetGrid.style.removeProperty('--dndb-col1-height');
+  }
+}
+
 function initApp() {
   setupNavigation();
+  setupDndbHubNavigation();
   setupGlobalActions();
   setupKeyboardShortcuts();
   initRoll20Print();
@@ -54,6 +76,19 @@ function initApp() {
   });
 
   render();
+
+  // Synchronize Column 2 (Skills) and Column 3 (Hub) height to match Column 1 (down to CONDITIONS)
+  syncSheetHeights();
+  if (window.ResizeObserver) {
+    const colLeft = document.querySelector('.dndb-col-left');
+    if (colLeft) {
+      const ro = new ResizeObserver(() => {
+        syncSheetHeights();
+      });
+      ro.observe(colLeft);
+    }
+  }
+  window.addEventListener('resize', syncSheetHeights);
 }
 
 function setupNavigation() {
@@ -64,6 +99,51 @@ function setupNavigation() {
       tabs.forEach(t => t.classList.toggle('active', t === tab));
       render();
     });
+  });
+}
+
+function setupDndbHubNavigation() {
+  const hubBtns = document.querySelectorAll('.dndb-hub-tab-btn');
+  hubBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const tab = btn.dataset.hubTab;
+      if (!tab) return;
+      switchDndbHubTab(tab);
+    });
+  });
+
+  document.getElementById('btn-jump-conditions')?.addEventListener('click', () => {
+    switchDndbHubTab('conditions');
+  });
+
+  // Initiative Quick Box 1-Click Roll
+  const initQuickBox = document.getElementById('dndb-init-quick-box');
+  initQuickBox?.addEventListener('click', () => {
+    const initTotal = store.getDefenseTotal('INITIATIVE');
+    rollCheck({
+      name: 'Initiative Roll',
+      type: 'initiative',
+      bonus: initTotal,
+      subtitle: 'Reaction Speed Turn Order Check'
+    });
+  });
+
+  // Advantages catalog modal button in hub
+  document.getElementById('btn-open-adv-modal')?.addEventListener('click', () => {
+    openAdvantageModal();
+  });
+}
+
+function switchDndbHubTab(tab) {
+  activeDndbHubTab = tab;
+  const hubBtns = document.querySelectorAll('.dndb-hub-tab-btn');
+  const hubPanes = document.querySelectorAll('.dndb-tab-pane');
+
+  hubBtns.forEach(b => {
+    b.classList.toggle('active', b.dataset.hubTab === tab);
+  });
+  hubPanes.forEach(p => {
+    p.classList.toggle('active', p.id === `dndb-tab-pane-${tab}`);
   });
 }
 
@@ -152,10 +232,33 @@ function setupGlobalActions() {
     });
   };
 
-  bindDrawerAction('drawer-btn-undo', 'btn-undo');
-  bindDrawerAction('drawer-btn-redo', 'btn-redo');
-  bindDrawerAction('drawer-btn-new', 'btn-new-char');
-  bindDrawerAction('drawer-btn-clear', 'btn-clear');
+  document.getElementById('drawer-btn-undo')?.addEventListener('click', () => {
+    closeDrawer();
+    store.undo();
+  });
+  document.getElementById('drawer-btn-redo')?.addEventListener('click', () => {
+    closeDrawer();
+    store.redo();
+  });
+  document.getElementById('drawer-btn-new')?.addEventListener('click', () => {
+    closeDrawer();
+    document.getElementById('btn-new-char')?.click();
+  });
+  document.getElementById('drawer-btn-clear')?.addEventListener('click', async () => {
+    closeDrawer();
+    const confirmed = await showConfirmModal({
+      title: 'Reset Character',
+      message: 'Are you sure you want to clear the entire character sheet and reset all Power Points?',
+      confirmText: 'Reset Sheet',
+      cancelText: 'Cancel',
+      isDanger: true,
+      icon: '<i class="ri-delete-bin-line"></i>'
+    });
+    if (confirmed) {
+      store.resetCharacter();
+      showToast('Character sheet reset successfully.', 'info');
+    }
+  });
   bindDrawerAction('drawer-btn-export', 'btn-export');
   bindDrawerAction('drawer-btn-excel', 'btn-excel');
   bindDrawerAction('drawer-btn-import', 'btn-import');
@@ -256,6 +359,9 @@ function render() {
 
   const conditionsContainer = document.getElementById('conditions-container');
   if (conditionsContainer) renderConditionsTracker(conditionsContainer);
+
+  switchDndbHubTab(activeDndbHubTab);
+  syncSheetHeights();
 }
 
 function renderHeaderPoints() {
@@ -356,12 +462,129 @@ function renderHeroDetails() {
   const baseInput = document.getElementById('input-base');
   if (baseInput && document.activeElement !== baseInput) baseInput.value = char.baseOfOperations;
 
-
   const plDisplay = document.getElementById('display-pl');
   if (plDisplay) plDisplay.textContent = char.powerLevel;
 
+  const dndbPlDisplay = document.getElementById('dndb-pl-display');
+  if (dndbPlDisplay) dndbPlDisplay.textContent = char.powerLevel;
+
   const hpDisplay = document.getElementById('display-hp');
   if (hpDisplay) hpDisplay.textContent = char.heroPoints;
+
+  // Initiative & Speed Vitals
+  const initVal = store.getDefenseTotal('INITIATIVE');
+  const initDisplay = document.getElementById('dndb-init-val');
+  if (initDisplay) initDisplay.textContent = initVal >= 0 ? `+${initVal}` : `${initVal}`;
+
+  // Movement Speed calculation
+  let speedRank = 0;
+  let speedMode = 'Ground';
+  (char.powers || []).forEach(p => {
+    if (p.active === false) return;
+    (p.effects || []).forEach(eff => {
+      const effName = (eff.baseEffect || eff.name || '').toLowerCase();
+      if (effName === 'flight') {
+        const r = Number(eff.ranks) || 0;
+        if (r > speedRank) { speedRank = r; speedMode = 'Flight'; }
+      } else if (effName === 'speed') {
+        const r = Number(eff.ranks) || 0;
+        if (r > speedRank) { speedRank = r; speedMode = 'Speed'; }
+      } else if (effName === 'swimming') {
+        const r = Number(eff.ranks) || 0;
+        if (r > speedRank) { speedRank = r; speedMode = 'Swim'; }
+      }
+    });
+  });
+
+  const speedDistances = ['30 ft.', '60 ft. (4 MPH)', '120 ft. (8 MPH)', '250 ft. (16 MPH)', '500 ft. (30 MPH)', '900 ft. (60 MPH)', '1,800 ft. (120 MPH)', '1/2 mile (250 MPH)', '1 mile (500 MPH)', '2 miles (1000 MPH)', '4 miles (2000 MPH)'];
+  const speedDisplay = document.getElementById('dndb-speed-val');
+  const speedBox = speedDisplay?.parentElement;
+  if (speedDisplay) {
+    if (speedRank === 0) {
+      speedDisplay.textContent = '30 ft.';
+      const sub = speedBox?.querySelector('.dndb-vital-sub');
+      if (sub) sub.textContent = 'Normal Walk';
+    } else {
+      const distStr = speedDistances[speedRank] || `Rank ${speedRank}`;
+      speedDisplay.textContent = distStr.split(' ')[0] + ' ' + (distStr.split(' ')[1] || '');
+      const sub = speedBox?.querySelector('.dndb-vital-sub');
+      if (sub) sub.textContent = `${speedMode} Rank ${speedRank}`;
+    }
+  }
+
+  // PP Progress
+  const spent = store.getTotalSpentPP();
+  const budget = store.getTotalBudgetPP();
+  const ppSpentEl = document.getElementById('dndb-pp-spent');
+  const ppBudgetEl = document.getElementById('dndb-pp-budget');
+  const ppProgress = document.getElementById('dndb-pp-progress');
+  if (ppSpentEl) ppSpentEl.textContent = spent;
+  if (ppBudgetEl) ppBudgetEl.textContent = budget;
+  if (ppProgress) {
+    const pct = Math.min(100, Math.max(0, Math.round((spent / budget) * 100)));
+    ppProgress.style.width = `${pct}%`;
+    ppProgress.classList.toggle('overbudget', spent > budget);
+  }
+
+  // Passive Perception (10 + Awareness + Perception rank)
+  const aweMod = store.getAbility('AWE');
+  const percSkill = (char.skills || []).find(s => s.name.toLowerCase() === 'perception');
+  const percRanks = percSkill ? percSkill.ranks : 0;
+  const passivePerc = 10 + aweMod + percRanks;
+  const passiveEl = document.getElementById('dndb-passive-perc');
+  if (passiveEl) passiveEl.textContent = passivePerc;
+
+  // Senses list
+  const sensesListEl = document.getElementById('dndb-senses-list');
+  if (sensesListEl) {
+    const specialSenses = [];
+    (char.powers || []).forEach(p => {
+      if (p.active === false) return;
+      (p.effects || []).forEach(eff => {
+        if ((eff.baseEffect || eff.name) === 'Senses') {
+          const faculties = eff.config?.selectedFaculties || [];
+          faculties.forEach(f => {
+            const name = typeof f === 'object' ? (f.name || f.id) : f;
+            if (name && !specialSenses.includes(name)) specialSenses.push(name);
+          });
+        }
+      });
+    });
+
+    let sHtml = `
+      <div class="dndb-sense-item"><i class="ri-check-line"></i> Normal Vision & Hearing</div>
+      <div class="dndb-sense-item"><i class="ri-check-line"></i> Olfactory & Tactile</div>
+    `;
+    if (specialSenses.length > 0) {
+      sHtml += specialSenses.map(s => `
+        <div class="dndb-sense-item" style="color: #38bdf8;"><i class="ri-radar-line"></i> ${escapeHtml(s)}</div>
+      `).join('');
+    }
+    sensesListEl.innerHTML = sHtml;
+  }
+
+  // Quick Conditions Summary
+  const condSummaryEl = document.getElementById('dndb-active-conditions-summary');
+  if (condSummaryEl) {
+    const activeConds = char.activeConditions || [];
+    if (activeConds.length === 0) {
+      condSummaryEl.innerHTML = `<span class="condition-chip normal"><i class="ri-checkbox-circle-line"></i> Normal / Healthy</span>`;
+    } else {
+      condSummaryEl.innerHTML = activeConds.map(c => `
+        <span class="condition-chip danger"><i class="ri-alert-line"></i> ${escapeHtml(c)}</span>
+      `).join('');
+    }
+  }
+
+  // Hub Tab Badges
+  const hubPowersCount = document.getElementById('hub-powers-count');
+  const hubAdvantagesCount = document.getElementById('hub-advantages-count');
+  const powersPpBadge = document.getElementById('powers-pp-badge');
+  const advantagesPpBadge = document.getElementById('advantages-pp-badge');
+  if (hubPowersCount) hubPowersCount.textContent = (char.powers || []).length;
+  if (hubAdvantagesCount) hubAdvantagesCount.textContent = (char.advantages || []).length;
+  if (powersPpBadge) powersPpBadge.textContent = `${store.getTotalPowerPP()} PP`;
+  if (advantagesPpBadge) advantagesPpBadge.textContent = `${store.getTotalAdvantagePP()} PP`;
 }
 
 function renderAbilities() {
@@ -378,25 +601,48 @@ function renderAbilities() {
           <span class="ab-cost">${val * 2} PP</span>
         </div>
         <div class="ab-controls">
-          <button class="step-btn" data-ab-dec="${ab.key}">-</button>
-          <span class="ab-val ${val < 0 ? 'negative' : ''}">${val >= 0 ? '+' + val : val}</span>
-          <button class="step-btn" data-ab-inc="${ab.key}">+</button>
+          <button class="step-btn" data-ab-dec="${ab.key}" title="Decrease ${ab.key}">-</button>
+          <button class="ab-roll-btn" data-roll-ability="${ab.key}" data-roll-name="${escapeHtml(ab.name)}" data-roll-bonus="${val}" title="Click to Roll ${escapeHtml(ab.name)} Check (d20${val >= 0 ? '+' + val : val})">
+            <i class="ri-dice-line"></i>
+            <span class="ab-val ${val < 0 ? 'negative' : ''}">${val >= 0 ? '+' + val : val}</span>
+          </button>
+          <button class="step-btn" data-ab-inc="${ab.key}" title="Increase ${ab.key}">+</button>
         </div>
       </div>
     `;
   }).join('');
 
+  // Step decrement
   container.querySelectorAll('[data-ab-dec]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const k = btn.dataset.abDec;
       store.setAbility(k, store.getAbility(k) - 1);
     });
   });
 
+  // Step increment
   container.querySelectorAll('[data-ab-inc]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const k = btn.dataset.abInc;
       store.setAbility(k, store.getAbility(k) + 1);
+    });
+  });
+
+  // 1-Click Ability Roll
+  container.querySelectorAll('[data-roll-ability]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const key = btn.dataset.rollAbility;
+      const name = btn.dataset.rollName || 'Ability';
+      const bonus = parseInt(btn.dataset.rollBonus, 10) || 0;
+      rollCheck({
+        name: `${name} Check`,
+        type: 'ability',
+        bonus,
+        subtitle: `M&M 3e Ability Check • Base ${key} (${bonus >= 0 ? '+' + bonus : bonus})`
+      });
     });
   });
 }
@@ -409,6 +655,10 @@ function renderDefenses() {
     const base = store.getDefenseBase(def.key);
     const bought = store.character.defensesBought[def.key] || 0;
     const total = store.getDefenseTotal(def.key);
+    const isInit = def.key === 'INITIATIVE';
+    const rollTitle = isInit
+      ? `Click to Roll Initiative (d20${total >= 0 ? '+' + total : total})`
+      : `Click to Roll ${escapeHtml(def.name)} Resistance Check (d20${total >= 0 ? '+' + total : total})`;
 
     return `
       <div class="defense-card" title="${def.desc}">
@@ -417,18 +667,20 @@ function renderDefenses() {
           <span class="def-base-info">${def.baseAbility} ${base}</span>
         </div>
         <div class="def-body">
-          <div class="def-total-box">
+          <button class="def-roll-btn" data-roll-defense="${def.key}" data-roll-name="${escapeHtml(def.name)}" data-roll-bonus="${total}" title="${rollTitle}">
+            <i class="ri-dice-line"></i>
             <span class="def-total">${total >= 0 ? '+' + total : total}</span>
-          </div>
+            <span class="def-roll-label">ROLL</span>
+          </button>
           ${!def.isDerived && def.key !== 'TOUGHNESS' ? `
             <div class="def-stepper">
-              <button class="step-btn" data-def-dec="${def.key}">-</button>
+              <button class="step-btn" data-def-dec="${def.key}" title="Decrease ${def.name}">-</button>
               <span class="def-bought-val">+${bought} PP</span>
-              <button class="step-btn" data-def-inc="${def.key}">+</button>
+              <button class="step-btn" data-def-inc="${def.key}" title="Increase ${def.name}">+</button>
             </div>
           ` : `
             <div class="def-stepper derived">
-              <span class="def-derived-label">${def.key === 'TOUGHNESS' ? 'Via STA/Armor' : 'Derived'}</span>
+              <span class="def-derived-label">${def.key === 'TOUGHNESS' ? 'Via STA/Armor' : isInit ? 'AGL + Adv' : 'Derived'}</span>
             </div>
           `}
         </div>
@@ -436,19 +688,42 @@ function renderDefenses() {
     `;
   }).join('');
 
+  // Step decrement
   container.querySelectorAll('[data-def-dec]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const k = btn.dataset.defDec;
       const cur = store.character.defensesBought[k] || 0;
       if (cur > 0) store.setDefense(k, cur - 1);
     });
   });
 
+  // Step increment
   container.querySelectorAll('[data-def-inc]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const k = btn.dataset.defInc;
       const cur = store.character.defensesBought[k] || 0;
       store.setDefense(k, cur + 1);
+    });
+  });
+
+  // 1-Click Defense / Resistance / Initiative Roll
+  container.querySelectorAll('[data-roll-defense]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const key = btn.dataset.rollDefense;
+      const name = btn.dataset.rollName || 'Defense';
+      const bonus = parseInt(btn.dataset.rollBonus, 10) || 0;
+      const isInit = key === 'INITIATIVE';
+      rollCheck({
+        name: isInit ? 'Initiative Roll' : `${name} Resistance Check`,
+        type: isInit ? 'initiative' : 'defense',
+        bonus,
+        subtitle: isInit
+          ? 'Reaction Speed Turn Order Check'
+          : `M&M 3e Resistance Check`
+      });
     });
   });
 }
@@ -910,6 +1185,14 @@ function renderSkills() {
       </div>
     </div>
 
+    <div class="sheet-skills-table-header" style="display:grid;grid-template-columns:20px 42px 1fr auto auto;gap:0.65rem;padding:0.25rem 0.65rem;font-size:0.65rem;font-weight:800;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;border-bottom:1px solid var(--border-subtle);margin-bottom:0.35rem;">
+      <span title="Trained Status (● Trained, ◆ Specialization, ○ Untrained)">Pip</span>
+      <span>Abil</span>
+      <span>Skill Name</span>
+      <span style="min-width:52px;text-align:center;">Roll</span>
+      <span style="min-width:58px;text-align:center;">Rank</span>
+    </div>
+
     <div class="sheet-skills-list">
   `;
 
@@ -934,25 +1217,16 @@ function renderSkills() {
             const ranks = inst.ranks;
             const totalBonus = abilityVal + ranks;
             html += `
-              <div class="sheet-skill-row is-trained is-specialization">
-                <div class="sheet-skill-main-col">
-                  <div class="sheet-skill-title-line">
-                    <span class="sheet-skill-name">
-                      ${escapeHtml(ruleSkill.name)}: <span class="spec-highlight">${escapeHtml(inst.subtype || 'General')}</span>
-                    </span>
-                    <span class="sheet-skill-ab-tag">${abilityKey} (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal})</span>
-                    <span class="sheet-skill-trained-badge spec"><i class="ri-shield-star-line"></i> Specialization</span>
-                  </div>
-                  <p class="sheet-skill-desc">${escapeHtml(ruleSkill.desc)}</p>
-                </div>
-
-                <div class="sheet-skill-calc-col">
-                  <span class="sheet-skill-formula-hint">${abilityKey} (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal}) + ${ranks} Ranks</span>
-                  <span class="sheet-skill-total-bonus ${totalBonus >= 0 ? 'positive' : 'negative'}">
-                    ${totalBonus >= 0 ? `+${totalBonus}` : totalBonus}
-                  </span>
-                </div>
-
+              <div class="sheet-skill-row is-trained is-specialization" title="${escapeHtml(ruleSkill.desc)}">
+                <span class="dndb-skill-pip spec" title="Specialization">◆</span>
+                <span class="sheet-skill-ab-tag">${abilityKey}</span>
+                <span class="sheet-skill-name">
+                  ${escapeHtml(ruleSkill.name)}: <span class="spec-highlight">${escapeHtml(inst.subtype || 'General')}</span>
+                </span>
+                <button class="sheet-skill-roll-btn ${totalBonus >= 0 ? 'positive' : 'negative'}" data-roll-skill="${escapeHtml(ruleSkill.name)}: ${escapeHtml(inst.subtype || 'General')}" data-roll-bonus="${totalBonus}" title="Click to Roll ${escapeHtml(ruleSkill.name)}: ${escapeHtml(inst.subtype || 'General')} Check (d20${totalBonus >= 0 ? '+' + totalBonus : totalBonus})">
+                  <i class="ri-dice-line"></i>
+                  <span class="skill-roll-val">${totalBonus >= 0 ? `+${totalBonus}` : totalBonus}</span>
+                </button>
                 <div class="sheet-skill-stepper-col">
                   <div class="stepper-compact">
                     <button class="step-btn-xs" data-sheet-sk-dec="${inst.id}" title="Decrease Rank">-</button>
@@ -1019,27 +1293,14 @@ function renderSkills() {
         const totalBonus = abilityVal + ranks;
 
         html += `
-          <div class="sheet-skill-row ${isTrained ? 'is-trained' : ''}">
-            <div class="sheet-skill-main-col">
-              <div class="sheet-skill-title-line">
-                <span class="sheet-skill-name">${escapeHtml(ruleSkill.name)}</span>
-                <span class="sheet-skill-ab-tag">${abilityKey} (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal})</span>
-                ${isTrained ? `
-                  <span class="sheet-skill-trained-badge"><i class="ri-checkbox-circle-line"></i> Trained</span>
-                ` : `
-                  <span class="sheet-skill-untrained-badge">Untrained</span>
-                `}
-              </div>
-              <p class="sheet-skill-desc">${escapeHtml(ruleSkill.desc)}</p>
-            </div>
-
-            <div class="sheet-skill-calc-col">
-              <span class="sheet-skill-formula-hint">${abilityKey} (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal}) + ${ranks} Ranks</span>
-              <span class="sheet-skill-total-bonus ${totalBonus >= 0 ? 'positive' : 'negative'}">
-                ${totalBonus >= 0 ? `+${totalBonus}` : totalBonus}
-              </span>
-            </div>
-
+          <div class="sheet-skill-row ${isTrained ? 'is-trained' : ''}" title="${escapeHtml(ruleSkill.desc)}">
+            <span class="dndb-skill-pip ${isTrained ? 'trained' : 'untrained'}" title="${isTrained ? 'Trained (+ ' + ranks + ' Ranks)' : 'Untrained'}">${isTrained ? '●' : '○'}</span>
+            <span class="sheet-skill-ab-tag">${abilityKey}</span>
+            <span class="sheet-skill-name">${escapeHtml(ruleSkill.name)}</span>
+            <button class="sheet-skill-roll-btn ${totalBonus >= 0 ? 'positive' : 'negative'}" data-roll-skill="${escapeHtml(ruleSkill.name)}" data-roll-bonus="${totalBonus}" title="Click to Roll ${escapeHtml(ruleSkill.name)} Check (d20${totalBonus >= 0 ? '+' + totalBonus : totalBonus})">
+              <i class="ri-dice-line"></i>
+              <span class="skill-roll-val">${totalBonus >= 0 ? `+${totalBonus}` : totalBonus}</span>
+            </button>
             <div class="sheet-skill-stepper-col">
               <div class="stepper-compact">
                 <button class="step-btn-xs" data-sheet-sk-dec="${skillId || ''}" title="Decrease Rank" ${ranks <= 0 ? 'disabled' : ''}>-</button>
@@ -1053,8 +1314,16 @@ function renderSkills() {
     });
   }
 
+  const prevList = container.querySelector('.sheet-skills-list');
+  const prevScroll = prevList ? prevList.scrollTop : 0;
+
   html += `</div>`;
   container.innerHTML = html;
+
+  const newList = container.querySelector('.sheet-skills-list');
+  if (newList && prevScroll > 0) {
+    newList.scrollTop = prevScroll;
+  }
 
   // Search input listeners
   const searchInput = container.querySelector('#sheet-skill-search');
@@ -1134,6 +1403,21 @@ function renderSkills() {
       showToast(`Removed ${label}`, 'info');
     });
   });
+
+  // 1-Click Skill Roll
+  container.querySelectorAll('[data-roll-skill]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const skillName = btn.dataset.rollSkill || 'Skill';
+      const bonus = parseInt(btn.dataset.rollBonus, 10) || 0;
+      rollCheck({
+        name: `${skillName} Check`,
+        type: 'skill',
+        bonus,
+        subtitle: `M&M 3e Skill Check • Total Bonus ${bonus >= 0 ? '+' + bonus : bonus}`
+      });
+    });
+  });
 }
 
 function renderAdvantages() {
@@ -1150,6 +1434,27 @@ function renderAdvantages() {
   if (addBtn && !addBtn._wired) {
     addBtn.addEventListener('click', () => openAdvantageModal());
     addBtn._wired = true;
+  }
+
+  // Wire Collapse / Expand All Advantages toggle button
+  const allAdvBtn = document.getElementById('btn-toggle-all-advantages');
+  const allAdvText = document.getElementById('toggle-all-adv-text');
+  if (allAdvBtn && advs.length > 0) {
+    allAdvBtn.style.display = 'inline-flex';
+    const allCollapsed = advs.every(a => collapsedAdvantageNames.has(a.name));
+    if (allAdvText) {
+      allAdvText.textContent = allCollapsed ? 'Expand All' : 'Collapse All';
+    }
+    allAdvBtn.onclick = () => {
+      if (allCollapsed) {
+        collapsedAdvantageNames.clear();
+      } else {
+        advs.forEach(a => collapsedAdvantageNames.add(a.name));
+      }
+      renderAdvantages();
+    };
+  } else if (allAdvBtn) {
+    allAdvBtn.style.display = 'none';
   }
 
   if (advs.length === 0) {
@@ -1172,9 +1477,10 @@ function renderAdvantages() {
         const iconClass = getAdvCategoryIcon(category);
         const desc = rule?.desc || 'Rules description unavailable.';
         const isRanked = Boolean(rule?.ranked);
+        const isCollapsed = collapsedAdvantageNames.has(a.name);
 
         return `
-          <div class="sheet-adv-card">
+          <div class="sheet-adv-card ${isCollapsed ? 'is-collapsed' : ''}" id="adv-card-${escapeHtml(a.name)}">
             <div class="adv-card-header">
               <div class="adv-card-title-group">
                 <i class="${iconClass} adv-card-icon"></i>
@@ -1183,32 +1489,62 @@ function renderAdvantages() {
               <div class="adv-card-badges">
                 <span class="adv-cat-tag ${category.toLowerCase()}">${escapeHtml(category)}</span>
                 <span class="adv-cost-tag">${a.ranks} PP</span>
+                <button class="btn-adv-collapse-toggle ${isCollapsed ? 'collapsed' : ''}" data-toggle-collapse-adv="${escapeHtml(a.name)}" title="${isCollapsed ? 'Expand Advantage Section' : 'Close Advantage Section'}" type="button">
+                  <i class="${isCollapsed ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line'}"></i>
+                </button>
               </div>
             </div>
 
-            <p class="adv-card-desc">${escapeHtml(desc)}</p>
+            <div class="adv-card-body ${isCollapsed ? 'collapsed' : ''}" id="adv-body-${escapeHtml(a.name)}">
+              <p class="adv-card-desc">${escapeHtml(desc)}</p>
 
-            <div class="adv-card-footer">
-              <div class="adv-card-stepper-wrap">
-                ${isRanked ? `
-                  <div class="stepper-compact">
-                    <button class="step-btn-xs" data-adv-dec="${escapeHtml(a.name)}" title="Decrease Rank" ${a.ranks <= 1 ? 'disabled' : ''}>-</button>
-                    <span class="step-val-xs">Rank ${a.ranks}</span>
-                    <button class="step-btn-xs" data-adv-inc="${escapeHtml(a.name)}" title="Increase Rank">+</button>
-                  </div>
-                ` : `
-                  <span class="adv-status-tag"><i class="ri-check-line"></i> Active Trait</span>
-                `}
+              <div class="adv-card-footer">
+                <div class="adv-card-stepper-wrap">
+                  ${isRanked ? `
+                    <div class="stepper-compact">
+                      <button class="step-btn-xs" data-adv-dec="${escapeHtml(a.name)}" title="Decrease Rank" ${a.ranks <= 1 ? 'disabled' : ''}>-</button>
+                      <span class="step-val-xs">Rank ${a.ranks}</span>
+                      <button class="step-btn-xs" data-adv-inc="${escapeHtml(a.name)}" title="Increase Rank">+</button>
+                    </div>
+                  ` : `
+                    <span class="adv-status-tag"><i class="ri-check-line"></i> Active Trait</span>
+                  `}
+                </div>
+                <button class="btn-adv-del" data-adv-del="${escapeHtml(a.name)}" title="Remove ${escapeHtml(a.name)} from Sheet">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
               </div>
-              <button class="btn-adv-del" data-adv-del="${escapeHtml(a.name)}" title="Remove ${escapeHtml(a.name)} from Sheet">
-                <i class="ri-delete-bin-line"></i>
-              </button>
             </div>
           </div>
         `;
       }).join('')}
     </div>
   `;
+
+  // Bind Advantage Collapse / Expand Toggle
+  container.querySelectorAll('[data-toggle-collapse-adv]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const name = btn.dataset.toggleCollapseAdv;
+      if (collapsedAdvantageNames.has(name)) {
+        collapsedAdvantageNames.delete(name);
+      } else {
+        collapsedAdvantageNames.add(name);
+      }
+      renderAdvantages();
+    });
+  });
+
+  // Expand when clicking header of collapsed card
+  container.querySelectorAll('.sheet-adv-card.is-collapsed .adv-card-header').forEach(header => {
+    header.style.cursor = 'pointer';
+    header.addEventListener('click', (e) => {
+      if (e.target.closest('button')) return;
+      const card = header.closest('.sheet-adv-card');
+      const toggleBtn = card?.querySelector('[data-toggle-collapse-adv]');
+      if (toggleBtn) toggleBtn.click();
+    });
+  });
 
   // Decrement
   container.querySelectorAll('[data-adv-dec]').forEach(btn => {
@@ -1388,6 +1724,27 @@ function renderPowers() {
   const totalPP = store.getTotalPowerPP();
   if (countBadge) countBadge.textContent = `${totalPP} PP`;
 
+  // Wire Collapse / Expand All Powers toggle button
+  const allPowersBtn = document.getElementById('btn-toggle-all-powers');
+  const allPowersText = document.getElementById('toggle-all-powers-text');
+  if (allPowersBtn && powers.length > 0) {
+    allPowersBtn.style.display = 'inline-flex';
+    const allCollapsed = powers.every(p => collapsedPowerIds.has(p.id));
+    if (allPowersText) {
+      allPowersText.textContent = allCollapsed ? 'Expand All' : 'Collapse All';
+    }
+    allPowersBtn.onclick = () => {
+      if (allCollapsed) {
+        collapsedPowerIds.clear();
+      } else {
+        powers.forEach(p => collapsedPowerIds.add(p.id));
+      }
+      renderPowers();
+    };
+  } else if (allPowersBtn) {
+    allPowersBtn.style.display = 'none';
+  }
+
   if (powers.length === 0) {
     container.innerHTML = `<div class="empty-hint">No powers created yet. Click "+ New Power" to build superpowers!</div>`;
     return;
@@ -1406,9 +1763,10 @@ function renderPowers() {
         const isArray = p.type === 'array' || (p.alternateEffects && p.alternateEffects.length > 0);
         const activeSlotId = p.activeSlotId || 'main';
         const isPrimaryActive = isPowerActive && (!isArray || activeSlotId === 'main' || !p.alternateEffects.some(s => s.id === activeSlotId));
+        const isCollapsed = collapsedPowerIds.has(p.id);
 
         return `
-          <div class="power-cascade-card ${isPowerActive ? 'power-active' : 'power-deactivated'}">
+          <div class="power-cascade-card ${isPowerActive ? 'power-active' : 'power-deactivated'} ${isCollapsed ? 'is-collapsed' : ''}" id="power-card-${p.id}">
             <!-- HEADER & TOP METRICS -->
             <div class="power-cascade-top">
               <div class="power-top-left">
@@ -1440,6 +1798,9 @@ function renderPowers() {
                   <span class="power-cost-sub">Total Power Points</span>
                 </div>
                 <div class="power-actions-group">
+                  <button class="btn-power-collapse-toggle ${isCollapsed ? 'collapsed' : ''}" data-toggle-collapse-power="${p.id}" title="${isCollapsed ? 'Expand Power Details' : 'Close Power Section'}" type="button">
+                    <i class="${isCollapsed ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line'}"></i> <span class="collapse-text">${isCollapsed ? 'Expand' : 'Close'}</span>
+                  </button>
                   <button class="btn btn-secondary btn-xs" data-power-edit="${p.id}" title="Open Power Studio / Builder">
                     <i class="ri-edit-line"></i> Edit
                   </button>
@@ -1450,190 +1811,199 @@ function renderPowers() {
               </div>
             </div>
 
-            <!-- Deactivated Power Notification Banner -->
-            ${!isPowerActive ? `
-              <div class="power-deactivated-banner">
-                <div class="deact-banner-left">
-                  <i class="ri-shut-down-line"></i>
-                  <span><strong>Power Deactivated:</strong> This power is currently turned off. Its effects and associated attacks are inactive.</span>
-                </div>
-                <button class="btn btn-primary btn-xs" data-toggle-power="${p.id}" type="button">
-                  <i class="ri-flashlight-fill"></i> Activate Power
-                </button>
+            ${isCollapsed ? `
+              <div class="power-collapsed-hint" data-toggle-collapse-power="${p.id}" title="Click to expand full playbook & effects">
+                <i class="ri-information-line"></i>
+                <span>Section details closed (${escapeHtml(mainEff.baseEffect || p.baseEffect || 'Effect')} Rank ${mainEff.ranks || p.ranks || 1} • ${cost} PP). Click to expand.</span>
               </div>
             ` : ''}
 
-            <!-- ZONA 1: ACTION & TARGETING PLAYBOOK -->
-            <div class="power-targeting-playbook">
-              <div class="playbook-metric-card">
-                <div class="playbook-metric-header">
-                  <span class="playbook-metric-label"><i class="ri-time-line"></i> Action</span>
-                  <span class="playbook-metric-val action">${escapeHtml(mainEff.action || p.action || 'Standard')}</span>
-                </div>
-                <p class="playbook-metric-explain">${getActionExplanation(mainEff.action || p.action || 'Standard')}</p>
-              </div>
-
-              <div class="playbook-metric-card">
-                <div class="playbook-metric-header">
-                  <span class="playbook-metric-label"><i class="ri-map-pin-range-line"></i> Range</span>
-                  <span class="playbook-metric-val range">${escapeHtml(mainEff.range || p.range || 'Close')}</span>
-                </div>
-                <p class="playbook-metric-explain">${getRangeExplanation(mainEff.range || p.range || 'Close', mainEff.ranks || p.ranks || 1)}</p>
-              </div>
-
-              <div class="playbook-metric-card">
-                <div class="playbook-metric-header">
-                  <span class="playbook-metric-label"><i class="ri-timer-line"></i> Duration</span>
-                  <span class="playbook-metric-val duration">${escapeHtml(mainEff.duration || p.duration || 'Instant')}</span>
-                </div>
-                <p class="playbook-metric-explain">${getDurationExplanation(mainEff.duration || p.duration || 'Instant')}</p>
-              </div>
-
-              <div class="playbook-metric-card">
-                <div class="playbook-metric-header">
-                  <span class="playbook-metric-label"><i class="ri-shield-line"></i> Resistance Check</span>
-                  <span class="playbook-metric-val res">${escapeHtml(mainEff.resistance || p.resistance || 'None')}</span>
-                </div>
-                <p class="playbook-metric-explain">${getResistanceExplanation(mainEff.resistance || p.resistance, metrics.dcDescription)}</p>
-              </div>
-            </div>
-
-            <!-- ZONA 2: PRIMARY EFFECT & SUBOPTIONS -->
-            <div class="power-tier-section">
-              <div class="tier-badge-line">
-                <span class="tier-label">Primary Effect:</span>
-                <span class="tier-main-pill">${escapeHtml(mainEff.name && mainEff.name !== mainEff.baseEffect ? `${mainEff.name} [${mainEff.baseEffect}]` : (mainEff.baseEffect || p.baseEffect || 'Effect'))} Rank ${mainEff.ranks || p.ranks || 1}</span>
-                <span class="tier-cost-rate">(${mainEff.baseCost !== undefined ? mainEff.baseCost : 1} PP/Rank base)</span>
-                ${isArray ? `
-                  <div class="primary-slot-active-wrap" style="margin-left: auto;">
-                    ${isPrimaryActive ? `
-                      <span class="slot-active-status-badge active"><i class="ri-flashlight-fill"></i> ACTIVE PRIMARY</span>
-                    ` : `
-                      <button class="btn-slot-activate ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:main" type="button" title="Switch active power to Primary (Free Action)" ${!isPowerActive ? 'disabled' : ''}>
-                        <i class="ri-checkbox-blank-circle-line"></i> Switch to Primary (Free Action)
-                      </button>
-                    `}
+            <div class="power-cascade-body ${isCollapsed ? 'collapsed' : ''}" id="power-body-${p.id}">
+              <!-- Deactivated Power Notification Banner -->
+              ${!isPowerActive ? `
+                <div class="power-deactivated-banner">
+                  <div class="deact-banner-left">
+                    <i class="ri-shut-down-line"></i>
+                    <span><strong>Power Deactivated:</strong> This power is currently turned off. Its effects and associated attacks are inactive.</span>
                   </div>
+                  <button class="btn btn-primary btn-xs" data-toggle-power="${p.id}" type="button">
+                    <i class="ri-flashlight-fill"></i> Activate Power
+                  </button>
+                </div>
+              ` : ''}
+
+              <!-- ZONA 1: ACTION & TARGETING PLAYBOOK -->
+              <div class="power-targeting-playbook">
+                <div class="playbook-metric-card">
+                  <div class="playbook-metric-header">
+                    <span class="playbook-metric-label"><i class="ri-time-line"></i> Action</span>
+                    <span class="playbook-metric-val action">${escapeHtml(mainEff.action || p.action || 'Standard')}</span>
+                  </div>
+                  <p class="playbook-metric-explain">${getActionExplanation(mainEff.action || p.action || 'Standard')}</p>
+                </div>
+
+                <div class="playbook-metric-card">
+                  <div class="playbook-metric-header">
+                    <span class="playbook-metric-label"><i class="ri-map-pin-range-line"></i> Range</span>
+                    <span class="playbook-metric-val range">${escapeHtml(mainEff.range || p.range || 'Close')}</span>
+                  </div>
+                  <p class="playbook-metric-explain">${getRangeExplanation(mainEff.range || p.range || 'Close', mainEff.ranks || p.ranks || 1)}</p>
+                </div>
+
+                <div class="playbook-metric-card">
+                  <div class="playbook-metric-header">
+                    <span class="playbook-metric-label"><i class="ri-timer-line"></i> Duration</span>
+                    <span class="playbook-metric-val duration">${escapeHtml(mainEff.duration || p.duration || 'Instant')}</span>
+                  </div>
+                  <p class="playbook-metric-explain">${getDurationExplanation(mainEff.duration || p.duration || 'Instant')}</p>
+                </div>
+
+                <div class="playbook-metric-card">
+                  <div class="playbook-metric-header">
+                    <span class="playbook-metric-label"><i class="ri-shield-line"></i> Resistance Check</span>
+                    <span class="playbook-metric-val res">${escapeHtml(mainEff.resistance || p.resistance || 'None')}</span>
+                  </div>
+                  <p class="playbook-metric-explain">${getResistanceExplanation(mainEff.resistance || p.resistance, metrics.dcDescription)}</p>
+                </div>
+              </div>
+
+              <!-- ZONA 2: PRIMARY EFFECT & SUBOPTIONS -->
+              <div class="power-tier-section">
+                <div class="tier-badge-line">
+                  <span class="tier-label">Primary Effect:</span>
+                  <span class="tier-main-pill">${escapeHtml(mainEff.name && mainEff.name !== mainEff.baseEffect ? `${mainEff.name} [${mainEff.baseEffect}]` : (mainEff.baseEffect || p.baseEffect || 'Effect'))} Rank ${mainEff.ranks || p.ranks || 1}</span>
+                  <span class="tier-cost-rate">(${mainEff.baseCost !== undefined ? mainEff.baseCost : 1} PP/Rank base)</span>
+                  ${isArray ? `
+                    <div class="primary-slot-active-wrap" style="margin-left: auto;">
+                      ${isPrimaryActive ? `
+                        <span class="slot-active-status-badge active"><i class="ri-flashlight-fill"></i> ACTIVE PRIMARY</span>
+                      ` : `
+                        <button class="btn-slot-activate ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:main" type="button" title="Switch active power to Primary (Free Action)" ${!isPowerActive ? 'disabled' : ''}>
+                          <i class="ri-checkbox-blank-circle-line"></i> Switch to Primary (Free Action)
+                        </button>
+                      `}
+                    </div>
+                  ` : ''}
+                </div>
+                ${baseDef?.desc ? `<p class="tier-rule-desc">${escapeHtml(baseDef.desc)}</p>` : ''}
+                ${subOptionsHtml}
+              </div>
+
+              <!-- ZONA 3: EXTRAS & FLAWS (IF ANY) -->
+              ${modifiersHtml}
+
+              <!-- ZONA 4: LINKED EFFECTS CHAIN TREE -->
+              ${(p.linkedEffects && p.linkedEffects.length > 0) ? `
+                <div class="power-tier-section">
+                  <div class="power-guidance-banner">
+                    <i class="ri-information-fill"></i>
+                    <span><strong>Linked Effects Chain:</strong> All effects below trigger simultaneously on the same target with <strong>1 action &amp; 1 attack check</strong> without requiring separate actions.</span>
+                  </div>
+                  <div class="linked-cascade-list" style="margin-top: 0.65rem;">
+                    ${p.linkedEffects.map(le => {
+                      const leCost = calculateEffectCost(le).totalCost;
+                      const leDef = BASE_EFFECTS.find(b => b.name === (le.baseEffect || le.name));
+                      const leSub = renderEffectDetailedSubOptions(le);
+                      const leMods = renderEffectExplainedModifiers(le);
+                      return `
+                        <div class="linked-cascade-item">
+                          <span class="linked-item-branch">&#x21B3;</span>
+                          <div class="linked-item-content">
+                            <div class="linked-item-header">
+                              <strong>${escapeHtml(le.baseEffect || le.name)} Rank ${le.ranks || 1}</strong>
+                              <span class="linked-item-cost">${leCost} PP</span>
+                              <span class="power-tag action"><i class="ri-time-line"></i> ${escapeHtml(le.action || 'Standard')}</span>
+                              <span class="power-tag range"><i class="ri-map-pin-range-line"></i> ${escapeHtml(le.range || 'Close')}</span>
+                              ${le.resistance ? `<span class="power-tag res"><i class="ri-shield-line"></i> vs ${escapeHtml(le.resistance)}</span>` : ''}
+                            </div>
+                            ${leDef?.desc ? `<p class="tier-rule-desc" style="margin-top: 0.35rem;">${escapeHtml(leDef.desc)}</p>` : ''}
+                            ${leSub}
+                            ${leMods}
+                          </div>
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              ` : ''}
+
+              <!-- ZONA 5: ARRAY ALTERNATE SLOTS GROUP -->
+              ${(p.alternateEffects && p.alternateEffects.length > 0) ? `
+                <div class="power-tier-section">
+                  <div class="power-guidance-banner" style="background: rgba(56, 189, 248, 0.1); border-left: 3px solid #38bdf8;">
+                    <i class="ri-stack-line" style="color: #38bdf8;"></i>
+                    <span><strong>Array Alternate Slots (${p.alternateEffects.length} configured):</strong> Cost-effective power pool sharing points. You may switch to another slot configuration <strong>once per turn as a Free Action</strong>.</span>
+                  </div>
+                  <div class="array-cascade-list" style="margin-top: 0.75rem;">
+                    ${p.alternateEffects.map((ae, aIdx) => {
+                      const eff = ae.effect || ae;
+                      const isDynamic = Boolean(ae.isDynamic);
+                      const effDef = BASE_EFFECTS.find(b => b.name === (eff.baseEffect || eff.name));
+                      const effCost = calculateEffectCost(eff).totalCost;
+                      const aeSub = renderEffectDetailedSubOptions(eff);
+                      const aeMods = renderEffectExplainedModifiers(eff);
+                      const isThisSlotActive = isPowerActive && (activeSlotId === ae.id);
+
+                      return `
+                        <div class="array-slot-card ${isThisSlotActive ? 'active-slot' : 'standby-slot'} ${isDynamic ? 'dynamic' : 'alternate'}">
+                          <div class="slot-header">
+                            <div class="slot-title-wrap">
+                              <span class="slot-index-pill">Slot ${aIdx + 1}</span>
+                              <span class="slot-type-pill ${isDynamic ? 'dynamic' : 'alternate'}">
+                                <i class="${isDynamic ? 'ri-shuffle-line' : 'ri-swap-box-line'}"></i>
+                                ${isDynamic ? 'Dynamic Slot (2 PP)' : 'Alternate Slot (1 PP)'}
+                              </span>
+                              <h4 class="slot-name">${escapeHtml(ae.name || eff.baseEffect || 'Slot')}</h4>
+                              <span class="power-tag"><i class="ri-magic-line"></i> ${escapeHtml(eff.baseEffect || 'Effect')}</span>
+                            </div>
+                            <div class="slot-badges-right">
+                              ${isThisSlotActive ? `
+                                <span class="slot-active-status-badge active"><i class="ri-flashlight-fill"></i> ACTIVE IN USE</span>
+                              ` : `
+                                <button class="btn-slot-activate ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:${ae.id}" type="button" title="Switch active power to this slot (Free Action)" ${!isPowerActive ? 'disabled' : ''}>
+                                  <i class="ri-checkbox-blank-circle-line"></i> Activate Slot (Free Action)
+                                </button>
+                              `}
+                              <span class="slot-ranks-badge"><i class="ri-award-line"></i> Rank ${eff.ranks || 1}</span>
+                              <span class="slot-cost-badge" title="Equivalent standalone power point value"><i class="ri-copper-coin-line"></i> ${effCost} PP Value</span>
+                            </div>
+                          </div>
+
+                          <div class="slot-meta-row">
+                            <div class="slot-tags-group">
+                              <span class="power-tag action"><i class="ri-time-line"></i> ${escapeHtml(eff.action || 'Standard')}</span>
+                              ${eff.range ? `<span class="power-tag range"><i class="ri-map-pin-range-line"></i> ${escapeHtml(eff.range)}</span>` : ''}
+                              ${eff.duration ? `<span class="power-tag duration"><i class="ri-timer-line"></i> ${escapeHtml(eff.duration)}</span>` : ''}
+                              ${eff.resistance ? `<span class="power-tag res"><i class="ri-shield-line"></i> vs ${escapeHtml(eff.resistance)}</span>` : ''}
+                            </div>
+                            <span class="slot-mode-hint">
+                              <i class="${isDynamic ? 'ri-links-line' : (isThisSlotActive ? 'ri-radio-button-fill' : 'ri-checkbox-blank-circle-line')}"></i>
+                              ${isDynamic ? 'Dynamic: Flexibly shares rank points with other dynamic slots' : (isThisSlotActive ? 'Currently active in combat (100% capacity)' : 'Alternate: Mutually exclusive standby (Free action to switch)')}
+                            </span>
+                          </div>
+
+                          ${effDef?.desc ? `<p class="tier-rule-desc" style="margin: 0.4rem 0;">${escapeHtml(effDef.desc)}</p>` : ''}
+                          ${aeSub}
+                          ${aeMods}
+                        </div>
+                      `;
+                    }).join('')}
+                  </div>
+                </div>
+              ` : ''}
+
+              <!-- ZONA 6: COST BREAKDOWN & NOTES -->
+              <div class="power-tier-footer">
+                <!-- Transparent Cost Breakdown Bar -->
+                <div class="power-cost-formula-bar">
+                  <span class="formula-label"><i class="ri-calculator-line"></i> Cost Breakdown Formula:</span>
+                  <span class="formula-math">${getCostBreakdownFormula(p, mainEff, cost)}</span>
+                </div>
+
+                ${p.notes ? `
+                  <p class="power-notes-quote"><i class="ri-chat-1-line"></i> "${escapeHtml(p.notes)}"</p>
                 ` : ''}
               </div>
-              ${baseDef?.desc ? `<p class="tier-rule-desc">${escapeHtml(baseDef.desc)}</p>` : ''}
-              ${subOptionsHtml}
-            </div>
-
-            <!-- ZONA 3: EXTRAS & FLAWS (IF ANY) -->
-            ${modifiersHtml}
-
-            <!-- ZONA 4: LINKED EFFECTS CHAIN TREE -->
-            ${(p.linkedEffects && p.linkedEffects.length > 0) ? `
-              <div class="power-tier-section">
-                <div class="power-guidance-banner">
-                  <i class="ri-information-fill"></i>
-                  <span><strong>Linked Effects Chain:</strong> All effects below trigger simultaneously on the same target with <strong>1 action &amp; 1 attack check</strong> without requiring separate actions.</span>
-                </div>
-                <div class="linked-cascade-list" style="margin-top: 0.65rem;">
-                  ${p.linkedEffects.map(le => {
-                    const leCost = calculateEffectCost(le).totalCost;
-                    const leDef = BASE_EFFECTS.find(b => b.name === (le.baseEffect || le.name));
-                    const leSub = renderEffectDetailedSubOptions(le);
-                    const leMods = renderEffectExplainedModifiers(le);
-                    return `
-                      <div class="linked-cascade-item">
-                        <span class="linked-item-branch">&#x21B3;</span>
-                        <div class="linked-item-content">
-                          <div class="linked-item-header">
-                            <strong>${escapeHtml(le.baseEffect || le.name)} Rank ${le.ranks || 1}</strong>
-                            <span class="linked-item-cost">${leCost} PP</span>
-                            <span class="power-tag action"><i class="ri-time-line"></i> ${escapeHtml(le.action || 'Standard')}</span>
-                            <span class="power-tag range"><i class="ri-map-pin-range-line"></i> ${escapeHtml(le.range || 'Close')}</span>
-                            ${le.resistance ? `<span class="power-tag res"><i class="ri-shield-line"></i> vs ${escapeHtml(le.resistance)}</span>` : ''}
-                          </div>
-                          ${leDef?.desc ? `<p class="tier-rule-desc" style="margin-top: 0.35rem;">${escapeHtml(leDef.desc)}</p>` : ''}
-                          ${leSub}
-                          ${leMods}
-                        </div>
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            ` : ''}
-
-            <!-- ZONA 5: ARRAY ALTERNATE SLOTS GROUP -->
-            ${(p.alternateEffects && p.alternateEffects.length > 0) ? `
-              <div class="power-tier-section">
-                <div class="power-guidance-banner" style="background: rgba(56, 189, 248, 0.1); border-left: 3px solid #38bdf8;">
-                  <i class="ri-stack-line" style="color: #38bdf8;"></i>
-                  <span><strong>Array Alternate Slots (${p.alternateEffects.length} configured):</strong> Cost-effective power pool sharing points. You may switch to another slot configuration <strong>once per turn as a Free Action</strong>.</span>
-                </div>
-                <div class="array-cascade-list" style="margin-top: 0.75rem;">
-                  ${p.alternateEffects.map((ae, aIdx) => {
-                    const eff = ae.effect || ae;
-                    const isDynamic = Boolean(ae.isDynamic);
-                    const effDef = BASE_EFFECTS.find(b => b.name === (eff.baseEffect || eff.name));
-                    const effCost = calculateEffectCost(eff).totalCost;
-                    const aeSub = renderEffectDetailedSubOptions(eff);
-                    const aeMods = renderEffectExplainedModifiers(eff);
-                    const isThisSlotActive = isPowerActive && (activeSlotId === ae.id);
-
-                    return `
-                      <div class="array-slot-card ${isThisSlotActive ? 'active-slot' : 'standby-slot'} ${isDynamic ? 'dynamic' : 'alternate'}">
-                        <div class="slot-header">
-                          <div class="slot-title-wrap">
-                            <span class="slot-index-pill">Slot ${aIdx + 1}</span>
-                            <span class="slot-type-pill ${isDynamic ? 'dynamic' : 'alternate'}">
-                              <i class="${isDynamic ? 'ri-shuffle-line' : 'ri-swap-box-line'}"></i>
-                              ${isDynamic ? 'Dynamic Slot (2 PP)' : 'Alternate Slot (1 PP)'}
-                            </span>
-                            <h4 class="slot-name">${escapeHtml(ae.name || eff.baseEffect || 'Slot')}</h4>
-                            <span class="power-tag"><i class="ri-magic-line"></i> ${escapeHtml(eff.baseEffect || 'Effect')}</span>
-                          </div>
-                          <div class="slot-badges-right">
-                            ${isThisSlotActive ? `
-                              <span class="slot-active-status-badge active"><i class="ri-flashlight-fill"></i> ACTIVE IN USE</span>
-                            ` : `
-                              <button class="btn-slot-activate ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:${ae.id}" type="button" title="Switch active power to this slot (Free Action)" ${!isPowerActive ? 'disabled' : ''}>
-                                <i class="ri-checkbox-blank-circle-line"></i> Activate Slot (Free Action)
-                              </button>
-                            `}
-                            <span class="slot-ranks-badge"><i class="ri-award-line"></i> Rank ${eff.ranks || 1}</span>
-                            <span class="slot-cost-badge" title="Equivalent standalone power point value"><i class="ri-copper-coin-line"></i> ${effCost} PP Value</span>
-                          </div>
-                        </div>
-
-                        <div class="slot-meta-row">
-                          <div class="slot-tags-group">
-                            <span class="power-tag action"><i class="ri-time-line"></i> ${escapeHtml(eff.action || 'Standard')}</span>
-                            ${eff.range ? `<span class="power-tag range"><i class="ri-map-pin-range-line"></i> ${escapeHtml(eff.range)}</span>` : ''}
-                            ${eff.duration ? `<span class="power-tag duration"><i class="ri-timer-line"></i> ${escapeHtml(eff.duration)}</span>` : ''}
-                            ${eff.resistance ? `<span class="power-tag res"><i class="ri-shield-line"></i> vs ${escapeHtml(eff.resistance)}</span>` : ''}
-                          </div>
-                          <span class="slot-mode-hint">
-                            <i class="${isDynamic ? 'ri-links-line' : (isThisSlotActive ? 'ri-radio-button-fill' : 'ri-checkbox-blank-circle-line')}"></i>
-                            ${isDynamic ? 'Dynamic: Flexibly shares rank points with other dynamic slots' : (isThisSlotActive ? 'Currently active in combat (100% capacity)' : 'Alternate: Mutually exclusive standby (Free action to switch)')}
-                          </span>
-                        </div>
-
-                        ${effDef?.desc ? `<p class="tier-rule-desc" style="margin: 0.4rem 0;">${escapeHtml(effDef.desc)}</p>` : ''}
-                        ${aeSub}
-                        ${aeMods}
-                      </div>
-                    `;
-                  }).join('')}
-                </div>
-              </div>
-            ` : ''}
-
-            <!-- ZONA 6: COST BREAKDOWN & NOTES -->
-            <div class="power-tier-footer">
-              <!-- Transparent Cost Breakdown Bar -->
-              <div class="power-cost-formula-bar">
-                <span class="formula-label"><i class="ri-calculator-line"></i> Cost Breakdown Formula:</span>
-                <span class="formula-math">${getCostBreakdownFormula(p, mainEff, cost)}</span>
-              </div>
-
-              ${p.notes ? `
-                <p class="power-notes-quote"><i class="ri-chat-1-line"></i> "${escapeHtml(p.notes)}"</p>
-              ` : ''}
             </div>
           </div>
         `;
@@ -1650,6 +2020,20 @@ function renderPowers() {
       const nowActive = store.togglePowerActive(pId);
       const name = power ? (power.name || power.baseEffect || 'Power') : 'Power';
       showToast(nowActive ? `Power "${name}" activated!` : `Power "${name}" deactivated.`, 'info');
+    });
+  });
+
+  // Bind Power Collapse / Expand Toggle
+  container.querySelectorAll('[data-toggle-collapse-power]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const pId = btn.dataset.toggleCollapsePower;
+      if (collapsedPowerIds.has(pId)) {
+        collapsedPowerIds.delete(pId);
+      } else {
+        collapsedPowerIds.add(pId);
+      }
+      renderPowers();
     });
   });
 

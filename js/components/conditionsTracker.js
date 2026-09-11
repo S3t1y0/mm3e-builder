@@ -14,7 +14,7 @@ export function renderConditionsTracker(container) {
           <h3>Conditions Simulator</h3>
           ${activeConditions.length > 0 ? `
             <span class="active-count-badge">${activeConditions.length} Active</span>
-          ` : '<span class="normal-status-badge">Normal — No Conditions</span>'}
+          ` : '<span class="normal-status-badge">Normal: No Conditions</span>'}
         </div>
         ${activeConditions.length > 0 ? `
           <button id="btn-clear-conditions" class="btn btn-outline btn-xs">Clear All</button>

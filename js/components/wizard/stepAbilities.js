@@ -6,18 +6,18 @@ function getBenchmarkLabel(val) {
   if (val <= -2) return 'Debilitated (-2 or lower)';
   if (val === -1) return 'Below Average (-1)';
   if (val === 0) return 'Human Norm (0)';
-  if (val === 1 || val === 2) return 'Athletic / Trained (1–2)';
-  if (val === 3 || val === 4) return 'Peak Human (3–4)';
-  if (val >= 5 && val <= 7) return 'Superhuman (5–7)';
-  if (val >= 8 && val <= 10) return 'High Superhuman (8–10)';
-  if (val >= 11 && val <= 14) return 'Godlike / Titan (11–14)';
+  if (val === 1 || val === 2) return 'Athletic / Trained (1-2)';
+  if (val === 3 || val === 4) return 'Peak Human (3-4)';
+  if (val >= 5 && val <= 7) return 'Superhuman (5-7)';
+  if (val >= 8 && val <= 10) return 'High Superhuman (8-10)';
+  if (val >= 11 && val <= 14) return 'Godlike / Titan (11-14)';
   return 'Cosmic Force (15+)';
 }
 
 export function renderStepAbilities(container) {
   const char = store.character;
   const totalAbilityPP = store.getTotalAbilityPP();
-  const recommendedPP = `${Math.round(char.powerLevel * 3)}–${Math.round(char.powerLevel * 5)} PP`;
+  const recommendedPP = `${Math.round(char.powerLevel * 3)}-${Math.round(char.powerLevel * 5)} PP`;
 
   container.innerHTML = `
     <div class="wizard-stage-header">
@@ -123,7 +123,7 @@ function updateAbilityDisplay(container, key) {
   const badge = container.querySelector('.wizard-stage-badge');
   if (badge) {
     const totalAbilityPP = store.getTotalAbilityPP();
-    const recommendedPP = `${Math.round(store.character.powerLevel * 3)}–${Math.round(store.character.powerLevel * 5)} PP`;
+    const recommendedPP = `${Math.round(store.character.powerLevel * 3)}-${Math.round(store.character.powerLevel * 5)} PP`;
     badge.textContent = `${totalAbilityPP} PP Spent (Target: ~${recommendedPP})`;
   }
 }

@@ -494,7 +494,7 @@ export function buildRoll20SheetHtml() {
           <div class="r20-bio-item"><strong>Hero Name:</strong> ${escapeHtml(char.name || 'Hero Name')}</div>
           <div class="r20-bio-item"><strong>Real Identity:</strong> ${escapeHtml(char.identity || 'Secret Alter Ego')}</div>
           <div class="r20-bio-item"><strong>Status:</strong> ${char.isSecretIdentity ? 'Secret Identity' : 'Public ID'}</div>
-          <div class="r20-bio-item"><strong>Player:</strong> ${escapeHtml(char.player || '—')}</div>
+          <div class="r20-bio-item"><strong>Player:</strong> ${escapeHtml(char.player || '-')}</div>
           <div class="r20-bio-item"><strong>Base of Operations:</strong> ${escapeHtml(char.baseOfOperations || 'Freedom City')}</div>
           <div class="r20-bio-item"><strong>Power Level:</strong> ${pl}</div>
         </div>
@@ -536,9 +536,9 @@ export function buildRoll20SheetHtml() {
           </div>
           <div style="padding: 10px 14px; font-size: 0.85rem; line-height: 1.4;">
             ${char.notes ? escapeHtml(char.notes).replace(/\n/g, '<br>') : `
-              <p><strong>Motivation: Responsibility</strong> — Driven to protect the innocent and uphold order against emerging superhuman threats.</p>
-              <p><strong>Complication: Secret Identity</strong> — Maintains a civilian double-life, requiring continuous care to avoid exposing loved ones.</p>
-              <p><strong>Complication: Enemy</strong> — Has recurrent arch-villains plotting retribution.</p>
+              <p><strong>Motivation: Responsibility:</strong> Driven to protect the innocent and uphold order against emerging superhuman threats.</p>
+              <p><strong>Complication: Secret Identity:</strong> Maintains a civilian double-life, requiring continuous care to avoid exposing loved ones.</p>
+              <p><strong>Complication: Enemy:</strong> Has recurrent arch-villains plotting retribution.</p>
             `}
           </div>
         </div>

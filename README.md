@@ -1,6 +1,6 @@
-# Mutants & Masterminds 3E Character Builder & Sheet Manager
+# Mutants & Masterminds 3E: Hero Registry & Tactical Sheet Manager
 
-A modern, responsive, zero-dependency web application designed for character creation, power budgeting, and sheet management for the *Mutants & Masterminds 3rd Edition* tabletop roleplaying game (d20 Hero System by Green Ronin Publishing).
+A modern, responsive, zero-dependency web application designed for character creation, power budgeting, live combat tracking, and sheet management for the *Mutants & Masterminds 3rd Edition* tabletop roleplaying game (d20 Hero System by Green Ronin Publishing).
 
 ---
 
@@ -8,11 +8,13 @@ A modern, responsive, zero-dependency web application designed for character cre
 
 - [Overview](#overview)
 - [Key Features](#key-features)
-  - [Character Management & Rule Validation](#character-management--rule-validation)
-  - [Modular Power Builder](#modular-power-builder)
-  - [Equipment & Resource Tracking](#equipment--resource-tracking)
+  - [D&D Beyond Style 3-Tier Tactical Dashboard](#dd-beyond-style-3-tier-tactical-dashboard)
+  - [Universal 1-Click D20 Dice Roller HUD](#universal-1-click-d20-dice-roller-hud)
+  - [Guided Character Wizard & Archetypes](#guided-character-wizard--archetypes)
+  - [Modular Power Studio Engine](#modular-power-studio-engine)
+  - [Combat Tracking & Condition Simulator](#combat-tracking--condition-simulator)
+  - [Equipment & Headquarters Manager](#equipment--headquarters-manager)
   - [Official Roll20 Compatibility & Print-to-PDF](#official-roll20-compatibility--print-to-pdf)
-  - [Combat Tracking & Reference Library](#combat-tracking--reference-library)
   - [Data Portability & State Management](#data-portability--state-management)
 - [Architecture & Technology Stack](#architecture--technology-stack)
 - [Directory Structure](#directory-structure)
@@ -21,68 +23,112 @@ A modern, responsive, zero-dependency web application designed for character cre
   - [Running Locally](#running-locally)
 - [Deployment](#deployment)
   - [Deploying to GitHub Pages](#deploying-to-github-pages)
+- [Design Standards](#design-standards)
 - [Disclaimer & Legal Notice](#disclaimer--legal-notice)
 
 ---
 
 ## Overview
 
-The M&M 3E Character Builder simplifies the complex math of character creation in *Mutants & Masterminds 3rd Edition*. Built entirely on modern native web standards, it handles real-time Power Point (PP) calculations, Power Level (PL) trade-off cap validations, equipment budgets, and conditional modifiers without requiring external frameworks or compilation pipelines.
+The Mutants & Masterminds 3E Hero Registry modernizes tabletop superhero gaming. Built entirely on native web standards without bulky external frameworks, it pairs the deep point-buy mechanics of the d20 Hero System with the sleek, glanceable UX inspired by contemporary tabletop platforms like D&D Beyond.
+
+The application handles real-time Power Point (PP) budgets, automated Power Level (PL) trade-off caps, modular power calculations with dynamic extras and flaws, active combat conditions, and instant one-click dice rolls.
 
 ---
 
 ## Key Features
 
-### Character Management & Rule Validation
-- Full support for the 8 core abilities: Strength, Stamina, Agility, Dexterity, Fighting, Intellect, Awareness, and Presence.
-- Dynamic Defense calculation: Dodge, Parry, Fortitude, Toughness, and Will, automatically accounting for base abilities, purchased defense ranks, and active modifiers.
-- Power Level Cap Enforcement: Automated trade-off validation for standard rule limits:
-  - Dodge + Toughness <= 2 x PL
-  - Parry + Toughness <= 2 x PL
-  - Fortitude + Will <= 2 x PL
-  - Attack Bonus + Effect Rank <= 2 x PL
-- Non-blocking visual alerts when character metrics exceed power level guidelines.
+### D&D Beyond Style 3-Tier Tactical Dashboard
 
-### Modular Power Builder
-- Interactive Power Builder with support for standard M&M 3E effect types, descriptors, ranges, and action types.
-- Modifiers Engine:
-  - Extras: Adjust cost per rank (+1 to +5 PP/rank) or flat cost bonuses.
-  - Flaws: Reduce cost per rank (-1 to -5 PP/rank) with support for fractional costs (e.g., 1 PP per 2 ranks) down to rule minimums.
-  - Flat Modifiers: Dynamic flat cost adjustments for power feats and minor drawbacks.
-- Real-time total point calculation with automated cost breakdown.
+- **Tier 1: Hero Identity & Combat Vitals Banner**:
+  - Hero Crest avatar with dark crimson shield styling.
+  - Live character fields: Hero Name, Alter Ego / Real Name, Player Name, and Base of Operations.
+  - Interactive Power Level (PL) stepper with real-time budget scaling.
+  - Hero Points tracker stepper (`-` / `+`) for fast in-combat tracking.
+  - Dynamic Speed & Movement rate calculator (`30 ft. Normal Walk`, Flight, Speed ranks).
+  - 1-Click Initiative Roll box triggering the dice roller HUD.
+  - Live Power Points (PP) budget progress meter with visual alert states when over budget.
 
-### Equipment & Resource Tracking
-- Dedicated inventory and equipment ledger categorized by Gear, Gadgets, Combat Vehicles, and Headquarters.
-- Equipment Point (EP) budget tracker linked directly to the character's Equipment advantage ranks (1 PP = 5 EP).
-- One-click advantage synchronization to automatically adjust the Equipment advantage rank to cover current inventory EP.
+- **Tier 2: 8 Abilities Ribbon (Horizontal Dock)**:
+  - Concise 8-column layout featuring all core abilities: STR, STA, AGL, DEX, FGT, INT, AWE, and PRE.
+  - Large modifier values, current PP costs, rank stepper controls, and instant 1-click ability check roll buttons.
+
+- **Tier 3: 3-Column Tactical Tabletop Grid**:
+  - **Column 1 (Defenses & Senses)**:
+    - Resistance checks: Dodge, Parry, Fortitude, Toughness, and Will with rank steppers and 1-click saving throw buttons.
+    - Senses & Passive Perception tracker automatically factoring Awareness and active sensory powers (Darkvision, Radio Sense, etc.).
+    - Quick Conditions glance overview with direct shortcut to the combat simulator.
+  - **Column 2 (Skills Table with Status Pips)**:
+    - Alphabetical skill roster with visual status indicators: Trained, Specialized, and Untrained.
+    - Live category filtering (`All`, `Combat`, `Physical`, `Mental`, `Interaction`) and instant search.
+    - Instant 1-click d20 skill rolls with bonus breakdowns.
+    - Integrated Close Combat, Ranged Combat, and Expertise specialization manager with popular presets.
+    - Independent scroll container bounded to maintain viewport stability.
+  - **Column 3 (Tabbed Action & Content Hub)**:
+    - `ACTIONS` Tab: Targeted combat profiles (Unarmed, Weapons, Powers, Custom attacks) with calculated attack bonuses, damage ranks, critical ranges, and resistance check DCs.
+    - `POWERS` Tab: Modular power suites cascade with active power toggle switches, array slot selectors, and internal smooth scrolling.
+    - `ADVANTAGES` Tab: Complete traits roster with instant access to the 56-choice standard advantage catalog.
+    - `CONDITIONS` Tab: Full interactive conditions simulator for tracking damage states.
+
+### Universal 1-Click D20 Dice Roller HUD
+
+- Floating tabletop dice roller overlay appearing instantly on any roll action.
+- Displays d20 dice roll, modifier bonuses, critical success alerts (Natural 20), and total result.
+- Provides immediate Target DC difficulty checks and effect descriptions.
+- Non-intrusive backdrop dismissal and keyboard accessibility.
+
+### Guided Character Wizard & Archetypes
+
+- Step-by-step guided creation workflow for new players and quick NPC generation.
+- Built-in superhero archetype presets: Battlesuit, Speedster, Mystic, Paragon, Martial Artist, Crime Fighter, and more.
+- Guided ability point distribution, advantage selection, and power suite scaffolding.
+
+### Modular Power Studio Engine
+
+- Comprehensive implementation of the Mutants & Masterminds 3rd Edition effect system.
+- Real-time cost calculations:
+  - Base effect ranks, action types (Standard, Move, Free, Reaction), ranges (Close, Ranged, Perception), and durations (Instant, Sustained, Continuous, Permanent).
+  - Extras (+1 to +5 PP/rank or flat modifiers).
+  - Flaws (-1 to -5 PP/rank) with fractional cost handling down to rule minimums (e.g., 1 PP per 2 ranks).
+  - Flat Feats and Drawbacks.
+  - Dynamic Arrays and Alternative Effects (1 PP alternate power rules).
+
+### Combat Tracking & Condition Simulator
+
+- Full support for cumulative damage conditions: Bruised, Dazed, Staggered, and Incapacitated.
+- Combined conditions simulator: Blind, Deaf, Exhausted, Fatigued, Bound, Defenseless, Paralyzed, Prone, Restrained, Stunned, Surprised, and Vulnerable.
+- Real-time combat penalty propagation to active defenses and checks.
+
+### Equipment & Headquarters Manager
+
+- Dedicated inventory system for Gear, Gadgets, Combat Vehicles, and Headquarters.
+- Equipment Point (EP) budget tracker linked directly to Equipment advantage ranks (1 PP = 5 EP).
+- One-click advantage synchronization to balance purchased ranks with equipment loadout.
 
 ### Official Roll20 Compatibility & Print-to-PDF
-- Roll20 Sheet Preview: In-app modal viewer replicating the exact visual hierarchy, fonts, and layout of the official Roll20 Mutants & Masterminds 3E character sheet.
-- High-Fidelity Print Engine: Custom `@media print` CSS rules formatted specifically for standard Letter and A4 portrait layouts, outputting vector-sharp PDF character sheets ready for tabletop play.
 
-### Combat Tracking & Reference Library
-- Targeted Combat Effects: Manage standard melee attacks, ranged attacks, and custom power attacks with calculated attack bonuses, damage ranks, critical ranges, and resistance defenses.
-- Condition Tracker: Live tracking of cumulative damage conditions (Bruised, Dazed, Staggered, Incapacitated) and status penalties.
-- Reference Manual: Integrated tables for Action Types (Standard, Move, Free, Reaction), Condition definitions, and the Rank & Measures chart.
+- **Roll20 Sheet Preview**: In-app modal replicating the exact visual layout, typography, and structure of the official Roll20 M&M 3E character sheet.
+- **Vector Print Engine**: High-fidelity `@media print` rules optimized for Letter and A4 portrait layouts, generating crisp PDF character sheets ready for physical table sessions.
 
 ### Data Portability & State Management
-- Reactive Local Storage: Changes persist automatically in browser storage across page reloads.
-- Full Undo / Redo Stack: Step-by-step history management via toolbar controls or keyboard shortcuts (`Ctrl+Z`, `Ctrl+Shift+Z`).
-- Profile Export & Import: Complete character save files in human-readable JSON.
-- Spreadsheet Export: Tabular export to CSV / Excel format.
+
+- Reactive Local Storage: Automatic persistence across browser sessions.
+- Full History Stack: Undo (`Ctrl+Z`) and Redo (`Ctrl+Y` / `Ctrl+Shift+Z`) state tracking via keyboard shortcuts and slide-out menu drawer.
+- Profile Export & Import: Complete character save files in human-readable JSON format.
+- Tabular Data Export: Clean CSV / Excel export for campaign archives and GM rosters.
 
 ---
 
 ## Architecture & Technology Stack
 
-The application adheres to a zero-dependency, vanilla web architecture for optimal performance, instant load times, and long-term maintainability.
+The application strictly adheres to a zero-dependency, vanilla web architecture for lightning-fast loads, zero build friction, and long-term durability:
 
-- **Markup**: Semantic HTML5 with accessible structures.
-- **Styling**: Vanilla CSS3 utilizing Custom Properties (CSS variables), CSS Grid, Flexbox, glassmorphism filters, and dedicated print stylesheets.
-- **Client Logic**: Modular JavaScript (ECMAScript 2022+ ES Modules).
-- **State Pattern**: Centralized reactive Store (`js/state.js`) implementing an Observer pattern with an immutable history stack.
-- **Icons**: Remix Icon CDN.
-- **Typography**: Inter font family (Google Fonts CDN) with tabular numerals enabled for layout stability.
+- **Structure**: Semantic HTML5 with accessible landmarks and ARIA attributes.
+- **Styling**: Vanilla CSS3 using custom properties, CSS Grid, Flexbox, glassmorphism backdrops, and dedicated print stylesheets.
+- **Logic**: Native ECMAScript Modules (ESM).
+- **State Pattern**: Centralized reactive Store (`js/state.js`) using an Observer pattern and immutable snapshots.
+- **Typography**: Inter (Google Fonts) with tabular numeral formatting (`tnum`) for number stability.
+- **Icons**: Remix Icon library.
 
 ---
 
@@ -91,32 +137,42 @@ The application adheres to a zero-dependency, vanilla web architecture for optim
 ```text
 mm3e-builder/
 ├── assets/                  # Static assets and graphic resources
+│   └── roll20/              # Roll20 sheet textures, icons, and badges
 ├── css/
-│   ├── main.css             # Base variables, layout, typography, and menubar
-│   ├── sheet.css            # Character sheet components, cards, tables, and modals
-│   └── roll20-print.css     # Official Roll20 preview and print-to-PDF styles
+│   ├── main.css             # Design tokens, typography, header, drawer, and global resets
+│   ├── sheet.css            # D&D Beyond-style 3-Tier dashboard and tactical grid
+│   ├── builder.css          # Modular Power Studio and effects cascade styling
+│   ├── wizard.css           # Step-by-step guided character wizard styles
+│   └── roll20-print.css     # Official Roll20 preview and print-to-PDF stylesheets
 ├── js/
 │   ├── app.js               # Application bootstrap, navigation, and view coordinator
 │   ├── state.js             # Central character state, PP calculations, and history stack
 │   ├── components/
-│   │   ├── advantageModal.js    # Advantage selection and customization modal
-│   │   ├── conditionsTracker.js # Combat conditions state tracker
+│   │   ├── advantageModal.js    # Advantage selection and customization modal (56 choices)
+│   │   ├── conditionsTracker.js # Combat conditions simulator and status tracker
 │   │   ├── notifications.js     # Toast notifications and confirmation dialogs
-│   │   ├── powerBuilder.js      # Interactive power and modifier builder
-│   │   ├── references.js        # Rulebook quick-reference tables
+│   │   ├── powerBuilder.js      # Interactive Modular Power Studio and modifier builder
+│   │   ├── quickDiceRoller.js   # Universal 1-Click D20 Dice Roller HUD with critical hit checks
+│   │   ├── references.js        # Rulebook quick-reference tables and measures chart
 │   │   ├── resourceModal.js     # Equipment, vehicles, and headquarters manager
 │   │   ├── roll20Print.js       # Roll20 sheet generator and print controller
 │   │   ├── skillModal.js        # Skill specialization and rank editor
-│   │   └── targetedEffects.js   # Attack and offensive effect manager
+│   │   ├── targetedEffects.js   # Combat attack profiles and offensive effect manager
+│   │   └── wizard/
+│   │       ├── stepAbilities.js # Guided ability point allocation step
+│   │       └── wizardController.js # Step-by-step wizard state machine and templates
 │   ├── rules/
 │   │   ├── abilities.js         # Core ability constants and abbreviations
 │   │   ├── advantages.js        # Advantage library and metadata
+│   │   ├── archetypes.js        # Pre-built superhero archetype templates
+│   │   ├── conditions.js        # Standard and combined condition rules
 │   │   ├── defenses.js          # Defense metrics and base ability links
-│   │   ├── powers.js            # Power calculation formulas and modifier tables
+│   │   ├── powerEngine.js       # D20 Hero System power calculation formulas and modifiers
+│   │   ├── powers.js            # Unified power engine export interface
 │   │   ├── resources.js         # Standard equipment and vehicle presets
 │   │   └── skills.js            # Standard skill definitions and associated abilities
 │   └── storage/
-│       └── exportImport.js      # JSON and CSV serialization / deserialization
+│       └── exportImport.js      # JSON and CSV/Excel serialization and deserialization
 ├── index.html               # Main single-page application entrypoint
 ├── serve.js                 # Zero-dependency local development server (Node.js)
 └── README.md                # Project documentation
@@ -127,13 +183,14 @@ mm3e-builder/
 ## Getting Started
 
 ### Prerequisites
-- Any modern web browser supporting ES Modules (Google Chrome, Mozilla Firefox, Microsoft Edge, Safari).
-- Node.js (version 18.x or newer) is optional, used only for running the included local development server.
+
+- Any modern web browser with ES Module support (Chrome, Firefox, Safari, Edge).
+- Node.js (version 18.x or newer) is optional, used solely for running the local development server.
 
 ### Running Locally
 
 #### Method 1: Using the Built-In Node.js Server
-Clone or download the repository, navigate to the project directory, and start the static server:
+Clone or download the repository, navigate to the project directory, and launch the local server:
 
 ```bash
 node serve.js
@@ -145,7 +202,7 @@ http://localhost:8080
 ```
 
 #### Method 2: Using Any Static HTTP Server
-You can serve the directory using any static file server:
+Serve the directory with any standard static file server:
 
 ```bash
 # Using npx serve
@@ -156,7 +213,7 @@ python -m http.server 8080
 ```
 
 #### Method 3: Direct File Access
-Because the project uses ES Modules (`import` / `export`), opening `index.html` directly via the `file://` protocol may trigger browser CORS restrictions. Running through a local HTTP server or a browser extension like VS Code Live Server is recommended.
+Because the project uses ES Modules (`import` / `export`), opening `index.html` directly via the `file://` protocol may trigger browser CORS restrictions. Serving through a local HTTP server or VS Code Live Server is recommended.
 
 ---
 
@@ -164,25 +221,32 @@ Because the project uses ES Modules (`import` / `export`), opening `index.html` 
 
 ### Deploying to GitHub Pages
 
-Because the project requires no compilation step, it can be hosted directly on GitHub Pages:
+Because the project requires no build or compilation step, it can be deployed directly to GitHub Pages:
 
-1. Initialize a Git repository (if not already initialized) and commit your files:
+1. Commit your files to Git:
    ```bash
-   git init
    git add .
-   git commit -m "Initial commit of M&M 3E Character Builder"
+   git commit -m "Deploy Mutants & Masterminds 3E Hero Registry"
    ```
-2. Create a new repository on GitHub and link the remote:
+2. Push to your GitHub repository:
    ```bash
-   git remote add origin https://github.com/<your-username>/<your-repo-name>.git
-   git branch -M main
-   git push -u origin main
+   git push origin main
    ```
 3. Enable GitHub Pages:
-   - Go to your repository settings on GitHub (**Settings** > **Pages**).
+   - In your GitHub repository, open **Settings** > **Pages**.
    - Under **Build and deployment** > **Source**, select **Deploy from a branch**.
-   - Choose the `main` branch and `/ (root)` folder, then click **Save**.
-4. The site will be live at `https://<your-username>.github.io/<your-repo-name>/`.
+   - Select the `main` branch and `/ (root)` folder, then click **Save**.
+4. The application will be published at `https://<your-username>.github.io/<your-repo-name>/`.
+
+---
+
+## Design Standards
+
+The user interface follows strict design craftsmanship principles:
+- **Unified Tabletop Crimson Theme**: Consistent primary accents (`#dc2626` / `#b91c1c` / `#ef4444`) tailored for a heroic tabletop atmosphere.
+- **High-Contrast Readability**: WCAG AA compliant contrast across all cards, badges, and inputs.
+- **Reduced Motion Support**: Complete `@media (prefers-reduced-motion: reduce)` guardrails.
+- **Zero AI Slop**: Free of purple gradient clichés, unstyled placeholders, and automated filler text.
 
 ---
 

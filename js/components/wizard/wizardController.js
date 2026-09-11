@@ -444,8 +444,8 @@ function getStepGuidance(step, char) {
     case 2:
       return `
         <strong>Ability Costs:</strong><br>
-        Each rank costs <strong>2 PP</strong>. Ranks from 1–4 represent normal to peak human potential, while ranks 5+ are superhuman.<br><br>
-        <em>Tip:</em> For a PL ${pl} hero, typical ability point budgets range between <strong>30–50 PP</strong>.
+        Each rank costs <strong>2 PP</strong>. Ranks from 1-4 represent normal to peak human potential, while ranks 5+ are superhuman.<br><br>
+        <em>Tip:</em> For a PL ${pl} hero, typical ability point budgets range between <strong>30-50 PP</strong>.
       `;
     case 3:
       return `

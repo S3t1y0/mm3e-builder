@@ -67,10 +67,10 @@
 }
 
 .stepper-item.active {
-  background: rgba(139, 92, 246, 0.12);
-  border-color: rgba(139, 92, 246, 0.35);
+  background: rgba(220, 38, 38, 0.12);
+  border-color: rgba(220, 38, 38, 0.35);
   color: var(--text-primary);
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.15);
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.15);
 }
 
 .stepper-item.completed {
@@ -98,7 +98,7 @@
   background: var(--accent-primary);
   border-color: var(--accent-primary-hover);
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
+  box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
 }
 
 .stepper-item.completed .stepper-bubble {
@@ -193,8 +193,8 @@
   width: 2.75rem;
   height: 2.75rem;
   border-radius: var(--radius-md);
-  background: rgba(139, 92, 246, 0.15);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.3);
   color: var(--accent-primary);
   display: flex;
   align-items: center;
@@ -259,8 +259,8 @@
 
 .archetype-card.selected {
   border-color: var(--accent-primary);
-  background: rgba(139, 92, 246, 0.1);
-  box-shadow: 0 0 16px rgba(139, 92, 246, 0.2);
+  background: rgba(220, 38, 38, 0.1);
+  box-shadow: 0 0 16px rgba(220, 38, 38, 0.2);
 }
 
 .archetype-card.selected::after {
@@ -387,7 +387,7 @@
   font-size: 0.75rem;
   font-weight: 700;
   color: var(--accent-primary);
-  background: rgba(139, 92, 246, 0.15);
+  background: rgba(220, 38, 38, 0.15);
   padding: 0.2rem 0.5rem;
   border-radius: var(--radius-xs);
 }
@@ -860,7 +860,7 @@
 
 .wizard-advantage-card.active {
   border-color: var(--accent-primary);
-  background: rgba(139, 92, 246, 0.08);
+  background: rgba(220, 38, 38, 0.08);
 }
 
 .wizard-advantage-head {

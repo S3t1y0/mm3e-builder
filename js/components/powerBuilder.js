@@ -1,6 +1,6 @@
 // js/components/powerBuilder.js
 /**
- * Mutants & Masterminds 3e — Full-Screen Power Studio Component
+ * Mutants & Masterminds 3e: Full-Screen Power Studio Component
  * Features:
  * - Full-screen immersive workspace (100vw × 100vh) with top command bar and split-pane layout.
  * - Base Effect Explorer & Active Showcase with full parameter tags (Action, Range, Duration, Resistance, Category, Cost) and rich M&M 3e rules mechanics.

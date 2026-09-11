@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>M&M 3e Builder — Character Sheet Manager & Power Builder</title>
+  <title>Mutants & Masterminds 3e: Hero Registry & Tactical Sheet</title>
   <meta name="description"
-    content="Character Sheet Manager and Modular Power Builder for Mutants & Masterminds 3rd Edition.">
+    content="Official-grade Hero Registry, Character Sheet Manager, and Power System for Mutants & Masterminds 3rd Edition.">
 
   <!-- Google Font: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -30,9 +30,17 @@
   <!-- TOP MENUBAR -->
   <header class="menubar">
     <div class="menubar-left">
-      <a href="#" class="app-brand">
-        <i class="ri-flashlight-fill brand-icon"></i>
-        <span class="brand-gradient">M&M 3e Builder</span>
+      <a href="#" class="app-brand" aria-label="Mutants & Masterminds 3E Hero Registry">
+        <span class="brand-emblem" aria-hidden="true">
+          <i class="ri-shield-flash-fill"></i>
+        </span>
+        <span class="brand-text">
+          <span class="brand-title-row">
+            <span class="brand-title">MUTANTS &amp; MASTERMINDS</span>
+            <span class="brand-badge">3E</span>
+          </span>
+          <span class="brand-subtitle">HERO REGISTRY</span>
+        </span>
       </a>
       <nav class="nav-tabs">
         <button class="nav-tab-btn" data-tab="wizard"><i class="ri-magic-line"></i> Character Wizard</button>
@@ -43,15 +51,7 @@
     </div>
 
     <div class="menubar-right">
-      <div class="menubar-quick-actions">
-        <button id="btn-undo" class="btn btn-ghost btn-xs" title="Undo (Ctrl+Z)" disabled><i
-            class="ri-arrow-go-back-line"></i> <span class="btn-text">Undo</span></button>
-        <button id="btn-redo" class="btn btn-ghost btn-xs" title="Redo (Ctrl+Shift+Z)" disabled><i
-            class="ri-arrow-go-forward-line"></i> <span class="btn-text">Redo</span></button>
-      </div>
       <div class="menubar-desktop-actions">
-        <button id="btn-clear" class="btn btn-ghost btn-xs" title="Clear Sheet"><i class="ri-delete-bin-line"></i>
-          Clear</button>
         <button id="btn-export" class="btn btn-secondary btn-xs" title="Export JSON"><i class="ri-download-2-line"></i>
           Export</button>
         <button id="btn-excel" class="btn btn-secondary btn-xs" title="Export Excel / CSV"><i
@@ -143,126 +143,226 @@
     <!-- VIEW 0: CHARACTER WIZARD (STEP-BY-STEP GUIDED BUILDER) -->
     <div id="view-wizard" class="view-tab-content" style="display: none;"></div>
 
-    <!-- VIEW 1: CHARACTER SHEET -->
-    <div id="view-character-sheet" class="view-tab-content">
-      <!-- HERO IDENTITY -->
-      <section class="sheet-card hero-identity-card">
-        <div class="identity-main-side">
-          <div class="identity-grid">
-            <div class="field-group">
-              <label for="input-hero-name"><i class="ri-shield-user-line"></i> Hero Name</label>
-              <input type="text" id="input-hero-name" class="text-input hero-name-field"
-                placeholder="e.g. Apex, Chronos, Valkyrie" value="Hero Name">
+    <!-- VIEW 1: CHARACTER SHEET (D&D BEYOND 3-TIER TACTICAL DASHBOARD) -->
+    <div id="view-character-sheet" class="view-tab-content dndb-sheet-view">
+      
+      <!-- TIER 1: D&D BEYOND HERO VITALS & IDENTITY HEADER -->
+      <section class="dndb-hero-banner">
+        <div class="dndb-hero-identity">
+          <div class="dndb-avatar-crest">
+            <i class="ri-shield-user-fill"></i>
+          </div>
+          <div class="dndb-name-block">
+            <div class="dndb-hero-name-row">
+              <input type="text" id="input-hero-name" class="dndb-name-input" placeholder="Hero Name" value="Hero Name">
+              <span class="dndb-pl-pill"><i class="ri-shield-star-line"></i> PL <span id="display-pl">10</span></span>
             </div>
-            <div class="field-group">
-              <label for="input-identity"><i class="ri-user-line"></i> Real Name</label>
-              <input type="text" id="input-identity" class="text-input" placeholder="e.g. John Doe, Alter Ego">
-            </div>
-            <div class="field-group">
-              <label for="input-player"><i class="ri-user-smile-line"></i> Player</label>
-              <input type="text" id="input-player" class="text-input" placeholder="Player Name">
-            </div>
-            <div class="field-group">
-              <label for="input-base"><i class="ri-building-4-line"></i> Base of Operations</label>
-              <input type="text" id="input-base" class="text-input" placeholder="e.g., Freedom City, The Spire">
+            <div class="dndb-sub-identity-row">
+              <input type="text" id="input-identity" class="dndb-sub-input" placeholder="Real Name (e.g. Alter Ego)">
+              <span class="dndb-dot-sep">•</span>
+              <input type="text" id="input-player" class="dndb-sub-input" placeholder="Player Name">
+              <span class="dndb-dot-sep">•</span>
+              <input type="text" id="input-base" class="dndb-sub-input" placeholder="Base of Operations">
             </div>
           </div>
         </div>
 
-        <div class="hero-metrics-side">
-          <div class="metric-box">
-            <span class="metric-title">POWER LEVEL (PL)</span>
-            <div class="stepper">
-              <button class="step-btn" id="btn-pl-dec">-</button>
-              <span class="step-val" id="display-pl">10</span>
-              <button class="step-btn" id="btn-pl-inc">+</button>
+        <div class="dndb-hero-vitals-dock">
+          <!-- Power Level Stepper -->
+          <div class="dndb-vital-box pl-box">
+            <span class="dndb-vital-label">POWER LEVEL</span>
+            <div class="dndb-vital-stepper">
+              <button class="step-btn-xs" id="btn-pl-dec" title="Decrease PL">-</button>
+              <strong class="dndb-vital-val" id="dndb-pl-display">10</strong>
+              <button class="step-btn-xs" id="btn-pl-inc" title="Increase PL">+</button>
             </div>
           </div>
-          <div class="metric-box">
-            <span class="metric-title">HERO POINTS</span>
-            <div class="stepper">
-              <button class="step-btn" id="btn-hp-dec">-</button>
-              <span class="step-val" id="display-hp">1</span>
-              <button class="step-btn" id="btn-hp-inc">+</button>
+
+          <!-- Hero Points Stepper -->
+          <div class="dndb-vital-box hp-box">
+            <span class="dndb-vital-label">HERO POINTS</span>
+            <div class="dndb-vital-stepper">
+              <button class="step-btn-xs" id="btn-hp-dec" title="Spend Hero Point">-</button>
+              <strong class="dndb-vital-val" id="display-hp">1</strong>
+              <button class="step-btn-xs" id="btn-hp-inc" title="Gain Hero Point">+</button>
+            </div>
+          </div>
+
+          <!-- Speed / Movement Badge -->
+          <div class="dndb-vital-box speed-box">
+            <span class="dndb-vital-label">SPEED</span>
+            <strong class="dndb-vital-val" id="dndb-speed-val">30 ft.</strong>
+            <span class="dndb-vital-sub">Rank 0</span>
+          </div>
+
+          <!-- Initiative Badge -->
+          <div class="dndb-vital-box init-box" id="dndb-init-quick-box" title="Click to Roll Initiative">
+            <span class="dndb-vital-label">INITIATIVE</span>
+            <strong class="dndb-vital-val" id="dndb-init-val">+4</strong>
+            <span class="dndb-vital-sub"><i class="ri-dice-line"></i> ROLL</span>
+          </div>
+
+          <!-- PP Summary Meter -->
+          <div class="dndb-vital-box pp-box">
+            <span class="dndb-vital-label">POWER POINTS</span>
+            <div class="dndb-pp-val-row">
+              <span id="dndb-pp-spent">0</span> / <span id="dndb-pp-budget">150</span> PP
+            </div>
+            <div class="dndb-pp-mini-bar">
+              <div id="dndb-pp-progress" class="dndb-pp-progress-fill" style="width: 0%;"></div>
             </div>
           </div>
         </div>
       </section>
 
-      <!-- TARGETED EFFECTS COMBAT MODULE -->
-      <section id="targeted-effects-container"></section>
-
-      <!-- CONDITIONS TRACKER SIMULATOR -->
-      <section id="conditions-container"></section>
-
-      <!-- 8 ABILITIES -->
-      <section class="sheet-card">
-        <div class="card-header-row">
-          <div class="card-title-group">
-            <span class="icon"><i class="ri-brain-line"></i></span>
-            <h3>Abilities</h3>
-          </div>
-          <span class="cost-tag-badge" id="abilities-pp-badge">2 PP / Rank</span>
+      <!-- TIER 2: 8 ABILITIES RIBBON (HORIZONTAL DOCK ALA D&D BEYOND) -->
+      <section class="dndb-abilities-ribbon">
+        <div class="dndb-ribbon-header">
+          <span class="dndb-ribbon-title"><i class="ri-brain-line"></i> ABILITIES</span>
+          <span class="dndb-ribbon-cost" id="abilities-pp-badge">2 PP / Rank</span>
         </div>
-        <div id="abilities-grid" class="abilities-grid"></div>
+        <div id="abilities-grid" class="dndb-abilities-grid"></div>
       </section>
 
-      <!-- 5 DEFENSES -->
-      <section class="sheet-card">
-        <div class="card-header-row">
-          <div class="card-title-group">
-            <span class="icon"><i class="ri-shield-check-line"></i></span>
-            <h3>Defenses</h3>
+      <!-- TIER 3: 3-COLUMN TACTICAL TABLETOP GRID -->
+      <div class="dndb-sheet-grid">
+        
+        <!-- COLUMN 1 (LEFT): DEFENSES (SAVING THROWS) & SENSES & QUICK CONDITIONS -->
+        <div class="dndb-col dndb-col-left">
+          
+          <!-- Defenses Card -->
+          <div class="dndb-card dndb-defenses-card">
+            <div class="dndb-card-header">
+              <div class="dndb-card-title-wrap">
+                <i class="ri-shield-check-fill dndb-card-icon"></i>
+                <h3 class="dndb-card-title">DEFENSES</h3>
+              </div>
+              <span class="dndb-card-badge">1 PP / Rank</span>
+            </div>
+            <p class="dndb-card-sub">Resistance checks to withstand damage and hazardous effects.</p>
+            <div id="defenses-grid" class="dndb-defenses-grid"></div>
           </div>
-          <span class="cost-tag-badge">1 PP / Rank</span>
-        </div>
-        <div id="defenses-grid" class="defenses-grid"></div>
-      </section>
 
-      <!-- SKILLS -->
-      <section class="sheet-card">
-        <div class="card-header-row">
-          <div class="card-title-group">
-            <span class="icon"><i class="ri-focus-3-line"></i></span>
-            <h3>Skills</h3>
+          <!-- Senses Card -->
+          <div class="dndb-card dndb-senses-card">
+            <div class="dndb-card-header">
+              <div class="dndb-card-title-wrap">
+                <i class="ri-eye-2-line dndb-card-icon"></i>
+                <h3 class="dndb-card-title">SENSES & PERCEPTION</h3>
+              </div>
+            </div>
+            <div class="dndb-senses-content">
+              <div class="dndb-sense-row">
+                <span class="dndb-sense-val" id="dndb-passive-perc">10</span>
+                <span class="dndb-sense-label">PASSIVE PERCEPTION</span>
+              </div>
+              <div class="dndb-sense-list" id="dndb-senses-list">
+                <div class="dndb-sense-item"><i class="ri-check-line"></i> Normal Vision & Hearing</div>
+                <div class="dndb-sense-item"><i class="ri-check-line"></i> Olfactory & Tactile</div>
+              </div>
+            </div>
           </div>
-          <div class="header-action-group">
-            <span class="cost-tag-badge" id="skills-pp-badge">0 PP</span>
-            <span class="badge-text" style="font-size:0.75rem;font-weight:700;color:var(--text-muted);">Rate: 1 PP = 2 Ranks</span>
-          </div>
-        </div>
-        <div id="skills-list-container"></div>
-      </section>
 
-      <!-- ADVANTAGES -->
-      <section class="sheet-card">
-        <div class="card-header-row">
-          <div class="card-title-group">
-            <span class="icon"><i class="ri-star-line"></i></span>
-            <h3>Advantages</h3>
-          </div>
-          <div class="header-action-group">
-            <span class="cost-tag-badge" id="advantages-pp-badge">0 PP</span>
-            <button class="btn btn-secondary btn-xs" id="btn-open-adv-modal"><i class="ri-add-line"></i> Browse & Add Advantages (56 Choices)</button>
+          <!-- Quick Conditions Overview -->
+          <div class="dndb-card dndb-quick-conditions-card">
+            <div class="dndb-card-header">
+              <div class="dndb-card-title-wrap">
+                <i class="ri-heart-pulse-line dndb-card-icon"></i>
+                <h3 class="dndb-card-title">CONDITIONS</h3>
+              </div>
+              <button id="btn-jump-conditions" class="dndb-card-action-btn" type="button">Simulator</button>
+            </div>
+            <div id="dndb-active-conditions-summary" class="dndb-conditions-summary">
+              <span class="condition-chip normal"><i class="ri-checkbox-circle-line"></i> Normal / Healthy</span>
+            </div>
           </div>
         </div>
-        <div id="advantages-list-container"></div>
-      </section>
 
-      <!-- POWERS -->
-      <section class="sheet-card">
-        <div class="card-header-row">
-          <div class="card-title-group">
-            <span class="icon"><i class="ri-flashlight-line"></i></span>
-            <h3>Powers</h3>
-          </div>
-          <div class="header-action-group">
-            <span class="cost-tag-badge" id="powers-pp-badge">0 PP</span>
-            <button id="btn-new-power" class="btn btn-primary btn-sm"><i class="ri-add-line"></i> New Power</button>
+        <!-- COLUMN 2 (CENTER): SKILLS TABLE -->
+        <div class="dndb-col dndb-col-center">
+          <div class="dndb-card dndb-skills-card">
+            <div class="dndb-card-header">
+              <div class="dndb-card-title-wrap">
+                <i class="ri-focus-3-line dndb-card-icon"></i>
+                <h3 class="dndb-card-title">SKILLS</h3>
+              </div>
+              <div class="dndb-skills-header-right">
+                <span class="dndb-card-badge" id="skills-pp-badge">0 PP</span>
+                <span class="dndb-skills-rate">1 PP = 2 Ranks</span>
+              </div>
+            </div>
+
+            <!-- Skills List Container (Table rendered by renderSkills) -->
+            <div id="skills-list-container"></div>
           </div>
         </div>
-        <div id="powers-list-container"></div>
-      </section>
+
+        <!-- COLUMN 3 (RIGHT): TABBED ACTION & CONTENT HUB -->
+        <div class="dndb-col dndb-col-right">
+          <div class="dndb-tabbed-hub">
+            <!-- Navigation Tab Bar -->
+            <div class="dndb-hub-nav">
+              <button class="dndb-hub-tab-btn active" data-hub-tab="actions" type="button">
+                <i class="ri-sword-line"></i> ACTIONS
+              </button>
+              <button class="dndb-hub-tab-btn" data-hub-tab="powers" type="button">
+                <i class="ri-flashlight-line"></i> POWERS <span class="hub-tab-badge" id="hub-powers-count">0</span>
+              </button>
+              <button class="dndb-hub-tab-btn" data-hub-tab="advantages" type="button">
+                <i class="ri-star-line"></i> ADVANTAGES <span class="hub-tab-badge" id="hub-advantages-count">0</span>
+              </button>
+              <button class="dndb-hub-tab-btn" data-hub-tab="conditions" type="button">
+                <i class="ri-alarm-warning-line"></i> CONDITIONS
+              </button>
+            </div>
+
+            <!-- Tab 1: ACTIONS (Targeted Effects) -->
+            <div id="dndb-tab-pane-actions" class="dndb-tab-pane active">
+              <div id="targeted-effects-container"></div>
+            </div>
+
+            <!-- Tab 2: POWERS -->
+            <div id="dndb-tab-pane-powers" class="dndb-tab-pane">
+              <div class="dndb-pane-toolbar">
+                <div class="dndb-pane-info">
+                  <span class="dndb-pane-title">Power Suites & Abilities</span>
+                  <span class="dndb-card-badge" id="powers-pp-badge">0 PP</span>
+                </div>
+                <div class="dndb-pane-actions">
+                  <button id="btn-toggle-all-powers" class="btn btn-ghost btn-xs" title="Collapse / Expand All Powers" type="button">
+                    <i class="ri-contract-up-down-line"></i> <span id="toggle-all-powers-text">Collapse All</span>
+                  </button>
+                  <button id="btn-new-power" class="btn btn-primary btn-sm"><i class="ri-add-line"></i> New Power</button>
+                </div>
+              </div>
+              <div id="powers-list-container"></div>
+            </div>
+
+            <!-- Tab 3: ADVANTAGES -->
+            <div id="dndb-tab-pane-advantages" class="dndb-tab-pane">
+              <div class="dndb-pane-toolbar">
+                <div class="dndb-pane-info">
+                  <span class="dndb-pane-title">Character Traits & Advantages</span>
+                  <span class="dndb-card-badge" id="advantages-pp-badge">0 PP</span>
+                </div>
+                <div class="dndb-pane-actions">
+                  <button id="btn-toggle-all-advantages" class="btn btn-ghost btn-xs" title="Collapse / Expand All Advantages" type="button">
+                    <i class="ri-contract-up-down-line"></i> <span id="toggle-all-adv-text">Collapse All</span>
+                  </button>
+                  <button class="btn btn-secondary btn-xs" id="btn-open-adv-modal"><i class="ri-add-line"></i> Browse Catalog (56 Choices)</button>
+                </div>
+              </div>
+              <div id="advantages-list-container"></div>
+            </div>
+
+            <!-- Tab 4: CONDITIONS SIMULATOR -->
+            <div id="dndb-tab-pane-conditions" class="dndb-tab-pane">
+              <div id="conditions-container"></div>
+            </div>
+          </div>
+        </div>
+
+      </div>
     </div>
 
     <!-- VIEW 2: RESOURCES -->
