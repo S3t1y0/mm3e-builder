@@ -112,6 +112,7 @@ The application handles real-time Power Point (PP) budgets, automated Power Leve
 
 ### Data Portability & State Management
 
+- **1-Click Compressed URL Sharing (Serverless)**: Generate compact, permanent share links using native browser `CompressionStream('deflate-raw')` and Base64URL slugs (~200 - 450 bytes) in URL hash tags (`#hero=...`). Zero backend, zero database, zero external dependencies, 100% compatible with GitHub Pages.
 - Reactive Local Storage: Automatic persistence across browser sessions.
 - Full History Stack: Undo (`Ctrl+Z`) and Redo (`Ctrl+Y` / `Ctrl+Shift+Z`) state tracking via keyboard shortcuts and slide-out menu drawer.
 - Profile Export & Import: Complete character save files in human-readable JSON format.
@@ -156,6 +157,7 @@ mm3e-builder/
 │   │   ├── references.js        # Rulebook quick-reference tables and measures chart
 │   │   ├── resourceModal.js     # Equipment, vehicles, and headquarters manager
 │   │   ├── roll20Print.js       # Roll20 sheet generator and print controller
+│   │   ├── shareModal.js        # 1-Click compressed share URL modal and clipboard exporter
 │   │   ├── skillModal.js        # Skill specialization and rank editor
 │   │   ├── targetedEffects.js   # Combat attack profiles and offensive effect manager
 │   │   └── wizard/
@@ -172,7 +174,8 @@ mm3e-builder/
 │   │   ├── resources.js         # Standard equipment and vehicle presets
 │   │   └── skills.js            # Standard skill definitions and associated abilities
 │   └── storage/
-│       └── exportImport.js      # JSON and CSV/Excel serialization and deserialization
+│       ├── exportImport.js      # JSON and CSV/Excel serialization and deserialization
+│       └── shareUrl.js          # Native stream compression and Base64URL hash codecs
 ├── index.html               # Main single-page application entrypoint
 ├── serve.js                 # Zero-dependency local development server (Node.js)
 └── README.md                # Project documentation

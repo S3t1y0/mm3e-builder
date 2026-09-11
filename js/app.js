@@ -26,6 +26,8 @@ import { showToast, showConfirmModal } from './components/notifications.js';
 import { initRoll20Print, openRoll20Preview } from './components/roll20Print.js';
 import { renderWizard } from './components/wizard/wizardController.js';
 import { rollCheck } from './components/quickDiceRoller.js';
+import { getSharedCharacterFromUrl, clearShareHash } from './storage/shareUrl.js';
+import { openShareModal } from './components/shareModal.js';
 
 let activeTab = 'sheet'; // 'sheet', 'wizard', 'resources', 'references'
 let activeDndbHubTab = 'actions'; // 'actions', 'powers', 'advantages', 'conditions'
@@ -89,6 +91,37 @@ function initApp() {
     }
   }
   window.addEventListener('resize', syncSheetHeights);
+  window.addEventListener('hashchange', checkSharedCharacterUrl);
+
+  // Check for shared character in URL (#hero=...)
+  checkSharedCharacterUrl();
+}
+
+async function checkSharedCharacterUrl() {
+  try {
+    const sharedChar = await getSharedCharacterFromUrl();
+    if (sharedChar) {
+      const heroName = sharedChar.name || 'Shared Hero';
+      const pl = sharedChar.powerLevel || 10;
+      const spent = sharedChar.powerPointsTotal || 150;
+      const confirmed = await showConfirmModal({
+        title: 'Shared Character Detected',
+        message: `A shared hero profile was detected in your link: <strong>${heroName}</strong> (PL ${pl}, ${spent} PP). Would you like to load this character into your sheet?`,
+        confirmText: 'Load Hero',
+        cancelText: 'Keep Current',
+        isDanger: false,
+        icon: '<i class="ri-shield-flash-line"></i>'
+      });
+      if (confirmed) {
+        store.loadCharacter(sharedChar);
+        showToast(`Loaded shared hero: ${heroName}`, 'success');
+      }
+      clearShareHash();
+    }
+  } catch (err) {
+    console.warn('Error processing shared character URL:', err);
+    clearShareHash();
+  }
 }
 
 function setupNavigation() {
@@ -163,6 +196,9 @@ function setupGlobalActions() {
       store.resetCharacter();
       showToast('Character sheet reset successfully.', 'info');
     }
+  });
+  document.getElementById('btn-share')?.addEventListener('click', () => {
+    openShareModal();
   });
   document.getElementById('btn-export')?.addEventListener('click', () => {
     exportToJson();
@@ -258,6 +294,10 @@ function setupGlobalActions() {
       store.resetCharacter();
       showToast('Character sheet reset successfully.', 'info');
     }
+  });
+  document.getElementById('drawer-btn-share')?.addEventListener('click', () => {
+    closeDrawer();
+    openShareModal();
   });
   bindDrawerAction('drawer-btn-export', 'btn-export');
   bindDrawerAction('drawer-btn-excel', 'btn-excel');

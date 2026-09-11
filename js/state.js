@@ -48,10 +48,9 @@ class Store {
       const raw = localStorage.getItem(STORAGE_KEY);
       if (raw) {
         const char = JSON.parse(raw);
-        if (char && Array.isArray(char.powers)) {
-          char.powers = char.powers.map(p => normalizePower(p));
+        if (char) {
+          return this.normalizeCharacter(char);
         }
-        return char;
       }
     } catch (e) {
       console.warn('Failed to load character from storage:', e);
@@ -173,24 +172,24 @@ class Store {
 
   getTotalSkillPP() {
     let ranks = 0;
-    for (const s of this.character.skills) {
-      ranks += s.ranks;
+    for (const s of (this.character.skills || [])) {
+      ranks += (parseInt(s.ranks ?? s.rank ?? 0, 10) || 0);
     }
     return Math.ceil(ranks / 2);
   }
 
   getTotalAdvantagePP() {
     let sum = 0;
-    for (const a of this.character.advantages) {
-      sum += a.ranks;
+    for (const a of (this.character.advantages || [])) {
+      sum += (parseInt(a.ranks ?? a.rank ?? 1, 10) || 1);
     }
     return sum;
   }
 
   getTotalPowerPP() {
     let sum = 0;
-    for (const p of this.character.powers) {
-      sum += calculatePowerTotalCost(p);
+    for (const p of (this.character.powers || [])) {
+      sum += (calculatePowerTotalCost(p) || 0);
     }
     return sum;
   }
@@ -524,11 +523,51 @@ class Store {
     this.notify();
   }
 
-  loadCharacter(data) {
-    this.character = { ...createDefaultCharacter(), ...data };
-    if (this.character && Array.isArray(this.character.powers)) {
-      this.character.powers = this.character.powers.map(p => normalizePower(p));
+  normalizeCharacter(data) {
+    const defaultChar = createDefaultCharacter();
+    const char = {
+      ...defaultChar,
+      ...(data || {}),
+      abilities: { ...defaultChar.abilities, ...(data?.abilities || {}) },
+      defensesBought: { ...defaultChar.defensesBought, ...(data?.defensesBought || data?.defenses || {}) }
+    };
+
+    // Ensure uppercase ability keys and numeric values
+    for (const [k, v] of Object.entries(char.abilities)) {
+      const upper = k.toUpperCase();
+      char.abilities[upper] = parseInt(v, 10) || 0;
+      if (upper !== k) delete char.abilities[k];
     }
+
+    // Ensure uppercase defense keys and numeric values
+    for (const [k, v] of Object.entries(char.defensesBought)) {
+      const upper = k.toUpperCase();
+      char.defensesBought[upper] = parseInt(v, 10) || 0;
+      if (upper !== k) delete char.defensesBought[k];
+    }
+
+    // Normalize skills
+    char.skills = (Array.isArray(char.skills) ? char.skills : []).map(s => ({
+      ...s,
+      name: s.name || s.id || 'Skill',
+      ranks: parseInt(s.ranks ?? s.rank ?? 0, 10) || 0
+    }));
+
+    // Normalize advantages
+    char.advantages = (Array.isArray(char.advantages) ? char.advantages : []).map(a => ({
+      ...a,
+      name: a.name || a.id || 'Advantage',
+      ranks: parseInt(a.ranks ?? a.rank ?? 1, 10) || 1
+    }));
+
+    // Normalize powers
+    char.powers = (Array.isArray(char.powers) ? char.powers : []).map(p => normalizePower(p));
+
+    return char;
+  }
+
+  loadCharacter(data) {
+    this.character = this.normalizeCharacter(data);
     this.pushHistory();
     this.notify();
   }

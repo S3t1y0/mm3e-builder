@@ -1003,6 +1003,206 @@ p {
 }
 
 /* ==========================================================================
+   SHARE CHARACTER MODAL
+   ========================================================================== */
+.modal-dialog-share {
+  max-width: 540px;
+  width: 92%;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  box-shadow: var(--shadow-lg), 0 0 32px rgba(220, 38, 38, 0.15);
+}
+
+.share-modal-header {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  position: relative;
+}
+
+.share-icon-crest {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(145deg, rgba(220, 38, 38, 0.18) 0%, rgba(185, 28, 28, 0.28) 100%);
+  border: 1px solid rgba(220, 38, 38, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  color: #f87171;
+  flex-shrink: 0;
+  box-shadow: 0 0 14px rgba(220, 38, 38, 0.25);
+}
+
+.share-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.share-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.share-sub {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.share-modal-body {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.share-hero-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.85rem 1rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.share-hero-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-pill);
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: #f87171;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.share-hero-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  flex: 1;
+}
+
+.share-hero-name {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.share-hero-chips {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.share-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-pill);
+}
+
+.share-pill.pl {
+  background: rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: #fca5a5;
+}
+
+.share-pill.pp {
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #7dd3fc;
+}
+
+.share-pill.slug {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+}
+
+.share-input-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.share-input-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.share-input-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.share-url-input {
+  flex: 1;
+  padding: 0.55rem 0.85rem;
+  font-size: 0.82rem;
+  font-family: monospace;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  outline: none;
+  transition: border-color var(--trans-fast);
+}
+
+.share-url-input:focus {
+  border-color: var(--accent-primary);
+}
+
+.btn-primary.copied {
+  background: #15803d !important;
+  border-color: #22c55e !important;
+  color: #ffffff !important;
+}
+
+.share-explainer {
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.45;
+  margin: 0;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+}
+
+.share-explainer i {
+  color: var(--accent-secondary);
+  font-size: 0.95rem;
+  margin-top: 0.05rem;
+  flex-shrink: 0;
+}
+
+.share-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* ==========================================================================
    ENHANCED INLINE WARNING BANNER (Trade-off Caps Warning)
    ========================================================================== */
 .warning-banner {
