@@ -731,17 +731,16 @@ button:active:not(:disabled),
 }
 
 /* ==========================================================================
-   TOAST NOTIFICATION SYSTEM (Replaces native browser alert())
+   TOAST NOTIFICATION SYSTEM (Disabled per user request)
    ========================================================================== */
 .toast-container {
+  display: none !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
   position: fixed;
   top: 1.25rem;
   right: 1.25rem;
   z-index: 10000;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  pointer-events: none;
   max-width: 420px;
   width: calc(100vw - 2.5rem);
 }

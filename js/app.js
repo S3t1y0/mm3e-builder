@@ -449,6 +449,37 @@ function renderHeroDetails() {
   const hpDisplay = document.getElementById('display-hp');
   if (hpDisplay) hpDisplay.textContent = char.heroPoints;
 
+  // Damage / Injuries Tracker in Hero Vitals Banner
+  const injuries = Math.max(0, parseInt(char.injuries || 0, 10));
+  const injuryDisplay = document.getElementById('display-hero-injuries');
+  const injuryBox = document.getElementById('dndb-damage-box');
+  const injurySub = document.getElementById('display-hero-injury-sub');
+  const injuryClearBtn = document.getElementById('btn-hero-injury-clear');
+  const injuryDecBtn = document.getElementById('btn-hero-injury-dec');
+
+  if (injuryDisplay) {
+    injuryDisplay.textContent = injuries;
+    injuryDisplay.classList.toggle('wounded', injuries > 0);
+  }
+  if (injuryBox) {
+    injuryBox.classList.toggle('has-injuries', injuries > 0);
+  }
+  if (injuryDecBtn) {
+    injuryDecBtn.disabled = injuries <= 0;
+  }
+  if (injuryClearBtn) {
+    injuryClearBtn.style.display = injuries > 0 ? 'inline-flex' : 'none';
+  }
+  if (injurySub) {
+    if (injuries > 0) {
+      injurySub.innerHTML = `<i class="ri-arrow-down-line"></i> -${injuries} Toughness`;
+      injurySub.className = 'dndb-vital-sub wounded';
+    } else {
+      injurySub.innerHTML = `<i class="ri-shield-check-line"></i> Full Toughness`;
+      injurySub.className = 'dndb-vital-sub normal';
+    }
+  }
+
   // Initiative & Speed Vitals
   const initVal = store.getDefenseTotal('INITIATIVE');
   const initDisplay = document.getElementById('dndb-init-val');
@@ -3041,6 +3072,19 @@ document.getElementById('btn-hp-inc')?.addEventListener('click', () => {
   store.character.heroPoints++;
   store.pushHistory();
   store.notify();
+});
+
+// Damage / Bruises Vitals Controls (Tier 1 Hero Banner)
+document.getElementById('btn-hero-injury-dec')?.addEventListener('click', () => {
+  if (store.character.injuries > 0) {
+    store.removeInjury(1);
+  }
+});
+document.getElementById('btn-hero-injury-inc')?.addEventListener('click', () => {
+  store.addInjury(1);
+});
+document.getElementById('btn-hero-injury-clear')?.addEventListener('click', () => {
+  store.clearInjuries();
 });
 
 // Wire New Power button

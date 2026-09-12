@@ -1,21 +1,7 @@
 // js/components/notifications.js
-// Modern Toast and Confirmation Dialog System replacing ugly native browser alert() and confirm()
+// Confirmation Dialog System replacing native browser confirm()
 
-let toastContainer = null;
 let confirmModalOverlay = null;
-
-function ensureToastContainer() {
-  if (!toastContainer) {
-    toastContainer = document.getElementById('toast-container');
-    if (!toastContainer) {
-      toastContainer = document.createElement('div');
-      toastContainer.id = 'toast-container';
-      toastContainer.className = 'toast-container';
-      document.body.appendChild(toastContainer);
-    }
-  }
-  return toastContainer;
-}
 
 function ensureConfirmModal() {
   if (!confirmModalOverlay) {
@@ -31,72 +17,11 @@ function ensureConfirmModal() {
 }
 
 /**
- * Display a modern, non-blocking toast notification.
- * @param {string} message - Text or HTML message to display
- * @param {'success' | 'error' | 'warning' | 'info'} type - Type of toast
- * @param {number} duration - Milliseconds before auto-dismissing (default 3500ms)
+ * Toast notifications have been disabled per user request.
+ * Kept as safe no-op to ensure zero errors across all callers.
  */
 export function showToast(message, type = 'info', duration = 3500) {
-  const container = ensureToastContainer();
-
-  const toast = document.createElement('div');
-  toast.className = `toast-item toast-${type}`;
-
-  const icons = {
-    success: '<i class="ri-checkbox-circle-fill"></i>',
-    error: '<i class="ri-close-circle-fill"></i>',
-    warning: '<i class="ri-error-warning-fill"></i>',
-    info: '<i class="ri-information-fill"></i>'
-  };
-
-  const icon = icons[type] || '<i class="ri-notification-3-line"></i>';
-
-  toast.innerHTML = `
-    <div class="toast-content">
-      <span class="toast-icon">${icon}</span>
-      <div class="toast-message">${message}</div>
-    </div>
-    <button class="toast-close-btn" aria-label="Close notification"><i class="ri-close-line"></i></button>
-    <div class="toast-progress-bar"></div>
-  `;
-
-  container.appendChild(toast);
-
-  // Trigger enter animation on next tick
-  requestAnimationFrame(() => {
-    toast.classList.add('visible');
-  });
-
-  let dismissTimeout = null;
-
-  const dismiss = () => {
-    if (toast.classList.contains('dismissing')) return;
-    toast.classList.add('dismissing');
-    toast.classList.remove('visible');
-    setTimeout(() => {
-      toast.remove();
-    }, 220);
-  };
-
-  // Close button
-  toast.querySelector('.toast-close-btn')?.addEventListener('click', (e) => {
-    e.stopPropagation();
-    clearTimeout(dismissTimeout);
-    dismiss();
-  });
-
-  // Auto dismiss
-  if (duration > 0) {
-    dismissTimeout = setTimeout(dismiss, duration);
-
-    // Pause on hover
-    toast.addEventListener('mouseenter', () => clearTimeout(dismissTimeout));
-    toast.addEventListener('mouseleave', () => {
-      dismissTimeout = setTimeout(dismiss, 1500);
-    });
-  }
-
-  return { dismiss };
+  return { dismiss: () => {} };
 }
 
 /**

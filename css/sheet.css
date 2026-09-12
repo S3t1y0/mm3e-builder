@@ -4238,6 +4238,71 @@
   gap: 0.45rem;
 }
 
+/* Damage & Injuries Vital Box */
+.dndb-vital-box.damage-box {
+  min-width: 125px;
+  position: relative;
+  transition: background-color var(--trans-fast);
+}
+
+.dndb-vital-box.damage-box.has-injuries {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.dndb-vital-box.damage-box.has-injuries .dndb-vital-label {
+  color: #f87171;
+}
+
+.dndb-vital-box.damage-box .dndb-vital-val.wounded {
+  color: #f87171;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+}
+
+.dndb-injury-status-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.15rem;
+}
+
+.dndb-vital-box.damage-box .dndb-vital-sub.wounded {
+  color: #fca5a5;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.dndb-vital-box.damage-box .dndb-vital-sub.normal {
+  color: #34d399;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.btn-injury-quick-heal {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #34d399;
+  border-radius: 3px;
+  padding: 0.08rem 0.28rem;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: all var(--trans-fast);
+}
+
+.btn-injury-quick-heal:hover {
+  background: #10b981;
+  border-color: #10b981;
+  color: #000;
+  transform: scale(1.1);
+}
+
 /* Initiative Quick Box (Interactive D&D Beyond Style) */
 .dndb-vital-box.init-box {
   cursor: pointer;

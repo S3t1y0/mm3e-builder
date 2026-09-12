@@ -174,6 +174,24 @@
             </div>
           </div>
 
+          <!-- Damage & Injuries Stepper (Quick Combat Vitals) -->
+          <div class="dndb-vital-box damage-box" id="dndb-damage-box" title="Tracks cumulative bruised penalties from failed Toughness checks">
+            <span class="dndb-vital-label"><i class="ri-shield-cross-line"></i> DAMAGE / BRUISES</span>
+            <div class="dndb-vital-stepper">
+              <button class="step-btn-xs" id="btn-hero-injury-dec" title="Recover 1 bruise (1 minute rest)" disabled>-</button>
+              <strong class="dndb-vital-val font-mono" id="display-hero-injuries">0</strong>
+              <button class="step-btn-xs" id="btn-hero-injury-inc" title="Add 1 bruise (+1 injury penalty)">+</button>
+            </div>
+            <div class="dndb-injury-status-row">
+              <span class="dndb-vital-sub normal" id="display-hero-injury-sub">
+                <i class="ri-shield-check-line"></i> Full Toughness
+              </span>
+              <button class="btn-injury-quick-heal" id="btn-hero-injury-clear" title="Heal all injuries (Reset to 0)" style="display: none;">
+                <i class="ri-first-aid-kit-line"></i>
+              </button>
+            </div>
+          </div>
+
           <!-- Speed / Movement Badge -->
           <div class="dndb-vital-box speed-box">
             <span class="dndb-vital-label">SPEED</span>
