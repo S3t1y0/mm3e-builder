@@ -1272,6 +1272,12 @@ function renderSkills() {
   const prevScroll = prevList ? prevList.scrollTop : 0;
 
   html += `</div>`;
+
+  // Prevent unnecessary DOM destruction and visual re-render/animation if content is identical
+  if (container._lastRenderedHtml === html && container.firstElementChild) {
+    return;
+  }
+  container._lastRenderedHtml = html;
   container.innerHTML = html;
 
   const newList = container.querySelector('.sheet-skills-list');
