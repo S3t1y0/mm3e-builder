@@ -8,10 +8,10 @@
   <meta name="description"
     content="Official-grade Hero Registry, Character Sheet Manager, and Power System for Mutants & Masterminds 3rd Edition.">
 
-  <!-- Google Font: Inter -->
+  <!-- High-Agency Typography: Geist & Geist Mono (Vercel) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+  <link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700;800;900&family=Geist+Mono:wght@400;500;600;700&display=swap"
     rel="stylesheet">
 
   <!-- Open-Source Icons: Remix Icon (Apache 2.0) -->
@@ -132,23 +132,23 @@
     <!-- VIEW 1: CHARACTER SHEET (D&D BEYOND 3-TIER TACTICAL DASHBOARD) -->
     <div id="view-character-sheet" class="view-tab-content dndb-sheet-view">
       
-      <!-- TIER 1: D&D BEYOND HERO VITALS & IDENTITY HEADER -->
+      <!-- TIER 1: HERO VITALS & IDENTITY DOCK (BENTO 2.0 TACTICAL BAR) -->
       <section class="dndb-hero-banner">
         <div class="dndb-hero-identity">
-          <div class="dndb-avatar-crest">
-            <i class="ri-shield-user-fill"></i>
+          <div class="dndb-avatar-crest" title="Tactical Operative Registry Emblem">
+            <i class="ri-shield-star-fill"></i>
           </div>
           <div class="dndb-name-block">
             <div class="dndb-hero-name-row">
-              <input type="text" id="input-hero-name" class="dndb-name-input" placeholder="Hero Name" value="Hero Name">
-              <span class="dndb-pl-pill"><i class="ri-shield-star-line"></i> PL <span id="display-pl">10</span></span>
+              <input type="text" id="input-hero-name" class="dndb-name-input" placeholder="Hero Codex / Codename" value="Vanguard Prime">
+              <span class="dndb-pl-pill"><i class="ri-shield-check-line"></i> PL <span id="display-pl" class="font-mono">10</span></span>
             </div>
             <div class="dndb-sub-identity-row">
-              <input type="text" id="input-identity" class="dndb-sub-input" placeholder="Real Name (e.g. Alter Ego)">
+              <input type="text" id="input-identity" class="dndb-sub-input" placeholder="Real Identity (Secret / Public)">
               <span class="dndb-dot-sep">•</span>
-              <input type="text" id="input-player" class="dndb-sub-input" placeholder="Player Name">
+              <input type="text" id="input-player" class="dndb-sub-input" placeholder="Tactical Operative">
               <span class="dndb-dot-sep">•</span>
-              <input type="text" id="input-base" class="dndb-sub-input" placeholder="Base of Operations">
+              <input type="text" id="input-base" class="dndb-sub-input" placeholder="Metropolis Citadel">
             </div>
           </div>
         </div>
@@ -159,7 +159,7 @@
             <span class="dndb-vital-label">POWER LEVEL</span>
             <div class="dndb-vital-stepper">
               <button class="step-btn-xs" id="btn-pl-dec" title="Decrease PL">-</button>
-              <strong class="dndb-vital-val" id="dndb-pl-display">10</strong>
+              <strong class="dndb-vital-val font-mono" id="dndb-pl-display">10</strong>
               <button class="step-btn-xs" id="btn-pl-inc" title="Increase PL">+</button>
             </div>
           </div>
@@ -169,7 +169,7 @@
             <span class="dndb-vital-label">HERO POINTS</span>
             <div class="dndb-vital-stepper">
               <button class="step-btn-xs" id="btn-hp-dec" title="Spend Hero Point">-</button>
-              <strong class="dndb-vital-val" id="display-hp">1</strong>
+              <strong class="dndb-vital-val font-mono" id="display-hp">1</strong>
               <button class="step-btn-xs" id="btn-hp-inc" title="Gain Hero Point">+</button>
             </div>
           </div>
@@ -177,21 +177,21 @@
           <!-- Speed / Movement Badge -->
           <div class="dndb-vital-box speed-box">
             <span class="dndb-vital-label">SPEED</span>
-            <strong class="dndb-vital-val" id="dndb-speed-val">30 ft.</strong>
+            <strong class="dndb-vital-val font-mono" id="dndb-speed-val">30 ft.</strong>
             <span class="dndb-vital-sub">Rank 0</span>
           </div>
 
           <!-- Initiative Badge -->
           <div class="dndb-vital-box init-box" id="dndb-init-quick-box" title="Click to Roll Initiative">
             <span class="dndb-vital-label">INITIATIVE</span>
-            <strong class="dndb-vital-val" id="dndb-init-val">+4</strong>
+            <strong class="dndb-vital-val font-mono" id="dndb-init-val">+4</strong>
             <span class="dndb-vital-sub"><i class="ri-dice-line"></i> ROLL</span>
           </div>
 
           <!-- PP Summary Meter -->
           <div class="dndb-vital-box pp-box">
             <span class="dndb-vital-label">POWER POINTS</span>
-            <div class="dndb-pp-val-row">
+            <div class="dndb-pp-val-row font-mono">
               <span id="dndb-pp-spent">0</span> / <span id="dndb-pp-budget">150</span> PP
             </div>
             <div class="dndb-pp-mini-bar">

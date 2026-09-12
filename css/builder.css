@@ -8,10 +8,10 @@
   position: fixed;
   inset: 0;
   width: 100vw;
-  height: 100vh;
-  background: rgba(4, 8, 16, 0.82);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  height: 100dvh;
+  background: rgba(9, 9, 11, 0.82);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   z-index: 1000;
   display: none;
   align-items: center;
@@ -24,13 +24,13 @@
 }
 
 /* ==========================================================================
-   MODAL DIALOG (Concentric radius, layered shadow - pop-up animation removed)
+   MODAL DIALOG (Concentric radius, Liquid Glass refraction)
    ========================================================================== */
 .modal-dialog {
   background: var(--bg-card);
-  border: 1px solid var(--border-color);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  box-shadow: var(--shadow-glass);
   width: 100%;
   max-width: 1100px;
   max-height: 90vh;

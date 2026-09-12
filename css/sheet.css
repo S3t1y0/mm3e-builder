@@ -3736,12 +3736,12 @@
 }
 
 .hud-card {
-  background: rgba(15, 23, 42, 0.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(56, 189, 248, 0.35);
+  background: rgba(18, 18, 21, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 20px rgba(56, 189, 248, 0.15);
+  box-shadow: var(--shadow-glass);
   padding: 1rem 1.15rem;
   display: flex;
   flex-direction: column;
@@ -3750,13 +3750,13 @@
 }
 
 .hud-card.hud-crit {
-  border-color: rgba(245, 158, 11, 0.7);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 25px rgba(245, 158, 11, 0.3);
+  border-color: rgba(245, 158, 11, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 16px 36px rgba(0, 0, 0, 0.6);
 }
 
 .hud-card.hud-fumble {
-  border-color: rgba(239, 68, 68, 0.7);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 25px rgba(239, 68, 68, 0.3);
+  border-color: rgba(225, 29, 72, 0.5);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.15), 0 16px 36px rgba(0, 0, 0, 0.6);
 }
 
 /* Header */
@@ -4194,36 +4194,45 @@
   user-select: none;
 }
 
-/* Vitals Dock */
+/* Vitals Dock: Unified Telemetry Instrument Bar (Bento 2.0 Hardening) */
 .dndb-hero-vitals-dock {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  align-items: stretch;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
   flex-shrink: 0;
+  gap: 0;
 }
 
 .dndb-vital-box {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-md);
-  padding: 0.55rem 0.85rem;
+  background: transparent;
+  border: none;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0;
+  padding: 0.65rem 1.05rem;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  min-width: 90px;
+  min-width: 95px;
   text-align: center;
   position: relative;
-  transition: all var(--trans-fast);
+  transition: background-color var(--trans-fast);
+}
+
+.dndb-vital-box:last-child {
+  border-right: none;
 }
 
 .dndb-vital-box:hover {
-  border-color: rgba(220, 38, 38, 0.4);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .dndb-vital-label {
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   font-weight: 800;
   letter-spacing: 0.08em;
   color: var(--text-muted);
@@ -4233,10 +4242,14 @@
 }
 
 .dndb-vital-val {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
   font-size: 1.25rem;
-  font-weight: 900;
+  font-weight: 800;
   color: #fff;
   line-height: 1.1;
+  letter-spacing: -0.02em;
 }
 
 .dndb-vital-sub {
@@ -4255,27 +4268,23 @@
 /* Initiative Quick Box (Interactive D&D Beyond Style) */
 .dndb-vital-box.init-box {
   cursor: pointer;
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.12) 0%, rgba(20, 20, 28, 0.6) 100%);
-  border: 1px solid rgba(239, 68, 68, 0.45);
+  background: rgba(225, 29, 72, 0.06);
 }
 
 .dndb-vital-box.init-box:hover {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.25) 0%, rgba(30, 20, 28, 0.8) 100%);
-  border-color: #ef4444;
-  box-shadow: 0 0 14px rgba(239, 68, 68, 0.35);
-  transform: translateY(-2px);
+  background: rgba(225, 29, 72, 0.14);
 }
 
 .dndb-vital-box.init-box:active {
-  transform: translateY(0);
+  background: rgba(225, 29, 72, 0.22);
 }
 
 .dndb-vital-box.init-box .dndb-vital-val {
-  color: #f87171;
+  color: #fb7185;
 }
 
 .dndb-vital-box.init-box .dndb-vital-sub {
-  color: #fca5a5;
+  color: #fda4af;
   display: flex;
   align-items: center;
   gap: 0.25rem;
@@ -4293,7 +4302,7 @@
 }
 
 .dndb-pp-val-row #dndb-pp-spent {
-  color: #38bdf8;
+  color: var(--accent-secondary);
   font-size: 1.15rem;
 }
 
@@ -4365,10 +4374,10 @@
   gap: 0.75rem;
 }
 
-/* Ability Card (Notched D&D Beyond styling) */
+/* Ability Card (Clean Zinc Editorial Bento styling) */
 .dndb-abilities-grid .ability-card {
-  background: linear-gradient(180deg, rgba(30, 30, 42, 0.7) 0%, rgba(20, 20, 28, 0.9) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
   padding: 0.75rem 0.5rem;
   display: flex;
@@ -4376,14 +4385,14 @@
   align-items: center;
   text-align: center;
   position: relative;
-  transition: all var(--trans-fast);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  transition: border-color var(--trans-fast), background-color var(--trans-fast);
+  box-shadow: var(--shadow-sm);
 }
 
 .dndb-abilities-grid .ability-card:hover {
-  border-color: rgba(220, 38, 38, 0.5);
-  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3), 0 0 12px rgba(220, 38, 38, 0.15);
-  transform: translateY(-2px);
+  border-color: rgba(225, 29, 72, 0.4);
+  background: var(--bg-card-hover);
+  box-shadow: var(--shadow-md);
 }
 
 .dndb-abilities-grid .ab-top {
@@ -4396,9 +4405,9 @@
 
 .dndb-abilities-grid .ab-key {
   font-size: 0.92rem;
-  font-weight: 900;
+  font-weight: 800;
   letter-spacing: 0.06em;
-  color: #f87171; /* D&D Beyond red */
+  color: var(--accent-primary);
   text-transform: uppercase;
 }
 
@@ -4413,9 +4422,10 @@
 }
 
 .dndb-abilities-grid .ab-cost {
+  font-family: var(--font-mono);
   font-size: 0.62rem;
   font-weight: 700;
-  color: #94a3b8;
+  color: var(--text-secondary);
   background: rgba(255, 255, 255, 0.05);
   padding: 0.08rem 0.35rem;
   border-radius: 3px;
@@ -4431,8 +4441,8 @@
 }
 
 .dndb-abilities-grid .ab-roll-btn {
-  background: rgba(220, 38, 38, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.35);
+  background: rgba(225, 29, 72, 0.1);
+  border: 1px solid rgba(225, 29, 72, 0.3);
   border-radius: var(--radius-sm);
   color: #fff;
   padding: 0.25rem 0.5rem;
@@ -4444,10 +4454,9 @@
 }
 
 .dndb-abilities-grid .ab-roll-btn:hover {
-  background: #dc2626;
-  border-color: #ef4444;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
   color: #fff;
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
 }
 
 .dndb-abilities-grid .ab-val {
@@ -5073,8 +5082,8 @@
 
 .dndb-hub-tab-btn.active {
   color: #fff;
-  border-bottom-color: #dc2626;
-  background: rgba(220, 38, 38, 0.06);
+  border-bottom-color: var(--accent-primary);
+  background: rgba(225, 29, 72, 0.08);
 }
 
 .dndb-hub-tab-btn i {
@@ -5082,10 +5091,11 @@
 }
 
 .dndb-hub-tab-btn.active i {
-  color: #f87171;
+  color: var(--accent-primary);
 }
 
 .hub-tab-badge {
+  font-family: var(--font-mono);
   font-size: 0.65rem;
   font-weight: 800;
   padding: 0.1rem 0.4rem;
@@ -5095,8 +5105,8 @@
 }
 
 .dndb-hub-tab-btn.active .hub-tab-badge {
-  background: rgba(220, 38, 38, 0.3);
-  color: #fca5a5;
+  background: rgba(225, 29, 72, 0.25);
+  color: #fda4af;
 }
 
 /* Panes: Independently Scrollable Container Ala D&D Beyond */

@@ -2715,7 +2715,7 @@ function renderResourcesList(container, animate = false) {
         const hq = r.hq;
 
         return `
-          <div class="res-card ${isEquipped ? 'card-equipped' : 'card-unequipped'}">
+          <div class="res-card stagger-item ${isEquipped ? 'card-equipped' : 'card-unequipped'}" style="--stagger-idx: ${i};">
             <div class="res-card-top">
               <div class="res-title-box">
                 <span class="res-icon ${r.subtype || r.type}">${getResIcon(r)}</span>
@@ -2728,7 +2728,7 @@ function renderResourcesList(container, animate = false) {
                       title="Click to cycle status (Equipped -> In Bag -> Stored)"
                     >
                       ${status === 'equipped'
-                        ? '<i class="ri-checkbox-circle-fill"></i> Equipped'
+                        ? '<i class="ri-checkbox-circle-fill breathing-pulse"></i> Equipped'
                         : status === 'carried'
                         ? '<i class="ri-inbox-line"></i> In Bag'
                         : '<i class="ri-archive-line"></i> Stored'}
@@ -2738,7 +2738,7 @@ function renderResourcesList(container, animate = false) {
                 </div>
               </div>
               <div class="res-top-actions">
-                <span class="ep-tag">${r.epCost ?? r.cost ?? 0} EP</span>
+                <span class="ep-tag font-mono">${r.epCost ?? r.cost ?? 0} EP</span>
                 <button class="btn-icon-subtle btn-send-res-vtt" data-send-res-vtt="${itemId}" title="Send ${escapeHtml(r.name)} card to Roll20 chat"><i class="ri-broadcast-line"></i></button>
                 <button class="btn-icon-subtle" data-edit-res="${itemId}" title="Edit Item"><i class="ri-edit-line"></i></button>
                 <button class="btn-icon-subtle text-danger" data-del-res="${itemId}" title="Delete Item"><i class="ri-delete-bin-line"></i></button>
@@ -2748,28 +2748,28 @@ function renderResourcesList(container, animate = false) {
             <!-- TACTICAL CHIPS ROW -->
             ${isWeapon ? `
               <div class="res-tactical-chips">
-                <span class="res-chip chip-atk"><i class="ri-crosshair-2-line"></i> Atk +${atkBonus}</span>
-                <span class="res-chip chip-dc"><i class="ri-shield-flash-line"></i> DC ${dc} ${resistance}</span>
+                <span class="res-chip chip-atk font-mono"><i class="ri-crosshair-2-line"></i> Atk +${atkBonus}</span>
+                <span class="res-chip chip-dc font-mono"><i class="ri-shield-flash-line"></i> DC ${dc} ${resistance}</span>
                 <span class="res-chip chip-range">${isRanged ? 'Ranged' : (isStrengthBased ? 'Melee (STR-based)' : 'Close')}</span>
-                <span class="res-chip chip-crit">Crit ${crit}</span>
+                <span class="res-chip chip-crit font-mono">Crit ${crit}</span>
                 ${traits.map(t => `<span class="res-chip trait-chip">${t}</span>`).join('')}
               </div>
 
               <!-- WEAPON QUICK ROLL BUTTONS -->
               <div class="res-quick-roll-bar">
-                <button class="btn btn-primary btn-xs btn-res-roll-atk" data-res-roll-atk="${itemId}">
+                <button class="btn btn-primary btn-xs btn-res-roll-atk font-mono" data-res-roll-atk="${itemId}">
                   <i class="ri-dice-line"></i> Roll Attack (d20+${atkBonus})
                 </button>
-                <button class="btn btn-secondary btn-xs btn-res-roll-dc" data-res-roll-dc="${itemId}" title="Display Resistance Check DC in chat">
+                <button class="btn btn-secondary btn-xs btn-res-roll-dc font-mono" data-res-roll-dc="${itemId}" title="Display Resistance Check DC in chat">
                   <i class="ri-shield-line"></i> DC ${dc} ${resistance}
                 </button>
               </div>
             ` : isArmor ? `
               <div class="res-tactical-chips">
-                ${protRank > 0 ? `<span class="res-chip chip-prot"><i class="ri-shield-check-line"></i> +${protRank} Toughness</span>` : ''}
-                ${a.activeDefenseBonus ? `<span class="res-chip chip-def">+${a.activeDefenseBonus} Active Def (Dodge/Parry)</span>` : ''}
+                ${protRank > 0 ? `<span class="res-chip chip-prot font-mono"><i class="ri-shield-check-line"></i> +${protRank} Toughness</span>` : ''}
+                ${a.activeDefenseBonus ? `<span class="res-chip chip-def font-mono">+${a.activeDefenseBonus} Active Def (Dodge/Parry)</span>` : ''}
                 ${a.isSubtle ? `<span class="res-chip">Subtle</span>` : ''}
-                ${a.imperviousRank > 0 ? `<span class="res-chip">Impervious ${a.imperviousRank}</span>` : ''}
+                ${a.imperviousRank > 0 ? `<span class="res-chip font-mono">Impervious ${a.imperviousRank}</span>` : ''}
                 ${isEquipped && protRank > 0 ? `<span class="res-chip chip-applied"><i class="ri-check-double-line"></i> Added to Active Toughness</span>` : ''}
               </div>
             ` : v ? `

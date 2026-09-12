@@ -282,27 +282,27 @@ export function renderTargetedEffects(container) {
 
       <div class="attacks-list">
         ${filtered.length === 0 ? `<div class="empty-hint">No attacks matching filter "${activeFilter}".</div>` : ''}
-        ${filtered.map(atk => `
-          <div class="attack-card ${atk.type} ${atk.isInactive ? 'inactive-attack' : ''} ${atk.isStandby ? 'standby-attack' : ''}">
+        ${filtered.map((atk, idx) => `
+          <div class="attack-card stagger-item ${atk.type} ${atk.isInactive ? 'inactive-attack' : ''} ${atk.isStandby ? 'standby-attack' : ''}" style="--stagger-idx: ${idx};">
             <div class="attack-main">
               <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
                 <span class="attack-badge ${atk.type}">${atk.slotId && atk.slotId !== 'main' ? 'ARRAY SLOT' : atk.type.toUpperCase()}</span>
                 ${atk.isLinked ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.35);"><i class="ri-links-line"></i> LINKED</span>` : ''}
                 ${atk.isInactive ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35);"><i class="ri-forbid-line"></i> DEACTIVATED</span>` : ''}
                 ${atk.isStandby ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35);"><i class="ri-pause-circle-line"></i> STANDBY</span>` : ''}
-                ${atk.type === 'power' && !atk.isInactive && !atk.isStandby ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);"><i class="ri-flashlight-fill"></i> ACTIVE</span>` : ''}
+                ${atk.type === 'power' && !atk.isInactive && !atk.isStandby ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);"><i class="ri-flashlight-fill breathing-pulse"></i> ACTIVE</span>` : ''}
               </div>
               <h4 class="attack-name">${escapeHtml(atk.name)}</h4>
               ${atk.isInactive ? `
-                <button class="roll-btn" disabled style="opacity: 0.45; cursor: not-allowed;" title="Power is deactivated on Character Sheet">
+                <button class="roll-btn font-mono" disabled style="opacity: 0.45; cursor: not-allowed;" title="Power is deactivated on Character Sheet">
                   <i class="ri-forbid-line"></i> Deactivated
                 </button>
               ` : atk.isStandby ? `
-                <button class="btn-switch-and-roll" data-switch-power="${atk.powerId}" data-switch-slot="${atk.slotId}" data-bonus="${atk.rollBonus}" title="Switch Array active slot to this attack (Free Action) and roll">
+                <button class="btn-switch-and-roll font-mono" data-switch-power="${atk.powerId}" data-switch-slot="${atk.slotId}" data-bonus="${atk.rollBonus}" title="Switch Array active slot to this attack (Free Action) and roll">
                   <i class="ri-flashlight-line"></i> Switch & Roll d20${atk.rollBonus >= 0 ? '+' + atk.rollBonus : atk.rollBonus}
                 </button>
               ` : `
-                <button class="roll-btn" data-attack-id="${atk.id}" data-bonus="${atk.rollBonus}" title="Roll d20 + Attack">
+                <button class="roll-btn font-mono" data-attack-id="${atk.id}" data-bonus="${atk.rollBonus}" title="Roll d20 + Attack">
                   <i class="ri-dice-line"></i> Roll d20${atk.rollBonus >= 0 ? '+' + atk.rollBonus : atk.rollBonus}
                 </button>
               `}
@@ -310,19 +310,19 @@ export function renderTargetedEffects(container) {
             <div class="attack-metrics">
               <div class="metric">
                 <span class="m-label">ROLL BONUS</span>
-                <span class="m-val highlight">${atk.rollBonus >= 0 ? '+' + atk.rollBonus : atk.rollBonus}</span>
+                <span class="m-val highlight font-mono">${atk.rollBonus >= 0 ? '+' + atk.rollBonus : atk.rollBonus}</span>
               </div>
               <div class="metric">
                 <span class="m-label">RANGE</span>
-                <span class="m-val">${escapeHtml(atk.range)}</span>
+                <span class="m-val font-mono">${escapeHtml(atk.range)}</span>
               </div>
               <div class="metric">
                 <span class="m-label">EFFECT</span>
-                <span class="m-val">${escapeHtml(atk.effectName)} ${atk.effectRank}</span>
+                <span class="m-val font-mono">${escapeHtml(atk.effectName)} ${atk.effectRank}</span>
               </div>
               <div class="metric">
                 <span class="m-label">RESISTANCE</span>
-                <span class="m-val">${escapeHtml(atk.resistance)} (DC ${atk.dc})</span>
+                <span class="m-val font-mono">${escapeHtml(atk.resistance)} (DC ${atk.dc})</span>
               </div>
             </div>
             ${atk.type === 'custom' ? `
