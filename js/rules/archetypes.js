@@ -138,7 +138,7 @@ export const ARCHETYPES = [
       {
         name: 'Energy Aura Force Field',
         description: 'A shimmering aura that repels physical and energy attacks.',
-        effectType: 'Force Field',
+        effectType: 'Protection',
         costPerRank: 1,
         ranks: 6,
         range: 'Personal',
@@ -362,7 +362,7 @@ export const ARCHETYPES = [
       {
         name: 'Shield of the Seraphim',
         description: 'An arcane ward that repels hostile spells and physical blows.',
-        effectType: 'Force Field',
+        effectType: 'Protection',
         costPerRank: 1,
         ranks: 8,
         range: 'Personal',
@@ -429,14 +429,14 @@ export const ARCHETYPES = [
       {
         name: 'Impervious Toughness',
         description: 'Resilient tissue that shrugs off attacks with ranks less than the impervious rating.',
-        effectType: 'Impervious',
-        costPerRank: 1,
+        effectType: 'Protection',
+        costPerRank: 2,
         ranks: 8,
         range: 'Personal',
         action: 'None',
         duration: 'Permanent',
-        cost: 8,
-        extras: [],
+        cost: 16,
+        extras: [{ name: 'Impervious', costPerRank: 1, isFlat: false }],
         flaws: []
       },
       {

@@ -1,6 +1,7 @@
 // js/components/roll20Print.js
 import { store } from '../state.js';
 import { SKILLS } from '../rules/skills.js';
+import { calculatePowerTotalCost } from '../rules/powers.js';
 
 /**
  * Calculates movement speeds based on powers and standard speed rank 0.
@@ -27,22 +28,33 @@ function getMovementData(char) {
     12: { mph: '8000 mph', rpd: '16 mi/rnd' }
   };
 
-  for (const p of char.powers) {
-    const effect = (p.baseEffect || '').toLowerCase();
-    let moveType = null;
-    if (effect.includes('flight')) moveType = 'Flight';
-    else if (effect.includes('speed')) moveType = 'Ground';
-    else if (effect.includes('swimming')) moveType = 'Swimming';
-    else if (effect.includes('leaping')) moveType = 'Leaping';
-    else if (effect.includes('teleport')) moveType = 'Teleport';
+  for (const p of (char.powers || [])) {
+    const checkMoveEffect = (eff) => {
+      if (!eff) return;
+      const effect = (eff.baseEffect || eff.effectType || eff.name || '').toLowerCase();
+      let moveType = null;
+      if (effect.includes('flight')) moveType = 'Flight';
+      else if (effect.includes('speed')) moveType = 'Ground';
+      else if (effect.includes('swimming')) moveType = 'Swimming';
+      else if (effect.includes('leaping')) moveType = 'Leaping';
+      else if (effect.includes('teleport')) moveType = 'Teleport';
 
-    if (moveType) {
-      const rk = p.ranks || 1;
-      const speedInfo = speedTable[rk] || { mph: `Rank ${rk}`, rpd: `Rank ${rk}` };
-      if (moveType === 'Ground') {
-        moves[0] = { type: 'Ground', rank: rk, mph: speedInfo.mph, rpd: speedInfo.rpd };
-      } else {
-        moves.push({ type: moveType, rank: rk, mph: speedInfo.mph, rpd: speedInfo.rpd });
+      if (moveType) {
+        const rk = eff.ranks || 1;
+        const speedInfo = speedTable[rk] || { mph: `Rank ${rk}`, rpd: `Rank ${rk}` };
+        if (moveType === 'Ground') {
+          moves[0] = { type: 'Ground', rank: rk, mph: speedInfo.mph, rpd: speedInfo.rpd };
+        } else if (!moves.some(m => m.type === moveType && m.rank === rk)) {
+          moves.push({ type: moveType, rank: rk, mph: speedInfo.mph, rpd: speedInfo.rpd });
+        }
+      }
+    };
+
+    if (p.mainEffect) checkMoveEffect(p.mainEffect);
+    else checkMoveEffect(p);
+    if (Array.isArray(p.alternateEffects)) {
+      for (const slot of p.alternateEffects) {
+        if (slot.effect) checkMoveEffect(slot.effect);
       }
     }
   }
@@ -73,38 +85,78 @@ function getAttacksData(char) {
     crit: '20'
   });
 
-  // 2. Power-based attacks
-  for (const p of char.powers) {
-    const isAttack = ['Damage', 'Blast', 'Affliction', 'Weaken'].includes(p.baseEffect);
-    if (isAttack) {
-      let rollBonus = fgt;
-      let skillName = 'Fighting';
-      const isRanged = p.baseEffect === 'Blast' || p.range === 'Ranged';
+  // Helper to extract attack entries from individual effect components
+  const processAttackEffect = (eff, power, label) => {
+    if (!eff) return;
+    const base = eff.baseEffect || eff.effectType || eff.name || '';
+    if (!['Damage', 'Blast', 'Affliction', 'Weaken'].includes(base)) return;
 
-      if (isRanged) {
-        skillName = 'Dexterity';
-        const rangedSkill = char.skills.find(s => s.name === 'Ranged Combat' && (new RegExp(p.name, 'i').test(s.subtype || '') || /blast/i.test(s.subtype || '')));
-        rollBonus = dex + (rangedSkill ? rangedSkill.ranks : 0);
-        if (rangedSkill) skillName = `Ranged Combat (${rangedSkill.subtype})`;
+    let rollBonus = fgt;
+    let skillName = 'Fighting';
+    const isRanged = base === 'Blast' || eff.range === 'Ranged';
+
+    if (isRanged) {
+      skillName = 'Dexterity';
+      const searchPattern = eff.name || power.name || base;
+      const rangedSkill = char.skills.find(s => s.name === 'Ranged Combat' && (new RegExp(searchPattern, 'i').test(s.subtype || '') || /blast/i.test(s.subtype || '')));
+      rollBonus = dex + (rangedSkill ? rangedSkill.ranks : 0);
+      if (rangedSkill) skillName = `Ranged Combat (${rangedSkill.subtype})`;
+    }
+
+    const accurate = (eff.extras || []).find(e => e.name === 'Accurate');
+    if (accurate) {
+      rollBonus += (accurate.ranks || 1) * 2;
+    }
+
+    const rk = eff.ranks || power.ranks || 1;
+    const dcBase = (base === 'Affliction' || base === 'Weaken') ? 10 : 15;
+    const descStr = Array.isArray(power.descriptors) && power.descriptors.length > 0
+      ? power.descriptors.join(', ')
+      : (base === 'Affliction' ? 'Affliction' : base === 'Weaken' ? 'Weaken' : 'Damage');
+
+    attacks.push({
+      name: label || eff.name || power.name || base,
+      skill: skillName,
+      mod: rollBonus >= 0 ? `+${rollBonus}` : `${rollBonus}`,
+      attackTotal: rollBonus >= 0 ? `+${rollBonus}` : `${rollBonus}`,
+      rank: rk,
+      descriptor: descStr,
+      dc: dcBase + rk,
+      crit: '20'
+    });
+  };
+
+  // 2. Power-based attacks (Main effect, Linked effects, Alternate slots)
+  for (const p of (char.powers || [])) {
+    // Main Effect
+    if (p.mainEffect) {
+      processAttackEffect(p.mainEffect, p, p.name || p.mainEffect.name);
+    } else {
+      processAttackEffect(p, p, p.name);
+    }
+
+    // Linked Effects
+    if (Array.isArray(p.linkedEffects)) {
+      for (let i = 0; i < p.linkedEffects.length; i++) {
+        const le = p.linkedEffects[i];
+        processAttackEffect(le, p, `${p.name || 'Power'} [Linked: ${le.name || le.baseEffect}]`);
       }
+    }
 
-      // Check accurate
-      const accurate = (p.extras || []).find(e => e.name === 'Accurate');
-      if (accurate) {
-        rollBonus += (accurate.ranks || 1) * 2;
+    // Alternate Slots
+    if (Array.isArray(p.alternateEffects)) {
+      for (let i = 0; i < p.alternateEffects.length; i++) {
+        const slot = p.alternateEffects[i];
+        if (slot.effect) {
+          processAttackEffect(slot.effect, p, `${slot.name || `Slot ${i + 1}`} [Alt]`);
+        }
+        if (Array.isArray(slot.linkedEffects)) {
+          for (let j = 0; j < slot.linkedEffects.length; j++) {
+            const sle = slot.linkedEffects[j];
+            processAttackEffect(sle, p, `${slot.name || `Slot ${i + 1}`} [Linked: ${sle.name || sle.baseEffect}]`);
+          }
+        }
       }
-
-      const dcBase = p.baseEffect === 'Affliction' ? 10 : 15;
-      attacks.push({
-        name: p.name || p.baseEffect,
-        skill: skillName,
-        mod: rollBonus >= 0 ? `+${rollBonus}` : `${rollBonus}`,
-        attackTotal: rollBonus >= 0 ? `+${rollBonus}` : `${rollBonus}`,
-        rank: p.ranks,
-        descriptor: p.descriptors || (p.baseEffect === 'Affliction' ? 'Affliction' : 'Damage'),
-        dc: dcBase + p.ranks,
-        crit: '20'
-      });
     }
   }
 
@@ -338,6 +390,9 @@ export function buildRoll20SheetHtml() {
                 const total = store.getDefenseTotal(d.code);
                 const base = store.getDefenseBase(d.code);
                 const bought = char.defensesBought[d.code] || 0;
+                const boughtDisplay = d.code === 'TOUGHNESS'
+                  ? (total - base > 0 ? `+${total - base} (Armor/Adv)` : '0')
+                  : String(bought);
                 return `
                   <tr>
                     <td class="r20-def-name-cell">
@@ -345,7 +400,7 @@ export function buildRoll20SheetHtml() {
                     </td>
                     <td><span class="r20-def-total-badge">${total}</span></td>
                     <td><span class="r20-def-pill">${base}</span></td>
-                    <td><span class="r20-def-pill">${bought}</span></td>
+                    <td><span class="r20-def-pill">${boughtDisplay}</span></td>
                   </tr>
                 `;
               }).join('')}
@@ -353,7 +408,7 @@ export function buildRoll20SheetHtml() {
           </table>
           <div class="r20-hits-box">
             <span>CURRENT INJURIES / HITS</span>
-            <span class="r20-hits-val">0</span>
+            <span class="r20-hits-val">${char.injuries || 0}</span>
           </div>
         </div>
 
@@ -437,24 +492,47 @@ export function buildRoll20SheetHtml() {
           <div class="r20-powers-list">
             ${char.powers.length === 0 ? '<em style="color:#777; padding: 6px;">No powers defined.</em>' : ''}
             ${char.powers.map(p => {
-              const extrasStr = (p.extras || []).map(e => e.name).join(', ');
-              const flawsStr = (p.flaws || []).map(f => f.name).join(', ');
+              const totalCost = calculatePowerTotalCost(p);
+              const mainEff = p.mainEffect || p;
+              const extras = mainEff.extras || p.extras || [];
+              const flaws = mainEff.flaws || p.flaws || [];
+              const extrasStr = extras.map(e => e.name).join(', ');
+              const flawsStr = flaws.map(f => f.name).join(', ');
+              const descStr = Array.isArray(p.descriptors) && p.descriptors.length > 0 ? p.descriptors.join(', ') : (typeof p.descriptors === 'string' ? p.descriptors : '');
+              const altSlots = Array.isArray(p.alternateEffects) ? p.alternateEffects : [];
+              const linkedEffs = Array.isArray(p.linkedEffects) ? p.linkedEffects : [];
+
               return `
                 <div class="r20-power-card">
                   <div class="r20-power-header">
                     <span class="r20-power-name">${escapeHtml(p.name || p.baseEffect)}</span>
-                    <span class="r20-power-cost">Rank ${p.ranks} • Cost: ${p.cost || p.ranks * 2} PP</span>
+                    <span class="r20-power-cost">Rank ${p.ranks || mainEff.ranks || 1} • Cost: ${totalCost} PP</span>
                   </div>
                   <div class="r20-power-body">
                     <div class="r20-power-tags">
-                      <span class="r20-tag">${p.baseEffect || 'Effect'}</span>
-                      <span class="r20-tag">${p.action || 'Standard'} Action</span>
-                      <span class="r20-tag">${p.range || 'Close'} Range</span>
-                      <span class="r20-tag">${p.duration || 'Instant'}</span>
+                      <span class="r20-tag">${mainEff.baseEffect || p.baseEffect || 'Effect'}</span>
+                      <span class="r20-tag">${mainEff.action || p.action || 'Standard'} Action</span>
+                      <span class="r20-tag">${mainEff.range || p.range || 'Close'} Range</span>
+                      <span class="r20-tag">${mainEff.duration || p.duration || 'Instant'}</span>
                     </div>
-                    ${p.descriptors ? `<div style="font-size:0.75rem; color:#666;"><strong>Descriptors:</strong> ${escapeHtml(p.descriptors)}</div>` : ''}
+                    ${descStr ? `<div style="font-size:0.75rem; color:#666;"><strong>Descriptors:</strong> ${escapeHtml(descStr)}</div>` : ''}
                     ${extrasStr ? `<div style="font-size:0.72rem; color:var(--r20-green-dark);"><strong>Extras:</strong> ${escapeHtml(extrasStr)}</div>` : ''}
                     ${flawsStr ? `<div style="font-size:0.72rem; color:var(--r20-red);"><strong>Flaws:</strong> ${escapeHtml(flawsStr)}</div>` : ''}
+                    ${linkedEffs.length > 0 ? `
+                      <div style="font-size:0.72rem; color:#2563eb; margin-top:0.25rem;">
+                        <strong>Linked:</strong> ${linkedEffs.map(le => `${escapeHtml(le.name || le.baseEffect)} (${le.ranks} Ranks)`).join(' + ')}
+                      </div>
+                    ` : ''}
+                    ${altSlots.length > 0 ? `
+                      <div style="font-size:0.72rem; color:#d97706; margin-top:0.25rem; border-top: 1px dashed #e2e8f0; padding-top: 0.25rem;">
+                        <strong>Alternate Effects (${altSlots.length}):</strong>
+                        ${altSlots.map((s, idx) => `
+                          <div style="margin-left: 0.4rem; color: #475569;">
+                            • ${escapeHtml(s.name || s.effect?.name || `Slot ${idx + 1}`)}: ${s.effect?.baseEffect || 'Effect'} ${s.effect?.ranks || 1} (${s.isDynamic ? 'Dynamic' : 'Alternate'})
+                          </div>
+                        `).join('')}
+                      </div>
+                    ` : ''}
                     ${p.notes ? `<div class="r20-power-desc">${escapeHtml(p.notes)}</div>` : ''}
                   </div>
                 </div>

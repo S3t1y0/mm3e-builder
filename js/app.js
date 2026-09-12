@@ -21,11 +21,11 @@ import { openSkillModal } from './components/skillModal.js';
 import { openAdvantageModal } from './components/advantageModal.js';
 import { openResourceModal } from './components/resourceModal.js';
 import { renderReferencesTab } from './components/references.js';
-import { exportToJson, importFromJson, exportToCsv, printSheet } from './storage/exportImport.js';
+import { exportToJson, importFromJson } from './storage/exportImport.js';
 import { showToast, showConfirmModal } from './components/notifications.js';
 import { initRoll20Print, openRoll20Preview } from './components/roll20Print.js';
 import { renderWizard } from './components/wizard/wizardController.js';
-import { rollCheck } from './components/quickDiceRoller.js';
+import { rollCheck, sendFeatureToVTT } from './components/quickDiceRoller.js';
 import { getSharedCharacterFromUrl, clearShareHash } from './storage/shareUrl.js';
 import { openShareModal } from './components/shareModal.js';
 
@@ -33,10 +33,13 @@ let activeTab = 'sheet'; // 'sheet', 'wizard', 'resources', 'references'
 let activeDndbHubTab = 'actions'; // 'actions', 'powers', 'advantages', 'conditions'
 let activeSheetSkillCategory = 'All';
 let sheetSkillSearchQuery = '';
+let activeResourceCategory = 'all';
 
-// Collapsed sections tracking
+// Collapsed & Expanded sections tracking
 const collapsedPowerIds = new Set();
 const collapsedAdvantageNames = new Set();
+const expandedPowerRulesIds = new Set();
+const expandedArrayOverviewIds = new Set();
 
 if (typeof window !== 'undefined') {
   window.store = store;
@@ -145,10 +148,6 @@ function setupDndbHubNavigation() {
     });
   });
 
-  document.getElementById('btn-jump-conditions')?.addEventListener('click', () => {
-    switchDndbHubTab('conditions');
-  });
-
   // Initiative Quick Box 1-Click Roll
   const initQuickBox = document.getElementById('dndb-init-quick-box');
   initQuickBox?.addEventListener('click', () => {
@@ -204,14 +203,9 @@ function setupGlobalActions() {
     exportToJson();
     showToast('Character exported to JSON file successfully!', 'success');
   });
-  document.getElementById('btn-excel')?.addEventListener('click', () => {
-    exportToCsv();
-    showToast('Character exported to CSV/Excel file successfully!', 'success');
-  });
   document.getElementById('btn-roll20-preview')?.addEventListener('click', () => {
     openRoll20Preview();
   });
-  document.getElementById('btn-pdf')?.addEventListener('click', () => printSheet());
 
   // Import JSON
   const importInput = document.getElementById('file-import-input');
@@ -268,13 +262,8 @@ function setupGlobalActions() {
     });
   };
 
-  document.getElementById('drawer-btn-undo')?.addEventListener('click', () => {
-    closeDrawer();
-    store.undo();
-  });
-  document.getElementById('drawer-btn-redo')?.addEventListener('click', () => {
-    closeDrawer();
-    store.redo();
+  document.getElementById('btn-open-skill-spec')?.addEventListener('click', () => {
+    openSheetSpecializationModal('Close Combat');
   });
   document.getElementById('drawer-btn-new')?.addEventListener('click', () => {
     closeDrawer();
@@ -300,10 +289,8 @@ function setupGlobalActions() {
     openShareModal();
   });
   bindDrawerAction('drawer-btn-export', 'btn-export');
-  bindDrawerAction('drawer-btn-excel', 'btn-excel');
   bindDrawerAction('drawer-btn-import', 'btn-import');
   bindDrawerAction('drawer-btn-roll20', 'btn-roll20-preview');
-  bindDrawerAction('drawer-btn-print', 'btn-pdf');
 
   document.getElementById('drawer-btn-wizard')?.addEventListener('click', () => {
     closeDrawer();
@@ -355,18 +342,11 @@ function render() {
   // Tab switching
   const sheetView = document.getElementById('view-character-sheet');
   const wizardView = document.getElementById('view-wizard');
-  const resourcesView = document.getElementById('view-resources');
   const referencesView = document.getElementById('view-references');
-  const statsFooter = document.getElementById('points-breakdown-footer');
 
   if (sheetView) sheetView.style.display = activeTab === 'sheet' ? 'block' : 'none';
   if (wizardView) wizardView.style.display = activeTab === 'wizard' ? 'block' : 'none';
-  if (resourcesView) resourcesView.style.display = activeTab === 'resources' ? 'block' : 'none';
   if (referencesView) referencesView.style.display = activeTab === 'references' ? 'block' : 'none';
-
-  if (statsFooter) {
-    statsFooter.style.display = activeTab === 'wizard' ? 'none' : 'flex';
-  }
 
   if (activeTab === 'wizard') {
     renderWizard(wizardView, (newTab) => {
@@ -379,10 +359,6 @@ function render() {
 
   if (activeTab === 'references') {
     renderReferencesTab(referencesView);
-    return;
-  }
-  if (activeTab === 'resources') {
-    renderResourcesTab(resourcesView);
     return;
   }
 
@@ -399,6 +375,9 @@ function render() {
 
   const conditionsContainer = document.getElementById('conditions-container');
   if (conditionsContainer) renderConditionsTracker(conditionsContainer);
+
+  const equipmentContainer = document.getElementById('hub-equipment-container');
+  if (equipmentContainer) renderResourcesTab(equipmentContainer);
 
   switchDndbHubTab(activeDndbHubTab);
   syncSheetHeights();
@@ -444,47 +423,6 @@ function renderHeaderPoints() {
   const drawerPL = document.getElementById('drawer-char-pl');
   if (drawerName) drawerName.textContent = store.character.name || 'Hero Name';
   if (drawerPL) drawerPL.textContent = `PL ${store.character.powerLevel} • Mutants & Masterminds 3e`;
-
-  const statsFooter = document.getElementById('points-breakdown-footer');
-  if (statsFooter) {
-    const wasOpen = statsFooter.querySelector('#pp-dock-details')?.classList.contains('open');
-    statsFooter.innerHTML = `
-      <div class="pp-dock-summary">
-        <div class="dock-summary-left">
-          <span class="dock-label">TOTAL SPENT</span>
-          <strong class="dock-val">${spent} / ${budget} PP</strong>
-        </div>
-        <div class="dock-summary-right">
-          <div class="dock-rem-badge ${remaining < 0 ? 'negative' : ''}">
-            <span>Rem:</span> <strong>${remaining} PP</strong>
-          </div>
-          <button id="btn-toggle-dock-details" class="dock-toggle-btn" aria-label="Toggle PP Details" title="Toggle PP Breakdown">
-            <i class="${wasOpen ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line'}"></i>
-          </button>
-        </div>
-      </div>
-      <div class="pp-dock-details ${wasOpen ? 'open' : ''}" id="pp-dock-details">
-        <div class="breakdown-item"><span>Abilities:</span> <strong>${store.getTotalAbilityPP()} PP</strong></div>
-        <div class="breakdown-item"><span>Defenses:</span> <strong>${store.getTotalDefensePP()} PP</strong></div>
-        <div class="breakdown-item"><span>Skills:</span> <strong>${store.getTotalSkillPP()} PP</strong></div>
-        <div class="breakdown-item"><span>Advantages:</span> <strong>${store.getTotalAdvantagePP()} PP</strong></div>
-        <div class="breakdown-item"><span>Powers:</span> <strong>${store.getTotalPowerPP()} PP</strong></div>
-        <div class="breakdown-item total"><span>Total Spent:</span> <strong>${spent} / ${budget} PP</strong></div>
-        <div class="breakdown-item remaining ${remaining < 0 ? 'negative' : ''}"><span>Remaining:</span> <strong>${remaining} PP</strong></div>
-      </div>
-    `;
-
-    statsFooter.querySelector('#btn-toggle-dock-details')?.addEventListener('click', () => {
-      const details = statsFooter.querySelector('#pp-dock-details');
-      const icon = statsFooter.querySelector('#btn-toggle-dock-details i');
-      if (details) {
-        details.classList.toggle('open');
-        if (icon) {
-          icon.className = details.classList.contains('open') ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line';
-        }
-      }
-    });
-  }
 }
 
 function renderHeroDetails() {
@@ -603,26 +541,15 @@ function renderHeroDetails() {
     sensesListEl.innerHTML = sHtml;
   }
 
-  // Quick Conditions Summary
-  const condSummaryEl = document.getElementById('dndb-active-conditions-summary');
-  if (condSummaryEl) {
-    const activeConds = char.activeConditions || [];
-    if (activeConds.length === 0) {
-      condSummaryEl.innerHTML = `<span class="condition-chip normal"><i class="ri-checkbox-circle-line"></i> Normal / Healthy</span>`;
-    } else {
-      condSummaryEl.innerHTML = activeConds.map(c => `
-        <span class="condition-chip danger"><i class="ri-alert-line"></i> ${escapeHtml(c)}</span>
-      `).join('');
-    }
-  }
-
   // Hub Tab Badges
   const hubPowersCount = document.getElementById('hub-powers-count');
   const hubAdvantagesCount = document.getElementById('hub-advantages-count');
+  const hubEquipmentCount = document.getElementById('hub-equipment-count');
   const powersPpBadge = document.getElementById('powers-pp-badge');
   const advantagesPpBadge = document.getElementById('advantages-pp-badge');
   if (hubPowersCount) hubPowersCount.textContent = (char.powers || []).length;
   if (hubAdvantagesCount) hubAdvantagesCount.textContent = (char.advantages || []).length;
+  if (hubEquipmentCount) hubEquipmentCount.textContent = (char.resources || []).length;
   if (powersPpBadge) powersPpBadge.textContent = `${store.getTotalPowerPP()} PP`;
   if (advantagesPpBadge) advantagesPpBadge.textContent = `${store.getTotalAdvantagePP()} PP`;
 }
@@ -691,20 +618,28 @@ function renderDefenses() {
   const container = document.getElementById('defenses-grid');
   if (!container) return;
 
+  const injuries = store.character.injuries || 0;
+
   container.innerHTML = DEFENSES.map(def => {
     const base = store.getDefenseBase(def.key);
     const bought = store.character.defensesBought[def.key] || 0;
     const total = store.getDefenseTotal(def.key);
     const isInit = def.key === 'INITIATIVE';
+    const isToughness = def.key === 'TOUGHNESS';
     const rollTitle = isInit
       ? `Click to Roll Initiative (d20${total >= 0 ? '+' + total : total})`
       : `Click to Roll ${escapeHtml(def.name)} Resistance Check (d20${total >= 0 ? '+' + total : total})`;
 
+    let baseInfoHtml = `<span class="def-base-info">${def.baseAbility} ${base}</span>`;
+    if (isToughness && injuries > 0) {
+      baseInfoHtml = `<span class="def-base-info def-injured-text" title="Base STA ${base}, minus ${injuries} bruise penalty">STA ${base} (-${injuries} Bruised)</span>`;
+    }
+
     return `
-      <div class="defense-card" title="${def.desc}">
+      <div class="defense-card ${isToughness && injuries > 0 ? 'card-injured' : ''}" title="${def.desc}">
         <div class="def-header">
           <span class="def-name">${def.name}</span>
-          <span class="def-base-info">${def.baseAbility} ${base}</span>
+          ${baseInfoHtml}
         </div>
         <div class="def-body">
           <button class="def-roll-btn" data-roll-defense="${def.key}" data-roll-name="${escapeHtml(def.name)}" data-roll-bonus="${total}" title="${rollTitle}">
@@ -756,13 +691,20 @@ function renderDefenses() {
       const name = btn.dataset.rollName || 'Defense';
       const bonus = parseInt(btn.dataset.rollBonus, 10) || 0;
       const isInit = key === 'INITIATIVE';
+      const isToughness = key === 'TOUGHNESS';
+      const isAffliction = key === 'FORTITUDE' || key === 'WILL';
+      const curInjuries = store.character.injuries || 0;
+
       rollCheck({
         name: isInit ? 'Initiative Roll' : `${name} Resistance Check`,
         type: isInit ? 'initiative' : 'defense',
         bonus,
         subtitle: isInit
           ? 'Reaction Speed Turn Order Check'
-          : `M&M 3e Resistance Check`
+          : isToughness
+            ? (curInjuries > 0 ? `Damage Resistance • ${curInjuries} Bruise Penalty (-${curInjuries})` : 'Damage Resistance Check')
+            : `M&M 3e ${name} Resistance Check`,
+        extra: isToughness ? { injuries: curInjuries } : {}
       });
     });
   });
@@ -1019,16 +961,16 @@ function openSheetSpecializationModal(initialBaseSkill = 'Close Combat') {
               </label>
               <div class="spec-base-cards-grid">
                 ${baseSkillOptions.map(opt => {
-                  const isSel = opt.name.toLowerCase() === selectedBase.toLowerCase();
-                  const abMod = store.getAbility(opt.ability);
-                  return `
+      const isSel = opt.name.toLowerCase() === selectedBase.toLowerCase();
+      const abMod = store.getAbility(opt.ability);
+      return `
                     <div class="spec-base-card ${isSel ? 'active' : ''}" data-select-base="${opt.name}">
                       <i class="${opt.icon}"></i>
                       <h5>${escapeHtml(opt.name)}</h5>
                       <span>${opt.ability} (${abMod >= 0 ? '+' : ''}${abMod})</span>
                     </div>
                   `;
-                }).join('')}
+    }).join('')}
               </div>
             </div>
 
@@ -1280,50 +1222,22 @@ function renderSkills() {
               </div>
             `;
           });
-        }
-
-        // 2. Integrated Wizard-Style Specialization Card
-        const commonSubtypes = ruleSkill.commonSubtypes || [];
-        html += `
-          <div class="wizard-spec-prompt-card sheet-spec-card">
-            <div class="spec-prompt-header">
-              <div class="spec-prompt-info">
-                <span class="spec-prompt-title">
-                  <i class="ri-add-circle-fill"></i> Add ${escapeHtml(ruleSkill.name)} Specialization
-                </span>
-                <span class="spec-prompt-sub">
-                  Key Ability: <strong>${abilityKey}</strong> (${abilityVal >= 0 ? `+${abilityVal}` : abilityVal}) • Rate: 1 PP = 2 Ranks
-                </span>
+        } else {
+          html += `
+            <div class="sheet-skill-row is-subtype-empty" title="${escapeHtml(ruleSkill.desc)}">
+              <span class="dndb-skill-pip untrained" title="Specialization Required">○</span>
+              <span class="sheet-skill-ab-tag">${abilityKey}</span>
+              <span class="sheet-skill-name" style="opacity: 0.7;">
+                ${escapeHtml(ruleSkill.name)} <span style="font-size: 0.72rem; color: var(--text-muted);">(No spec added)</span>
+              </span>
+              <div style="grid-column: span 2; display: flex; justify-content: flex-end;">
+                <button class="btn btn-ghost btn-xs btn-open-sheet-spec-modal" data-base="${escapeHtml(ruleSkill.name)}" type="button" style="padding: 0.15rem 0.45rem; font-size: 0.7rem;">
+                  <i class="ri-add-line"></i> Add Spec
+                </button>
               </div>
-              <button class="btn btn-secondary btn-xs btn-open-sheet-spec-modal" data-base="${escapeHtml(ruleSkill.name)}" type="button">
-                <i class="ri-sound-module-line"></i> Custom Specialization...
-              </button>
             </div>
-
-            <div class="spec-quick-chips">
-              <span class="spec-chips-label">Popular Presets:</span>
-              ${commonSubtypes.map(sub => {
-                const isAlreadyAdded = instances.some(inst => (inst.subtype || '').toLowerCase() === sub.toLowerCase());
-                if (isAlreadyAdded) {
-                  return `
-                    <span class="spec-quick-chip added" title="${escapeHtml(sub)} already active on sheet">
-                      <i class="ri-check-line"></i> ${escapeHtml(sub)}
-                    </span>
-                  `;
-                }
-                return `
-                  <button class="spec-quick-chip btn-sheet-quick-add" 
-                          data-base="${escapeHtml(ruleSkill.name)}" 
-                          data-sub="${escapeHtml(sub)}" 
-                          title="Instantly add ${escapeHtml(ruleSkill.name)}: ${escapeHtml(sub)} (+2 Ranks)" 
-                          type="button">
-                    <i class="ri-add-line"></i> ${escapeHtml(sub)}
-                  </button>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
+          `;
+        }
       } else {
         // Standard Skill without subtypes (Always displayed, trained or untrained)
         const match = addedSkills.find(s => s.name.toLowerCase() === ruleSkill.name.toLowerCase());
@@ -1512,14 +1426,14 @@ function renderAdvantages() {
   container.innerHTML = `
     <div class="sheet-advantages-library">
       ${advs.map(a => {
-        const rule = ADVANTAGES.find(r => r.name.toLowerCase() === a.name.toLowerCase());
-        const category = rule?.category || 'General';
-        const iconClass = getAdvCategoryIcon(category);
-        const desc = rule?.desc || 'Rules description unavailable.';
-        const isRanked = Boolean(rule?.ranked);
-        const isCollapsed = collapsedAdvantageNames.has(a.name);
+    const rule = ADVANTAGES.find(r => r.name.toLowerCase() === a.name.toLowerCase());
+    const category = rule?.category || 'General';
+    const iconClass = getAdvCategoryIcon(category);
+    const desc = rule?.desc || 'Rules description unavailable.';
+    const isRanked = Boolean(rule?.ranked);
+    const isCollapsed = collapsedAdvantageNames.has(a.name);
 
-        return `
+    return `
           <div class="sheet-adv-card ${isCollapsed ? 'is-collapsed' : ''}" id="adv-card-${escapeHtml(a.name)}">
             <div class="adv-card-header">
               <div class="adv-card-title-group">
@@ -1529,6 +1443,9 @@ function renderAdvantages() {
               <div class="adv-card-badges">
                 <span class="adv-cat-tag ${category.toLowerCase()}">${escapeHtml(category)}</span>
                 <span class="adv-cost-tag">${a.ranks} PP</span>
+                <button class="btn-send-vtt" data-send-adv-vtt="${escapeHtml(a.name)}" title="Send ${escapeHtml(a.name)} info to Roll20 chat" type="button">
+                  <i class="ri-broadcast-line"></i>
+                </button>
                 <button class="btn-adv-collapse-toggle ${isCollapsed ? 'collapsed' : ''}" data-toggle-collapse-adv="${escapeHtml(a.name)}" title="${isCollapsed ? 'Expand Advantage Section' : 'Close Advantage Section'}" type="button">
                   <i class="${isCollapsed ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line'}"></i>
                 </button>
@@ -1557,7 +1474,7 @@ function renderAdvantages() {
             </div>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 
@@ -1611,6 +1528,25 @@ function renderAdvantages() {
       const name = btn.dataset.advDel;
       store.removeAdvantage(name);
       showToast(`Removed Advantage: ${name}`, 'info');
+    });
+  });
+
+  // Send Advantage info card to Roll20 VTT
+  container.querySelectorAll('[data-send-adv-vtt]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const name = btn.dataset.sendAdvVtt;
+      const adv = advs.find(x => x.name === name);
+      if (!adv) return;
+      const rule = ADVANTAGES.find(r => r.name.toLowerCase() === adv.name.toLowerCase());
+      sendFeatureToVTT({
+        category: 'advantage',
+        name: adv.name,
+        type: rule?.category || 'General',
+        ranks: adv.ranks ? `Rank ${adv.ranks}` : 'Rank 1',
+        cost: `${adv.ranks || 1} PP`,
+        description: rule?.desc || ''
+      });
     });
   });
 }
@@ -1676,7 +1612,114 @@ function getResistanceExplanation(resistance, dcDescription = '') {
   return `Target rolls d20 + ${cleanRes} vs. the effect DC to resist or mitigate the effect.`;
 }
 
-function renderEffectExplainedModifiers(mainEff) {
+function getEffectIcon(baseEffect) {
+  switch (baseEffect) {
+    case 'Damage':
+    case 'Blast':
+      return 'ri-sword-fill';
+    case 'Affliction':
+      return 'ri-skull-2-fill';
+    case 'Protection':
+    case 'Deflect':
+      return 'ri-shield-check-fill';
+    case 'Flight':
+      return 'ri-flight-takeoff-fill';
+    case 'Speed':
+      return 'ri-speed-fill';
+    case 'Leaping':
+      return 'ri-arrow-up-circle-fill';
+    case 'Teleport':
+      return 'ri-portal-fill';
+    case 'Movement':
+      return 'ri-footprint-fill';
+    case 'Senses':
+    case 'Remote Sensing':
+      return 'ri-eye-2-fill';
+    case 'Enhanced Trait':
+      return 'ri-sparkling-fill';
+    case 'Immunity':
+      return 'ri-shield-flash-fill';
+    case 'Healing':
+    case 'Regeneration':
+      return 'ri-heart-pulse-fill';
+    case 'Create':
+    case 'Transform':
+      return 'ri-magic-fill';
+    case 'Move Object':
+      return 'ri-drag-move-2-fill';
+    case 'Illusion':
+      return 'ri-ghost-fill';
+    case 'Mind Reading':
+      return 'ri-brain-fill';
+    case 'Weaken':
+    case 'Nullify':
+      return 'ri-forbid-fill';
+    default:
+      return 'ri-flashlight-fill';
+  }
+}
+
+function getEffectBenefitSnippet(eff) {
+  if (!eff) return '';
+  const base = eff.baseEffect || eff.name;
+  const cfg = eff.config || {};
+  if (base === 'Enhanced Trait') {
+    const trait = cfg.trait || 'Trait';
+    return `+${eff.ranks || 1} ${trait} Passive Buff`;
+  }
+  if (base === 'Senses') {
+    if (Array.isArray(cfg.selectedFaculties) && cfg.selectedFaculties.length > 0) {
+      const names = cfg.selectedFaculties.map(f => typeof f === 'object' ? f.name : f);
+      return names.slice(0, 2).join(', ') + (names.length > 2 ? ` (+${names.length - 2})` : '');
+    }
+    if (Array.isArray(cfg.selectedModes) && cfg.selectedModes.length > 0) {
+      const names = cfg.selectedModes.map(m => typeof m === 'object' ? m.name : m);
+      return names.slice(0, 2).join(', ');
+    }
+    return 'Sensory Enhancement';
+  }
+  if (base === 'Immunity') {
+    if (Array.isArray(cfg.selectedPresets) && cfg.selectedPresets.length > 0) {
+      const presetDict = {
+        aging: 'Aging', disease: 'Disease', poison: 'Poison', sleep: 'No Sleep',
+        starvation: 'No Food/Water', suffocation_partial: 'Hold Breath',
+        suffocation_all: 'No Breathing (Vacuum/Gas Proof)', env_cold: 'Cold', env_heat: 'Heat',
+        radiation: 'Radiation', vacuum: 'Vacuum', critical: 'Critical Hits',
+        alteration: 'Alteration Attacks', entrapment: 'Entrapment', fatigue: 'Fatigue',
+        sensory: 'Sensory Afflictions', interaction: 'Interaction Skills',
+        life_support: 'Life Support', fire: 'Fire/Heat', cold: 'Cold/Ice',
+        electricity: 'Electricity', magic: 'Magic', mental: 'Mental Powers',
+        energy: 'All Energy', physical: 'All Physical', fortitude: 'All Fortitude', will: 'All Will'
+      };
+      const names = cfg.selectedPresets.map(p => presetDict[p] || p);
+      return `Immune: ${names.slice(0, 2).join(', ')}${names.length > 2 ? ` (+${names.length - 2})` : ''}`;
+    }
+    return 'Hazard Immunity';
+  }
+  if (base === 'Movement') {
+    if (Array.isArray(cfg.selectedModes) && cfg.selectedModes.length > 0) {
+      const names = cfg.selectedModes.map(m => typeof m === 'object' ? m.name : m);
+      return names.slice(0, 2).join(', ');
+    }
+  }
+  if (base === 'Protection') {
+    return `+${eff.ranks || 1} Toughness`;
+  }
+  if (base === 'Affliction') {
+    const res = cfg.resistance || eff.resistance || 'Fortitude';
+    return `DC ${10 + (eff.ranks || 1)} vs ${res}`;
+  }
+  if (base === 'Damage' || base === 'Blast') {
+    return `DC ${15 + (eff.ranks || 1)} vs Toughness`;
+  }
+  if (base === 'Weaken') {
+    const trait = cfg.trait || 'Trait';
+    return `Weaken ${trait} (DC ${10 + (eff.ranks || 1)})`;
+  }
+  return '';
+}
+
+function renderEffectExplainedModifiers(mainEff, powerName = '') {
   const rawExtras = Array.isArray(mainEff.extras) ? mainEff.extras : [];
   const rawFlaws = Array.isArray(mainEff.flaws) ? mainEff.flaws : [];
   if (rawExtras.length === 0 && rawFlaws.length === 0) return '';
@@ -1701,7 +1744,18 @@ function renderEffectExplainedModifiers(mainEff) {
       <div class="power-mod-explain-card extra">
         <div class="power-mod-explain-header">
           <span class="power-mod-name"><i class="ri-add-circle-fill"></i> ${escapeHtml(e.name)}</span>
-          <span class="power-mod-rate-tag">${escapeHtml(costTag)}</span>
+          <div class="power-mod-header-actions">
+            <span class="power-mod-rate-tag">${escapeHtml(costTag)}</span>
+            <button class="btn-send-vtt btn-send-vtt-xs btn-send-extra-vtt"
+                    data-send-extra-vtt="${escapeHtml(e.name)}"
+                    data-extra-cost="${escapeHtml(costTag)}"
+                    data-extra-desc="${escapeHtml(desc)}"
+                    data-parent-power="${escapeHtml(powerName)}"
+                    title="Share ${escapeHtml(e.name)} Extra to Roll20"
+                    type="button">
+              <i class="ri-broadcast-line"></i>
+            </button>
+          </div>
         </div>
         <p class="power-mod-desc-text">${escapeHtml(desc)}</p>
       </div>
@@ -1716,7 +1770,18 @@ function renderEffectExplainedModifiers(mainEff) {
       <div class="power-mod-explain-card flaw">
         <div class="power-mod-explain-header">
           <span class="power-mod-name"><i class="ri-indeterminate-circle-fill"></i> ${escapeHtml(f.name)}</span>
-          <span class="power-mod-rate-tag">${escapeHtml(costTag)}</span>
+          <div class="power-mod-header-actions">
+            <span class="power-mod-rate-tag">${escapeHtml(costTag)}</span>
+            <button class="btn-send-vtt btn-send-vtt-xs btn-send-flaw-vtt"
+                    data-send-flaw-vtt="${escapeHtml(f.name)}"
+                    data-flaw-cost="${escapeHtml(costTag)}"
+                    data-flaw-desc="${escapeHtml(desc)}"
+                    data-parent-power="${escapeHtml(powerName)}"
+                    title="Share ${escapeHtml(f.name)} Flaw to Roll20"
+                    type="button">
+              <i class="ri-broadcast-line"></i>
+            </button>
+          </div>
         </div>
         <p class="power-mod-desc-text">${escapeHtml(desc)}</p>
       </div>
@@ -1793,28 +1858,42 @@ function renderPowers() {
   container.innerHTML = `
     <div class="powers-linear-stack">
       ${powers.map(p => {
-        const cost = calculatePowerTotalCost(p);
-        const metrics = calculatePowerCombatMetrics(p, store.character.powerLevel, store.character.abilities, store.character.skills);
-        const mainEff = p.mainEffect || p;
-        const baseDef = BASE_EFFECTS.find(b => b.name === (mainEff.baseEffect || p.baseEffect));
-        const subOptionsHtml = renderEffectDetailedSubOptions(mainEff);
-        const modifiersHtml = renderEffectExplainedModifiers(mainEff);
-        const isPowerActive = p.active !== false;
-        const isArray = p.type === 'array' || (p.alternateEffects && p.alternateEffects.length > 0);
-        const activeSlotId = p.activeSlotId || 'main';
-        const isPrimaryActive = isPowerActive && (!isArray || activeSlotId === 'main' || !p.alternateEffects.some(s => s.id === activeSlotId));
-        const isCollapsed = collapsedPowerIds.has(p.id);
+    const cost = calculatePowerTotalCost(p);
+    const mainEff = p.mainEffect || p;
+    const isPowerActive = p.active !== false;
+    const isArray = p.type === 'array' || (Array.isArray(p.alternateEffects) && p.alternateEffects.length > 0);
+    const activeSlotId = p.activeSlotId || 'main';
+    const isPrimaryActive = isPowerActive && (!isArray || activeSlotId === 'main' || !p.alternateEffects.some(s => s.id === activeSlotId));
+    const activeAltSlot = isArray && !isPrimaryActive ? p.alternateEffects.find(s => s.id === activeSlotId) : null;
 
-        return `
+    // Target effect to showcase in the active mode card
+    const displayedEff = (isArray && !isPrimaryActive && activeAltSlot) ? (activeAltSlot.effect || activeAltSlot) : mainEff;
+    const isDisplayedMain = isPrimaryActive || !isArray;
+    const displayedMetrics = calculatePowerCombatMetrics({ ...p, mainEffect: displayedEff }, store.character.powerLevel, store.character.abilities, store.character.skills);
+    const baseDef = BASE_EFFECTS.find(b => b.name === (displayedEff.baseEffect || displayedEff.name));
+    const subOptionsHtml = renderEffectDetailedSubOptions(displayedEff);
+    const powerTitle = p.name || displayedEff.baseEffect || 'Custom Power';
+    const modifiersHtml = renderEffectExplainedModifiers(displayedEff, powerTitle);
+    const isCollapsed = collapsedPowerIds.has(p.id);
+    const isRulesExpanded = expandedPowerRulesIds.has(p.id);
+    const isArrayOverviewOpen = expandedArrayOverviewIds.has(p.id);
+    const mainSlotCost = calculateEffectCost(mainEff).totalCost;
+    const primaryLinkedCost = (p.linkedEffects || []).reduce((sum, le) => sum + (calculateEffectCost(le).totalCost || 0), 0);
+    const primarySuiteCapacity = mainSlotCost + primaryLinkedCost;
+    const activeLinkedEffects = isDisplayedMain ? (p.linkedEffects || []) : (activeAltSlot?.linkedEffects || []);
+
+    return `
           <div class="power-cascade-card ${isPowerActive ? 'power-active' : 'power-deactivated'} ${isCollapsed ? 'is-collapsed' : ''}" id="power-card-${p.id}">
             <!-- HEADER & TOP METRICS -->
             <div class="power-cascade-top">
               <div class="power-top-left">
-                <span class="power-glyph"><i class="ri-flashlight-line"></i></span>
+                <span class="power-glyph"><i class="${getEffectIcon(mainEff.baseEffect || p.baseEffect)}"></i></span>
                 <div>
                   <h3 class="power-name-title">${escapeHtml(p.name || mainEff.baseEffect || 'Custom Power')}</h3>
                   <div class="power-tags-row">
                     <span class="power-tag"><i class="ri-magic-line"></i> ${escapeHtml(mainEff.baseEffect || p.baseEffect || 'Effect')} Rank ${mainEff.ranks || p.ranks || 1}</span>
+                    ${isArray ? `<span class="power-tag array-badge"><i class="ri-stack-line"></i> Array (${1 + p.alternateEffects.length} Modes)</span>` : ''}
+                    ${(activeLinkedEffects && activeLinkedEffects.length > 0) ? `<span class="power-tag linked-badge"><i class="ri-links-line"></i> ${activeLinkedEffects.length} Linked</span>` : ''}
                     ${(p.descriptors || []).map(d => `<span class="power-tag"><i class="ri-hashtag"></i> ${escapeHtml(d)}</span>`).join('')}
                     ${p.deviceConfig?.type && p.deviceConfig.type !== 'none' ? `
                       <span class="power-tag device"><i class="ri-shield-user-line"></i> Device (${p.deviceConfig.type === 'easily_removable' ? 'Easily Removable' : 'Removable'})</span>
@@ -1835,9 +1914,11 @@ function renderPowers() {
                 </div>
                 <div class="power-cost-badge-box">
                   <span class="power-total-pp-val">${cost} PP</span>
-                  <span class="power-cost-sub">Total Power Points</span>
                 </div>
                 <div class="power-actions-group">
+                  <button class="btn btn-secondary btn-xs btn-send-power-vtt" data-send-power-vtt="${p.id}" title="Send complete ${escapeHtml(p.name || 'Power')} suite to Roll20 chat" type="button">
+                    <i class="ri-broadcast-line"></i> Full Power
+                  </button>
                   <button class="btn-power-collapse-toggle ${isCollapsed ? 'collapsed' : ''}" data-toggle-collapse-power="${p.id}" title="${isCollapsed ? 'Expand Power Details' : 'Close Power Section'}" type="button">
                     <i class="${isCollapsed ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line'}"></i> <span class="collapse-text">${isCollapsed ? 'Expand' : 'Close'}</span>
                   </button>
@@ -1872,182 +1953,295 @@ function renderPowers() {
                 </div>
               ` : ''}
 
-              <!-- ZONA 1: ACTION & TARGETING PLAYBOOK -->
-              <div class="power-targeting-playbook">
-                <div class="playbook-metric-card">
-                  <div class="playbook-metric-header">
-                    <span class="playbook-metric-label"><i class="ri-time-line"></i> Action</span>
-                    <span class="playbook-metric-val action">${escapeHtml(mainEff.action || p.action || 'Standard')}</span>
+              <!-- ZONA 1: ARRAY MODE SWITCHER DOCK (IF POWER HAS ALTERNATE EFFECTS) -->
+              ${isArray ? `
+                <div class="power-array-dock">
+                  <div class="array-dock-bar">
+                    <div class="array-dock-info">
+                      <span class="array-dock-label"><i class="ri-stack-line"></i> ARRAY MODES (${1 + p.alternateEffects.length})</span>
+                      <span class="array-pool-hint"><i class="ri-copper-coin-line"></i> Pool: ${primarySuiteCapacity} PP • Free Action to Switch</span>
+                    </div>
+                    <div class="array-dock-actions">
+                      <button class="btn-toggle-array-overview ${isArrayOverviewOpen ? 'active' : ''}" data-toggle-array-overview="${p.id}" type="button" title="View all alternate mode configurations side by side">
+                        <i class="${isArrayOverviewOpen ? 'ri-layout-grid-fill' : 'ri-layout-grid-line'}"></i>
+                        <span>${isArrayOverviewOpen ? 'Close Overview' : 'Compare All Modes'}</span>
+                      </button>
+                    </div>
                   </div>
-                  <p class="playbook-metric-explain">${getActionExplanation(mainEff.action || p.action || 'Standard')}</p>
+                  <div class="array-segmented-switcher">
+                    <button class="array-mode-btn ${isPrimaryActive ? 'active' : 'standby'} ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:main" type="button" title="${isPrimaryActive ? 'Primary mode active in combat' : 'Click to switch to Primary mode (Free Action)'}">
+                      <span class="mode-btn-indicator"><i class="${isPrimaryActive ? 'ri-radio-button-fill' : 'ri-checkbox-blank-circle-line'}"></i></span>
+                      <span class="mode-btn-name">${escapeHtml(mainEff.name && mainEff.name !== mainEff.baseEffect ? mainEff.name : (p.name || mainEff.baseEffect))}</span>
+                      <span class="mode-btn-tag">Primary</span>
+                      <span class="mode-btn-status-badge ${isPrimaryActive ? 'active' : 'standby'}">${isPrimaryActive ? 'ACTIVE' : 'STANDBY'}</span>
+                    </button>
+                    ${p.alternateEffects.map((ae, aIdx) => {
+      const isThisSlotActive = isPowerActive && (activeSlotId === ae.id);
+      const eff = ae.effect || ae;
+      const slotLinkedCount = Array.isArray(ae.linkedEffects) ? ae.linkedEffects.length : 0;
+      return `
+                        <button class="array-mode-btn ${isThisSlotActive ? 'active' : 'standby'} ${ae.isDynamic ? 'dynamic' : ''} ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:${ae.id}" type="button" title="${isThisSlotActive ? 'This alternate mode is active in combat' : 'Click to switch to this mode (Free Action)'}">
+                          <span class="mode-btn-indicator"><i class="${isThisSlotActive ? 'ri-radio-button-fill' : 'ri-checkbox-blank-circle-line'}"></i></span>
+                          <span class="mode-btn-name">${escapeHtml(ae.name || eff.name || eff.baseEffect || `Slot ${aIdx + 1}`)}</span>
+                          ${slotLinkedCount > 0 ? `<span class="mode-btn-linked-badge" title="${slotLinkedCount} Linked Effects">+${slotLinkedCount}</span>` : ''}
+                          <span class="mode-btn-tag ${ae.isDynamic ? 'dynamic' : 'alt'}">${ae.isDynamic ? 'Dynamic' : 'Alt'}</span>
+                          <span class="mode-btn-status-badge ${isThisSlotActive ? 'active' : 'standby'}">${isThisSlotActive ? 'ACTIVE' : 'STANDBY'}</span>
+                        </button>
+                      `;
+    }).join('')}
+                  </div>
+                </div>
+              ` : ''}
+
+              <!-- ZONA 2: TACTICAL MECHANICS 2x2 EXPLANATION GRID -->
+              <div class="power-tactical-grid">
+                <!-- Cell 1: ACTION -->
+                <div class="tactical-grid-cell">
+                  <div class="tactical-grid-cell-header">
+                    <span class="tactical-grid-title"><i class="ri-time-line action-icon"></i> ACTION</span>
+                    <span class="tactical-grid-badge action">${escapeHtml(displayedEff.action || 'Standard')}</span>
+                  </div>
+                  <p class="tactical-grid-desc">${getActionExplanation(displayedEff.action || 'Standard')}</p>
                 </div>
 
-                <div class="playbook-metric-card">
-                  <div class="playbook-metric-header">
-                    <span class="playbook-metric-label"><i class="ri-map-pin-range-line"></i> Range</span>
-                    <span class="playbook-metric-val range">${escapeHtml(mainEff.range || p.range || 'Close')}</span>
+                <!-- Cell 2: RANGE -->
+                <div class="tactical-grid-cell">
+                  <div class="tactical-grid-cell-header">
+                    <span class="tactical-grid-title"><i class="ri-map-pin-range-line range-icon"></i> RANGE</span>
+                    <span class="tactical-grid-badge range">${escapeHtml(displayedEff.range || 'Close')}</span>
                   </div>
-                  <p class="playbook-metric-explain">${getRangeExplanation(mainEff.range || p.range || 'Close', mainEff.ranks || p.ranks || 1)}</p>
+                  <p class="tactical-grid-desc">${getRangeExplanation(displayedEff.range || 'Close', displayedEff.ranks || 1)}</p>
                 </div>
 
-                <div class="playbook-metric-card">
-                  <div class="playbook-metric-header">
-                    <span class="playbook-metric-label"><i class="ri-timer-line"></i> Duration</span>
-                    <span class="playbook-metric-val duration">${escapeHtml(mainEff.duration || p.duration || 'Instant')}</span>
+                <!-- Cell 3: DURATION -->
+                <div class="tactical-grid-cell">
+                  <div class="tactical-grid-cell-header">
+                    <span class="tactical-grid-title"><i class="ri-timer-line duration-icon"></i> DURATION</span>
+                    <span class="tactical-grid-badge duration">${escapeHtml(displayedEff.duration || 'Instant')}</span>
                   </div>
-                  <p class="playbook-metric-explain">${getDurationExplanation(mainEff.duration || p.duration || 'Instant')}</p>
+                  <p class="tactical-grid-desc">${getDurationExplanation(displayedEff.duration || 'Instant')}</p>
                 </div>
 
-                <div class="playbook-metric-card">
-                  <div class="playbook-metric-header">
-                    <span class="playbook-metric-label"><i class="ri-shield-line"></i> Resistance Check</span>
-                    <span class="playbook-metric-val res">${escapeHtml(mainEff.resistance || p.resistance || 'None')}</span>
+                <!-- Cell 4: RESISTANCE CHECK -->
+                <div class="tactical-grid-cell">
+                  <div class="tactical-grid-cell-header">
+                    <span class="tactical-grid-title"><i class="ri-shield-check-line res-icon"></i> RESISTANCE CHECK</span>
+                    <span class="tactical-grid-badge res">${escapeHtml(displayedEff.resistance || 'None')}</span>
                   </div>
-                  <p class="playbook-metric-explain">${getResistanceExplanation(mainEff.resistance || p.resistance, metrics.dcDescription)}</p>
+                  <p class="tactical-grid-desc">${getResistanceExplanation(displayedEff.resistance, displayedMetrics.dcDescription)}</p>
                 </div>
               </div>
 
-              <!-- ZONA 2: PRIMARY EFFECT & SUBOPTIONS -->
-              <div class="power-tier-section">
+              <!-- ZONA 4: ACTIVE EFFECT SHOWCASE -->
+              <div class="power-tier-section active-mode-card">
                 <div class="tier-badge-line">
-                  <span class="tier-label">Primary Effect:</span>
-                  <span class="tier-main-pill">${escapeHtml(mainEff.name && mainEff.name !== mainEff.baseEffect ? `${mainEff.name} [${mainEff.baseEffect}]` : (mainEff.baseEffect || p.baseEffect || 'Effect'))} Rank ${mainEff.ranks || p.ranks || 1}</span>
-                  <span class="tier-cost-rate">(${mainEff.baseCost !== undefined ? mainEff.baseCost : 1} PP/Rank base)</span>
+                  <span class="tier-label">${isDisplayedMain ? 'Primary Effect' : 'Active Alternate Mode'}:</span>
+                  <span class="tier-main-pill">
+                    <i class="${getEffectIcon(displayedEff.baseEffect)}"></i>
+                    ${escapeHtml(displayedEff.name && displayedEff.name !== displayedEff.baseEffect ? `${displayedEff.name} [${displayedEff.baseEffect}]` : (displayedEff.baseEffect || 'Effect'))} Rank ${displayedEff.ranks || 1}
+                  </span>
+                  <span class="tier-cost-rate">(${displayedEff.baseCost !== undefined ? displayedEff.baseCost : 1} PP/Rank base)</span>
                   ${isArray ? `
-                    <div class="primary-slot-active-wrap" style="margin-left: auto;">
-                      ${isPrimaryActive ? `
-                        <span class="slot-active-status-badge active"><i class="ri-flashlight-fill"></i> ACTIVE PRIMARY</span>
-                      ` : `
-                        <button class="btn-slot-activate ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:main" type="button" title="Switch active power to Primary (Free Action)" ${!isPowerActive ? 'disabled' : ''}>
-                          <i class="ri-checkbox-blank-circle-line"></i> Switch to Primary (Free Action)
-                        </button>
-                      `}
-                    </div>
+                    <span class="slot-active-status-badge ${isDisplayedMain ? 'primary-active' : 'alt-active'}" style="margin-left: auto;">
+                      <i class="ri-flashlight-fill"></i> ${isDisplayedMain ? 'ACTIVE PRIMARY' : `ACTIVE: ${escapeHtml(activeAltSlot?.name || 'ALTERNATE')}`}
+                    </span>
                   ` : ''}
+                  <button class="btn btn-outline btn-xs btn-send-effect-vtt"
+                          data-send-effect-vtt="${p.id}"
+                          data-effect-slot="${isDisplayedMain ? 'main' : (activeAltSlot?.id || 'alt')}"
+                          style="margin-left: ${isArray ? '0.5rem' : 'auto'};"
+                          title="Send only this Effect to Roll20 chat"
+                          type="button">
+                    <i class="ri-broadcast-line"></i> Share Effect
+                  </button>
                 </div>
-                ${baseDef?.desc ? `<p class="tier-rule-desc">${escapeHtml(baseDef.desc)}</p>` : ''}
+                <!-- RULES EXPLANATION DIRECTLY BELOW EFFECT NAME -->
+                ${(displayedEff.desc || baseDef?.desc) ? `
+                  <div class="effect-rules-callout">
+                    <p class="effect-rules-text">
+                      <i class="ri-book-open-line"></i> ${escapeHtml(displayedEff.desc || baseDef.desc)}
+                    </p>
+                  </div>
+                ` : ''}
                 ${subOptionsHtml}
               </div>
 
-              <!-- ZONA 3: EXTRAS & FLAWS (IF ANY) -->
+              <!-- ZONA 5: APPLIED MODIFIERS (EXTRAS & FLAWS) -->
               ${modifiersHtml}
 
-              <!-- ZONA 4: LINKED EFFECTS CHAIN TREE -->
-              ${(p.linkedEffects && p.linkedEffects.length > 0) ? `
-                <div class="power-tier-section">
-                  <div class="power-guidance-banner">
-                    <i class="ri-information-fill"></i>
-                    <span><strong>Linked Effects Chain:</strong> All effects below trigger simultaneously on the same target with <strong>1 action &amp; 1 attack check</strong> without requiring separate actions.</span>
+              <!-- ZONA 6: LINKED EFFECTS SYNERGY TREE -->
+              ${(activeLinkedEffects && activeLinkedEffects.length > 0) ? `
+                <div class="linked-synergy-section">
+                  <div class="linked-synergy-banner">
+                    <div class="synergy-banner-left">
+                      <span class="synergy-icon"><i class="ri-links-line"></i></span>
+                      <div>
+                        <strong class="synergy-title">LINKED COMBO SUITE (${activeLinkedEffects.length} EFFECTS${!isDisplayedMain ? ` - ${escapeHtml(activeAltSlot?.name || 'ALTERNATE SLOT')}` : ''})</strong>
+                        <span class="synergy-subtitle">All effects below trigger simultaneously with 1 attack roll &amp; 1 action</span>
+                      </div>
+                    </div>
+                    <span class="synergy-simultaneous-tag"><i class="ri-flashlight-line"></i> SIMULTANEOUS ON HIT</span>
                   </div>
-                  <div class="linked-cascade-list" style="margin-top: 0.65rem;">
-                    ${p.linkedEffects.map(le => {
-                      const leCost = calculateEffectCost(le).totalCost;
-                      const leDef = BASE_EFFECTS.find(b => b.name === (le.baseEffect || le.name));
-                      const leSub = renderEffectDetailedSubOptions(le);
-                      const leMods = renderEffectExplainedModifiers(le);
-                      return `
-                        <div class="linked-cascade-item">
-                          <span class="linked-item-branch">&#x21B3;</span>
-                          <div class="linked-item-content">
-                            <div class="linked-item-header">
-                              <strong>${escapeHtml(le.baseEffect || le.name)} Rank ${le.ranks || 1}</strong>
-                              <span class="linked-item-cost">${leCost} PP</span>
-                              <span class="power-tag action"><i class="ri-time-line"></i> ${escapeHtml(le.action || 'Standard')}</span>
-                              <span class="power-tag range"><i class="ri-map-pin-range-line"></i> ${escapeHtml(le.range || 'Close')}</span>
-                              ${le.resistance ? `<span class="power-tag res"><i class="ri-shield-line"></i> vs ${escapeHtml(le.resistance)}</span>` : ''}
+
+                  <div class="linked-synergy-tree">
+                    ${activeLinkedEffects.map((le, leIdx) => {
+      const leCost = calculateEffectCost(le).totalCost;
+      const leBenefit = getEffectBenefitSnippet(le);
+      const leBaseDef = BASE_EFFECTS.find(b => b.name === (le.baseEffect || le.name));
+      const leSub = renderEffectDetailedSubOptions(le);
+      const leMods = renderEffectExplainedModifiers(le, `${p.name || 'Power'} [${le.name || le.baseEffect}]`);
+      const isLast = leIdx === activeLinkedEffects.length - 1;
+
+      return `
+                        <div class="linked-synergy-node ${isLast ? 'is-last' : ''}">
+                          <div class="synergy-connector-rail">
+                            <span class="synergy-rail-dot"></span>
+                            <span class="synergy-rail-line"></span>
+                          </div>
+                          <div class="synergy-node-card">
+                            <div class="synergy-node-top">
+                              <div class="synergy-node-ident">
+                                <span class="synergy-node-glyph"><i class="${getEffectIcon(le.baseEffect)}"></i></span>
+                                <div>
+                                  <div class="synergy-title-row">
+                                    <strong class="synergy-node-name">${escapeHtml(le.name || le.baseEffect)}</strong>
+                                    <span class="synergy-rank-badge">Rank ${le.ranks || 1}</span>
+                                    ${leBenefit ? `<span class="synergy-benefit-pill"><i class="ri-checkbox-circle-fill"></i> ${escapeHtml(leBenefit)}</span>` : ''}
+                                  </div>
+                                  ${(le.desc || leBaseDef?.desc) ? `
+                                    <div class="synergy-rules-callout">
+                                      <p class="synergy-rules-text"><i class="ri-book-open-line"></i> ${escapeHtml(le.desc || leBaseDef.desc)}</p>
+                                    </div>
+                                  ` : ''}
+                                </div>
+                              </div>
+                              <div class="synergy-node-meta">
+                                ${le.resistance ? `<span class="tactical-chip-micro res"><i class="ri-shield-line"></i> vs ${escapeHtml(le.resistance)}</span>` : ''}
+                                <span class="tactical-chip-micro action">${escapeHtml(le.action || 'None')}</span>
+                                <span class="tactical-chip-micro range">${escapeHtml(le.range || 'Personal')}</span>
+                                <span class="synergy-cost-pill">${leCost} PP</span>
+                                <button class="btn-send-vtt btn-send-vtt-xs btn-send-linked-effect-vtt"
+                                        data-send-linked-effect-vtt="${escapeHtml(le.name || le.baseEffect)}"
+                                        data-parent-power="${escapeHtml(p.name || 'Power')}"
+                                        data-effect-ranks="${le.ranks || 1}"
+                                        data-effect-action="${escapeHtml(le.action || 'None')}"
+                                        data-effect-range="${escapeHtml(le.range || 'Personal')}"
+                                        data-effect-duration="${escapeHtml(le.duration || 'Instant')}"
+                                        data-effect-res="${escapeHtml(le.resistance ? `vs ${le.resistance}` : '')}"
+                                        data-effect-cost="${leCost} PP"
+                                        data-effect-desc="${escapeHtml(leBenefit || '')}"
+                                        title="Share ${escapeHtml(le.name || le.baseEffect)} Linked Effect to Roll20"
+                                        type="button">
+                                  <i class="ri-broadcast-line"></i>
+                                </button>
+                              </div>
                             </div>
-                            ${leDef?.desc ? `<p class="tier-rule-desc" style="margin-top: 0.35rem;">${escapeHtml(leDef.desc)}</p>` : ''}
                             ${leSub}
                             ${leMods}
                           </div>
                         </div>
                       `;
-                    }).join('')}
+    }).join('')}
                   </div>
                 </div>
               ` : ''}
 
-              <!-- ZONA 5: ARRAY ALTERNATE SLOTS GROUP -->
-              ${(p.alternateEffects && p.alternateEffects.length > 0) ? `
-                <div class="power-tier-section">
-                  <div class="power-guidance-banner" style="background: rgba(56, 189, 248, 0.1); border-left: 3px solid #38bdf8;">
-                    <i class="ri-stack-line" style="color: #38bdf8;"></i>
-                    <span><strong>Array Alternate Slots (${p.alternateEffects.length} configured):</strong> Cost-effective power pool sharing points. You may switch to another slot configuration <strong>once per turn as a Free Action</strong>.</span>
+              <!-- ZONA 7: ARRAY COMPARE ALL MODES OVERVIEW (TOGGLED) -->
+              ${(isArray && isArrayOverviewOpen) ? `
+                <div class="array-overview-panel">
+                  <div class="overview-panel-header">
+                    <div class="overview-header-left">
+                      <i class="ri-layout-grid-fill"></i>
+                      <strong>All Configured Array Slots (${1 + p.alternateEffects.length})</strong>
+                    </div>
+                    <span class="overview-hint">Mutually exclusive power configurations sharing a ${primarySuiteCapacity} PP pool</span>
                   </div>
-                  <div class="array-cascade-list" style="margin-top: 0.75rem;">
+                  <div class="array-overview-grid">
+                    <!-- Primary Slot Card -->
+                    <div class="overview-slot-card ${isPrimaryActive ? 'active-combat' : 'standby'}">
+                      <div class="overview-slot-header">
+                        <div class="overview-slot-title-wrap">
+                          <span class="overview-slot-chip primary">Primary Core</span>
+                          <strong>${escapeHtml(mainEff.name && mainEff.name !== mainEff.baseEffect ? mainEff.name : (p.name || mainEff.baseEffect))}</strong>
+                          <span class="overview-rank-tag">Rank ${mainEff.ranks || 1}</span>
+                          ${(p.linkedEffects && p.linkedEffects.length > 0) ? `<span class="power-tag linked-badge" style="font-size:0.65rem; padding: 2px 6px;"><i class="ri-links-line"></i> +${p.linkedEffects.length} Linked</span>` : ''}
+                        </div>
+                        <span class="overview-slot-cost">${primarySuiteCapacity} PP Value</span>
+                      </div>
+                      ${(p.linkedEffects && p.linkedEffects.length > 0) ? `
+                        <div class="overview-slot-linked-summary" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">
+                          <i class="ri-links-line"></i> <strong>Linked:</strong> ${p.linkedEffects.map(le => `${escapeHtml(le.name || le.baseEffect)} (R${le.ranks || 1})`).join(' + ')}
+                        </div>
+                      ` : ''}
+                      <div class="overview-slot-meta">
+                        <span><i class="ri-time-line"></i> ${escapeHtml(mainEff.action || 'Standard')}</span>
+                        <span><i class="ri-map-pin-range-line"></i> ${escapeHtml(mainEff.range || 'Close')}</span>
+                        <span><i class="ri-shield-line"></i> vs ${escapeHtml(mainEff.resistance || 'Toughness')}</span>
+                      </div>
+                      ${isPrimaryActive ? `
+                        <div class="overview-active-indicator"><i class="ri-flashlight-fill"></i> CURRENTLY ACTIVE IN COMBAT</div>
+                      ` : `
+                        <button class="btn btn-outline btn-xs overview-activate-btn" data-set-array-slot="${p.id}:main" type="button">
+                          <i class="ri-swap-box-line"></i> Switch to this Mode (Free Action)
+                        </button>
+                      `}
+                    </div>
+
+                    <!-- Alternate Slots Cards -->
                     ${p.alternateEffects.map((ae, aIdx) => {
-                      const eff = ae.effect || ae;
-                      const isDynamic = Boolean(ae.isDynamic);
-                      const effDef = BASE_EFFECTS.find(b => b.name === (eff.baseEffect || eff.name));
-                      const effCost = calculateEffectCost(eff).totalCost;
-                      const aeSub = renderEffectDetailedSubOptions(eff);
-                      const aeMods = renderEffectExplainedModifiers(eff);
-                      const isThisSlotActive = isPowerActive && (activeSlotId === ae.id);
-
-                      return `
-                        <div class="array-slot-card ${isThisSlotActive ? 'active-slot' : 'standby-slot'} ${isDynamic ? 'dynamic' : 'alternate'}">
-                          <div class="slot-header">
-                            <div class="slot-title-wrap">
-                              <span class="slot-index-pill">Slot ${aIdx + 1}</span>
-                              <span class="slot-type-pill ${isDynamic ? 'dynamic' : 'alternate'}">
-                                <i class="${isDynamic ? 'ri-shuffle-line' : 'ri-swap-box-line'}"></i>
-                                ${isDynamic ? 'Dynamic Slot (2 PP)' : 'Alternate Slot (1 PP)'}
-                              </span>
-                              <h4 class="slot-name">${escapeHtml(ae.name || eff.baseEffect || 'Slot')}</h4>
-                              <span class="power-tag"><i class="ri-magic-line"></i> ${escapeHtml(eff.baseEffect || 'Effect')}</span>
+      const eff = ae.effect || ae;
+      const effCost = calculateEffectCost(eff).totalCost;
+      const slotLinkedEffects = Array.isArray(ae.linkedEffects) ? ae.linkedEffects : [];
+      const slotLinkedCost = slotLinkedEffects.reduce((sum, le) => sum + (calculateEffectCost(le).totalCost || 0), 0);
+      const combinedCost = effCost + slotLinkedCost;
+      const isThisActive = isPowerActive && (activeSlotId === ae.id);
+      return `
+                        <div class="overview-slot-card ${isThisActive ? 'active-combat' : 'standby'} ${ae.isDynamic ? 'dynamic' : ''}">
+                          <div class="overview-slot-header">
+                            <div class="overview-slot-title-wrap">
+                              <span class="overview-slot-chip ${ae.isDynamic ? 'dynamic' : 'alt'}">${ae.isDynamic ? 'Dynamic' : 'Alternate'} Slot ${aIdx + 1}</span>
+                              <strong>${escapeHtml(ae.name || eff.name || eff.baseEffect || `Slot ${aIdx + 1}`)}</strong>
+                              <span class="overview-rank-tag">Rank ${eff.ranks || 1}</span>
+                              ${slotLinkedEffects.length > 0 ? `<span class="power-tag linked-badge" style="font-size:0.65rem; padding: 2px 6px;"><i class="ri-links-line"></i> +${slotLinkedEffects.length} Linked</span>` : ''}
                             </div>
-                            <div class="slot-badges-right">
-                              ${isThisSlotActive ? `
-                                <span class="slot-active-status-badge active"><i class="ri-flashlight-fill"></i> ACTIVE IN USE</span>
-                              ` : `
-                                <button class="btn-slot-activate ${!isPowerActive ? 'disabled' : ''}" data-set-array-slot="${p.id}:${ae.id}" type="button" title="Switch active power to this slot (Free Action)" ${!isPowerActive ? 'disabled' : ''}>
-                                  <i class="ri-checkbox-blank-circle-line"></i> Activate Slot (Free Action)
-                                </button>
-                              `}
-                              <span class="slot-ranks-badge"><i class="ri-award-line"></i> Rank ${eff.ranks || 1}</span>
-                              <span class="slot-cost-badge" title="Equivalent standalone power point value"><i class="ri-copper-coin-line"></i> ${effCost} PP Value</span>
-                            </div>
+                            <span class="overview-slot-cost">${combinedCost} PP Value</span>
                           </div>
-
-                          <div class="slot-meta-row">
-                            <div class="slot-tags-group">
-                              <span class="power-tag action"><i class="ri-time-line"></i> ${escapeHtml(eff.action || 'Standard')}</span>
-                              ${eff.range ? `<span class="power-tag range"><i class="ri-map-pin-range-line"></i> ${escapeHtml(eff.range)}</span>` : ''}
-                              ${eff.duration ? `<span class="power-tag duration"><i class="ri-timer-line"></i> ${escapeHtml(eff.duration)}</span>` : ''}
-                              ${eff.resistance ? `<span class="power-tag res"><i class="ri-shield-line"></i> vs ${escapeHtml(eff.resistance)}</span>` : ''}
+                          ${slotLinkedEffects.length > 0 ? `
+                            <div class="overview-slot-linked-summary" style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 6px;">
+                              <i class="ri-links-line"></i> <strong>Linked:</strong> ${slotLinkedEffects.map(le => `${escapeHtml(le.name || le.baseEffect)} (R${le.ranks || 1})`).join(' + ')}
                             </div>
-                            <span class="slot-mode-hint">
-                              <i class="${isDynamic ? 'ri-links-line' : (isThisSlotActive ? 'ri-radio-button-fill' : 'ri-checkbox-blank-circle-line')}"></i>
-                              ${isDynamic ? 'Dynamic: Flexibly shares rank points with other dynamic slots' : (isThisSlotActive ? 'Currently active in combat (100% capacity)' : 'Alternate: Mutually exclusive standby (Free action to switch)')}
-                            </span>
+                          ` : ''}
+                          <div class="overview-slot-meta">
+                            <span><i class="ri-time-line"></i> ${escapeHtml(eff.action || 'Standard')}</span>
+                            <span><i class="ri-map-pin-range-line"></i> ${escapeHtml(eff.range || 'Close')}</span>
+                            <span><i class="ri-shield-line"></i> vs ${escapeHtml(eff.resistance || 'Toughness')}</span>
                           </div>
-
-                          ${effDef?.desc ? `<p class="tier-rule-desc" style="margin: 0.4rem 0;">${escapeHtml(effDef.desc)}</p>` : ''}
-                          ${aeSub}
-                          ${aeMods}
+                          ${isThisActive ? `
+                            <div class="overview-active-indicator"><i class="ri-flashlight-fill"></i> CURRENTLY ACTIVE IN COMBAT</div>
+                          ` : `
+                            <button class="btn btn-outline btn-xs overview-activate-btn" data-set-array-slot="${p.id}:${ae.id}" type="button">
+                              <i class="ri-swap-box-line"></i> Switch to this Mode (Free Action)
+                            </button>
+                          `}
                         </div>
                       `;
-                    }).join('')}
+    }).join('')}
                   </div>
                 </div>
               ` : ''}
 
-              <!-- ZONA 6: COST BREAKDOWN & NOTES -->
+              <!-- ZONA 8: COST BREAKDOWN & NOTES FOOTER -->
               <div class="power-tier-footer">
-                <!-- Transparent Cost Breakdown Bar -->
                 <div class="power-cost-formula-bar">
-                  <span class="formula-label"><i class="ri-calculator-line"></i> Cost Breakdown Formula:</span>
+                  <span class="formula-label"><i class="ri-calculator-line"></i> Cost Breakdown:</span>
                   <span class="formula-math">${getCostBreakdownFormula(p, mainEff, cost)}</span>
                 </div>
-
-                ${p.notes ? `
-                  <p class="power-notes-quote"><i class="ri-chat-1-line"></i> "${escapeHtml(p.notes)}"</p>
-                ` : ''}
+                ${p.notes ? `<p class="power-notes-quote"><i class="ri-chat-1-line"></i> "${escapeHtml(p.notes)}"</p>` : ''}
               </div>
             </div>
           </div>
         `;
-      }).join('')}
+  }).join('')}
     </div>
   `;
 
@@ -2077,7 +2271,7 @@ function renderPowers() {
     });
   });
 
-  // Bind Array Slot Switcher
+  // Bind Array Slot Switcher (Both dock buttons and overview buttons)
   container.querySelectorAll('[data-set-array-slot]').forEach(btn => {
     btn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -2091,7 +2285,173 @@ function renderPowers() {
         const slot = power.alternateEffects?.find(s => s.id === slotId);
         slotTitle = slot ? (slot.name || slot.effect?.baseEffect || 'Alternate Slot') : 'Alternate Slot';
       }
-      showToast(`Switched active slot to "${slotTitle}" (Free Action)`, 'success');
+      showToast(`Switched active mode to "${slotTitle}" (Free Action)`, 'success');
+    });
+  });
+
+  // Bind Array Overview Toggle (Compare All Modes)
+  container.querySelectorAll('[data-toggle-array-overview]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const pId = btn.dataset.toggleArrayOverview;
+      if (expandedArrayOverviewIds.has(pId)) {
+        expandedArrayOverviewIds.delete(pId);
+      } else {
+        expandedArrayOverviewIds.add(pId);
+      }
+      renderPowers();
+    });
+  });
+
+  // Bind Power Rules Drawer Toggle (Progressive Disclosure)
+  container.querySelectorAll('[data-toggle-power-rules]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const pId = btn.dataset.togglePowerRules;
+      if (expandedPowerRulesIds.has(pId)) {
+        expandedPowerRulesIds.delete(pId);
+      } else {
+        expandedPowerRulesIds.add(pId);
+      }
+      renderPowers();
+    });
+  });
+
+  // Bind Send Full Power to Roll20 VTT
+  container.querySelectorAll('[data-send-power-vtt]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const pId = btn.dataset.sendPowerVtt;
+      const p = powers.find(x => x.id === pId);
+      if (!p) return;
+
+      const mainEff = p.mainEffect || p;
+      const isArray = p.type === 'array' || (Array.isArray(p.alternateEffects) && p.alternateEffects.length > 0);
+      const activeSlotId = p.activeSlotId || 'main';
+      const isPrimaryActive = !isArray || activeSlotId === 'main' || !p.alternateEffects.some(s => s.id === activeSlotId);
+      const activeAltSlot = isArray && !isPrimaryActive ? p.alternateEffects.find(s => s.id === activeSlotId) : null;
+      const activeEff = isPrimaryActive ? mainEff : (activeAltSlot?.effect || activeAltSlot || mainEff);
+
+      const extrasList = (activeEff.extras || []).map(ex => `${ex.name} (${(ex.cost >= 0 ? '+' : '') + ex.cost}/rank)`);
+      const flawsList = (activeEff.flaws || []).map(fl => `${fl.name} (${fl.cost}/rank)`);
+      const activeSlotName = !isPrimaryActive && activeAltSlot ? (activeAltSlot.name || activeEff.name) : null;
+      const fullPowerName = activeSlotName ? `${p.name || 'Power'}: ${activeSlotName}` : (p.name || activeEff.name || 'Custom Power');
+      const effectSummary = `${activeEff.baseEffect || activeEff.name || 'Effect'} Rank ${activeEff.ranks || 1}`;
+
+      sendFeatureToVTT({
+        category: 'power',
+        name: fullPowerName,
+        effectSummary,
+        action: activeEff.action || 'Standard Action',
+        range: activeEff.range || 'Personal',
+        duration: activeEff.duration || 'Instant',
+        resistance: activeEff.resistance ? `DC ${10 + (activeEff.ranks || 1)} vs ${activeEff.resistance}` : '',
+        descriptors: p.descriptors || [],
+        extras: extrasList,
+        flaws: flawsList,
+        cost: `${calculatePowerTotalCost(p)} PP`,
+        description: p.notes || p.description || ''
+      });
+    });
+  });
+
+  // Bind Send Single Power Effect to Roll20 VTT
+  container.querySelectorAll('[data-send-effect-vtt]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const pId = btn.dataset.sendEffectVtt;
+      const p = powers.find(x => x.id === pId);
+      if (!p) return;
+
+      const slotId = btn.dataset.effectSlot || 'main';
+      const mainEff = p.mainEffect || p;
+      const eff = (slotId !== 'main' && Array.isArray(p.alternateEffects))
+        ? (p.alternateEffects.find(s => s.id === slotId)?.effect || mainEff)
+        : mainEff;
+
+      const baseDef = (typeof BASE_EFFECTS !== 'undefined' ? BASE_EFFECTS : []).find(b => b.name === (eff.baseEffect || eff.name));
+      const metrics = calculatePowerCombatMetrics({ ...p, mainEffect: eff }, store.character.powerLevel, store.character.abilities, store.character.skills);
+      const effName = eff.name && eff.name !== eff.baseEffect ? `${eff.name} [${eff.baseEffect}]` : (eff.baseEffect || 'Effect');
+
+      sendFeatureToVTT({
+        category: 'power_effect',
+        name: effName,
+        parentPower: p.name || 'Power',
+        ranks: eff.ranks || 1,
+        action: eff.action || 'Standard',
+        range: eff.range || 'Close',
+        duration: eff.duration || 'Instant',
+        resistance: metrics?.dcDescription || (eff.resistance ? `DC ${10 + (eff.ranks || 1)} vs ${eff.resistance}` : ''),
+        cost: `${eff.baseCost !== undefined ? eff.baseCost : 1} PP/Rank base`,
+        description: eff.desc || baseDef?.desc || ''
+      });
+    });
+  });
+
+  // Bind Send Single Extra to Roll20 VTT
+  container.querySelectorAll('[data-send-extra-vtt]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const extraName = btn.dataset.sendExtraVtt;
+      const cost = btn.dataset.extraCost;
+      const desc = btn.dataset.extraDesc;
+      const parentPower = btn.dataset.parentPower;
+
+      sendFeatureToVTT({
+        category: 'power_extra',
+        name: extraName,
+        parentPower: parentPower || '',
+        cost: cost || '+1 PP',
+        description: desc || ''
+      });
+    });
+  });
+
+  // Bind Send Single Flaw to Roll20 VTT
+  container.querySelectorAll('[data-send-flaw-vtt]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const flawName = btn.dataset.sendFlawVtt;
+      const cost = btn.dataset.flawCost;
+      const desc = btn.dataset.flawDesc;
+      const parentPower = btn.dataset.parentPower;
+
+      sendFeatureToVTT({
+        category: 'power_flaw',
+        name: flawName,
+        parentPower: parentPower || '',
+        cost: cost || '-1 PP',
+        description: desc || ''
+      });
+    });
+  });
+
+  // Bind Send Linked Effect to Roll20 VTT
+  container.querySelectorAll('[data-send-linked-effect-vtt]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const leName = btn.dataset.sendLinkedEffectVtt;
+      const parentPower = btn.dataset.parentPower;
+      const ranks = btn.dataset.effectRanks;
+      const action = btn.dataset.effectAction;
+      const range = btn.dataset.effectRange;
+      const duration = btn.dataset.effectDuration;
+      const res = btn.dataset.effectRes;
+      const cost = btn.dataset.effectCost;
+      const desc = btn.dataset.effectDesc;
+
+      sendFeatureToVTT({
+        category: 'power_effect',
+        name: `${leName} (Linked Effect)`,
+        parentPower: parentPower || '',
+        ranks: ranks || 1,
+        action: action || 'None',
+        range: range || 'Personal',
+        duration: duration || 'Instant',
+        resistance: res || '',
+        cost: cost || '',
+        description: desc || 'Linked effect triggers simultaneously with primary attack.'
+      });
     });
   });
 
@@ -2125,8 +2485,6 @@ function renderPowers() {
   });
 }
 
-let activeResourceCategory = 'all';
-
 function renderResourcesTab(container) {
   const char = store.character;
   const budget = store.getEquipmentBudgetInfo();
@@ -2135,8 +2493,8 @@ function renderResourcesTab(container) {
     <div class="resources-page">
       <div class="res-header">
         <div>
-          <h2>Equipment & Resources Library</h2>
-          <p>Collection of gear, gadgets, combat vehicles, and headquarters (1 PP = 5 EP).</p>
+          <h2>Equipment & Resources Workshop</h2>
+          <p>Weapons, ballistic armor, utility gadgets, combat vehicles, and secret bases (1 PP = 5 EP).</p>
         </div>
         <button class="btn btn-primary" id="btn-main-add-res"><i class="ri-add-line"></i> Add Item / Preset</button>
       </div>
@@ -2150,7 +2508,7 @@ function renderResourcesTab(container) {
           </div>
           <div class="budget-divider">/</div>
           <div class="budget-stat-group">
-            <span class="budget-label">Equipment Advantage Capacity</span>
+            <span class="budget-label">Equipment Capacity</span>
             <span class="budget-val">${budget.maxEP} EP (${budget.ranks} Ranks)</span>
           </div>
         </div>
@@ -2162,12 +2520,12 @@ function renderResourcesTab(container) {
               <span>Deficit: <strong>${budget.totalEP - budget.maxEP} EP</strong> (Requires Rank ${budget.neededRanks} Equipment)</span>
             </div>
             <button class="btn btn-warning btn-xs" id="btn-sync-equipment">
-              <i class="ri-flashlight-line"></i> Sync Advantage (${budget.neededRanks} Ranks / ${budget.neededRanks} PP)
+              <i class="ri-flashlight-line"></i> Auto-Sync Advantage (${budget.neededRanks} Ranks / ${budget.neededRanks} PP)
             </button>
           ` : `
             <div class="budget-status-ok">
               <span class="status-icon"><i class="ri-checkbox-circle-line"></i></span>
-              <span>Budget OK (Remaining Capacity: <strong>${budget.remainingEP} EP</strong>)</span>
+              <span>Budget OK (Remaining: <strong>${budget.remainingEP} EP</strong>)</span>
             </div>
             ${budget.ranks > budget.neededRanks ? `
               <button class="btn btn-ghost btn-xs" id="btn-sync-equipment" title="Reduce unused ranks">
@@ -2184,25 +2542,28 @@ function renderResourcesTab(container) {
           <button class="filter-chip ${activeResourceCategory === 'all' ? 'active' : ''}" data-res-filter="all">
             All (${char.resources.length})
           </button>
-          <button class="filter-chip ${activeResourceCategory === 'Gear' ? 'active' : ''}" data-res-filter="Gear">
-            <i class="ri-sword-line"></i> Gear (${char.resources.filter(r => r.type === 'Gear').length})
+          <button class="filter-chip ${activeResourceCategory === 'Weapons' ? 'active' : ''}" data-res-filter="Weapons">
+            <i class="ri-sword-line"></i> Weapons (${char.resources.filter(r => r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor'))).length})
+          </button>
+          <button class="filter-chip ${activeResourceCategory === 'Armor' ? 'active' : ''}" data-res-filter="Armor">
+            <i class="ri-shield-line"></i> Armor & Defense (${char.resources.filter(r => r.subtype === 'armor' || r.subtype === 'shield' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')).length})
           </button>
           <button class="filter-chip ${activeResourceCategory === 'Gadget' ? 'active' : ''}" data-res-filter="Gadget">
-            <i class="ri-smartphone-line"></i> Gadget (${char.resources.filter(r => r.type === 'Gadget').length})
+            <i class="ri-smartphone-line"></i> Gadgets (${char.resources.filter(r => r.type === 'Gadget' || r.subtype === 'gadget').length})
           </button>
           <button class="filter-chip ${activeResourceCategory === 'Vehicle' ? 'active' : ''}" data-res-filter="Vehicle">
-            <i class="ri-car-line"></i> Vehicles (${char.resources.filter(r => r.type === 'Vehicle').length})
+            <i class="ri-car-line"></i> Vehicles (${char.resources.filter(r => r.type === 'Vehicle' || r.subtype === 'vehicle').length})
           </button>
           <button class="filter-chip ${activeResourceCategory === 'Headquarters' ? 'active' : ''}" data-res-filter="Headquarters">
-            <i class="ri-building-line"></i> HQ (${char.resources.filter(r => r.type === 'Headquarters').length})
+            <i class="ri-building-line"></i> HQ (${char.resources.filter(r => r.type === 'Headquarters' || r.subtype === 'headquarters').length})
           </button>
         </div>
 
         <div class="quick-add-group">
-          <button class="btn btn-secondary btn-xs" data-quick-add-type="Gear"><i class="ri-sword-line"></i> Gear</button>
-          <button class="btn btn-secondary btn-xs" data-quick-add-type="Gadget"><i class="ri-smartphone-line"></i> Gadget</button>
-          <button class="btn btn-secondary btn-xs" data-quick-add-type="Vehicle"><i class="ri-car-line"></i> Vehicle</button>
-          <button class="btn btn-secondary btn-xs" data-quick-add-type="Headquarters"><i class="ri-building-line"></i> HQ</button>
+          <button class="btn btn-secondary btn-xs" data-quick-add-type="Gear"><i class="ri-sword-line"></i> + Weapon/Armor</button>
+          <button class="btn btn-secondary btn-xs" data-quick-add-type="Gadget"><i class="ri-smartphone-line"></i> + Gadget</button>
+          <button class="btn btn-secondary btn-xs" data-quick-add-type="Vehicle"><i class="ri-car-line"></i> + Vehicle</button>
+          <button class="btn btn-secondary btn-xs" data-quick-add-type="Headquarters"><i class="ri-building-line"></i> + HQ</button>
         </div>
       </div>
 
@@ -2240,51 +2601,207 @@ function renderResourcesTab(container) {
 
 function renderResourcesList(container, animate = false) {
   const char = store.character;
+  const str = store.getAbility('STR');
+  const fgt = store.getAbility('FGT');
+  const dex = store.getAbility('DEX');
+
   const listWrap = container.querySelector('#resources-list-wrap');
   if (!listWrap) return;
 
   const filtered = char.resources.filter(r => {
     if (activeResourceCategory === 'all') return true;
+    if (activeResourceCategory === 'Weapons') {
+      return r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor'));
+    }
+    if (activeResourceCategory === 'Armor') {
+      return r.subtype === 'armor' || r.subtype === 'shield' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '');
+    }
+    if (activeResourceCategory === 'Gadget') {
+      return r.type === 'Gadget' || r.subtype === 'gadget';
+    }
+    if (activeResourceCategory === 'Vehicle') {
+      return r.type === 'Vehicle' || r.subtype === 'vehicle';
+    }
+    if (activeResourceCategory === 'Headquarters') {
+      return r.type === 'Headquarters' || r.subtype === 'headquarters';
+    }
     return r.type === activeResourceCategory;
   });
 
-  const getResIcon = (type) => {
-    switch (type) {
-      case 'Gear': return '<i class="ri-sword-line"></i>';
-      case 'Gadget': return '<i class="ri-smartphone-line"></i>';
-      case 'Vehicle': return '<i class="ri-car-line"></i>';
-      case 'Headquarters': return '<i class="ri-building-line"></i>';
-      default: return '<i class="ri-archive-line"></i>';
-    }
+  const getResIcon = (r) => {
+    if (r.subtype === 'weapon_ranged' || (r.weapon?.range === 'Ranged')) return '<i class="ri-focus-2-line"></i>';
+    if (r.subtype?.startsWith('weapon') || r.weapon != null) return '<i class="ri-sword-line"></i>';
+    if (r.subtype === 'armor') return '<i class="ri-shield-check-line"></i>';
+    if (r.subtype === 'shield') return '<i class="ri-shield-line"></i>';
+    if (r.type === 'Vehicle' || r.subtype === 'vehicle') return '<i class="ri-car-line"></i>';
+    if (r.type === 'Headquarters' || r.subtype === 'headquarters') return '<i class="ri-building-line"></i>';
+    if (r.type === 'Gadget' || r.subtype === 'gadget') return '<i class="ri-smartphone-line"></i>';
+    return '<i class="ri-archive-line"></i>';
+  };
+
+  const getSubtypeLabel = (r) => {
+    if (r.subtype === 'weapon_ranged') return 'RANGED WEAPON';
+    if (r.subtype === 'weapon_melee') return 'MELEE WEAPON';
+    if (r.weapon) return r.weapon.range === 'Ranged' ? 'RANGED WEAPON' : 'MELEE WEAPON';
+    if (r.subtype === 'armor') return 'BODY ARMOR';
+    if (r.subtype === 'shield') return 'SHIELD';
+    if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'VEHICLE';
+    if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'HEADQUARTERS';
+    return (r.type || 'GEAR').toUpperCase();
   };
 
   listWrap.innerHTML = filtered.length === 0 ? `
     <div class="empty-hint">
       ${char.resources.length === 0
-        ? 'Equipment library is empty. Click "+ Add Item / Preset" above to choose official M&M 3e weapons, gadgets, vehicles, or secret headquarters!'
-        : `No items in category ${activeResourceCategory}.`}
+      ? 'Equipment library is empty. Click "+ Add Item / Preset" above to choose official M&M 3e weapons, gadgets, vehicles, or secret headquarters!'
+      : `No items in category "${activeResourceCategory}".`}
     </div>
   ` : `
     <div class="res-grid">
-      ${filtered.map((r, i) => `
-        <div class="res-card">
-          <div class="res-card-top">
-            <div class="res-title-box">
-              <span class="res-icon">${getResIcon(r.type)}</span>
-              <div>
-                <span class="badge badge-subtle">${r.type.toUpperCase()}</span>
-                <strong class="res-card-name">${r.name}</strong>
+      ${filtered.map((r, i) => {
+        const itemId = r.id || i;
+        const status = r.status || 'equipped';
+        const isEquipped = status === 'equipped';
+
+        // Check weapon stats
+        const isWeapon = r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor'));
+        const w = r.weapon || {};
+        const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
+        const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
+
+        let dmgRank = w.damageRank;
+        if (dmgRank === undefined) {
+          const match = (r.desc || '').match(/Damage\s+(\d+)/i);
+          dmgRank = match ? parseInt(match[1], 10) : 1;
+        }
+
+        const traits = Array.isArray(w.traits) ? w.traits : [];
+        const isAffliction = traits.includes('Affliction') || /Affliction/i.test(r.desc || '');
+
+        let atkBonus = 0;
+        if (isWeapon) {
+          if (isRanged) {
+            const rangedSkill = char.skills.find(s => s.name === 'Ranged Combat' && (
+              new RegExp(r.name, 'i').test(s.subtype || '') ||
+              /firearm|guns|pistol|rifle|projectile/i.test(s.subtype || '')
+            ));
+            atkBonus = dex + (rangedSkill ? rangedSkill.ranks : 0) + (w.attackBonus || 0);
+          } else {
+            const closeSkill = char.skills.find(s => s.name === 'Close Combat' && (
+              new RegExp(r.name, 'i').test(s.subtype || '') ||
+              /blades|swords|melee|unarmed|axes/i.test(s.subtype || '')
+            ));
+            atkBonus = fgt + (closeSkill ? closeSkill.ranks : 0) + (w.attackBonus || 0);
+          }
+        }
+
+        const effectiveDmg = isStrengthBased ? (str + dmgRank) : dmgRank;
+        const dcBase = isAffliction ? 10 : 15;
+        const dc = dcBase + effectiveDmg;
+        const resistance = w.resistance || (isAffliction ? 'Fortitude' : 'Toughness');
+        const crit = w.crit || (/Critical\s+([0-9-]+)/i.exec(r.desc || '')?.[1]) || '20';
+
+        // Check armor stats
+        const isArmor = r.subtype === 'armor' || r.subtype === 'shield' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '');
+        const a = r.armor || {};
+        let protRank = a.protectionRank;
+        if (protRank === undefined) {
+          const m = (r.desc || '').match(/Protection\s+(\d+)/i);
+          protRank = m ? parseInt(m[1], 10) : 0;
+        }
+
+        // Vehicle / HQ stats
+        const v = r.vehicle;
+        const hq = r.hq;
+
+        return `
+          <div class="res-card ${isEquipped ? 'card-equipped' : 'card-unequipped'}">
+            <div class="res-card-top">
+              <div class="res-title-box">
+                <span class="res-icon ${r.subtype || r.type}">${getResIcon(r)}</span>
+                <div>
+                  <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                    <span class="badge badge-subtle">${getSubtypeLabel(r)}</span>
+                    <button
+                      class="res-status-pill status-${status}"
+                      data-toggle-status="${itemId}"
+                      title="Click to cycle status (Equipped -> In Bag -> Stored)"
+                    >
+                      ${status === 'equipped'
+                        ? '<i class="ri-checkbox-circle-fill"></i> Equipped'
+                        : status === 'carried'
+                        ? '<i class="ri-inbox-line"></i> In Bag'
+                        : '<i class="ri-archive-line"></i> Stored'}
+                    </button>
+                  </div>
+                  <strong class="res-card-name">${escapeHtml(r.name)}</strong>
+                </div>
+              </div>
+              <div class="res-top-actions">
+                <span class="ep-tag">${r.epCost ?? r.cost ?? 0} EP</span>
+                <button class="btn-icon-subtle btn-send-res-vtt" data-send-res-vtt="${itemId}" title="Send ${escapeHtml(r.name)} card to Roll20 chat"><i class="ri-broadcast-line"></i></button>
+                <button class="btn-icon-subtle" data-edit-res="${itemId}" title="Edit Item"><i class="ri-edit-line"></i></button>
+                <button class="btn-icon-subtle text-danger" data-del-res="${itemId}" title="Delete Item"><i class="ri-delete-bin-line"></i></button>
               </div>
             </div>
-            <div class="res-top-actions">
-              <span class="ep-tag">${r.epCost ?? r.cost ?? 0} EP</span>
-              <button class="btn-icon-subtle" data-edit-res="${r.id || i}" title="Edit Item"><i class="ri-edit-line"></i></button>
-              <button class="btn-icon-subtle text-danger" data-del-res="${r.id || i}" title="Delete Item"><i class="ri-delete-bin-line"></i></button>
-            </div>
+
+            <!-- TACTICAL CHIPS ROW -->
+            ${isWeapon ? `
+              <div class="res-tactical-chips">
+                <span class="res-chip chip-atk"><i class="ri-crosshair-2-line"></i> Atk +${atkBonus}</span>
+                <span class="res-chip chip-dc"><i class="ri-shield-flash-line"></i> DC ${dc} ${resistance}</span>
+                <span class="res-chip chip-range">${isRanged ? 'Ranged' : (isStrengthBased ? 'Melee (STR-based)' : 'Close')}</span>
+                <span class="res-chip chip-crit">Crit ${crit}</span>
+                ${traits.map(t => `<span class="res-chip trait-chip">${t}</span>`).join('')}
+              </div>
+
+              <!-- WEAPON QUICK ROLL BUTTONS -->
+              <div class="res-quick-roll-bar">
+                <button class="btn btn-primary btn-xs btn-res-roll-atk" data-res-roll-atk="${itemId}">
+                  <i class="ri-dice-line"></i> Roll Attack (d20+${atkBonus})
+                </button>
+                <button class="btn btn-secondary btn-xs btn-res-roll-dc" data-res-roll-dc="${itemId}" title="Display Resistance Check DC in chat">
+                  <i class="ri-shield-line"></i> DC ${dc} ${resistance}
+                </button>
+              </div>
+            ` : isArmor ? `
+              <div class="res-tactical-chips">
+                ${protRank > 0 ? `<span class="res-chip chip-prot"><i class="ri-shield-check-line"></i> +${protRank} Toughness</span>` : ''}
+                ${a.activeDefenseBonus ? `<span class="res-chip chip-def">+${a.activeDefenseBonus} Active Def (Dodge/Parry)</span>` : ''}
+                ${a.isSubtle ? `<span class="res-chip">Subtle</span>` : ''}
+                ${a.imperviousRank > 0 ? `<span class="res-chip">Impervious ${a.imperviousRank}</span>` : ''}
+                ${isEquipped && protRank > 0 ? `<span class="res-chip chip-applied"><i class="ri-check-double-line"></i> Added to Active Toughness</span>` : ''}
+              </div>
+            ` : v ? `
+              <div class="res-stat-matrix">
+                <div class="matrix-cell"><span class="m-lbl">SIZE</span><span class="m-v">${v.size}</span></div>
+                <div class="matrix-cell"><span class="m-lbl">STR</span><span class="m-v">${v.str}</span></div>
+                <div class="matrix-cell"><span class="m-lbl">SPEED</span><span class="m-v">${v.speedRank} (${v.speedMph})</span></div>
+                <div class="matrix-cell"><span class="m-lbl">DEFENSE</span><span class="m-v">${v.defense}</span></div>
+                <div class="matrix-cell"><span class="m-lbl">TOUGHNESS</span><span class="m-v">${v.toughness}${v.impervious ? ` (Imp ${v.impervious})` : ''}</span></div>
+              </div>
+              ${v.features?.length > 0 ? `
+                <div class="res-features-chips">
+                  ${v.features.map(f => `<span class="feature-chip"><i class="ri-check-line"></i> ${f}</span>`).join('')}
+                </div>
+              ` : ''}
+            ` : hq ? `
+              <div class="res-stat-matrix">
+                <div class="matrix-cell"><span class="m-lbl">SIZE</span><span class="m-v">${hq.size}</span></div>
+                <div class="matrix-cell"><span class="m-lbl">TOUGHNESS</span><span class="m-v">${hq.toughness}</span></div>
+                <div class="matrix-cell"><span class="m-lbl">FEATURES</span><span class="m-v">${hq.features?.length || 0} Installed</span></div>
+              </div>
+              ${hq.features?.length > 0 ? `
+                <div class="res-features-chips">
+                  ${hq.features.map(f => `<span class="feature-chip"><i class="ri-check-line"></i> ${f}</span>`).join('')}
+                </div>
+              ` : ''}
+            ` : ''}
+
+            <p class="res-card-desc">${r.desc || r.notes || '<span class="text-muted">No description notes.</span>'}</p>
           </div>
-          <p class="res-card-desc">${r.desc || r.notes || '<span class="text-muted">No description notes.</span>'}</p>
-        </div>
-      `).join('')}
+        `;
+      }).join('')}
     </div>
   `;
 
@@ -2293,6 +2810,97 @@ function renderResourcesList(container, animate = false) {
     void listWrap.offsetWidth; // Trigger reflow
     listWrap.classList.add('category-content-animate');
   }
+
+  // Toggle status button
+  listWrap.querySelectorAll('[data-toggle-status]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idOrIdx = btn.dataset.toggleStatus;
+      const resItem = char.resources.find(r => r.id === idOrIdx) || char.resources[parseInt(idOrIdx, 10)];
+      if (resItem) {
+        store.toggleResourceStatus(resItem.id);
+      }
+    });
+  });
+
+  // Weapon Quick Attack Roll
+  listWrap.querySelectorAll('[data-res-roll-atk]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idOrIdx = btn.dataset.resRollAtk;
+      const r = char.resources.find(item => item.id === idOrIdx) || char.resources[parseInt(idOrIdx, 10)];
+      if (!r) return;
+
+      const w = r.weapon || {};
+      const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
+      const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
+
+      let dmgRank = w.damageRank;
+      if (dmgRank === undefined) {
+        const match = (r.desc || '').match(/Damage\s+(\d+)/i);
+        dmgRank = match ? parseInt(match[1], 10) : 1;
+      }
+
+      const traits = Array.isArray(w.traits) ? w.traits : [];
+      const isAffliction = traits.includes('Affliction') || /Affliction/i.test(r.desc || '');
+
+      let bonus = 0;
+      if (isRanged) {
+        const rangedSkill = char.skills.find(s => s.name === 'Ranged Combat' && (
+          new RegExp(r.name, 'i').test(s.subtype || '') ||
+          /firearm|guns|pistol|rifle|projectile/i.test(s.subtype || '')
+        ));
+        bonus = dex + (rangedSkill ? rangedSkill.ranks : 0) + (w.attackBonus || 0);
+      } else {
+        const closeSkill = char.skills.find(s => s.name === 'Close Combat' && (
+          new RegExp(r.name, 'i').test(s.subtype || '') ||
+          /blades|swords|melee|unarmed|axes/i.test(s.subtype || '')
+        ));
+        bonus = fgt + (closeSkill ? closeSkill.ranks : 0) + (w.attackBonus || 0);
+      }
+
+      const effectiveDmg = isStrengthBased ? (str + dmgRank) : dmgRank;
+      const dcBase = isAffliction ? 10 : 15;
+      const dc = dcBase + effectiveDmg;
+      const resistance = w.resistance || (isAffliction ? 'Fortitude' : 'Toughness');
+      const crit = w.crit || (/Critical\s+([0-9-]+)/i.exec(r.desc || '')?.[1]) || '20';
+
+      rollCheck({
+        name: `${r.name} Attack`,
+        type: 'attack',
+        bonus,
+        subtitle: `Equipment Weapon • ${isRanged ? 'Ranged' : 'Close'} • Resisted by ${resistance}`,
+        extra: {
+          dc,
+          resistance,
+          crit,
+          descriptor: r.name,
+          range: isRanged ? 'Ranged' : 'Close',
+          effectRank: effectiveDmg
+        }
+      });
+    });
+  });
+
+  // Weapon Quick DC check toast
+  listWrap.querySelectorAll('[data-res-roll-dc]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idOrIdx = btn.dataset.resRollDc;
+      const r = char.resources.find(item => item.id === idOrIdx) || char.resources[parseInt(idOrIdx, 10)];
+      if (!r) return;
+
+      const w = r.weapon || {};
+      const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
+      let dmgRank = w.damageRank ?? (parseInt(r.desc?.match(/Damage\s+(\d+)/i)?.[1], 10) || 1);
+      const effectiveDmg = isStrengthBased ? (str + dmgRank) : dmgRank;
+      const dcBase = /Affliction/i.test(r.desc || '') ? 10 : 15;
+      const dc = dcBase + effectiveDmg;
+      const resistance = w.resistance || (/Affliction/i.test(r.desc || '') ? 'Fortitude' : 'Toughness');
+
+      showToast(`Target must make a DC ${dc} ${resistance} check against ${r.name}.`, 'info');
+    });
+  });
 
   // Bind edit and delete handlers
   listWrap.querySelectorAll('[data-edit-res]').forEach(btn => {
@@ -2330,18 +2938,57 @@ function renderResourcesList(container, animate = false) {
       }
     });
   });
+
+  // Send Equipment info to Roll20 VTT
+  listWrap.querySelectorAll('[data-send-res-vtt]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const idOrIdx = btn.dataset.sendResVtt;
+      const r = char.resources.find(item => item.id === idOrIdx) || char.resources[parseInt(idOrIdx, 10)];
+      if (!r) return;
+
+      const ep = r.epCost ?? r.cost ?? 0;
+      let mechanicsText = '';
+
+      if (r.weapon) {
+        const isStrengthBased = r.weapon.isStrengthBased;
+        const effDmg = isStrengthBased ? (str + r.weapon.damageRank) : r.weapon.damageRank;
+        mechanicsText = `Damage: DC ${15 + effDmg} (${r.weapon.range || 'Close'}) • Crit ${r.weapon.crit}${r.weapon.traits?.length ? ' • ' + r.weapon.traits.join(', ') : ''}`;
+      } else if (r.armor) {
+        if (r.armor.activeDefenseBonus > 0) mechanicsText = `Active Defense +${r.armor.activeDefenseBonus} (Dodge/Parry)`;
+        else mechanicsText = `+${r.armor.protectionRank} Toughness${r.armor.imperviousRank ? `, Impervious ${r.armor.imperviousRank}` : ''}`;
+      } else if (r.vehicle) {
+        mechanicsText = `Size: ${r.vehicle.size} • STR: ${r.vehicle.str} • Speed: ${r.vehicle.speedRank} (${r.vehicle.speedMph}) • Def: ${r.vehicle.defense} • Toughness: ${r.vehicle.toughness}`;
+      } else if (r.hq) {
+        mechanicsText = `Size: ${r.hq.size} • Toughness: ${hq.toughness} • Features: ${hq.features?.join(', ')}`;
+      }
+
+      sendFeatureToVTT({
+        category: 'equipment',
+        name: r.name,
+        type: getSubtypeLabel(r),
+        cost: `${ep} EP (${Math.ceil(ep / 5)} PP)`,
+        mechanics: mechanicsText,
+        description: r.desc || r.notes || ''
+      });
+    });
+  });
 }
 
 // Global modal triggers for Skills, Advantages, and Resources
-window.openAddSkillModal = function(id = null) {
+window.openAddSkillModal = function (id = null) {
   openSkillModal(id);
 };
 
-window.openAddAdvantageModal = function() {
+window.openAdvantageModal = function () {
   openAdvantageModal();
 };
 
-window.openAddResourceModal = function(type = 'Gear') {
+window.openAddAdvantageModal = function () {
+  openAdvantageModal();
+};
+
+window.openAddResourceModal = function (type = 'Gear') {
   openResourceModal(null, type);
 };
 

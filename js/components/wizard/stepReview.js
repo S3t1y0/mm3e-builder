@@ -3,6 +3,16 @@ import { store } from '../../state.js';
 import { exportToJson, printSheet } from '../../storage/exportImport.js';
 import { openRoll20Preview } from '../roll20Print.js';
 
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 export function renderStepReview(container, onSwitchToSheet) {
   const char = store.character;
   const pl = char.powerLevel;
@@ -117,15 +127,25 @@ export function renderStepReview(container, onSwitchToSheet) {
         </div>
 
         <!-- Powers with offensive effects -->
-        ${char.powers.filter(p => (p.effectType || '').includes('Damage') || (p.effectType || '').includes('Affliction')).map(p => `
-          <div style="background: var(--bg-elevated); padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
-            <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">${p.name}</div>
-            <div style="font-size: 0.75rem; color: var(--accent-secondary);">${p.range || 'Ranged'} • ${p.action || 'Standard'} Action</div>
-            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.35rem;">
-              Effect: <strong>${p.effectType} ${p.ranks || 10}</strong> • DC: <strong>${15 + (p.ranks || 10)}</strong>
+        ${char.powers.filter(p => {
+          const effBase = (p.baseEffect || p.mainEffect?.baseEffect || p.effectType || '');
+          return ['Damage', 'Blast', 'Affliction', 'Weaken'].some(a => effBase.includes(a));
+        }).map(p => {
+          const effBase = p.baseEffect || p.mainEffect?.baseEffect || p.effectType || 'Damage';
+          const ranks = p.ranks || p.mainEffect?.ranks || 1;
+          const isAfflictionOrWeaken = effBase === 'Affliction' || effBase === 'Weaken';
+          const dc = (isAfflictionOrWeaken ? 10 : 15) + ranks;
+          const res = effBase === 'Affliction' ? (p.resistance || 'Fortitude') : effBase === 'Weaken' ? (p.resistance || 'Fort/Will') : 'Toughness';
+          return `
+            <div style="background: var(--bg-elevated); padding: 0.75rem 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <div style="font-weight: 800; font-size: 0.9rem; color: var(--text-primary);">${escapeHtml(p.name || effBase)}</div>
+              <div style="font-size: 0.75rem; color: var(--accent-secondary);">${p.range || 'Ranged'} • ${p.action || 'Standard'} Action</div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 0.35rem;">
+                Effect: <strong>${escapeHtml(effBase)} ${ranks}</strong> • DC: <strong>${dc} vs ${res}</strong>
+              </div>
             </div>
-          </div>
-        `).join('')}
+          `;
+        }).join('')}
       </div>
     </div>
 

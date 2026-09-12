@@ -43,6 +43,7 @@ let activeCategory = 'All';
 let modifierSearchQuery = '';
 let isAddingAltSlot = false;
 let activeSlotId = null; // ID of currently active alternate effect in this power session
+let currentEditingTarget = 'main'; // 'main' or 'slot:0', 'slot:1', etc.
 let expandedLinkedIdx = null; // Index of linked effect whose modifiers drawer is open
 let expandedSlotIdx = null; // Index of alternate slot whose modifiers drawer is open
 
@@ -50,7 +51,12 @@ let expandedSlotIdx = null; // Index of alternate slot whose modifiers drawer is
 let isEffectExplorerOpen = false;
 let effectCategoryFilter = 'All';
 let effectSearchQuery = '';
-let isBaseLibraryExpanded = true;
+let isBaseLibraryExpanded = false;
+
+// Modifier Explorer Modal state
+let isModifierExplorerOpen = false;
+let currentModifierTarget = 'main'; // 'main', 'slot:0', 'linked:0', etc.
+
 let expandedLinkedLibIdx = null; // Index of linked effect whose library drawer is open
 let isNewSlotLibExpanded = false; // Whether library drawer for new slot in array is open
 let newSlotBaseName = 'Damage'; // Selected base effect for new slot
@@ -72,8 +78,9 @@ export function openPowerBuilder(powerToEdit = null) {
     currentPower = createEmptyPower();
     currentPower.mainEffect = createEmptyEffect('Damage');
     currentPower.baseEffect = 'Damage';
-    isBaseLibraryExpanded = true;
+    isBaseLibraryExpanded = false;
   }
+  currentEditingTarget = 'main';
 
   activeModifierTab = 'extras';
   activeCategory = 'All';
@@ -87,6 +94,8 @@ export function openPowerBuilder(powerToEdit = null) {
   newSlotBaseName = 'Damage';
   expandedSlotLibIdx = null;
   isEffectExplorerOpen = false;
+  isModifierExplorerOpen = false;
+  currentModifierTarget = 'main';
   effectCategoryFilter = 'All';
   effectSearchQuery = '';
 
@@ -104,12 +113,16 @@ export function closePowerBuilder() {
     modal.classList.remove('open');
   }
   isEffectExplorerOpen = false;
+  isModifierExplorerOpen = false;
   document.removeEventListener('keydown', handleStudioKeyDown);
 }
 
 function handleStudioKeyDown(e) {
   if (e.key === 'Escape') {
-    if (isEffectExplorerOpen) {
+    if (isModifierExplorerOpen) {
+      isModifierExplorerOpen = false;
+      renderPowerStudio();
+    } else if (isEffectExplorerOpen) {
       isEffectExplorerOpen = false;
       renderPowerStudio();
     } else {
@@ -133,6 +146,7 @@ function ensureStudioShell(modal) {
         <div class="pb-inspector" id="pb-inspector-container"></div>
       </div>
       <div id="pb-explorer-container"></div>
+      <div id="pb-modifier-modal-container"></div>
     </div>
   `;
 }
@@ -196,8 +210,9 @@ function renderPowerStudio(resetScroll = false) {
   const inspectorContainer = modal.querySelector('#pb-inspector-container');
   const headerContainer = modal.querySelector('#pb-header-container');
   const explorerContainer = modal.querySelector('#pb-explorer-container');
+  const modifierModalContainer = modal.querySelector('#pb-modifier-modal-container');
 
-  if (!canvasContainer || !inspectorContainer || !headerContainer || !explorerContainer) {
+  if (!canvasContainer || !inspectorContainer || !headerContainer || !explorerContainer || !modifierModalContainer) {
     ensureStudioShell(modal);
     return renderPowerStudio(true);
   }
@@ -236,6 +251,14 @@ function renderPowerStudio(resetScroll = false) {
       <button id="pb-close-btn" class="btn btn-ghost" title="Close Studio (Esc)"><i class="ri-close-line"></i></button>
     </div>
   `;
+
+  const activeTargetStr = (currentPower.type === 'array' && currentEditingTarget.startsWith('slot:'))
+    ? currentEditingTarget
+    : 'main';
+  const activeEffect = getEffectTarget(activeTargetStr);
+  const isEditingMain = activeTargetStr === 'main';
+  const slotIdx = isEditingMain ? null : parseInt(activeTargetStr.split(':')[1], 10);
+  const currentSlotObj = slotIdx !== null ? currentPower.alternateEffects[slotIdx] : null;
 
   // Render Left Canvas
   canvasContainer.innerHTML = `
@@ -370,12 +393,11 @@ function renderPowerStudio(resetScroll = false) {
         </div>
         <div class="form-row">
           <div class="form-group flex-1">
-            <label>REMOVABLE TYPE</label>
-            <select id="pb-device-type">
-              <option value="none" ${currentPower.deviceConfig?.type === 'none' ? 'selected' : ''}>None (Inherent Power)</option>
-              <option value="removable" ${currentPower.deviceConfig?.type === 'removable' ? 'selected' : ''}>Removable (-1 PP per 5 PP)</option>
-              <option value="easily_removable" ${currentPower.deviceConfig?.type === 'easily_removable' ? 'selected' : ''}>Easily Removable (-2 PP per 5 PP)</option>
-            </select>
+            <label>DELIVERY FORM</label>
+            <div style="padding: 0.5rem 0.75rem; background: var(--bg-tertiary); border: 1px solid var(--border-subtle); border-radius: 6px; font-weight: 600; font-size: 0.85rem; color: var(--accent-glow); display: flex; align-items: center; gap: 0.4rem;">
+              <i class="ri-shield-keyhole-line"></i>
+              ${currentPower.deviceConfig?.type === 'easily_removable' ? 'Easily Removable (-2 PP / 5 PP)' : 'Removable (-1 PP / 5 PP)'}
+            </div>
           </div>
           <div class="form-group flex-2">
             <label>DEVICE ITEM DESCRIPTOR</label>
@@ -393,266 +415,7 @@ function renderPowerStudio(resetScroll = false) {
       </div>
     ` : ''}
 
-    <!-- 3. Main Effect Card -->
-    <div class="pb-card pb-main-effect-card">
-      <div class="card-section-header">
-        <div class="section-title">
-          <span class="badge badge-primary">MAIN EFFECT</span>
-          <div class="main-slot-name-edit-box">
-            <input type="text"
-                   id="pb-main-slot-name-input"
-                   class="pb-slot-name-input"
-                   value="${escapeHtml(currentPower.mainEffect.name || currentPower.mainEffect.baseEffect || 'Main Effect')}"
-                   placeholder="Main Slot Name (e.g. Solar Blast)"
-                   title="Click to rename main effect slot" />
-            <i class="ri-edit-line slot-name-edit-icon" title="Editable slot name"></i>
-          </div>
-        </div>
-        <div class="card-header-badge">
-          <span class="effect-cost-badge">${breakdown.mainCost} PP</span>
-        </div>
-      </div>
-
-      <!-- Base Effect Active Showcase with Full Tags & Rules Explanation -->
-      ${renderBaseEffectShowcase(currentPower.mainEffect)}
-
-      <!-- Direct Embedded Base Effect Library in Power Studio -->
-      ${renderEmbeddedBaseEffectLibrary()}
-
-      <!-- Main Effect Power Ranks Bar -->
-      <div class="main-effect-ranks-bar">
-        <div class="ranks-control-group">
-          <label><i class="ri-bar-chart-fill"></i> POWER RANKS</label>
-          <div class="stepper">
-            <button class="step-btn" id="pb-rank-dec" type="button" title="Decrease rank">-</button>
-            <input type="number" class="step-val" id="pb-ranks" value="${currentPower.mainEffect.ranks}" min="1" max="30">
-            <button class="step-btn" id="pb-rank-inc" type="button" title="Increase rank">+</button>
-          </div>
-        </div>
-        <div class="ranks-calculation-badge">
-          <span class="calc-label">Base Cost:</span>
-          <span class="calc-value">${(() => {
-            const mc = calculateEffectCost(currentPower.mainEffect);
-            return `<strong>${mc.basePointCost} PP</strong> (${mc.netPerRank >= 1 ? `${mc.netPerRank} PP/Rank` : `1 PP / ${mc.divisor} Ranks`} × ${currentPower.mainEffect.ranks} Ranks)`;
-          })()}</span>
-        </div>
-      </div>
-
-      <!-- Effect Parameter Overrides (Range, Action, Duration, Resistance) -->
-      <div class="effect-params-grid">
-        <div class="form-group">
-          <label>RANGE OVERRIDE</label>
-          <select id="pb-effect-range">
-            <option value="Personal" ${currentPower.mainEffect.range === 'Personal' ? 'selected' : ''}>Personal</option>
-            <option value="Close" ${currentPower.mainEffect.range === 'Close' ? 'selected' : ''}>Close (5 ft)</option>
-            <option value="Ranged" ${currentPower.mainEffect.range === 'Ranged' ? 'selected' : ''}>Ranged</option>
-            <option value="Perception" ${currentPower.mainEffect.range === 'Perception' ? 'selected' : ''}>Perception</option>
-            <option value="Rank" ${currentPower.mainEffect.range === 'Rank' ? 'selected' : ''}>Rank-based</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>ACTION OVERRIDE</label>
-          <select id="pb-effect-action">
-            <option value="Standard" ${currentPower.mainEffect.action === 'Standard' ? 'selected' : ''}>Standard</option>
-            <option value="Move" ${currentPower.mainEffect.action === 'Move' ? 'selected' : ''}>Move</option>
-            <option value="Free" ${currentPower.mainEffect.action === 'Free' ? 'selected' : ''}>Free</option>
-            <option value="Reaction" ${currentPower.mainEffect.action === 'Reaction' ? 'selected' : ''}>Reaction</option>
-            <option value="None" ${currentPower.mainEffect.action === 'None' ? 'selected' : ''}>None</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>DURATION OVERRIDE</label>
-          <select id="pb-effect-duration">
-            <option value="Instant" ${currentPower.mainEffect.duration === 'Instant' ? 'selected' : ''}>Instant</option>
-            <option value="Concentration" ${currentPower.mainEffect.duration === 'Concentration' ? 'selected' : ''}>Concentration</option>
-            <option value="Sustained" ${currentPower.mainEffect.duration === 'Sustained' ? 'selected' : ''}>Sustained</option>
-            <option value="Continuous" ${currentPower.mainEffect.duration === 'Continuous' ? 'selected' : ''}>Continuous</option>
-            <option value="Permanent" ${currentPower.mainEffect.duration === 'Permanent' ? 'selected' : ''}>Permanent</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>RESISTANCE OVERRIDE</label>
-          <select id="pb-effect-resistance">
-            <option value="Toughness" ${currentPower.mainEffect.resistance === 'Toughness' ? 'selected' : ''}>Toughness</option>
-            <option value="Fortitude" ${currentPower.mainEffect.resistance === 'Fortitude' ? 'selected' : ''}>Fortitude</option>
-            <option value="Will" ${currentPower.mainEffect.resistance === 'Will' ? 'selected' : ''}>Will</option>
-            <option value="Dodge" ${currentPower.mainEffect.resistance === 'Dodge' ? 'selected' : ''}>Dodge</option>
-            <option value="None" ${currentPower.mainEffect.resistance === 'None' ? 'selected' : ''}>None</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Applied Modifiers for Main Effect -->
-      <div class="applied-modifiers-block">
-        <div class="applied-mod-header">
-          <span class="block-title">APPLIED EXTRAS & FLAWS (${currentPower.mainEffect.extras.length + currentPower.mainEffect.flaws.length})</span>
-          <span class="block-note">Click "+" from the palette below to attach modifiers</span>
-        </div>
-
-        ${(currentPower.mainEffect.extras.length === 0 && currentPower.mainEffect.flaws.length === 0) ? `
-          <div class="empty-modifiers-callout">
-            <i class="ri-magic-line"></i> No Extras or Flaws applied yet. Select modifiers from the palette below to customize this effect.
-          </div>
-        ` : `
-          <div class="applied-mods-grid">
-            ${currentPower.mainEffect.extras.map((ex, idx) => renderAppliedModifierCard(ex, idx, 'extra', 'main')).join('')}
-            ${currentPower.mainEffect.flaws.map((fl, idx) => renderAppliedModifierCard(fl, idx, 'flaw', 'main')).join('')}
-          </div>
-        `}
-      </div>
-
-      <!-- Modifiers Palette (Embedded for instant access) -->
-      ${renderModifierPaletteForTarget('main')}
-    </div>
-
-    <!-- 4. Linked Effects Section -->
-    ${(currentPower.type === 'compound' || currentPower.linkedEffects.length > 0) ? `
-      <div class="pb-card pb-linked-card">
-        <div class="linked-section-header">
-          <div class="section-title">
-            <i class="ri-links-line"></i> LINKED EFFECTS (${currentPower.linkedEffects.length})
-          </div>
-          <div class="linked-header-actions">
-            <select id="pb-quick-combo-sel" class="linked-combo-select" title="Add a popular pre-configured combo">
-              <option value="">⚡ Quick Combo Presets...</option>
-              ${COMMON_LINKED_COMBOS.map((c, i) => `
-                <option value="${i}">${c.name}</option>
-              `).join('')}
-            </select>
-            <button id="pb-add-linked-btn" class="btn btn-secondary btn-sm" type="button">
-              <i class="ri-add-line"></i> Add Linked Effect
-            </button>
-          </div>
-        </div>
-
-        <div class="linked-effects-chain">
-          ${currentPower.linkedEffects.map((linked, lIdx) => {
-            const linkedCost = calculateEffectCost(linked, 0).totalCost;
-            const valLinked = validateLinkedEffect(currentPower.mainEffect, linked);
-            const isExpanded = expandedLinkedIdx === lIdx;
-            const totalMods = (linked.extras ? linked.extras.length : 0) + (linked.flaws ? linked.flaws.length : 0);
-            const linkedBase = BASE_EFFECTS.find(b => b.name === (linked.baseEffect || linked.name)) || BASE_EFFECTS[0];
-            const isLinkedLibOpen = expandedLinkedLibIdx === lIdx;
-
-            return `
-              <div class="linked-item-card">
-                <div class="linked-item-header">
-                  <div class="linked-item-title-group">
-                    <span class="linked-node-badge"><i class="ri-links-line"></i> LINKED #${lIdx + 1}</span>
-                    <strong style="font-size:0.9rem;color:var(--text-primary);">${escapeHtml(linked.name || linked.baseEffect)}</strong>
-                  </div>
-                  <div style="display:flex;align-items:center;gap:0.5rem;">
-                    <span class="linked-cost-val">+${linkedCost} PP</span>
-                    <button class="btn-delete-linked" data-remove-linked="${lIdx}" title="Delete linked effect">
-                      <i class="ri-delete-bin-line"></i>
-                    </button>
-                  </div>
-                </div>
-
-                <!-- Range & Action Synchronization Status -->
-                <div class="linked-sync-status-bar ${valLinked.isValid ? 'synced' : 'mismatched'}">
-                  <span>
-                    <i class="${valLinked.isValid ? 'ri-checkbox-circle-fill' : 'ri-error-warning-fill'}"></i>
-                    ${valLinked.isValid
-                      ? `Range (${linked.range}) & Action (${linked.action}) match Main Effect`
-                      : valLinked.warnings.join(' • ')
-                    }
-                  </span>
-                  ${!valLinked.isValid ? `
-                    <button class="btn-auto-sync" data-auto-sync-linked="${lIdx}" type="button" title="Synchronize range and action with Main Effect">
-                      <i class="ri-flashlight-line"></i> Auto-Sync
-                    </button>
-                  ` : ''}
-                </div>
-
-                <!-- Linked Effect Base Effect Showcase & Library Trigger -->
-                <div class="linked-effect-showcase-box">
-                  <div class="linked-effect-header-bar">
-                    <div class="linked-effect-info-wrap">
-                      <span class="effect-tag-pill ${getCategoryClass(linkedBase.category)}">${linkedBase.category || 'General'}</span>
-                      <strong class="linked-effect-name">${linked.baseEffect}</strong>
-                      <span class="effect-tag-pill cost-pill">${linkedBase.cost} PP/Rank</span>
-                    </div>
-                    <button class="btn btn-secondary btn-xs" data-toggle-linked-lib="${lIdx}" type="button" title="Choose base effect from library">
-                      <i class="ri-compass-3-line"></i> ${isLinkedLibOpen ? 'Hide Library' : 'Change Effect (Library)'}
-                    </button>
-                  </div>
-
-                  <div class="effect-tags-row" style="margin: 0.35rem 0;">
-                    <span class="effect-tag-pill" title="Action required to activate"><i class="ri-flashlight-line"></i> ${linked.action || linkedBase.action} Action</span>
-                    <span class="effect-tag-pill" title="Range increment"><i class="ri-focus-2-line"></i> ${linked.range || linkedBase.range} Range</span>
-                    <span class="effect-tag-pill" title="Duration of manifestation"><i class="ri-time-line"></i> ${linked.duration || linkedBase.duration}</span>
-                    ${linkedBase.resistance ? `<span class="effect-tag-pill" title="Target resistance check defense"><i class="ri-shield-line"></i> vs ${linked.resistance || linkedBase.resistance}</span>` : ''}
-                  </div>
-
-                  <!-- Description of the selected power effect -->
-                  <div class="effect-desc-box">
-                    <strong>M&M 3e Rule:</strong> ${escapeHtml(linkedBase.desc || 'Standard D20 Hero System power effect.')}
-                  </div>
-
-                  <!-- Configurable Sub-options for Linked Effect -->
-                  ${renderEffectConfiguration(linked, `linked:${lIdx}`)}
-
-                  <!-- Embedded Library for Linked Effect if open -->
-                  ${isLinkedLibOpen ? renderEmbeddedLibraryForTarget('linked', lIdx, linked.baseEffect) : ''}
-
-                  <!-- Linked Effect Ranks Bar -->
-                  <div class="linked-ranks-row">
-                    <div class="ranks-control-group">
-                      <label><i class="ri-bar-chart-fill"></i> RANKS</label>
-                      <div class="stepper">
-                        <button class="step-btn" data-linked-dec="${lIdx}" type="button">-</button>
-                        <input type="number" class="step-val" data-linked-rank="${lIdx}" value="${linked.ranks}" min="1" max="30">
-                        <button class="step-btn" data-linked-inc="${lIdx}" type="button">+</button>
-                      </div>
-                    </div>
-                    <div class="ranks-calculation-badge">
-                      <span class="calc-label">Cost:</span>
-                      <span class="calc-value">${linked.ranks} Ranks × ${linkedBase.cost} PP/Rank = <strong>${(linked.ranks * linkedBase.cost)} PP</strong></span>
-                    </div>
-                  </div>
-                </div>
-
-                <!-- Modifiers Accordion for Linked Sub-effect -->
-                <div class="linked-modifiers-toggle">
-                  <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">
-                    <i class="ri-settings-3-line"></i> Extras & Flaws (${totalMods})
-                  </span>
-                  <button class="btn btn-ghost btn-sm" data-toggle-linked-mod="${lIdx}" type="button" style="font-size:0.75rem;">
-                    ${isExpanded ? '<i class="ri-arrow-up-s-line"></i> Hide Modifiers' : '<i class="ri-arrow-down-s-line"></i> Manage Modifiers'}
-                  </button>
-                </div>
-
-                ${isExpanded ? `
-                  <div class="slot-modifiers-drawer">
-                    <div class="slot-modifiers-drawer-header">
-                      <span class="drawer-title"><i class="ri-settings-3-line"></i> Applied Extras & Flaws: <strong>${escapeHtml(linked.name || linked.baseEffect)}</strong> (${totalMods})</span>
-                    </div>
-
-                    ${(linked.extras.length === 0 && linked.flaws.length === 0) ? `
-                      <div class="empty-applied-hint">No extras or flaws attached to this linked effect. Select modifiers from the library below to customize this effect.</div>
-                    ` : `
-                      <div class="applied-mods-grid sub-applied-mods-grid">
-                        ${(linked.extras || []).map((ex, exIdx) => renderAppliedModifierCard(ex, exIdx, 'extra', `linked:${lIdx}`)).join('')}
-                        ${(linked.flaws || []).map((fl, flIdx) => renderAppliedModifierCard(fl, flIdx, 'flaw', `linked:${lIdx}`)).join('')}
-                      </div>
-                    `}
-
-                    <!-- Visual Modifier Library Palette for Linked Effect -->
-                    ${renderModifierPaletteForTarget(`linked:${lIdx}`)}
-                  </div>
-                ` : ''}
-              </div>
-            `;
-          }).join('')}
-          ${currentPower.linkedEffects.length === 0 ? `
-            <div class="empty-section-hint">No linked effects added yet. Click "+ Add Linked Effect" or choose a Quick Combo above.</div>
-          ` : ''}
-        </div>
-      </div>
-    ` : ''}
-
-    <!-- 5. Alternate Effects (Array Studio) Section -->
+    <!-- 3. Array Studio Controller & In-Place Slot Tabs -->
     ${(currentPower.type === 'array' || currentPower.alternateEffects.length > 0) ? `
       <div class="pb-card pb-array-card">
         <div class="card-section-header">
@@ -688,8 +451,10 @@ function renderPowerStudio(resetScroll = false) {
         <!-- Array Budget Dashboard & Meter -->
         ${(() => {
           const highestSlotCost = currentPower.alternateEffects.reduce((max, s) => {
-            const c = calculateEffectCost(s.effect).totalCost;
-            return Math.max(max, c);
+            const baseCost = calculateEffectCost(s.effect).totalCost;
+            const slotLinked = s.linkedEffects || [];
+            const linkedCost = slotLinked.reduce((sum, le) => sum + calculateEffectCost(le).totalCost, 0);
+            return Math.max(max, baseCost + linkedCost);
           }, 0);
           const budgetCapacity = breakdown.arrayCapacity || 1;
           const pctFill = Math.min(100, Math.round((highestSlotCost / budgetCapacity) * 100));
@@ -699,7 +464,7 @@ function renderPowerStudio(resetScroll = false) {
             <div class="array-budget-dashboard">
               <div class="budget-dashboard-header">
                 <div class="budget-primary-stat">
-                  Primary Budget Pool: <strong>${budgetCapacity} PP</strong> (from Main Effect)
+                  Primary Budget Pool: <strong>${budgetCapacity} PP</strong> (from Primary Suite)
                 </div>
                 <div class="budget-headroom-badge ${isOverflow ? 'warn' : 'ok'}">
                   ${isOverflow
@@ -715,191 +480,401 @@ function renderPowerStudio(resetScroll = false) {
           `;
         })()}
 
-        <!-- Array Toolbar -->
-        <div class="array-toolbar">
-          <button id="pb-add-alt-slot-btn" class="btn btn-secondary btn-sm" type="button">
-            <i class="ri-add-line"></i> Add Blank Slot
-          </button>
-          <button id="pb-duplicate-main-slot-btn" class="btn btn-secondary btn-sm" type="button" title="Duplicate Main Effect to create an alternate slot variant">
-            <i class="ri-file-copy-line"></i> Duplicate Main as Alternate Slot
+        <!-- Array Slot Management Toolbar -->
+        <div class="array-toolbar" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.75rem;margin-bottom:0.75rem;">
+          <div style="display:flex;align-items:center;gap:0.5rem;">
+            <button id="pb-add-alt-slot-btn" class="btn btn-primary btn-sm" type="button" title="Add a new alternate effect slot in 1 click">
+              <i class="ri-add-line"></i> + Add Alternate Slot
+            </button>
+            <button id="pb-duplicate-main-slot-btn" class="btn btn-secondary btn-sm" type="button" title="Duplicate Main Effect into a new alternate slot variant">
+              <i class="ri-file-copy-line"></i> Duplicate Main as Slot
+            </button>
+          </div>
+          <div style="font-size:0.75rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.5rem;">
+            <span class="badge badge-subtle">${currentPower.alternateEffects.length} Alternate ${currentPower.alternateEffects.length === 1 ? 'Slot' : 'Slots'}</span>
+            <span style="color:var(--text-muted);font-size:0.72rem;">Slots draw from primary pool budget</span>
+          </div>
+        </div>
+
+        <!-- In-Place Array Slot Tabs Navigation Bar -->
+        <div style="margin-top: 0.5rem;">
+          <div style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 0.4rem; display: flex; align-items: center; justify-content: space-between;">
+            <span><i class="ri-cursor-line"></i> Workbench Slot View (Click Tab To Edit In Canvas)</span>
+            <span style="font-weight: 500; text-transform: none; color: var(--text-muted); font-size: 0.7rem;">Currently Viewing: <strong>${isEditingMain ? 'Main Effect (Primary Pool)' : (currentSlotObj?.name || 'Slot #' + (slotIdx + 1))}</strong></span>
+          </div>
+          <div class="array-slots-nav-bar">
+            <button type="button" class="array-slot-tab-btn ${isEditingMain ? 'active' : ''}" data-select-edit-slot="main" title="Edit Main Effect (Base Pool)">
+              <i class="ri-star-fill" style="color: #fbbf24;"></i> Main: ${escapeHtml(currentPower.mainEffect.name || currentPower.mainEffect.baseEffect || 'Main Effect')} (${breakdown.mainCost} PP)
+            </button>
+            ${currentPower.alternateEffects.map((slot, aIdx) => {
+              const baseCost = calculateEffectCost(slot.effect).totalCost;
+              const slotLinked = slot.linkedEffects || [];
+              const linkedCost = slotLinked.reduce((sum, le) => sum + calculateEffectCost(le).totalCost, 0);
+              const sCost = baseCost + linkedCost;
+              const isTabActive = activeTargetStr === `slot:${aIdx}`;
+              const isSlotOver = sCost > breakdown.arrayCapacity;
+              const isEquippedActive = slot.id === activeSlotId;
+              const linkedBadge = slotLinked.length > 0 ? `<span class="badge badge-subtle" style="font-size:0.65rem;padding:0.1rem 0.35rem;margin-left:0.25rem;"><i class="ri-links-line"></i>+${slotLinked.length}</span>` : '';
+              return `
+                <div class="array-slot-tab-wrap ${isTabActive ? 'active-wrap' : ''}">
+                  <button type="button"
+                          class="array-slot-tab-btn ${isTabActive ? 'active' : ''} ${isSlotOver ? 'slot-tab-overflow' : ''}"
+                          data-select-edit-slot="slot:${aIdx}"
+                          title="Click to edit #${aIdx + 1} ${escapeHtml(slot.name || 'Slot')} (${sCost} PP / max ${breakdown.arrayCapacity} PP)${isSlotOver ? ' - OVER BUDGET!' : ''}">
+                    ${isEquippedActive ? '<i class="ri-flashlight-fill" title="Equipped Active Slot in Sheet" style="color:var(--accent-glow);"></i> ' : ''}
+                    #${aIdx + 1}: ${escapeHtml(slot.name || slot.effect?.name || slot.effect?.baseEffect || 'Slot')} (${sCost} PP)
+                    ${linkedBadge}
+                    ${slot.isDynamic ? '<span class="slot-tab-dynamic-badge" title="Dynamic Slot (+2 PP)">Dyn</span>' : ''}
+                  </button>
+                  <button type="button" class="btn-delete-slot-tab" data-remove-alt-tab="${aIdx}" title="Delete this slot">&times;</button>
+                </div>
+              `;
+            }).join('')}
+            <button type="button" class="array-slot-tab-btn add-tab-btn" id="pb-add-slot-tab-btn" title="Add another alternate slot">
+              <i class="ri-add-line"></i> + Add Slot
+            </button>
+          </div>
+        </div>
+      </div>
+    ` : ''}
+
+    <!-- 4. Active Effect Configuration Card (Unified Editor Canvas) -->
+    <div class="pb-card pb-main-effect-card">
+      <div class="card-section-header">
+        <div class="section-title">
+          ${isEditingMain ? `
+            <span class="badge badge-primary">MAIN EFFECT (BASE POOL)</span>
+            <div class="main-slot-name-edit-box">
+              <input type="text"
+                     id="pb-main-slot-name-input"
+                     class="pb-slot-name-input"
+                     value="${escapeHtml(currentPower.mainEffect.name || currentPower.mainEffect.baseEffect || 'Main Effect')}"
+                     placeholder="Main Slot Name (e.g. Solar Blast)"
+                     title="Click to rename main effect slot" />
+              <i class="ri-edit-line slot-name-edit-icon" title="Editable slot name"></i>
+            </div>
+          ` : `
+            <span class="badge badge-subtle">SLOT #${slotIdx + 1}</span>
+            <div class="main-slot-name-edit-box">
+              <input type="text"
+                     class="pb-slot-name-input"
+                     data-slot-name-idx="${slotIdx}"
+                     value="${escapeHtml(currentSlotObj?.name || activeEffect.name || activeEffect.baseEffect || 'Slot ' + (slotIdx + 1))}"
+                     placeholder="Slot Name"
+                     title="Click to rename this slot" />
+              <i class="ri-edit-line slot-name-edit-icon" title="Editable slot name"></i>
+            </div>
+            <div class="slot-type-pill-toggle" style="margin-left:0.35rem;">
+              <button type="button" class="slot-type-btn ${!currentSlotObj?.isDynamic ? 'active' : ''}" data-set-slot-dynamic="${slotIdx}:false">Standard (+1 PP)</button>
+              <button type="button" class="slot-type-btn ${currentSlotObj?.isDynamic ? 'active dynamic' : ''}" data-set-slot-dynamic="${slotIdx}:true">Dynamic (+2 PP)</button>
+            </div>
+            <button type="button"
+                    class="btn btn-xs ${currentSlotObj?.id === activeSlotId ? 'btn-success' : 'btn-secondary'}"
+                    data-toggle-active-slot="${currentSlotObj?.id}"
+                    style="margin-left:0.35rem;display:inline-flex;align-items:center;gap:0.3rem;"
+                    title="Equip this slot as the active effect in the character sheet">
+              <i class="${currentSlotObj?.id === activeSlotId ? 'ri-flashlight-fill' : 'ri-flashlight-line'}"></i>
+              ${currentSlotObj?.id === activeSlotId ? 'Active in Sheet' : 'Set Active'}
+            </button>
+            <button type="button"
+                    class="btn btn-xs btn-outline-danger"
+                    data-remove-alt-tab="${slotIdx}"
+                    style="margin-left:0.25rem;display:inline-flex;align-items:center;gap:0.25rem;"
+                    title="Delete this alternate slot">
+              <i class="ri-delete-bin-line"></i> Delete
+            </button>
+          `}
+        </div>
+        <div class="card-header-badge">
+          ${isEditingMain ? `
+            <span class="effect-cost-badge">${breakdown.mainCost} PP</span>
+          ` : (() => {
+            const baseCost = calculateEffectCost(activeEffect).totalCost;
+            const slotLinked = currentSlotObj?.linkedEffects || [];
+            const linkedCost = slotLinked.reduce((sum, le) => sum + calculateEffectCost(le).totalCost, 0);
+            const sc = baseCost + linkedCost;
+            const over = sc > breakdown.arrayCapacity;
+            return `
+              <span class="effect-cost-badge ${over ? 'warn' : ''}" title="${over ? 'Slot cost exceeds primary array capacity!' : 'Within array capacity'}">
+                ${sc} / ${breakdown.arrayCapacity} PP ${over ? '(Over Budget)' : ''}
+              </span>
+            `;
+          })()}
+        </div>
+      </div>
+
+      <!-- Base Effect Active Showcase with Full Tags & Rules Explanation -->
+      ${renderBaseEffectShowcase(activeEffect, activeTargetStr)}
+
+      <!-- Direct Embedded Base Effect Library in Power Studio -->
+      ${isBaseLibraryExpanded ? renderEmbeddedLibraryForTarget(isEditingMain ? 'main' : 'slot', isEditingMain ? null : slotIdx, activeEffect.baseEffect) : ''}
+
+      <!-- Power Ranks Bar -->
+      <div class="main-effect-ranks-bar">
+        <div class="ranks-control-group">
+          <label><i class="ri-bar-chart-fill"></i> POWER RANKS</label>
+          <div class="stepper">
+            <button class="step-btn" data-target-rank-dec="${activeTargetStr}" type="button" title="Decrease rank">-</button>
+            <input type="number" class="step-val" data-target-ranks="${activeTargetStr}" value="${activeEffect.ranks}" min="1" max="30">
+            <button class="step-btn" data-target-rank-inc="${activeTargetStr}" type="button" title="Increase rank">+</button>
+          </div>
+        </div>
+        <div class="ranks-calculation-badge">
+          <span class="calc-label">Base Cost:</span>
+          <span class="calc-value">${(() => {
+            const mc = calculateEffectCost(activeEffect);
+            return `<strong>${mc.basePointCost} PP</strong> (${mc.netPerRank >= 1 ? `${mc.netPerRank} PP/Rank` : `1 PP / ${mc.divisor} Ranks`} × ${activeEffect.ranks} Ranks)`;
+          })()}</span>
+        </div>
+      </div>
+
+      <!-- Effect Parameter Overrides (Range, Action, Duration, Resistance) -->
+      <div class="effect-params-grid">
+        <div class="form-group">
+          <label>RANGE OVERRIDE</label>
+          <select data-param-target="${activeTargetStr}" data-param-field="range">
+            <option value="Personal" ${activeEffect.range === 'Personal' ? 'selected' : ''}>Personal</option>
+            <option value="Close" ${activeEffect.range === 'Close' ? 'selected' : ''}>Close (5 ft)</option>
+            <option value="Ranged" ${activeEffect.range === 'Ranged' ? 'selected' : ''}>Ranged</option>
+            <option value="Perception" ${activeEffect.range === 'Perception' ? 'selected' : ''}>Perception</option>
+            <option value="Rank" ${activeEffect.range === 'Rank' ? 'selected' : ''}>Rank-based</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>ACTION OVERRIDE</label>
+          <select data-param-target="${activeTargetStr}" data-param-field="action">
+            <option value="Standard" ${activeEffect.action === 'Standard' ? 'selected' : ''}>Standard</option>
+            <option value="Move" ${activeEffect.action === 'Move' ? 'selected' : ''}>Move</option>
+            <option value="Free" ${activeEffect.action === 'Free' ? 'selected' : ''}>Free</option>
+            <option value="Reaction" ${activeEffect.action === 'Reaction' ? 'selected' : ''}>Reaction</option>
+            <option value="None" ${activeEffect.action === 'None' ? 'selected' : ''}>None</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>DURATION OVERRIDE</label>
+          <select data-param-target="${activeTargetStr}" data-param-field="duration">
+            <option value="Instant" ${activeEffect.duration === 'Instant' ? 'selected' : ''}>Instant</option>
+            <option value="Concentration" ${activeEffect.duration === 'Concentration' ? 'selected' : ''}>Concentration</option>
+            <option value="Sustained" ${activeEffect.duration === 'Sustained' ? 'selected' : ''}>Sustained</option>
+            <option value="Continuous" ${activeEffect.duration === 'Continuous' ? 'selected' : ''}>Continuous</option>
+            <option value="Permanent" ${activeEffect.duration === 'Permanent' ? 'selected' : ''}>Permanent</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>RESISTANCE OVERRIDE</label>
+          <select data-param-target="${activeTargetStr}" data-param-field="resistance">
+            <option value="Toughness" ${activeEffect.resistance === 'Toughness' ? 'selected' : ''}>Toughness</option>
+            <option value="Fortitude" ${activeEffect.resistance === 'Fortitude' ? 'selected' : ''}>Fortitude</option>
+            <option value="Will" ${activeEffect.resistance === 'Will' ? 'selected' : ''}>Will</option>
+            <option value="Dodge" ${activeEffect.resistance === 'Dodge' ? 'selected' : ''}>Dodge</option>
+            <option value="None" ${activeEffect.resistance === 'None' ? 'selected' : ''}>None</option>
+          </select>
+        </div>
+      </div>
+      <div class="param-rules-hint" style="margin: 0.35rem 0 0.8rem; font-size: 0.72rem; color: var(--text-muted); display: flex; align-items: center; gap: 0.35rem;">
+        <i class="ri-information-line"></i> Note: Parameter overrides modify inherent mechanics. In standard M&M 3e rules, modifying Action or Range is normally accomplished via Extras (e.g. Increased Range) or Flaws.
+      </div>
+
+      <!-- Applied Modifiers for Active Effect -->
+      <div class="applied-modifiers-block">
+        <div class="applied-mod-header">
+          <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+            <span class="block-title"><i class="ri-settings-3-line"></i> APPLIED EXTRAS & FLAWS (${activeEffect.extras.length + activeEffect.flaws.length})</span>
+            <span class="block-note">Click button to open the Extras & Flaws library window</span>
+          </div>
+          <button class="btn btn-secondary btn-sm" data-open-modifier-explorer="${activeTargetStr}" type="button" title="Open Extras & Flaws Library Window">
+            <i class="ri-layout-grid-line"></i> Browse Modifiers Library...
           </button>
         </div>
 
-        <!-- Inline Add Slot Box (if opened) -->
-        ${isAddingAltSlot ? `
-          <div class="inline-add-slot-box">
-            <div class="inline-box-title"><i class="ri-add-circle-line"></i> Create New Alternate Effect Slot</div>
-            <div class="form-row">
-              <div class="form-group flex-2">
-                <label>SLOT NAME</label>
-                <input type="text" id="pb-new-slot-name" placeholder="e.g., Stun Ray, Telekinetic Grip" value="${escapeHtml(newSlotBaseName || '')}">
-              </div>
-              <div class="form-group flex-1">
-                <label>RANKS</label>
-                <input type="number" id="pb-new-slot-ranks" min="1" max="30" value="${currentPower.mainEffect.ranks}">
-              </div>
+        ${(activeEffect.extras.length === 0 && activeEffect.flaws.length === 0) ? `
+          <div class="empty-modifiers-callout">
+            <div style="font-size:1.3rem;color:var(--accent-primary);display:flex;align-items:center;"><i class="ri-magic-line"></i></div>
+            <div style="flex:1;">
+              <strong>No Extras or Flaws applied yet.</strong>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.15rem;">Attach Multiattack, Penetrating, Area, Range improvements, or Flaws from the library window.</div>
             </div>
+            <button class="btn btn-primary btn-sm" data-open-modifier-explorer="${activeTargetStr}" type="button">
+              <i class="ri-add-line"></i> Browse Extras & Flaws
+            </button>
+          </div>
+        ` : `
+          <div class="applied-mods-grid">
+            ${activeEffect.extras.map((ex, idx) => renderAppliedModifierCard(ex, idx, 'extra', activeTargetStr)).join('')}
+            ${activeEffect.flaws.map((fl, idx) => renderAppliedModifierCard(fl, idx, 'flaw', activeTargetStr)).join('')}
+          </div>
+          <div style="margin-top:0.65rem;display:flex;justify-content:flex-end;">
+            <button class="btn btn-secondary btn-xs" data-open-modifier-explorer="${activeTargetStr}" type="button">
+              <i class="ri-add-line"></i> Add More Modifiers...
+            </button>
+          </div>
+        `}
+      </div>
+    </div>
 
-            <!-- Visual Base Effect Picker Box for New Slot -->
-            ${(() => {
-              const newSlotBase = BASE_EFFECTS.find(b => b.name === newSlotBaseName) || BASE_EFFECTS[0];
-              const catClass = getCategoryClass(newSlotBase.category);
-              return `
-                <div class="new-slot-base-picker-box">
-                  <div class="new-slot-base-header">
-                    <div class="new-slot-base-info">
-                      <span class="picker-label"><i class="ri-flashlight-line"></i> BASE EFFECT:</span>
-                      <span class="effect-tag-pill ${catClass}">${newSlotBase.category || 'General'}</span>
-                      <strong class="selected-base-chip">${newSlotBase.name}</strong>
-                      <span class="effect-tag-pill cost-pill">${newSlotBase.cost} PP/Rank</span>
-                      <span class="picker-specs-hint">• ${newSlotBase.action} Action • ${newSlotBase.range} Range • ${newSlotBase.duration}</span>
-                    </div>
-                    <button class="btn btn-secondary btn-xs" id="pb-toggle-new-slot-lib" type="button" title="Choose base effect from library">
-                      <i class="ri-compass-3-line"></i> ${isNewSlotLibExpanded ? 'Hide Library' : 'Change Effect (Library)'}
-                    </button>
-                  </div>
+    <!-- 5. Linked Effects Section (Contextual to Main Effect or Active Slot) -->
+    ${(() => {
+      const activeContextLinkedEffects = isEditingMain
+        ? (currentPower.linkedEffects = currentPower.linkedEffects || [])
+        : (currentSlotObj ? (currentSlotObj.linkedEffects = currentSlotObj.linkedEffects || []) : []);
+      const activeContextParentEffect = isEditingMain
+        ? currentPower.mainEffect
+        : currentSlotObj?.effect;
+      const isArrayMode = currentPower.type === 'array' || currentPower.alternateEffects.length > 0;
+      const showLinkedSection = currentPower.type === 'compound' || isArrayMode || (currentPower.linkedEffects && currentPower.linkedEffects.length > 0) || activeContextLinkedEffects.length > 0;
 
-                  <!-- Description of the selected power effect for new slot -->
-                  <div class="effect-desc-box" style="margin-top: 0.35rem;">
-                    <strong>M&M 3e Rule:</strong> ${escapeHtml(newSlotBase.desc || 'Standard D20 Hero System power effect.')}
-                  </div>
+      if (!showLinkedSection || !activeContextParentEffect) return '';
 
-                  <!-- Configurable Sub-options for New Slot -->
-                  ${renderEffectConfiguration(newSlotTempEffect, 'new-slot')}
+      const contextTitle = isEditingMain
+        ? (isArrayMode ? `LINKED EFFECTS (PRIMARY SUITE)` : `LINKED EFFECTS`)
+        : `LINKED EFFECTS (SLOT #${slotIdx + 1}: ${escapeHtml(currentSlotObj?.name || 'Alternate Slot')})`;
+      const contextSubtitle = isEditingMain
+        ? `All effects below trigger simultaneously with Main Effect's action`
+        : `All effects below trigger simultaneously with Slot #${slotIdx + 1}'s action`;
 
-                  ${isNewSlotLibExpanded ? renderEmbeddedLibraryForTarget('new-slot', null, newSlotBaseName) : ''}
-                </div>
-              `;
-            })()}
-
-            <div class="inline-slot-actions">
-              <label class="dynamic-checkbox-label">
-                <input type="checkbox" id="pb-new-slot-dynamic"> Dynamic Array Slot (+2 PP flat)
-              </label>
-              <div class="action-btns">
-                <button id="pb-confirm-add-slot" class="btn btn-primary btn-sm" type="button">Add Slot</button>
-                <button id="pb-cancel-add-slot" class="btn btn-ghost btn-sm" type="button">Cancel</button>
-              </div>
+      return `
+      <div class="pb-card pb-linked-card">
+        <div class="linked-section-header">
+          <div>
+            <div class="section-title">
+              <i class="ri-links-line"></i> ${contextTitle} (${activeContextLinkedEffects.length})
+            </div>
+            <div style="font-size:0.73rem;color:var(--text-muted);margin-top:0.15rem;">
+              ${contextSubtitle}
             </div>
           </div>
-        ` : ''}
+          <div class="linked-header-actions">
+            <select id="pb-quick-combo-sel" class="linked-combo-select" title="Add a popular pre-configured combo">
+              <option value="">⚡ Quick Combo Presets...</option>
+              ${COMMON_LINKED_COMBOS.map((c, i) => `
+                <option value="${i}">${c.name}</option>
+              `).join('')}
+            </select>
+            <button id="pb-add-linked-btn" class="btn btn-secondary btn-sm" type="button">
+              <i class="ri-add-line"></i> Add Linked Effect
+            </button>
+          </div>
+        </div>
 
-        <!-- Slots List -->
-        <div class="array-slots-list">
-          ${currentPower.alternateEffects.map((slot, aIdx) => {
-            const validation = validateArraySlot(breakdown.arrayCapacity, slot.effect);
-            const slotBase = BASE_EFFECTS.find(b => b.name === (slot.effect.baseEffect || slot.name)) || BASE_EFFECTS[0];
-            const isExpanded = expandedSlotIdx === aIdx;
-            const isSlotLibOpen = expandedSlotLibIdx === aIdx;
-            const totalMods = (slot.effect?.extras ? slot.effect.extras.length : 0) + (slot.effect?.flaws ? slot.effect.flaws.length : 0);
-            const isActive = activeSlotId === slot.id;
+        <div class="linked-effects-chain">
+          ${activeContextLinkedEffects.map((linked, lIdx) => {
+            const linkedCost = calculateEffectCost(linked, 0).totalCost;
+            const valLinked = validateLinkedEffect(activeContextParentEffect, linked);
+            const totalMods = (linked.extras ? linked.extras.length : 0) + (linked.flaws ? linked.flaws.length : 0);
+            const linkedBase = BASE_EFFECTS.find(b => b.name === (linked.baseEffect || linked.name)) || BASE_EFFECTS[0];
+            const linkedTargetStr = isEditingMain ? `linked:${lIdx}` : `slot:${slotIdx}:linked:${lIdx}`;
 
             return `
-              <div class="array-slot-item ${validation.isValid ? '' : 'slot-overflow'} ${isActive ? 'active-slot' : ''}">
-                <div class="slot-main-row">
-                  <div class="slot-left-group">
-                    <button class="slot-active-toggle-btn ${isActive ? 'active' : ''}" data-toggle-active-slot="${slot.id}" type="button" title="${isActive ? 'Currently Active Slot' : 'Click to switch active power (Free Action)'}">
-                      <i class="${isActive ? 'ri-radio-button-fill' : 'ri-checkbox-blank-circle-line'}"></i>
-                    </button>
-                    <div class="slot-info-box">
-                      <div class="slot-title-line">
-                        <div class="slot-name-edit-box">
-                          <input type="text"
-                                 class="pb-slot-name-input"
-                                 data-slot-name-idx="${aIdx}"
-                                 value="${escapeHtml(slot.name || slot.effect?.name || slot.effect?.baseEffect || 'Alternate Slot')}"
-                                 placeholder="Slot Name (e.g. Solar Flare)"
-                                 title="Click to rename this slot" />
-                          <i class="ri-edit-line slot-name-edit-icon" title="Editable slot name"></i>
-                        </div>
-                        ${isActive ? '<span class="badge badge-primary" style="font-size:0.65rem;"><i class="ri-flashlight-fill"></i> ACTIVE</span>' : '<span class="badge badge-subtle" style="font-size:0.65rem;">STANDBY</span>'}
-                      </div>
-                      <div class="slot-specs-row">
-                        <span><strong>${slot.effect.baseEffect}</strong> (Rank ${slot.effect.ranks})</span>
-                        <span>•</span>
-                        <span>${slot.effect.range || slotBase.range || 'Close'}</span>
-                        <span>•</span>
-                        <span>${slot.effect.action || slotBase.action || 'Standard'}</span>
-                        ${slotBase.resistance ? `<span>•</span><span>vs ${slot.effect.resistance || slotBase.resistance}</span>` : ''}
-                      </div>
-                    </div>
+              <div class="linked-item-card">
+                <div class="linked-item-header">
+                  <div class="linked-item-title-group">
+                    <span class="linked-node-badge"><i class="ri-links-line"></i> LINKED #${lIdx + 1}</span>
+                    <strong style="font-size:0.9rem;color:var(--text-primary);">${escapeHtml(linked.name || linked.baseEffect)}</strong>
                   </div>
-
-                  <div class="slot-right-actions">
-                    <!-- Segmented Dynamic / Standard Toggle -->
-                    <div class="slot-type-pill-toggle">
-                      <button type="button" class="slot-type-btn ${!slot.isDynamic ? 'active' : ''}" data-set-slot-dynamic="${aIdx}:false">Standard (+1 PP)</button>
-                      <button type="button" class="slot-type-btn ${slot.isDynamic ? 'active dynamic' : ''}" data-set-slot-dynamic="${aIdx}:true">Dynamic (+2 PP)</button>
-                    </div>
-
-                    <!-- Budget Badge -->
-                    <div class="slot-budget-badge ${validation.isValid ? 'ok' : 'warn'}">
-                      ${validation.isValid
-                        ? `Cost: ${validation.slotCost} / ${validation.capacity} PP`
-                        : `Cost: ${validation.slotCost} (+${validation.overflow} PP Over!)`
-                      }
-                    </div>
-
-                    <button class="btn btn-secondary btn-xs" data-toggle-slot-lib="${aIdx}" type="button" title="Change base effect from library">
-                      <i class="ri-compass-3-line"></i> ${isSlotLibOpen ? 'Hide Library' : 'Change Effect'}
-                    </button>
-
-                    <button class="btn btn-ghost btn-sm" data-toggle-slot-mod="${aIdx}" type="button" title="Configure modifiers for this slot">
-                      <i class="ri-settings-3-line"></i> (${totalMods})
-                    </button>
-
-                    <button class="btn-delete-slot" data-remove-alt="${aIdx}" title="Delete slot">
-                      <i class="ri-close-line"></i>
+                  <div style="display:flex;align-items:center;gap:0.5rem;">
+                    <span class="linked-cost-val">+${linkedCost} PP</span>
+                    <button class="btn-delete-linked" data-remove-linked="${linkedTargetStr}" title="Delete linked effect">
+                      <i class="ri-delete-bin-line"></i>
                     </button>
                   </div>
                 </div>
 
-                <!-- Description of the selected power effect in alternate slot -->
-                <div class="slot-effect-desc-wrap" style="margin-top: 0.45rem;">
+                <!-- Range & Action Synchronization Status -->
+                <div class="linked-sync-status-bar ${valLinked.isValid ? 'synced' : 'mismatched'}">
+                  <span>
+                    <i class="${valLinked.isValid ? 'ri-checkbox-circle-fill' : 'ri-error-warning-fill'}"></i>
+                    ${valLinked.isValid
+                      ? `Range (${linked.range}) & Action (${linked.action}) match ${isEditingMain ? 'Main Effect' : 'Slot Effect'}`
+                      : valLinked.warnings.join(' • ')
+                    }
+                  </span>
+                  ${!valLinked.isValid ? `
+                    <button class="btn-auto-sync" data-auto-sync-linked="${linkedTargetStr}" type="button" title="Synchronize range and action with parent effect">
+                      <i class="ri-flashlight-line"></i> Auto-Sync
+                    </button>
+                  ` : ''}
+                </div>
+
+                <!-- Linked Effect Base Effect Showcase & Library Trigger -->
+                <div class="linked-effect-showcase-box">
+                  <div class="linked-effect-header-bar">
+                    <div class="linked-effect-info-wrap">
+                      <span class="effect-tag-pill ${getCategoryClass(linkedBase.category)}">${linkedBase.category || 'General'}</span>
+                      <strong class="linked-effect-name">${linked.baseEffect}</strong>
+                      <span class="effect-tag-pill cost-pill">${linkedBase.cost} PP/Rank</span>
+                    </div>
+                    <button class="btn btn-secondary btn-xs" data-open-linked-explorer="${linkedTargetStr}" type="button" title="Open Base Effect Library window">
+                      <i class="ri-layout-grid-line"></i> Change Base Effect...
+                    </button>
+                  </div>
+
+                  <div class="effect-tags-row" style="margin: 0.35rem 0;">
+                    <span class="effect-tag-pill" title="Action required to activate"><i class="ri-flashlight-line"></i> ${linked.action || linkedBase.action} Action</span>
+                    <span class="effect-tag-pill" title="Range increment"><i class="ri-focus-2-line"></i> ${linked.range || linkedBase.range} Range</span>
+                    <span class="effect-tag-pill" title="Duration of manifestation"><i class="ri-time-line"></i> ${linked.duration || linkedBase.duration}</span>
+                    ${linkedBase.resistance ? `<span class="effect-tag-pill" title="Target resistance check defense"><i class="ri-shield-line"></i> vs ${linked.resistance || linkedBase.resistance}</span>` : ''}
+                  </div>
+
                   <div class="effect-desc-box">
-                    <strong>M&M 3e Rule:</strong> ${escapeHtml(slotBase.desc || 'Standard D20 Hero System power effect.')}
+                    <strong>M&M 3e Rule:</strong> ${escapeHtml(linkedBase.desc || 'Standard D20 Hero System power effect.')}
                   </div>
 
-                  <!-- Configurable Sub-options for Alternate Slot -->
-                  ${renderEffectConfiguration(slot.effect, `slot:${aIdx}`)}
+                  <!-- Configurable Sub-options for Linked Effect -->
+                  ${renderEffectConfiguration(linked, linkedTargetStr)}
+
+                  <!-- Linked Effect Ranks Bar -->
+                  <div class="linked-ranks-row">
+                    <div class="ranks-control-group">
+                      <label><i class="ri-bar-chart-fill"></i> RANKS</label>
+                      <div class="stepper">
+                        <button class="step-btn" data-linked-dec="${linkedTargetStr}" type="button">-</button>
+                        <input type="number" class="step-val" data-linked-rank="${linkedTargetStr}" value="${linked.ranks}" min="1" max="30">
+                        <button class="step-btn" data-linked-inc="${linkedTargetStr}" type="button">+</button>
+                      </div>
+                    </div>
+                    <div class="ranks-calculation-badge">
+                      <span class="calc-label">Cost:</span>
+                      <span class="calc-value">${linked.ranks} Ranks × ${linkedBase.cost} PP/Rank = <strong>${(linked.ranks * linkedBase.cost)} PP</strong></span>
+                    </div>
+                  </div>
                 </div>
 
-                <!-- Slot Library Drawer if open -->
-                ${isSlotLibOpen ? `
-                  <div class="slot-library-drawer">
-                    ${renderEmbeddedLibraryForTarget('slot', aIdx, slot.effect.baseEffect)}
+                <!-- Modifiers Section for Linked Sub-effect -->
+                <div class="linked-modifiers-bar" style="display:flex;align-items:center;justify-content:space-between;background:var(--bg-elevated);border:1px solid var(--border-subtle);border-radius:var(--radius-sm);padding:0.45rem 0.75rem;margin-top:0.6rem;">
+                  <div style="display:flex;align-items:center;gap:0.45rem;">
+                    <span style="font-size:0.75rem;font-weight:700;color:var(--text-secondary);">
+                      <i class="ri-settings-3-line"></i> Extras & Flaws:
+                    </span>
+                    <span class="badge ${totalMods > 0 ? 'badge-primary' : 'badge-subtle'}" style="font-size:0.7rem;">
+                      ${totalMods} Applied
+                    </span>
                   </div>
-                ` : ''}
+                  <button class="btn btn-secondary btn-xs" data-open-modifier-explorer="${linkedTargetStr}" type="button" title="Open Extras & Flaws Library window for this Linked Effect">
+                    <i class="ri-layout-grid-line"></i> ${totalMods > 0 ? 'Manage Modifiers...' : '+ Add Modifiers...'}
+                  </button>
+                </div>
 
-                <!-- Slot Modifiers Drawer -->
-                ${isExpanded ? `
-                  <div class="slot-modifiers-drawer">
-                    <div class="slot-modifiers-drawer-header">
-                      <span class="drawer-title"><i class="ri-settings-3-line"></i> Applied Extras & Flaws: <strong>${escapeHtml(slot.name || 'Alternate Slot')}</strong> (${totalMods})</span>
-                    </div>
-
-                    ${(!slot.effect?.extras?.length && !slot.effect?.flaws?.length) ? `
-                      <div class="empty-applied-hint">No extras or flaws attached to this alternate slot. Select modifiers from the library below to customize this effect.</div>
-                    ` : `
-                      <div class="applied-mods-grid sub-applied-mods-grid">
-                        ${(slot.effect.extras || []).map((ex, exIdx) => renderAppliedModifierCard(ex, exIdx, 'extra', `slot:${aIdx}`)).join('')}
-                        ${(slot.effect.flaws || []).map((fl, flIdx) => renderAppliedModifierCard(fl, flIdx, 'flaw', `slot:${aIdx}`)).join('')}
-                      </div>
-                    `}
-
-                    <!-- Visual Modifier Library Palette for Alternate Slot -->
-                    ${renderModifierPaletteForTarget(`slot:${aIdx}`)}
+                ${totalMods > 0 ? `
+                  <div class="applied-mods-grid sub-applied-mods-grid" style="margin-top: 0.5rem;">
+                    ${(linked.extras || []).map((ex, exIdx) => renderAppliedModifierCard(ex, exIdx, 'extra', linkedTargetStr)).join('')}
+                    ${(linked.flaws || []).map((fl, flIdx) => renderAppliedModifierCard(fl, flIdx, 'flaw', linkedTargetStr)).join('')}
+                  </div>
+                  <div style="margin-top: 0.35rem; display: flex; justify-content: flex-end;">
+                    <button class="btn btn-ghost btn-xs" data-open-modifier-explorer="${linkedTargetStr}" type="button" style="font-size:0.72rem;">
+                      <i class="ri-add-line"></i> Add More Modifiers...
+                    </button>
                   </div>
                 ` : ''}
               </div>
             `;
           }).join('')}
-          ${currentPower.alternateEffects.length === 0 ? `
-            <div class="empty-section-hint">No alternate slots configured. Click "+ Add Blank Slot" or "Duplicate Main" to build your Array.</div>
+          ${activeContextLinkedEffects.length === 0 ? `
+            <div class="empty-section-hint">No linked effects added to ${isEditingMain ? 'Main Effect' : `Slot #${slotIdx + 1}`} yet. Click "+ Add Linked Effect" or choose a Quick Combo above.</div>
           ` : ''}
         </div>
       </div>
-    ` : ''}
+    `;
+    })()}
 
     <!-- 6. Power Notes / Lore -->
     <div class="pb-card pb-notes-card">
@@ -1003,6 +978,15 @@ function renderPowerStudio(resetScroll = false) {
     explorerContainer.innerHTML = renderEffectExplorerModal();
   } else {
     explorerContainer.innerHTML = '';
+  }
+
+  // Render Modifier Explorer if opened
+  if (modifierModalContainer) {
+    if (isModifierExplorerOpen) {
+      modifierModalContainer.innerHTML = renderModifierExplorerModal();
+    } else {
+      modifierModalContainer.innerHTML = '';
+    }
   }
 
   // Restore scroll position
@@ -1503,7 +1487,7 @@ function renderEffectConfiguration(effect, targetStr = 'main') {
   `;
 }
 
-function renderBaseEffectShowcase(effect) {
+function renderBaseEffectShowcase(effect, targetStr = 'main') {
   const base = BASE_EFFECTS.find(b => b.name === (effect.baseEffect || effect.name)) || BASE_EFFECTS[0];
   const catClass = getCategoryClass(base.category);
 
@@ -1515,9 +1499,14 @@ function renderBaseEffectShowcase(effect) {
           <h4>${base.name}</h4>
           <span class="effect-tag-pill cost-pill">${effect.baseCost || base.cost} PP/Rank</span>
         </div>
-        <button id="pb-toggle-embedded-library" class="btn ${isBaseLibraryExpanded ? 'btn-secondary' : 'btn-primary'} btn-sm" type="button" title="Toggle Base Effect Library view">
-          <i class="ri-compass-3-line"></i> ${isBaseLibraryExpanded ? 'Hide Effect Library' : `Browse Effect Library (${BASE_EFFECTS.length})`}
-        </button>
+        <div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap;">
+          <button id="pb-open-explorer-modal" class="btn btn-secondary btn-sm" type="button" title="Open full Effect Explorer Modal">
+            <i class="ri-layout-grid-line"></i> Change Base Effect...
+          </button>
+          <button id="pb-toggle-embedded-library" class="btn ${isBaseLibraryExpanded ? 'btn-secondary' : 'btn-ghost'} btn-sm" type="button" title="Toggle inline Effect Library grid">
+            <i class="ri-compass-3-line"></i> ${isBaseLibraryExpanded ? 'Hide Inline Library' : `Inline Library (${BASE_EFFECTS.length})`}
+          </button>
+        </div>
       </div>
 
       <div class="effect-tags-row">
@@ -1531,8 +1520,8 @@ function renderBaseEffectShowcase(effect) {
         <strong>M&M 3e Rule:</strong> ${escapeHtml(base.desc || 'Standard D20 Hero System power effect.')}
       </div>
 
-      <!-- Configurable Sub-options for Main Effect -->
-      ${renderEffectConfiguration(effect, 'main')}
+      <!-- Configurable Sub-options for Active Effect (hidden while exploring library) -->
+      ${!isBaseLibraryExpanded ? renderEffectConfiguration(effect, targetStr) : ''}
     </div>
   `;
 }
@@ -1625,7 +1614,9 @@ function renderEmbeddedLibraryForTarget(targetType, targetIndex, currentSelected
 
 function renderEffectExplorerModal() {
   const filtered = getFilteredBaseEffects();
-  const currentSelectedName = currentPower?.mainEffect?.baseEffect || 'Damage';
+  const activeEff = getEffectTarget(currentEditingTarget);
+  const currentSelectedName = activeEff?.baseEffect || 'Damage';
+  const targetLabel = getTargetLabel(currentEditingTarget, activeEff);
 
   return `
     <div class="effect-explorer-modal" id="pb-effect-explorer-backdrop">
@@ -1633,7 +1624,7 @@ function renderEffectExplorerModal() {
         <div class="explorer-header">
           <div class="explorer-title">
             <h3><i class="ri-compass-3-line"></i> Base Effect Library</h3>
-            <p>Select a core D20 Hero System effect to build your power</p>
+            <p>Select a core D20 Hero System effect for <strong>${escapeHtml(targetLabel)}</strong></p>
           </div>
           <button id="pb-close-explorer-btn" class="btn btn-ghost" title="Close Library (Esc)"><i class="ri-close-line"></i></button>
         </div>
@@ -1697,17 +1688,178 @@ function renderEffectExplorerModal() {
   `;
 }
 
+function renderModifierExplorerModal() {
+  const activeEff = getEffectTarget(currentModifierTarget);
+  const targetLabel = getTargetLabel(currentModifierTarget, activeEff);
+
+  const isExtra = activeModifierTab === 'extras';
+  const totalAppliedOnTarget = (activeEff?.extras?.length || 0) + (activeEff?.flaws?.length || 0);
+
+  return `
+    <div class="effect-explorer-modal" id="pb-modifier-explorer-backdrop">
+      <div class="effect-explorer-dialog modifier-explorer-dialog">
+        <div class="explorer-header">
+          <div class="explorer-title">
+            <h3><i class="ri-sound-module-line"></i> Extras & Flaws Library</h3>
+            <p>Browse and attach D20 Hero System modifiers for <strong>${escapeHtml(targetLabel)}</strong></p>
+          </div>
+          <button id="pb-close-modifier-explorer-btn" class="btn btn-ghost" title="Close Library (Esc)"><i class="ri-close-line"></i></button>
+        </div>
+
+        <div class="explorer-controls">
+          <div style="display:flex;gap:0.75rem;align-items:center;flex-wrap:wrap;">
+            <!-- Search Bar -->
+            <div class="explorer-search-bar" style="flex:1;min-width:240px;">
+              <i class="ri-search-line search-icon"></i>
+              <input type="text" id="pb-modifier-modal-search" placeholder="Search modifiers by name, keyword, or rule..." value="${escapeHtml(modifierSearchQuery)}">
+              ${modifierSearchQuery ? '<button id="pb-clear-modifier-modal-search" class="clear-search-btn"><i class="ri-close-line"></i></button>' : ''}
+            </div>
+
+            <!-- Extras vs Flaws Tabs -->
+            <div class="palette-type-tabs">
+              <button class="palette-type-btn ${isExtra ? 'active' : ''}" id="pb-mod-tab-extras" type="button">
+                <i class="ri-add-circle-line"></i> Extras (${EXTRAS.length})
+              </button>
+              <button class="palette-type-btn ${!isExtra ? 'active' : ''}" id="pb-mod-tab-flaws" type="button">
+                <i class="ri-indeterminate-circle-line"></i> Flaws (${FLAWS.length})
+              </button>
+            </div>
+          </div>
+
+          <!-- Category Filter Pills -->
+          <div class="explorer-category-pills">
+            ${MODIFIER_CATEGORIES.map(cat => `
+              <button class="explorer-pill ${activeCategory === cat ? 'active' : ''}" data-mod-modal-cat="${cat}" type="button">
+                ${cat}
+              </button>
+            `).join('')}
+          </div>
+        </div>
+
+        <!-- Multi-Column Grid of Modifier Cards -->
+        <div class="explorer-grid" id="pb-modifier-modal-grid">
+          ${renderModifierModalCards(currentModifierTarget)}
+        </div>
+
+        <!-- Modal Footer with Active Summary -->
+        <div class="explorer-modal-footer">
+          <div style="font-size:0.78rem;color:var(--text-secondary);display:flex;align-items:center;gap:0.5rem;">
+            <span><i class="ri-check-double-line"></i> Active on ${escapeHtml(targetLabel)}: <strong>${totalAppliedOnTarget} modifier${totalAppliedOnTarget === 1 ? '' : 's'}</strong></span>
+          </div>
+          <button id="pb-done-modifier-explorer-btn" class="btn btn-primary btn-sm" type="button">
+            <i class="ri-check-line"></i> Done
+          </button>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderModifierModalCards(targetStr = 'main') {
+  const filtered = getFilteredModifiers();
+  if (filtered.length === 0) {
+    return `
+      <div style="grid-column: 1 / -1; text-align: center; padding: 2.5rem; color: var(--text-muted);">
+        No modifiers match "${escapeHtml(modifierSearchQuery || activeCategory)}".
+      </div>
+    `;
+  }
+
+  const isExtra = activeModifierTab === 'extras';
+  const targetList = getModifierTargetList(targetStr, isExtra ? 'extra' : 'flaw') || [];
+
+  return filtered.map(m => {
+    const costLabel = m.costDisplay || (m.type === 'per_rank'
+      ? `${m.cost > 0 ? '+' : ''}${m.cost} PP/Rank`
+      : `${m.cost > 0 ? '+' : ''}${m.cost} PP flat`);
+
+    const hasRanks = Boolean(m.hasRanks || m.type === 'flat_per_rank');
+    const typeClass = m.type === 'per_rank' ? 'type-per-rank' : (hasRanks ? 'type-ranked' : 'type-flat');
+    const typeLabel = m.type === 'per_rank' ? 'Per Rank' : (hasRanks ? 'Ranked Flat' : 'Flat');
+    const typeIcon = m.type === 'per_rank' ? '⟳' : (hasRanks ? '★' : '◆');
+    const catClass = getModifierCategoryClass(m.category);
+    const costClass = isExtra
+      ? (m.cost > 0 ? 'cost-extra' : 'cost-neutral')
+      : (m.cost < 0 ? 'cost-flaw' : 'cost-neutral');
+
+    const appliedEntry = targetList.find(a => a.name === m.name);
+    const isApplied = Boolean(appliedEntry);
+
+    return `
+      <div class="explorer-card ${isApplied ? 'selected' : ''}" style="display:flex;flex-direction:column;">
+        <div class="explorer-card-header">
+          <div style="display:flex;align-items:center;gap:0.4rem;flex-wrap:wrap;">
+            <span class="explorer-card-title">${escapeHtml(m.name)}</span>
+            ${isApplied ? `<span class="pal-applied-badge"><i class="ri-checkbox-circle-fill"></i> Applied${hasRanks ? ` (R${appliedEntry.ranks || 1})` : ''}</span>` : ''}
+          </div>
+          <div style="display:flex;gap:0.35rem;align-items:center;">
+            <span class="effect-tag-pill ${catClass}">${escapeHtml(m.category || (isExtra ? 'Combat' : 'Limitations'))}</span>
+            <span class="effect-tag-pill cost-pill ${costClass}">${costLabel}</span>
+          </div>
+        </div>
+
+        <div class="effect-tags-row">
+          <span class="effect-tag-pill">${typeIcon} ${typeLabel}</span>
+          ${m.hasConfig ? '<span class="effect-tag-pill" style="color:#fbbf24;"><i class="ri-sound-module-line"></i> Configurable</span>' : ''}
+        </div>
+
+        <p class="explorer-card-desc">${escapeHtml(m.desc || '')}</p>
+
+        <div class="explorer-card-footer">
+          <span style="font-size:0.74rem;color:var(--text-muted);">
+            ${isApplied
+              ? (hasRanks ? `Rank ${appliedEntry.ranks || 1} attached` : '✓ Attached to effect')
+              : 'Click to attach'
+            }
+          </span>
+          <div style="display:flex;gap:0.35rem;align-items:center;">
+            ${isApplied && hasRanks ? `
+              <button class="btn btn-sm btn-secondary" data-modal-add-mod="${escapeHtml(m.name)}" type="button" title="Increase rank (+1)">
+                + Rank (${(appliedEntry.ranks || 1) + 1})
+              </button>
+              <button class="btn btn-sm btn-ghost" data-modal-remove-mod="${escapeHtml(m.name)}" type="button" title="Remove modifier" style="color:var(--accent-primary);">
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            ` : isApplied && !hasRanks ? `
+              <button class="btn btn-sm btn-ghost" data-modal-remove-mod="${escapeHtml(m.name)}" type="button" title="Remove modifier" style="color:var(--accent-primary);">
+                <i class="ri-delete-bin-line"></i> Remove
+              </button>
+              <button class="btn btn-sm btn-secondary" type="button" disabled>
+                <i class="ri-check-line"></i> Applied
+              </button>
+            ` : `
+              <button class="btn btn-sm btn-primary" data-modal-add-mod="${escapeHtml(m.name)}" type="button">
+                <i class="ri-add-line"></i> Add Modifier
+              </button>
+            `}
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
 function getModifierTargetList(targetStr, modType) {
-  const [type, idxStr] = (targetStr || 'main').split(':');
-  const idx = idxStr !== undefined ? parseInt(idxStr, 10) : null;
-  const isExtra = modType === 'extra';
+  const parts = (targetStr || 'main').split(':');
+  const type = parts[0];
+  const isExtra = modType === 'extra' || modType === 'extras';
 
   if (type === 'main') {
     return isExtra ? currentPower.mainEffect.extras : currentPower.mainEffect.flaws;
-  } else if (type === 'linked' && idx !== null && currentPower.linkedEffects[idx]) {
-    return isExtra ? currentPower.linkedEffects[idx].extras : currentPower.linkedEffects[idx].flaws;
-  } else if (type === 'slot' && idx !== null && currentPower.alternateEffects[idx]?.effect) {
-    return isExtra ? currentPower.alternateEffects[idx].effect.extras : currentPower.alternateEffects[idx].effect.flaws;
+  } else if (type === 'linked') {
+    const idx = parseInt(parts[1], 10);
+    const eff = currentPower.linkedEffects?.[idx];
+    return eff ? (isExtra ? eff.extras : eff.flaws) : null;
+  } else if (type === 'slot') {
+    const sIdx = parseInt(parts[1], 10);
+    const slot = currentPower.alternateEffects?.[sIdx];
+    if (!slot) return null;
+    if (parts[2] === 'linked') {
+      const lIdx = parseInt(parts[3], 10);
+      const eff = slot.linkedEffects?.[lIdx];
+      return eff ? (isExtra ? eff.extras : eff.flaws) : null;
+    }
+    return slot.effect ? (isExtra ? slot.effect.extras : slot.effect.flaws) : null;
   }
   return null;
 }
@@ -1884,8 +2036,10 @@ function renderPaletteCards(targetStr = 'main') {
     return `<div class="empty-palette-hint">No modifiers found matching "${escapeHtml(modifierSearchQuery || activeCategory)}".</div>`;
   }
 
+  const isExtra = activeModifierTab === 'extras';
+  const targetList = getModifierTargetList(targetStr, isExtra ? 'extra' : 'flaw') || [];
+
   return filtered.map(m => {
-    const isExtra = activeModifierTab === 'extras';
     const costLabel = m.costDisplay || (m.type === 'per_rank'
       ? `${m.cost > 0 ? '+' : ''}${m.cost} PP/Rank`
       : `${m.cost > 0 ? '+' : ''}${m.cost} PP flat`);
@@ -1899,11 +2053,15 @@ function renderPaletteCards(targetStr = 'main') {
       ? (m.cost > 0 ? 'cost-extra' : 'cost-neutral')
       : (m.cost < 0 ? 'cost-flaw' : 'cost-neutral');
 
+    const appliedEntry = targetList.find(a => a.name === m.name);
+    const isApplied = Boolean(appliedEntry);
+
     return `
-      <div class="palette-card">
+      <div class="palette-card ${isApplied ? 'is-applied' : ''}">
         <div class="pal-card-main">
           <div class="pal-card-title-row">
             <span class="pal-name">${escapeHtml(m.name)}</span>
+            ${isApplied ? `<span class="pal-applied-badge"><i class="ri-checkbox-circle-fill"></i> Applied${hasRanks ? ` (R${appliedEntry.ranks || 1})` : ''}</span>` : ''}
             <span class="pal-cost ${costClass}">${costLabel}</span>
           </div>
 
@@ -1915,9 +2073,19 @@ function renderPaletteCards(targetStr = 'main') {
 
           <p class="pal-desc">${escapeHtml(m.desc || '')}</p>
         </div>
-        <button class="btn-add-modifier" data-add-mod="${escapeHtml(m.name)}" data-mod-tab="${activeModifierTab}" data-add-mod-target="${targetStr}" title="Add modifier to this effect" type="button">
-          <i class="ri-add-line"></i>
-        </button>
+        ${isApplied && !hasRanks ? `
+          <button class="btn-add-modifier is-applied-btn" data-add-mod="${escapeHtml(m.name)}" data-mod-tab="${activeModifierTab}" data-add-mod-target="${targetStr}" title="Already applied" type="button" disabled>
+            <i class="ri-check-line"></i>
+          </button>
+        ` : isApplied && hasRanks ? `
+          <button class="btn-add-modifier is-rank-up" data-add-mod="${escapeHtml(m.name)}" data-mod-tab="${activeModifierTab}" data-add-mod-target="${targetStr}" title="Increase rank (+1)" type="button">
+            + Rank
+          </button>
+        ` : `
+          <button class="btn-add-modifier" data-add-mod="${escapeHtml(m.name)}" data-mod-tab="${activeModifierTab}" data-add-mod-target="${targetStr}" title="Add modifier to this effect" type="button">
+            <i class="ri-add-line"></i>
+          </button>
+        `}
       </div>
     `;
   }).join('');
@@ -2089,6 +2257,12 @@ function attachStudioEventHandlers(modal) {
     currentPower.deviceConfig.toughness = Math.max(1, parseInt(e.target.value, 10) || 10);
   });
 
+  // Open Effect Explorer Modal
+  modal.querySelector('#pb-open-explorer-modal')?.addEventListener('click', () => {
+    isEffectExplorerOpen = true;
+    renderPowerStudio();
+  });
+
   // Embedded Base Effect Library main toggle
   modal.querySelector('#pb-toggle-embedded-library')?.addEventListener('click', () => {
     isBaseLibraryExpanded = !isBaseLibraryExpanded;
@@ -2148,38 +2322,45 @@ function attachStudioEventHandlers(modal) {
   // Bind embedded effect selection cards
   bindEmbeddedSelectButtons(modal);
 
-  // Ranks stepper
-  modal.querySelector('#pb-rank-dec')?.addEventListener('click', () => {
-    if (currentPower.mainEffect.ranks > 1) {
-      currentPower.mainEffect.ranks--;
-      renderPowerStudio();
-    }
+  // Target-aware Ranks stepper
+  modal.querySelectorAll('[data-target-rank-dec]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eff = getEffectTarget(btn.dataset.targetRankDec);
+      if (eff && eff.ranks > 1) {
+        eff.ranks--;
+        renderPowerStudio();
+      }
+    });
   });
-  modal.querySelector('#pb-rank-inc')?.addEventListener('click', () => {
-    currentPower.mainEffect.ranks++;
-    renderPowerStudio();
+  modal.querySelectorAll('[data-target-rank-inc]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const eff = getEffectTarget(btn.dataset.targetRankInc);
+      if (eff) {
+        eff.ranks++;
+        renderPowerStudio();
+      }
+    });
   });
-  modal.querySelector('#pb-ranks')?.addEventListener('change', (e) => {
-    currentPower.mainEffect.ranks = Math.max(1, parseInt(e.target.value, 10) || 1);
-    renderPowerStudio();
+  modal.querySelectorAll('[data-target-ranks]').forEach(inp => {
+    inp.addEventListener('change', (e) => {
+      const eff = getEffectTarget(inp.dataset.targetRanks);
+      if (eff) {
+        eff.ranks = Math.max(1, parseInt(e.target.value, 10) || 1);
+        renderPowerStudio();
+      }
+    });
   });
 
-  // Overrides (Range, Action, Duration, Resistance)
-  modal.querySelector('#pb-effect-range')?.addEventListener('change', (e) => {
-    currentPower.mainEffect.range = e.target.value;
-    renderPowerStudio();
-  });
-  modal.querySelector('#pb-effect-action')?.addEventListener('change', (e) => {
-    currentPower.mainEffect.action = e.target.value;
-    renderPowerStudio();
-  });
-  modal.querySelector('#pb-effect-duration')?.addEventListener('change', (e) => {
-    currentPower.mainEffect.duration = e.target.value;
-    renderPowerStudio();
-  });
-  modal.querySelector('#pb-effect-resistance')?.addEventListener('change', (e) => {
-    currentPower.mainEffect.resistance = e.target.value;
-    renderPowerStudio();
+  // Target-aware Overrides (Range, Action, Duration, Resistance)
+  modal.querySelectorAll('[data-param-field]').forEach(sel => {
+    sel.addEventListener('change', (e) => {
+      const eff = getEffectTarget(sel.dataset.paramTarget);
+      const field = sel.dataset.paramField;
+      if (eff && field) {
+        eff[field] = e.target.value;
+        renderPowerStudio();
+      }
+    });
   });
 
   // Applied modifiers ranks & removal
@@ -2323,20 +2504,35 @@ function attachStudioEventHandlers(modal) {
     attachExplorerHandlers(modal);
   }
 
+  // Attach Modifier Explorer event handlers if open
+  if (isModifierExplorerOpen) {
+    attachModifierExplorerHandlers(modal);
+  }
+
   // Linked Effects handlers
   modal.querySelector('#pb-add-linked-btn')?.addEventListener('click', () => {
-    currentPower.linkedEffects.push({
+    const isMain = currentPower.type !== 'array' || !currentEditingTarget.startsWith('slot:');
+    const slotIdx = isMain ? null : parseInt(currentEditingTarget.split(':')[1], 10);
+    const currentSlotObj = !isMain && currentPower.alternateEffects ? currentPower.alternateEffects[slotIdx] : null;
+    const targetParent = isMain ? currentPower.mainEffect : currentSlotObj?.effect;
+    if (!targetParent) return;
+    const targetList = isMain
+      ? (currentPower.linkedEffects = currentPower.linkedEffects || [])
+      : (currentSlotObj.linkedEffects = currentSlotObj.linkedEffects || []);
+
+    targetList.push({
       baseEffect: 'Affliction',
       name: 'Affliction',
       baseCost: 1,
-      ranks: currentPower.mainEffect.ranks || 1,
-      range: currentPower.mainEffect.range || 'Close',
-      action: currentPower.mainEffect.action || 'Standard',
-      duration: currentPower.mainEffect.duration || 'Instant',
+      ranks: targetParent.ranks || 1,
+      range: targetParent.range || 'Close',
+      action: targetParent.action || 'Standard',
+      duration: targetParent.duration || 'Instant',
       resistance: 'Fortitude',
       extras: [],
       flaws: []
     });
+    showToast(`Linked effect added to ${isMain ? 'Main Effect' : `Slot #${slotIdx + 1}`}`, 'info');
     renderPowerStudio();
   });
 
@@ -2346,20 +2542,29 @@ function attachStudioEventHandlers(modal) {
     if (!val && val !== '0') return;
     const combo = COMMON_LINKED_COMBOS[parseInt(val, 10)];
     if (combo) {
+      const isMain = currentPower.type !== 'array' || !currentEditingTarget.startsWith('slot:');
+      const slotIdx = isMain ? null : parseInt(currentEditingTarget.split(':')[1], 10);
+      const currentSlotObj = !isMain && currentPower.alternateEffects ? currentPower.alternateEffects[slotIdx] : null;
+      const targetParent = isMain ? currentPower.mainEffect : currentSlotObj?.effect;
+      if (!targetParent) return;
+      const targetList = isMain
+        ? (currentPower.linkedEffects = currentPower.linkedEffects || [])
+        : (currentSlotObj.linkedEffects = currentSlotObj.linkedEffects || []);
       const baseRef = BASE_EFFECTS.find(b => b.name === combo.effect);
-      currentPower.linkedEffects.push({
+
+      targetList.push({
         baseEffect: combo.effect,
         name: combo.name,
         baseCost: baseRef ? baseRef.cost : 1,
-        ranks: Math.min(currentPower.mainEffect.ranks || 10, combo.defaultRanks || 8),
-        range: currentPower.mainEffect.range || (baseRef ? baseRef.range : 'Close'),
-        action: currentPower.mainEffect.action || (baseRef ? baseRef.action : 'Standard'),
-        duration: currentPower.mainEffect.duration || (baseRef ? baseRef.duration : 'Instant'),
+        ranks: Math.min(targetParent.ranks || 10, combo.defaultRanks || 8),
+        range: targetParent.range || (baseRef ? baseRef.range : 'Close'),
+        action: targetParent.action || (baseRef ? baseRef.action : 'Standard'),
+        duration: targetParent.duration || (baseRef ? baseRef.duration : 'Instant'),
         resistance: combo.resistance || (baseRef ? (baseRef.resistance || 'Fortitude') : 'Fortitude'),
         extras: [],
         flaws: []
       });
-      showToast(`Linked preset "${combo.name}" added!`, 'info');
+      showToast(`Linked preset "${combo.name}" added to ${isMain ? 'Main Effect' : `Slot #${slotIdx + 1}`}!`, 'info');
       renderPowerStudio();
     }
   });
@@ -2367,11 +2572,17 @@ function attachStudioEventHandlers(modal) {
   // Linked Auto-Sync button
   modal.querySelectorAll('[data-auto-sync-linked]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.autoSyncLinked, 10);
-      if (currentPower.linkedEffects[idx]) {
-        syncLinkedEffectWithMain(currentPower.mainEffect, currentPower.linkedEffects[idx]);
-        showToast('Linked effect Range & Action synchronized with Main Effect!', 'success');
-        renderPowerStudio();
+      const targetId = btn.dataset.autoSyncLinked;
+      const eff = getEffectTarget(targetId);
+      if (eff) {
+        const parentEff = targetId.startsWith('slot:')
+          ? currentPower.alternateEffects[parseInt(targetId.split(':')[1], 10)]?.effect
+          : currentPower.mainEffect;
+        if (parentEff) {
+          syncLinkedEffectWithMain(parentEff, eff);
+          showToast('Linked effect Range & Action synchronized!', 'success');
+          renderPowerStudio();
+        }
       }
     });
   });
@@ -2385,29 +2596,46 @@ function attachStudioEventHandlers(modal) {
     });
   });
 
-
   modal.querySelectorAll('[data-remove-linked]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.removeLinked, 10);
-      currentPower.linkedEffects.splice(idx, 1);
+      const targetId = btn.dataset.removeLinked;
+      const parts = (targetId || '').split(':');
+      if (parts[0] === 'linked') {
+        const idx = parseInt(parts[1], 10);
+        currentPower.linkedEffects.splice(idx, 1);
+      } else if (parts[0] === 'slot' && parts[2] === 'linked') {
+        const sIdx = parseInt(parts[1], 10);
+        const lIdx = parseInt(parts[3], 10);
+        currentPower.alternateEffects[sIdx]?.linkedEffects?.splice(lIdx, 1);
+      }
       renderPowerStudio();
     });
   });
 
-  // Linked Effect Base Effect Library Toggle
-  modal.querySelectorAll('[data-toggle-linked-lib]').forEach(btn => {
+  // Open full Effect Explorer Modal for Linked Effect
+  modal.querySelectorAll('[data-open-linked-explorer]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.toggleLinkedLib, 10);
-      expandedLinkedLibIdx = (expandedLinkedLibIdx === idx) ? null : idx;
+      currentEditingTarget = btn.dataset.openLinkedExplorer;
+      isEffectExplorerOpen = true;
+      renderPowerStudio();
+    });
+  });
+
+  // Open full Modifier Explorer Modal (Extras & Flaws) for any target (main, linked, slot)
+  modal.querySelectorAll('[data-open-modifier-explorer]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentModifierTarget = btn.dataset.openModifierExplorer || 'main';
+      isModifierExplorerOpen = true;
       renderPowerStudio();
     });
   });
 
   modal.querySelectorAll('[data-linked-dec]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.linkedDec, 10);
-      if (currentPower.linkedEffects[idx] && currentPower.linkedEffects[idx].ranks > 1) {
-        currentPower.linkedEffects[idx].ranks--;
+      const targetId = btn.dataset.linkedDec;
+      const eff = getEffectTarget(targetId);
+      if (eff && eff.ranks > 1) {
+        eff.ranks--;
         renderPowerStudio();
       }
     });
@@ -2415,9 +2643,10 @@ function attachStudioEventHandlers(modal) {
 
   modal.querySelectorAll('[data-linked-inc]').forEach(btn => {
     btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.linkedInc, 10);
-      if (currentPower.linkedEffects[idx]) {
-        currentPower.linkedEffects[idx].ranks++;
+      const targetId = btn.dataset.linkedInc;
+      const eff = getEffectTarget(targetId);
+      if (eff) {
+        eff.ranks++;
         renderPowerStudio();
       }
     });
@@ -2425,78 +2654,89 @@ function attachStudioEventHandlers(modal) {
 
   modal.querySelectorAll('[data-linked-rank]').forEach(inp => {
     inp.addEventListener('change', (e) => {
-      const idx = parseInt(inp.dataset.linkedRank, 10);
-      if (currentPower.linkedEffects[idx]) {
-        currentPower.linkedEffects[idx].ranks = Math.max(1, parseInt(e.target.value, 10) || 1);
+      const targetId = inp.dataset.linkedRank;
+      const eff = getEffectTarget(targetId);
+      if (eff) {
+        eff.ranks = Math.max(1, parseInt(e.target.value, 10) || 1);
         renderPowerStudio();
       }
     });
   });
 
-  // Array handlers
-  modal.querySelector('#pb-add-alt-slot-btn')?.addEventListener('click', () => {
-    isAddingAltSlot = true;
-    isNewSlotLibExpanded = false;
-    newSlotBaseName = 'Damage';
-    newSlotTempEffect = createEmptyEffect('Damage');
-    renderPowerStudio();
-  });
+  // Array Slot Creation & Management
+  const handleAddNewSlot = () => {
+    if (!currentPower.alternateEffects) {
+      currentPower.alternateEffects = [];
+    }
+    const nextNum = currentPower.alternateEffects.length + 1;
+    const newEffect = createEmptyEffect('Damage');
+    newEffect.ranks = currentPower.mainEffect?.ranks || 1;
+    newEffect.name = `Alternate Slot ${nextNum}`;
 
-  modal.querySelector('#pb-cancel-add-slot')?.addEventListener('click', () => {
-    isAddingAltSlot = false;
-    isNewSlotLibExpanded = false;
-    newSlotTempEffect = createEmptyEffect('Damage');
-    renderPowerStudio();
-  });
-
-  modal.querySelector('#pb-toggle-new-slot-lib')?.addEventListener('click', () => {
-    isNewSlotLibExpanded = !isNewSlotLibExpanded;
-    renderPowerStudio();
-  });
-
-  modal.querySelectorAll('[data-toggle-slot-lib]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.toggleSlotLib, 10);
-      expandedSlotLibIdx = (expandedSlotLibIdx === idx) ? null : idx;
-      renderPowerStudio();
+    currentPower.alternateEffects.push({
+      id: 'alt_' + Date.now() + Math.random().toString(36).substr(2, 4),
+      name: newEffect.name,
+      isDynamic: false,
+      effect: normalizeEffect(newEffect),
+      linkedEffects: []
     });
-  });
 
+    currentEditingTarget = `slot:${currentPower.alternateEffects.length - 1}`;
+    showToast(`Added Alternate Slot #${nextNum}. Configure its base effect and modifiers below!`, 'success');
+    renderPowerStudio();
+  };
+
+  modal.querySelector('#pb-add-alt-slot-btn')?.addEventListener('click', handleAddNewSlot);
+  modal.querySelector('#pb-add-slot-tab-btn')?.addEventListener('click', handleAddNewSlot);
+
+  // Duplicate Main as Alternate Slot
   modal.querySelector('#pb-duplicate-main-slot-btn')?.addEventListener('click', () => {
     const newSlot = createAlternateSlotFromEffect(currentPower.mainEffect, `${currentPower.name || currentPower.mainEffect.baseEffect} (Variant)`);
+    if (Array.isArray(currentPower.linkedEffects) && currentPower.linkedEffects.length > 0) {
+      newSlot.linkedEffects = currentPower.linkedEffects.map(le => JSON.parse(JSON.stringify(le)));
+    } else {
+      newSlot.linkedEffects = [];
+    }
     currentPower.alternateEffects.push(newSlot);
+    currentEditingTarget = `slot:${currentPower.alternateEffects.length - 1}`;
     showToast(`Duplicated "${currentPower.mainEffect.name || currentPower.mainEffect.baseEffect}" into a new alternate slot!`, 'success');
     renderPowerStudio();
   });
 
-  modal.querySelector('#pb-confirm-add-slot')?.addEventListener('click', () => {
-    const baseName = newSlotBaseName || 'Damage';
-    const slotName = modal.querySelector('#pb-new-slot-name')?.value.trim() || baseName;
-    const ranks = Math.max(1, parseInt(modal.querySelector('#pb-new-slot-ranks')?.value, 10) || 1);
-    const isDynamic = Boolean(modal.querySelector('#pb-new-slot-dynamic')?.checked);
-
-    const slotEffect = normalizeEffect(newSlotTempEffect || createEmptyEffect(baseName));
-    slotEffect.name = slotName;
-    slotEffect.ranks = ranks;
-
-    currentPower.alternateEffects.push({
-      id: 'alt_' + Date.now() + Math.random().toString(36).substr(2, 4),
-      name: slotName,
-      isDynamic,
-      effect: slotEffect
+  // Array Slot Tabs Selection
+  modal.querySelectorAll('[data-select-edit-slot]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentEditingTarget = btn.dataset.selectEditSlot;
+      renderPowerStudio();
     });
+  });
 
-    isAddingAltSlot = false;
-    isNewSlotLibExpanded = false;
-    newSlotBaseName = 'Damage';
-    newSlotTempEffect = createEmptyEffect('Damage');
-    showToast(`Added alternate effect slot "${slotName}" (${baseName})!`, 'success');
-    renderPowerStudio();
+  // Array Slot Deletion (from tabs or from active slot header)
+  modal.querySelectorAll('[data-remove-alt-tab], [data-remove-alt]').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const rawIdx = btn.dataset.removeAltTab !== undefined ? btn.dataset.removeAltTab : btn.dataset.removeAlt;
+      const idx = parseInt(rawIdx, 10);
+      if (!currentPower.alternateEffects || !currentPower.alternateEffects[idx]) return;
+      const slotName = currentPower.alternateEffects[idx].name || `Slot #${idx + 1}`;
+      currentPower.alternateEffects.splice(idx, 1);
+      if (currentEditingTarget === `slot:${idx}`) {
+        currentEditingTarget = 'main';
+      } else if (currentEditingTarget.startsWith('slot:')) {
+        const currentIdx = parseInt(currentEditingTarget.split(':')[1], 10);
+        if (currentIdx > idx) {
+          currentEditingTarget = `slot:${currentIdx - 1}`;
+        }
+      }
+      showToast(`Deleted alternate slot "${slotName}".`, 'info');
+      renderPowerStudio();
+    });
   });
 
   // Array Active Slot Toggle
   modal.querySelectorAll('[data-toggle-active-slot]').forEach(btn => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
       const slotId = btn.dataset.toggleActiveSlot;
       activeSlotId = (activeSlotId === slotId) ? null : slotId;
       showToast(activeSlotId ? 'Switched active Alternate Effect (Free Action)' : 'Reverted to Main Effect (Free Action)', 'info');
@@ -2513,24 +2753,6 @@ function attachStudioEventHandlers(modal) {
         currentPower.alternateEffects[idx].isDynamic = (isDynamicStr === 'true');
         renderPowerStudio();
       }
-    });
-  });
-
-  // Array Slot Modifiers Toggle
-  modal.querySelectorAll('[data-toggle-slot-mod]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.toggleSlotMod, 10);
-      expandedSlotIdx = (expandedSlotIdx === idx) ? null : idx;
-      renderPowerStudio();
-    });
-  });
-
-
-  modal.querySelectorAll('[data-remove-alt]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      const idx = parseInt(btn.dataset.removeAlt, 10);
-      currentPower.alternateEffects.splice(idx, 1);
-      renderPowerStudio();
     });
   });
 
@@ -2606,7 +2828,8 @@ function updateExplorerGrid(modal) {
   const grid = modal.querySelector('.explorer-grid');
   if (!grid) return;
   const filtered = getFilteredBaseEffects();
-  const currentSelectedName = currentPower?.mainEffect?.baseEffect || 'Damage';
+  const activeEff = getEffectTarget(currentEditingTarget);
+  const currentSelectedName = activeEff?.baseEffect || 'Damage';
 
   grid.innerHTML = filtered.map(eff => {
     const isSelected = eff.name === currentSelectedName;
@@ -2653,17 +2876,45 @@ function bindExplorerSelectButtons(modal) {
       const effName = card.dataset.selectBase;
       const chosen = BASE_EFFECTS.find(b => b.name === effName);
       if (chosen) {
-        currentPower.mainEffect.baseEffect = chosen.name;
-        currentPower.mainEffect.name = chosen.name;
-        currentPower.mainEffect.baseCost = chosen.cost;
-        currentPower.mainEffect.range = chosen.range;
-        currentPower.mainEffect.action = chosen.action;
-        currentPower.mainEffect.duration = chosen.duration;
-        currentPower.mainEffect.resistance = chosen.resistance || (chosen.name === 'Affliction' ? 'Fortitude' : 'Toughness');
-        delete currentPower.mainEffect.config;
-        currentPower.mainEffect = normalizeEffect(currentPower.mainEffect);
-        if (!currentPower.name || BASE_EFFECTS.some(b => b.name === currentPower.name)) {
-          currentPower.name = chosen.name;
+        const target = getEffectTarget(currentEditingTarget);
+        if (target) {
+          target.baseEffect = chosen.name;
+          target.baseCost = chosen.cost;
+          target.range = chosen.range;
+          target.action = chosen.action;
+          target.duration = chosen.duration;
+          target.resistance = chosen.resistance || (chosen.name === 'Affliction' ? 'Fortitude' : 'Toughness');
+          delete target.config;
+          normalizeEffect(target);
+          if (currentEditingTarget === 'main') {
+            target.name = chosen.name;
+            if (!currentPower.name || BASE_EFFECTS.some(b => b.name === currentPower.name)) {
+              currentPower.name = chosen.name;
+            }
+          } else if (currentEditingTarget.startsWith('slot:') && currentEditingTarget.includes(':linked:')) {
+            const parts = currentEditingTarget.split(':');
+            const sIdx = parseInt(parts[1], 10);
+            const lIdx = parseInt(parts[3], 10);
+            target.name = chosen.name;
+            const parentSlotEff = currentPower.alternateEffects[sIdx]?.effect;
+            if (parentSlotEff) {
+              syncLinkedEffectWithMain(parentSlotEff, target);
+            }
+            showToast(`Linked effect #${lIdx + 1} for Slot #${sIdx + 1} updated to "${chosen.name}" and auto-synced!`, 'success');
+          } else if (currentEditingTarget.startsWith('slot:')) {
+            const sIdx = parseInt(currentEditingTarget.split(':')[1], 10);
+            if (currentPower.alternateEffects[sIdx]) {
+              if (!currentPower.alternateEffects[sIdx].name || BASE_EFFECTS.some(b => b.name === currentPower.alternateEffects[sIdx].name)) {
+                currentPower.alternateEffects[sIdx].name = chosen.name;
+                target.name = chosen.name;
+              }
+            }
+          } else if (currentEditingTarget.startsWith('linked:')) {
+            const lIdx = parseInt(currentEditingTarget.split(':')[1], 10);
+            target.name = chosen.name;
+            syncLinkedEffectWithMain(currentPower.mainEffect, target);
+            showToast(`Linked effect #${lIdx + 1} updated to "${chosen.name}" and auto-synced with Main Effect!`, 'success');
+          }
         }
       }
       isEffectExplorerOpen = false;
@@ -2672,12 +2923,141 @@ function bindExplorerSelectButtons(modal) {
   });
 }
 
+function attachModifierExplorerHandlers(modal) {
+  const container = modal.querySelector('#pb-modifier-modal-container');
+  if (!container || !isModifierExplorerOpen) return;
+
+  // Close buttons
+  container.querySelector('#pb-close-modifier-explorer-btn')?.addEventListener('click', () => {
+    isModifierExplorerOpen = false;
+    renderPowerStudio();
+  });
+
+  container.querySelector('#pb-done-modifier-explorer-btn')?.addEventListener('click', () => {
+    isModifierExplorerOpen = false;
+    renderPowerStudio();
+  });
+
+  // Backdrop click to close
+  container.querySelector('#pb-modifier-explorer-backdrop')?.addEventListener('click', (e) => {
+    if (e.target.id === 'pb-modifier-explorer-backdrop') {
+      isModifierExplorerOpen = false;
+      renderPowerStudio();
+    }
+  });
+
+  // Modifier Search
+  const searchInput = container.querySelector('#pb-modifier-modal-search');
+  searchInput?.addEventListener('input', (e) => {
+    modifierSearchQuery = e.target.value;
+    updateModifierModalGrid(modal);
+  });
+
+  container.querySelector('#pb-clear-modifier-modal-search')?.addEventListener('click', () => {
+    modifierSearchQuery = '';
+    if (searchInput) searchInput.value = '';
+    updateModifierModalGrid(modal);
+  });
+
+  // Extras vs Flaws tabs
+  container.querySelector('#pb-mod-tab-extras')?.addEventListener('click', () => {
+    activeModifierTab = 'extras';
+    container.querySelector('#pb-mod-tab-extras').classList.add('active');
+    container.querySelector('#pb-mod-tab-flaws').classList.remove('active');
+    updateModifierModalGrid(modal);
+  });
+
+  container.querySelector('#pb-mod-tab-flaws')?.addEventListener('click', () => {
+    activeModifierTab = 'flaws';
+    container.querySelector('#pb-mod-tab-flaws').classList.add('active');
+    container.querySelector('#pb-mod-tab-extras').classList.remove('active');
+    updateModifierModalGrid(modal);
+  });
+
+  // Category filter pills
+  container.querySelectorAll('[data-mod-modal-cat]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeCategory = btn.dataset.modModalCat;
+      container.querySelectorAll('[data-mod-modal-cat]').forEach(b => {
+        b.classList.toggle('active', b.dataset.modModalCat === activeCategory);
+      });
+      updateModifierModalGrid(modal);
+    });
+  });
+
+  // Bind add and remove modifier buttons
+  bindModifierModalActionButtons(modal);
+}
+
+function updateModifierModalGrid(modal) {
+  const grid = modal.querySelector('#pb-modifier-modal-grid');
+  if (!grid) return;
+  grid.innerHTML = renderModifierModalCards(currentModifierTarget);
+  bindModifierModalActionButtons(modal);
+}
+
+function bindModifierModalActionButtons(modal) {
+  const container = modal.querySelector('#pb-modifier-modal-container');
+  if (!container) return;
+
+  container.querySelectorAll('[data-modal-add-mod]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const modName = btn.dataset.modalAddMod;
+      const isExtra = activeModifierTab === 'extras';
+      const ref = isExtra ? EXTRAS.find(e => e.name === modName) : FLAWS.find(f => f.name === modName);
+      if (!ref) return;
+
+      const targetList = getModifierTargetList(currentModifierTarget, isExtra ? 'extra' : 'flaw');
+      if (!targetList) return;
+
+      const existing = targetList.find(m => m.name === modName);
+
+      if (existing && (ref.hasRanks || ref.type === 'flat_per_rank')) {
+        existing.ranks = (existing.ranks || 1) + 1;
+        showToast(`Increased "${modName}" to rank ${existing.ranks}`, 'info');
+      } else if (!existing) {
+        targetList.push(normalizeModifier({
+          name: ref.name,
+          cost: ref.cost,
+          type: ref.type,
+          desc: ref.desc,
+          category: ref.category,
+          ranks: 1
+        }));
+        showToast(`Added ${isExtra ? 'Extra' : 'Flaw'} "${modName}"`, 'success');
+      } else {
+        showToast(`${modName} is already applied to this effect.`, 'info');
+        return;
+      }
+
+      renderPowerStudio();
+    });
+  });
+
+  container.querySelectorAll('[data-modal-remove-mod]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const modName = btn.dataset.modalRemoveMod;
+      const isExtra = activeModifierTab === 'extras';
+      const targetList = getModifierTargetList(currentModifierTarget, isExtra ? 'extra' : 'flaw');
+      if (!targetList) return;
+
+      const idx = targetList.findIndex(m => m.name === modName);
+      if (idx !== -1) {
+        targetList.splice(idx, 1);
+        showToast(`Removed modifier "${modName}"`, 'info');
+        renderPowerStudio();
+      }
+    });
+  });
+}
+
 function updateAllEmbeddedLibraries(modal) {
   modal.querySelectorAll('.pb-embedded-library-section').forEach(sec => {
     const searchInput = sec.querySelector('.pb-target-search');
     const targetStr = searchInput?.dataset.searchTarget || 'main';
-    const [targetType, targetIdxStr] = targetStr.split(':');
-    const targetIdx = targetIdxStr !== undefined ? parseInt(targetIdxStr, 10) : null;
+    const parts = targetStr.split(':');
+    const targetType = parts[0];
+    const targetIdx = parts[1] !== undefined ? parseInt(parts[1], 10) : null;
 
     let selectedName = 'Damage';
     if (targetType === 'main') {
@@ -2687,7 +3067,12 @@ function updateAllEmbeddedLibraries(modal) {
     } else if (targetType === 'new-slot') {
       selectedName = newSlotBaseName;
     } else if (targetType === 'slot' && targetIdx !== null && currentPower?.alternateEffects[targetIdx]) {
-      selectedName = currentPower.alternateEffects[targetIdx].effect?.baseEffect || 'Damage';
+      if (parts[2] === 'linked' && parts[3] !== undefined) {
+        const lIdx = parseInt(parts[3], 10);
+        selectedName = currentPower.alternateEffects[targetIdx].linkedEffects?.[lIdx]?.baseEffect || 'Damage';
+      } else {
+        selectedName = currentPower.alternateEffects[targetIdx].effect?.baseEffect || 'Damage';
+      }
     }
 
     const grid = sec.querySelector('.embedded-effect-grid');
@@ -2746,8 +3131,9 @@ function bindEmbeddedSelectButtons(modal) {
     card.addEventListener('click', () => {
       const effName = card.dataset.selectBase;
       const targetStr = card.dataset.selectTarget || 'main';
-      const [targetType, targetIdxStr] = targetStr.split(':');
-      const targetIdx = targetIdxStr !== undefined ? parseInt(targetIdxStr, 10) : null;
+      const parts = targetStr.split(':');
+      const targetType = parts[0];
+      const targetIdx = parts[1] !== undefined ? parseInt(parts[1], 10) : null;
       const chosen = BASE_EFFECTS.find(b => b.name === effName);
       if (!chosen) return;
 
@@ -2787,7 +3173,21 @@ function bindEmbeddedSelectButtons(modal) {
         showToast(`Base effect for new slot set to "${chosen.name}"`, 'info');
       } else if (targetType === 'slot' && targetIdx !== null && currentPower.alternateEffects[targetIdx]) {
         const slot = currentPower.alternateEffects[targetIdx];
-        if (slot.effect) {
+        if (parts[2] === 'linked' && parts[3] !== undefined) {
+          const lIdx = parseInt(parts[3], 10);
+          const linked = slot.linkedEffects?.[lIdx];
+          if (linked) {
+            linked.baseEffect = chosen.name;
+            linked.name = chosen.name;
+            linked.baseCost = chosen.cost;
+            delete linked.config;
+            normalizeEffect(linked);
+            if (slot.effect) {
+              syncLinkedEffectWithMain(slot.effect, linked);
+            }
+            showToast(`Linked effect #${lIdx + 1} for Slot #${targetIdx + 1} updated to "${chosen.name}" and auto-synced!`, 'success');
+          }
+        } else if (slot.effect) {
           slot.effect.baseEffect = chosen.name;
           slot.effect.baseCost = chosen.cost;
           slot.effect.range = chosen.range;
@@ -2800,9 +3200,9 @@ function bindEmbeddedSelectButtons(modal) {
             slot.name = chosen.name;
             slot.effect.name = chosen.name;
           }
+          expandedSlotLibIdx = null;
+          showToast(`Alternate slot #${targetIdx + 1} base effect changed to "${chosen.name}"`, 'success');
         }
-        expandedSlotLibIdx = null;
-        showToast(`Alternate slot #${targetIdx + 1} base effect changed to "${chosen.name}"`, 'success');
       }
 
       renderPowerStudio();
@@ -2874,18 +3274,46 @@ function getEffectTarget(targetStr) {
   if (!targetStr || targetStr === 'main') {
     return currentPower.mainEffect;
   }
-  const [targetType, targetIdxStr] = targetStr.split(':');
-  const targetIdx = targetIdxStr !== undefined ? parseInt(targetIdxStr, 10) : null;
-  if (targetType === 'linked' && targetIdx !== null && currentPower.linkedEffects[targetIdx]) {
-    return currentPower.linkedEffects[targetIdx];
+  const parts = targetStr.split(':');
+  const targetType = parts[0];
+  if (targetType === 'linked') {
+    const targetIdx = parseInt(parts[1], 10);
+    return currentPower.linkedEffects?.[targetIdx] || currentPower.mainEffect;
   }
-  if (targetType === 'slot' && targetIdx !== null && currentPower.alternateEffects[targetIdx]?.effect) {
-    return currentPower.alternateEffects[targetIdx].effect;
+  if (targetType === 'slot') {
+    const sIdx = parseInt(parts[1], 10);
+    const slot = currentPower.alternateEffects?.[sIdx];
+    if (!slot) return currentPower.mainEffect;
+    if (parts[2] === 'linked') {
+      const lIdx = parseInt(parts[3], 10);
+      return slot.linkedEffects?.[lIdx] || slot.effect;
+    }
+    return slot.effect || currentPower.mainEffect;
   }
   if (targetType === 'new-slot') {
     return newSlotTempEffect;
   }
   return currentPower.mainEffect;
+}
+
+function getTargetLabel(targetStr, eff) {
+  if (!targetStr || targetStr === 'main') return 'Main Effect';
+  const parts = targetStr.split(':');
+  if (parts[0] === 'linked') {
+    const lIdx = parseInt(parts[1], 10);
+    return `Linked Effect #${lIdx + 1} (${eff?.name || eff?.baseEffect || 'Linked'})`;
+  }
+  if (parts[0] === 'slot') {
+    const sIdx = parseInt(parts[1], 10);
+    const slot = currentPower.alternateEffects?.[sIdx];
+    if (parts[2] === 'linked') {
+      const lIdx = parseInt(parts[3], 10);
+      const le = slot?.linkedEffects?.[lIdx];
+      return `Linked Effect #${lIdx + 1} for Slot #${sIdx + 1} (${slot?.name || 'Slot'}) [${le?.name || le?.baseEffect || 'Linked'}]`;
+    }
+    return `Alternate Slot #${sIdx + 1} (${slot?.name || slot?.effect?.name || 'Slot'})`;
+  }
+  return 'Effect';
 }
 
 function bindEffectConfigurationHandlers(modal) {

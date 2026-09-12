@@ -28,6 +28,7 @@ function createDefaultCharacter() {
     advantages: [],
     powers: [],
     activeConditions: [],
+    injuries: 0,
     customAttacks: [],
     resources: [],
     notes: ''
@@ -140,6 +141,80 @@ class Store {
     const base = this.getDefenseBase(key);
     const bought = this.character.defensesBought[key] || 0;
     let total = base + bought;
+
+    // Add equipped Shield Active Defenses (+Dodge / +Parry)
+    if (key === 'DODGE' || key === 'PARRY') {
+      for (const r of (this.character.resources || [])) {
+        const isEquipped = r.status === 'equipped' || !r.status;
+        if (isEquipped && (r.subtype === 'shield' || r.armor?.activeDefenseBonus)) {
+          total += (parseInt(r.armor?.activeDefenseBonus, 10) || 0);
+        }
+      }
+    }
+
+    if (key === 'TOUGHNESS') {
+      // 1. Add active Protection power ranks (from main effect, active array slot, or linked effects)
+      for (const p of (this.character.powers || [])) {
+        if (p.active === false) continue;
+        const isArray = p.type === 'array' || (Array.isArray(p.alternateEffects) && p.alternateEffects.length > 0);
+        const activeSlot = p.activeSlotId || 'main';
+
+        const effectsToCheck = [];
+        if (!isArray || activeSlot === 'main' || !p.alternateEffects?.some(s => s.id === activeSlot)) {
+          if (p.mainEffect) effectsToCheck.push(p.mainEffect);
+          else effectsToCheck.push(p);
+          if (Array.isArray(p.linkedEffects)) {
+            effectsToCheck.push(...p.linkedEffects);
+          }
+        } else {
+          const slot = p.alternateEffects.find(s => s.id === activeSlot);
+          if (slot?.effect) effectsToCheck.push(slot.effect);
+          if (Array.isArray(slot?.linkedEffects)) {
+            effectsToCheck.push(...slot.linkedEffects);
+          }
+        }
+
+        for (const eff of effectsToCheck) {
+          const effBase = (eff.baseEffect || eff.effectType || eff.name || '').toLowerCase();
+          if (effBase === 'protection' || effBase === 'force field' || effBase === 'armor plating') {
+            total += (parseInt(eff.ranks, 10) || 0);
+          }
+        }
+      }
+
+      // 2. Add equipped Armor Protection bonus from Equipment
+      let maxArmorProtection = 0;
+      for (const r of (this.character.resources || [])) {
+        const isEquipped = r.status === 'equipped' || !r.status;
+        if (!isEquipped) continue;
+
+        if (r.subtype === 'armor' || r.armor?.protectionRank) {
+          const prot = parseInt(r.armor?.protectionRank ?? 0, 10);
+          if (prot > maxArmorProtection) maxArmorProtection = prot;
+        } else if (!r.subtype && r.desc) {
+          const match = r.desc.match(/Protection\s+(\d+)/i);
+          if (match) {
+            const prot = parseInt(match[1], 10);
+            if (prot > maxArmorProtection) maxArmorProtection = prot;
+          }
+        }
+      }
+      total += maxArmorProtection;
+
+      // 3. Add Defensive Roll advantage ranks (M&M 3e Deluxe Hero's Handbook: active defense, lost if Defenseless or Vulnerable)
+      const isDefenseless = this.character.activeConditions.includes('Defenseless');
+      const isVulnerable = this.character.activeConditions.includes('Vulnerable');
+      if (!isDefenseless && !isVulnerable) {
+        const defRoll = (this.character.advantages || []).find(a => (a.name || '').toLowerCase() === 'defensive roll');
+        if (defRoll) {
+          total += (parseInt(defRoll.ranks ?? defRoll.rank ?? 1, 10) || 1);
+        }
+      }
+
+      // 4. Subtract injuries (cumulative -1 penalty per injury/bruise per M&M 3e rules)
+      const injuries = Math.max(0, parseInt(this.character.injuries || 0, 10));
+      total = total - injuries;
+    }
 
     // Check conditions impact
     if (key === 'DODGE' || key === 'PARRY') {
@@ -381,9 +456,25 @@ class Store {
       id: resData.id || ('res_' + Date.now() + Math.random().toString(36).substr(2, 4)),
       name: resData.name || 'Equipment Item',
       type: resData.type || 'Gear',
+      subtype: resData.subtype || (resData.type === 'Vehicle' ? 'vehicle' : (resData.type === 'Headquarters' ? 'headquarters' : 'gear')),
       epCost: Math.max(1, parseInt(resData.epCost, 10) || 1),
-      desc: resData.desc || ''
+      desc: resData.desc || '',
+      status: resData.status || 'equipped',
+      weapon: resData.weapon || null,
+      armor: resData.armor || null,
+      vehicle: resData.vehicle || null,
+      hq: resData.hq || null
     };
+
+    // If new item is equipped armor, set other armors to 'carried' (Option A: 1 equipped armor)
+    if (item.status === 'equipped' && (item.subtype === 'armor' || item.armor?.protectionRank) && item.subtype !== 'shield') {
+      for (const r of this.character.resources) {
+        if ((r.subtype === 'armor' || r.armor?.protectionRank) && r.subtype !== 'shield') {
+          r.status = 'carried';
+        }
+      }
+    }
+
     this.character.resources.push(item);
     this.pushHistory();
     this.notify();
@@ -393,14 +484,49 @@ class Store {
   updateResource(id, resData) {
     const idx = this.character.resources.findIndex(r => r.id === id);
     if (idx !== -1) {
-      this.character.resources[idx] = {
+      const updated = {
         ...this.character.resources[idx],
         ...resData,
         epCost: Math.max(1, parseInt(resData.epCost, 10) || 1)
       };
+
+      if (updated.status === 'equipped' && (updated.subtype === 'armor' || updated.armor?.protectionRank) && updated.subtype !== 'shield') {
+        for (const r of this.character.resources) {
+          if (r.id !== id && (r.subtype === 'armor' || r.armor?.protectionRank) && r.subtype !== 'shield') {
+            r.status = 'carried';
+          }
+        }
+      }
+
+      this.character.resources[idx] = updated;
       this.pushHistory();
       this.notify();
     }
+  }
+
+  setResourceStatus(id, newStatus) {
+    const item = this.character.resources.find(r => r.id === id);
+    if (!item) return;
+
+    if (newStatus === 'equipped' && (item.subtype === 'armor' || item.armor?.protectionRank) && item.subtype !== 'shield') {
+      for (const r of this.character.resources) {
+        if (r.id !== id && (r.subtype === 'armor' || r.armor?.protectionRank) && r.subtype !== 'shield') {
+          r.status = 'carried';
+        }
+      }
+    }
+
+    item.status = newStatus;
+    this.pushHistory();
+    this.notify();
+  }
+
+  toggleResourceStatus(id) {
+    const item = this.character.resources.find(r => r.id === id);
+    if (!item) return;
+    const current = item.status || 'equipped';
+    const next = current === 'equipped' ? 'carried' : (current === 'carried' ? 'stored' : 'equipped');
+    this.setResourceStatus(id, next);
   }
 
   removeResource(id) {
@@ -479,6 +605,112 @@ class Store {
     this.character.activeConditions = [];
     this.pushHistory();
     this.notify();
+  }
+
+  addCondition(conditionName) {
+    if (!this.character.activeConditions.includes(conditionName)) {
+      this.character.activeConditions.push(conditionName);
+      this.pushHistory();
+      this.notify();
+    }
+  }
+
+  removeCondition(conditionName) {
+    const idx = this.character.activeConditions.indexOf(conditionName);
+    if (idx !== -1) {
+      this.character.activeConditions.splice(idx, 1);
+      this.pushHistory();
+      this.notify();
+    }
+  }
+
+  addInjury(count = 1) {
+    this.character.injuries = Math.max(0, (this.character.injuries || 0) + (parseInt(count, 10) || 1));
+    this.pushHistory();
+    this.notify();
+    return this.character.injuries;
+  }
+
+  removeInjury(count = 1) {
+    this.character.injuries = Math.max(0, (this.character.injuries || 0) - (parseInt(count, 10) || 1));
+    this.pushHistory();
+    this.notify();
+    return this.character.injuries;
+  }
+
+  setInjuries(count) {
+    this.character.injuries = Math.max(0, parseInt(count, 10) || 0);
+    this.pushHistory();
+    this.notify();
+    return this.character.injuries;
+  }
+
+  clearInjuries() {
+    this.character.injuries = 0;
+    this.pushHistory();
+    this.notify();
+    return 0;
+  }
+
+  /**
+   * Applies M&M 3e Damage Failure Degree consequences to character state.
+   * Handles condition escalation per official Deluxe Hero's Handbook rules:
+   * - 1st Degree (failed by 1-5): +1 Bruise (-1 Toughness penalty)
+   * - 2nd Degree (failed by 6-10): +1 Bruise + Dazed (escalates to Staggered if already Dazed)
+   * - 3rd Degree (failed by 11-15): +1 Bruise + Staggered (escalates to Incapacitated if already Staggered)
+   * - 4th Degree (failed by 16+): Incapacitated immediately
+   */
+  applyDamageFailureDegree(degree) {
+    const d = parseInt(degree, 10);
+    const conds = this.character.activeConditions || [];
+    const changes = {
+      injuryAdded: false,
+      newInjuries: this.character.injuries || 0,
+      addedConditions: [],
+      escalated: false,
+      description: ''
+    };
+
+    if (d === 1) {
+      this.addInjury(1);
+      changes.injuryAdded = true;
+      changes.newInjuries = this.character.injuries;
+      changes.description = '+1 Bruise (-1 Toughness penalty)';
+    } else if (d === 2) {
+      this.addInjury(1);
+      changes.injuryAdded = true;
+      changes.newInjuries = this.character.injuries;
+      if (conds.includes('Dazed')) {
+        this.addCondition('Staggered');
+        changes.addedConditions.push('Staggered');
+        changes.escalated = true;
+        changes.description = '+1 Bruise & Escalated to Staggered (already Dazed)';
+      } else {
+        this.addCondition('Dazed');
+        changes.addedConditions.push('Dazed');
+        changes.description = '+1 Bruise & Dazed for 1 round';
+      }
+    } else if (d === 3) {
+      this.addInjury(1);
+      changes.injuryAdded = true;
+      changes.newInjuries = this.character.injuries;
+      if (conds.includes('Staggered')) {
+        this.addCondition('Incapacitated');
+        changes.addedConditions.push('Incapacitated');
+        changes.escalated = true;
+        changes.description = '+1 Bruise & Escalated to Incapacitated (already Staggered)';
+      } else {
+        this.addCondition('Staggered');
+        changes.addedConditions.push('Staggered');
+        changes.description = '+1 Bruise & Staggered';
+      }
+    } else if (d >= 4) {
+      this.addCondition('Incapacitated');
+      changes.addedConditions.push('Incapacitated');
+      changes.description = 'Incapacitated (Unconscious / Defeated)';
+    }
+
+    return changes;
   }
 
   addCustomAttack(attack) {
@@ -562,6 +794,9 @@ class Store {
 
     // Normalize powers
     char.powers = (Array.isArray(char.powers) ? char.powers : []).map(p => normalizePower(p));
+
+    // Normalize injuries
+    char.injuries = Math.max(0, parseInt(data?.injuries ?? 0, 10)) || 0;
 
     return char;
   }

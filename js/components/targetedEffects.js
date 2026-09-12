@@ -124,6 +124,23 @@ export function renderTargetedEffects(container) {
     });
     if (mainAtk) attacks.push(mainAtk);
 
+    // Also include primary linked attack effects
+    if (Array.isArray(power.linkedEffects)) {
+      power.linkedEffects.forEach((le, lIdx) => {
+        const linkedAtk = buildPowerAttack({
+          power,
+          eff: le,
+          slotId: 'main',
+          slotName: `${power.name || mainEff.name} + ${le.name || le.baseEffect}`
+        });
+        if (linkedAtk) {
+          linkedAtk.id = `${power.id}_linked_${lIdx}`;
+          linkedAtk.isLinked = true;
+          attacks.push(linkedAtk);
+        }
+      });
+    }
+
     if (Array.isArray(power.alternateEffects)) {
       for (const slot of power.alternateEffects) {
         const slotEff = slot.effect || slot;
@@ -134,6 +151,23 @@ export function renderTargetedEffects(container) {
           slotName: slot.name || slotEff.name
         });
         if (slotAtk) attacks.push(slotAtk);
+
+        // Also include alternate slot linked attack effects
+        if (Array.isArray(slot.linkedEffects)) {
+          slot.linkedEffects.forEach((le, lIdx) => {
+            const slotLinkedAtk = buildPowerAttack({
+              power,
+              eff: le,
+              slotId: slot.id,
+              slotName: `${slot.name || slotEff.name} + ${le.name || le.baseEffect}`
+            });
+            if (slotLinkedAtk) {
+              slotLinkedAtk.id = `${power.id}_${slot.id}_linked_${lIdx}`;
+              slotLinkedAtk.isLinked = true;
+              attacks.push(slotLinkedAtk);
+            }
+          });
+        }
       }
     }
   }
@@ -153,6 +187,73 @@ export function renderTargetedEffects(container) {
       resistance: custom.resistance || 'Toughness',
       crit: custom.crit || '20',
       tags: ['Attack roll', 'Resistance']
+    });
+  }
+
+  // 4. Equipped Weapons from Resources / Equipment
+  for (const r of (char.resources || [])) {
+    const isEquipped = r.status === 'equipped' || !r.status;
+    if (!isEquipped) continue;
+
+    // Check if weapon
+    const isWeapon = r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || ''));
+    if (!isWeapon) continue;
+
+    const w = r.weapon || {};
+    const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
+    const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
+
+    // Extract damage rank
+    let dmgRank = w.damageRank;
+    if (dmgRank === undefined) {
+      const match = (r.desc || '').match(/Damage\s+(\d+)/i);
+      dmgRank = match ? parseInt(match[1], 10) : 1;
+    }
+
+    const traits = Array.isArray(w.traits) ? w.traits : [];
+    const isAffliction = traits.includes('Affliction') || /Affliction/i.test(r.desc || '');
+
+    // Calculate attack bonus
+    let rollBonus = 0;
+    if (isRanged) {
+      const dex = store.getAbility('DEX');
+      const rangedSkill = char.skills.find(s => s.name === 'Ranged Combat' && (
+        new RegExp(r.name, 'i').test(s.subtype || '') ||
+        /firearm|guns|pistol|rifle|projectile/i.test(s.subtype || '')
+      ));
+      rollBonus = dex + (rangedSkill ? rangedSkill.ranks : 0) + (w.attackBonus || 0);
+    } else {
+      const fgt = store.getAbility('FGT');
+      const closeSkill = char.skills.find(s => s.name === 'Close Combat' && (
+        new RegExp(r.name, 'i').test(s.subtype || '') ||
+        /blades|swords|melee|unarmed|axes/i.test(s.subtype || '')
+      ));
+      rollBonus = fgt + (closeSkill ? closeSkill.ranks : 0) + (w.attackBonus || 0);
+    }
+
+    // Effective rank and DC
+    const effectiveRank = isStrengthBased ? (str + dmgRank) : dmgRank;
+    const dcBase = isAffliction ? 10 : 15;
+    const resistance = w.resistance || (isAffliction ? 'Fortitude' : 'Toughness');
+    const crit = w.crit || (/Critical\s+([0-9-]+)/i.exec(r.desc || '')?.[1]) || '20';
+
+    const tags = ['Attack roll', 'Resistance'];
+    if (traits.some(t => /area/i.test(t)) || /Area/i.test(r.desc || '')) tags.push('Area');
+    if (traits.some(t => /multiattack/i.test(t)) || /Multiattack/i.test(r.desc || '')) tags.push('Multiattack');
+
+    attacks.push({
+      id: `equip_${r.id}`,
+      type: 'equipment',
+      name: `${r.name}`,
+      rollBonus,
+      range: isRanged ? 'Ranged' : 'Close',
+      effectName: isAffliction ? 'Affliction' : (isStrengthBased ? `Damage (STR-based ${dmgRank})` : 'Damage'),
+      effectRank: effectiveRank,
+      dc: dcBase + effectiveRank,
+      resistance,
+      crit,
+      tags,
+      equipmentId: r.id
     });
   }
 
@@ -186,6 +287,7 @@ export function renderTargetedEffects(container) {
             <div class="attack-main">
               <div style="display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;">
                 <span class="attack-badge ${atk.type}">${atk.slotId && atk.slotId !== 'main' ? 'ARRAY SLOT' : atk.type.toUpperCase()}</span>
+                ${atk.isLinked ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(168, 85, 247, 0.15); color: #c084fc; border: 1px solid rgba(168, 85, 247, 0.35);"><i class="ri-links-line"></i> LINKED</span>` : ''}
                 ${atk.isInactive ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(239, 68, 68, 0.15); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.35);"><i class="ri-forbid-line"></i> DEACTIVATED</span>` : ''}
                 ${atk.isStandby ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.35);"><i class="ri-pause-circle-line"></i> STANDBY</span>` : ''}
                 ${atk.type === 'power' && !atk.isInactive && !atk.isStandby ? `<span class="badge" style="font-size: 0.65rem; font-weight: 800; padding: 0.15rem 0.5rem; border-radius: 9999px; background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.35);"><i class="ri-flashlight-fill"></i> ACTIVE</span>` : ''}
@@ -267,7 +369,15 @@ export function renderTargetedEffects(container) {
         name: atkName,
         type: 'attack',
         bonus,
-        subtitle: `Targeted Effect Attack Check • ${atk?.range || 'Close'} • ${atk?.resistance || 'Toughness'}`
+        subtitle: `Targeted Effect Attack Check • ${atk?.range || 'Close'} • ${atk?.resistance || 'Toughness'}`,
+        extra: {
+          dc: atk?.dc || defaultDC,
+          resistance: atk?.resistance || 'Toughness',
+          descriptor: atk?.effectName || atk?.descriptor || '',
+          range: atk?.range || 'Close',
+          crit: atk?.crit || '20',
+          effectRank: atk?.effectRank || 0
+        }
       });
 
       const d20 = res.d20;
@@ -304,12 +414,23 @@ export function renderTargetedEffects(container) {
         showToast('Switched active Array slot (Free Action)', 'info');
       }
 
+      const atk = attacks.find(a => a.powerId === powerId && a.slotId === slotId) || attacks.find(a => a.powerId === powerId);
+      const atkName = atk?.name || 'Array Attack';
+
       // Universal Quick Roll HUD
       const res = rollCheck({
-        name: 'Array Attack',
+        name: atkName,
         type: 'attack',
         bonus,
-        subtitle: `Switched Array Slot (Free Action) • Attack Check`
+        subtitle: `Switched Array Slot (Free Action) • Attack Check`,
+        extra: {
+          dc: atk?.dc || 15,
+          resistance: atk?.resistance || 'Toughness',
+          descriptor: atk?.effectName || '',
+          range: atk?.range || 'Close',
+          crit: atk?.crit || '20',
+          effectRank: atk?.effectRank || 0
+        }
       });
 
       const d20 = res.d20;

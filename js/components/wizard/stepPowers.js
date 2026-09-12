@@ -143,7 +143,7 @@ export function renderStepPowers(container) {
         </div>
       ` : char.powers.map(p => {
         const cost = calculatePowerTotalCost(p);
-        const effectName = p.effectType || (p.effects?.[0]?.name) || 'Custom Effect';
+        const effectName = p.baseEffect || p.mainEffect?.baseEffect || p.effectType || (p.effects?.[0]?.name) || 'Custom Effect';
         const rank = p.ranks || p.effects?.[0]?.ranks || 1;
         const range = p.range || 'Personal';
         const altCount = (p.alternateEffects || []).length;

@@ -635,7 +635,7 @@ p {
   max-width: 1440px;
   width: 100%;
   margin: 0 auto;
-  padding: 1.75rem 1.5rem 6rem; /* Extra bottom padding for floating bar */
+  padding: 1.75rem 1.5rem 2rem;
 }
 
 /* Caps Warning Banner */
@@ -648,149 +648,19 @@ p {
   border: 1px solid rgba(245, 158, 11, 0.35);
   border-radius: var(--radius-md);
   margin-bottom: 1.5rem;
-  color: #fde68a;
+}
+
+.warning-banner i {
+  color: #f59e0b;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.warning-banner p {
+  color: #fbbf24;
   font-size: 0.88rem;
-  box-shadow: var(--shadow-sm);
-  animation: bannerFade 0.2s ease-out;
-}
-
-@keyframes bannerFade {
-  from { opacity: 0; transform: translateY(-4px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.warning-icon {
-  font-size: 1.35rem;
-}
-
-/* ==========================================================================
-   FLOATING POINTS BREAKDOWN FOOTER (Sticky Glassmorphic Bar / Mobile Dock)
-   ========================================================================== */
-.points-breakdown-bar {
-  position: fixed;
-  bottom: 1rem;
-  left: 0;
-  right: 0;
-  margin-left: auto;
-  margin-right: auto;
-  width: calc(100% - 3rem);
-  max-width: 1400px;
-  z-index: 80;
-  display: flex;
-  flex-direction: column;
-  background: rgba(15, 23, 42, 0.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  padding: 0.85rem 1.5rem;
-  box-shadow: var(--shadow-lg), 0 0 20px rgba(0, 0, 0, 0.4);
-}
-
-.pp-dock-summary {
-  display: none;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.dock-summary-left {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.dock-label {
-  font-size: 0.65rem;
-  font-weight: 800;
-  letter-spacing: var(--letter-spacing-caps);
-  color: var(--text-muted);
-}
-
-.dock-val {
-  font-size: 0.95rem;
-  font-weight: 800;
-  color: var(--accent-secondary);
-  font-variant-numeric: tabular-nums;
-}
-
-.dock-summary-right {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-}
-
-.dock-rem-badge {
-  font-size: 0.8rem;
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: var(--accent-emerald);
-  padding: 0.25rem 0.6rem;
-  border-radius: var(--radius-pill);
-  font-variant-numeric: tabular-nums;
-}
-
-.dock-rem-badge.negative {
-  background: rgba(239, 68, 68, 0.15);
-  border-color: rgba(239, 68, 68, 0.4);
-  color: var(--accent-danger);
-}
-
-.dock-toggle-btn {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-sm);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  font-size: 1.15rem;
-  transition: all var(--trans-fast);
-}
-
-.dock-toggle-btn:active {
-  transform: scale(0.96);
-}
-
-.pp-dock-details {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  gap: 1rem;
-}
-
-.breakdown-item {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-.breakdown-item strong {
-  color: var(--text-primary);
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-}
-
-.breakdown-item.total strong {
-  color: var(--accent-secondary);
-  font-size: 0.95rem;
-}
-
-.breakdown-item.remaining strong {
-  color: var(--accent-emerald);
-  font-size: 0.95rem;
-}
-
-.breakdown-item.remaining.negative strong {
-  color: var(--accent-danger);
+  line-height: 1.45;
+  margin: 0;
 }
 
 .btn-danger {
@@ -1399,56 +1269,7 @@ i[class^="ri-"], i[class*=" ri-"] {
   }
 
   .app-container {
-    padding: 1rem 0.85rem 6.5rem;
-  }
-
-  /* Compact Points Breakdown Footer Dock on Mobile */
-  .points-breakdown-bar {
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 100%;
-    max-width: 100%;
-    border-radius: 0;
-    border-bottom: none;
-    border-left: none;
-    border-right: none;
-    padding: 0.65rem 1.15rem;
-    background: rgba(10, 15, 29, 0.96);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    z-index: 95;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.5);
-  }
-
-  .pp-dock-summary {
-    display: flex;
-  }
-
-  .pp-dock-details {
-    display: none;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.45rem;
-    padding-top: 0.75rem;
-    margin-top: 0.65rem;
-    border-top: 1px solid var(--border-subtle);
-    max-height: 220px;
-    overflow-y: auto;
-  }
-
-  .pp-dock-details.open {
-    display: flex;
-  }
-
-  .pp-dock-details .breakdown-item {
-    justify-content: space-between;
-    padding: 0.2rem 0;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
-  }
-
-  .pp-dock-details .breakdown-item:last-child {
-    border-bottom: none;
+    padding: 1rem 0.85rem 1.5rem;
   }
 }
 
@@ -1470,13 +1291,13 @@ i[class^="ri-"], i[class*=" ri-"] {
   }
 
   .app-container {
-    padding: 0.75rem 0.65rem 6.5rem;
+    padding: 0.75rem 0.65rem 1.5rem;
   }
 }
 
 /* PRINT MEDIA */
 @media print {
-  .menubar, .targeted-actions, .btn, .modal-overlay, .palette-search, .palette-tabs, .points-breakdown-bar, .toast-container {
+  .menubar, .targeted-actions, .btn, .modal-overlay, .palette-search, .palette-tabs, .toast-container {
     display: none !important;
   }
   body, .app-container {

@@ -1466,14 +1466,36 @@ export function normalizePower(rawPower) {
   }
 
   // Check if power comes with legacy flat effect properties
-  const hasLegacyFlatEffect = Boolean(power.baseEffect && !power.mainEffect);
+  const hasLegacyFlatEffect = Boolean((power.baseEffect || power.effectType) && !power.mainEffect);
   if (hasLegacyFlatEffect || !power.mainEffect) {
-    const baseName = power.baseEffect || power.name || 'Damage';
-    const baseRef = BASE_EFFECTS.find(b => b.name === baseName);
+    const rawBase = power.baseEffect || power.effectType;
+    let baseName = rawBase;
+    const aliasMap = {
+      'force field': 'Protection',
+      'blast': 'Damage',
+      'impervious': 'Protection',
+      'armor plating': 'Protection'
+    };
+
+    if (rawBase && aliasMap[rawBase.toLowerCase()]) {
+      baseName = aliasMap[rawBase.toLowerCase()];
+    } else if (!baseName || !BASE_EFFECTS.some(b => b.name === baseName)) {
+      if (BASE_EFFECTS.some(b => b.name === power.name)) {
+        baseName = power.name;
+      } else if (power.name && aliasMap[power.name.toLowerCase()]) {
+        baseName = aliasMap[power.name.toLowerCase()];
+      } else {
+        baseName = BASE_EFFECTS.some(b => b.name === power.baseEffect) ? power.baseEffect : (power.effectType || 'Damage');
+      }
+    }
+
+    const baseRef = BASE_EFFECTS.find(b => b.name === baseName) || BASE_EFFECTS.find(b => b.name === 'Damage');
+    const finalBaseName = baseRef ? baseRef.name : (baseName || 'Damage');
+
     power.mainEffect = normalizeEffect({
       id: 'eff_main_' + power.id,
-      name: power.name || baseName,
-      baseEffect: baseName,
+      name: power.name || finalBaseName,
+      baseEffect: finalBaseName,
       ranks: Number(power.ranks) || 1,
       baseCost: power.baseCost !== undefined ? Number(power.baseCost) : (baseRef ? baseRef.cost : 1),
       action: power.action || (baseRef ? baseRef.action : 'Standard'),
@@ -1485,11 +1507,23 @@ export function normalizePower(rawPower) {
       config: power.config || {}
     });
   } else {
+    // If power.mainEffect already exists, heal any corrupted baseEffect if effectType was provided
+    if (!BASE_EFFECTS.some(b => b.name === power.mainEffect.baseEffect)) {
+      const aliasMap = { 'force field': 'Protection', 'blast': 'Damage', 'impervious': 'Protection', 'armor plating': 'Protection' };
+      if (power.effectType && BASE_EFFECTS.some(b => b.name === power.effectType)) {
+        power.mainEffect.baseEffect = power.effectType;
+      } else if (power.effectType && aliasMap[power.effectType.toLowerCase()]) {
+        power.mainEffect.baseEffect = aliasMap[power.effectType.toLowerCase()];
+      } else if (power.mainEffect.baseEffect && aliasMap[power.mainEffect.baseEffect.toLowerCase()]) {
+        power.mainEffect.baseEffect = aliasMap[power.mainEffect.baseEffect.toLowerCase()];
+      }
+    }
     power.mainEffect = normalizeEffect(power.mainEffect);
   }
 
   // Keep root legacy aliases in sync so legacy components, print templates, and targeted effects work
   power.baseEffect = power.mainEffect.baseEffect;
+  power.effectType = power.mainEffect.baseEffect;
   power.ranks = power.mainEffect.ranks;
   power.baseCost = power.mainEffect.baseCost;
   power.range = power.mainEffect.range;
@@ -1688,6 +1722,11 @@ export function normalizeAlternateSlot(rawSlot) {
     slot.effect = normalizeEffect(slot.effect);
   }
 
+  // Normalize linked effects for alternate slot
+  slot.linkedEffects = Array.isArray(slot.linkedEffects)
+    ? slot.linkedEffects.map(normalizeEffect)
+    : [];
+
   return slot;
 }
 
@@ -1845,18 +1884,37 @@ export function calculatePowerDetailedBreakdown(rawPower) {
   }));
   const linkedCost = linkedBreakdowns.reduce((sum, item) => sum + item.cost, 0);
 
-  const alternateBreakdowns = power.alternateEffects.map(a => ({
-    name: a.name || a.effect?.name || 'Alternate Slot',
-    isDynamic: Boolean(a.isDynamic),
-    slotCost: a.isDynamic ? 2 : 1,
-    effectCost: calculateEffectCost(a.effect || createEmptyEffect(), 0).totalCost
-  }));
+  const alternateBreakdowns = power.alternateEffects.map(a => {
+    const baseCost = calculateEffectCost(a.effect || createEmptyEffect(), 0).totalCost;
+    const slotLinkedBreakdowns = (a.linkedEffects || []).map(le => ({
+      name: le.name || le.baseEffect,
+      cost: calculateEffectCost(le, 0).totalCost,
+      details: calculateEffectCost(le, 0)
+    }));
+    const slotLinkedCost = slotLinkedBreakdowns.reduce((sum, item) => sum + item.cost, 0);
+    const combinedSlotValue = baseCost + slotLinkedCost;
+
+    return {
+      name: a.name || a.effect?.name || 'Alternate Slot',
+      isDynamic: Boolean(a.isDynamic),
+      slotCost: a.isDynamic ? 2 : 1,
+      baseCost,
+      linkedCost: slotLinkedCost,
+      linkedBreakdowns: slotLinkedBreakdowns,
+      combinedSlotValue,
+      effectCost: combinedSlotValue
+    };
+  });
   const alternateCost = alternateBreakdowns.reduce((sum, item) => sum + item.slotCost, 0);
 
   const rawSubtotal = mainCost + linkedCost + alternateCost;
   const deviceType = power.deviceConfig?.type || 'none';
   const deviceDiscount = calculateDeviceDiscount(rawSubtotal, deviceType);
   const finalCost = Math.max(1, rawSubtotal - deviceDiscount);
+
+  // In M&M 3e, the primary power suite budget capacity is the full value of the primary power
+  // (Main Effect + its Linked Effects)
+  const primarySuiteCapacity = mainCost + linkedCost;
 
   // Human readable formula string
   const netLabel = mainBreakdown.netPerRank >= 1
@@ -1892,18 +1950,24 @@ export function calculatePowerDetailedBreakdown(rawPower) {
     deviceDiscount,
     finalCost,
     formulaString,
-    arrayCapacity: mainCost // Max cost any alternate slot is allowed to have
+    arrayCapacity: primarySuiteCapacity // Max cost any alternate slot is allowed to have (Main + Linked)
   };
 }
 
 /**
  * Validates whether an alternate effect slot fits within the array capacity.
  */
-export function validateArraySlot(mainEffectCost, alternateEffect) {
-  const altCost = calculateEffectCost(alternateEffect).totalCost;
+export function validateArraySlot(mainEffectCost, alternateEffect, alternateLinkedEffects = []) {
+  const baseCost = calculateEffectCost(alternateEffect || createEmptyEffect()).totalCost;
+  const linkedCost = Array.isArray(alternateLinkedEffects)
+    ? alternateLinkedEffects.reduce((sum, le) => sum + calculateEffectCost(le).totalCost, 0)
+    : 0;
+  const altCost = baseCost + linkedCost;
   return {
     isValid: altCost <= mainEffectCost,
     slotCost: altCost,
+    baseCost,
+    linkedCost,
     capacity: mainEffectCost,
     headroom: mainEffectCost - altCost,
     overflow: Math.max(0, altCost - mainEffectCost)

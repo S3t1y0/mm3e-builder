@@ -141,10 +141,15 @@ function renderCatalogList(container) {
 
   const filtered = RESOURCE_PRESETS.filter(p => {
     if (activeResCategory === 'all') return true;
+    if (activeResCategory === 'Weapons') return p.subtype?.startsWith('weapon') || p.weapon != null;
+    if (activeResCategory === 'Armor') return p.subtype === 'armor' || p.subtype === 'shield' || p.armor != null;
+    if (activeResCategory === 'Gadget') return p.type === 'Gadget';
+    if (activeResCategory === 'Vehicle') return p.type === 'Vehicle';
+    if (activeResCategory === 'Headquarters') return p.type === 'Headquarters';
     return p.type.toLowerCase() === activeResCategory.toLowerCase();
   });
 
-  catalogList.innerHTML = filtered.map(preset => `
+  catalogList.innerHTML = filtered.map((preset, idx) => `
     <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 0.65rem 0.85rem; display: flex; align-items: center; justify-content: space-between; gap: 0.75rem;">
       <div>
         <div style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">${preset.name}</div>
@@ -152,7 +157,7 @@ function renderCatalogList(container) {
       </div>
       <div style="display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0;">
         <span style="font-weight: 800; font-size: 0.8rem; color: var(--accent-secondary);">${preset.epCost} EP</span>
-        <button class="btn btn-secondary btn-xs btn-add-preset" data-name="${preset.name}" data-type="${preset.type}" data-cost="${preset.epCost}" data-desc="${preset.desc}">
+        <button class="btn btn-secondary btn-xs btn-add-preset" data-preset-idx="${idx}">
           <i class="ri-add-line"></i> Add
         </button>
       </div>
@@ -161,20 +166,16 @@ function renderCatalogList(container) {
 
   catalogList.querySelectorAll('.btn-add-preset').forEach(btn => {
     btn.addEventListener('click', () => {
-      const name = btn.dataset.name;
-      const type = btn.dataset.type;
-      const epCost = parseInt(btn.dataset.cost, 10) || 0;
-      const desc = btn.dataset.desc;
-
-      store.addResource({
-        name,
-        type,
-        epCost,
-        cost: epCost,
-        desc
-      });
-      showToast(`Equipped ${name} (${epCost} EP)`, 'success');
-      renderStepResources(container);
+      const idx = parseInt(btn.dataset.presetIdx, 10);
+      const preset = filtered[idx];
+      if (preset) {
+        store.addResource({
+          ...preset,
+          status: 'equipped'
+        });
+        showToast(`Equipped ${preset.name} (${preset.epCost} EP)`, 'success');
+        renderStepResources(container);
+      }
     });
   });
 }

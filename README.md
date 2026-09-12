@@ -116,7 +116,6 @@ The application handles real-time Power Point (PP) budgets, automated Power Leve
 - Reactive Local Storage: Automatic persistence across browser sessions.
 - Full History Stack: Undo (`Ctrl+Z`) and Redo (`Ctrl+Y` / `Ctrl+Shift+Z`) state tracking via keyboard shortcuts and slide-out menu drawer.
 - Profile Export & Import: Complete character save files in human-readable JSON format.
-- Tabular Data Export: Clean CSV / Excel export for campaign archives and GM rosters.
 
 ---
 
@@ -174,7 +173,7 @@ mm3e-builder/
 │   │   ├── resources.js         # Standard equipment and vehicle presets
 │   │   └── skills.js            # Standard skill definitions and associated abilities
 │   └── storage/
-│       ├── exportImport.js      # JSON and CSV/Excel serialization and deserialization
+│       ├── exportImport.js      # Character JSON profile serialization and file transfer
 │       └── shareUrl.js          # Native stream compression and Base64URL hash codecs
 ├── index.html               # Main single-page application entrypoint
 ├── serve.js                 # Zero-dependency local development server (Node.js)

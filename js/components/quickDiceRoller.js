@@ -1,8 +1,9 @@
 // js/components/quickDiceRoller.js
+import { showToast } from './notifications.js';
 /**
  * Universal Simple Dice Roller for Mutants & Masterminds 3e
  * Provides 1-click rolling for Abilities, Defenses, Skills, Attacks, and Initiative.
- * Displays results in a clean, non-intrusive floating HUD with M&M 3e Degree calculation.
+ * Displays results in a clean, non-intrusive floating HUD.
  */
 
 let rollHistory = [];
@@ -10,28 +11,44 @@ let currentRoll = null;
 let hudTimeout = null;
 
 /**
- * Calculate Degrees of Success or Failure according to Mutants & Masterminds 3e rules.
- * Success: Total >= DC. 1st degree: 0-4 over DC. 2nd degree: 5-9 over. 3rd: 10-14. 4th: 15+.
- * Failure: Total < DC. 1st degree: 1-5 under DC. 2nd degree: 6-10 under. 3rd: 11-15. 4th: 16+.
+ * Calculate Degrees of Success or Failure according to Mutants & Masterminds 3e rules:
+ * - Success (Total >= DC):
+ *   - 1st Degree: 0-4 over DC (meets DC)
+ *   - 2nd Degree: 5-9 over DC
+ *   - 3rd Degree: 10-14 over DC
+ *   - 4th Degree: 15+ over DC
+ * - Failure (Total < DC):
+ *   - Margin = DC - Total
+ *   - 1st Degree: failed by 1-5
+ *   - 2nd Degree: failed by 6-10
+ *   - 3rd Degree: failed by 11-15
+ *   - 4th Degree: failed by 16+
  */
 export function calculateDegrees(total, dc) {
   if (dc === null || dc === undefined || isNaN(dc)) return null;
-  const diff = total - dc;
+  const numDC = parseInt(dc, 10);
+  const diff = total - numDC;
+
   if (diff >= 0) {
     const degrees = Math.floor(diff / 5) + 1;
+    const degSuffix = degrees === 1 ? '1st' : degrees === 2 ? '2nd' : degrees === 3 ? '3rd' : `${degrees}th`;
     return {
       isSuccess: true,
       degrees,
       diff,
-      text: degrees === 1 ? 'Success (1 Degree)' : `Success (${degrees} Degrees)`
+      margin: diff,
+      text: `Success (${degSuffix} Degree)`
     };
   } else {
-    const degrees = Math.floor(Math.abs(diff + 1) / 5) + 1;
+    const margin = numDC - total;
+    const degrees = Math.floor((margin - 1) / 5) + 1;
+    const degSuffix = degrees === 1 ? '1st' : degrees === 2 ? '2nd' : degrees === 3 ? '3rd' : `${degrees}th`;
     return {
       isSuccess: false,
       degrees,
       diff,
-      text: degrees === 1 ? 'Failure (1 Degree)' : `Failure (${degrees} Degrees)`
+      margin,
+      text: `Failure (${degSuffix} Degree)`
     };
   }
 }
@@ -40,11 +57,17 @@ export function calculateDegrees(total, dc) {
  * Perform a d20 roll check
  * @param {Object} options
  * @param {string} options.name - Name of roll (e.g. "Toughness Resistance", "Perception")
- * @param {string} options.type - Category: 'ability' | 'defense' | 'skill' | 'attack' | 'initiative'
- * @param {number} options.bonus - Roll modifier bonus
+ * @param {string} [options.type] - Category: 'ability' | 'defense' | 'skill' | 'attack' | 'initiative'
+ * @param {number} [options.bonus] - Roll modifier bonus
  * @param {string} [options.subtitle] - Contextual subtitle / details
  */
-export function rollCheck({ name, type = 'check', bonus = 0, subtitle = '' }) {
+export function rollCheck({
+  name,
+  type = 'check',
+  bonus = 0,
+  subtitle = '',
+  extra = {}
+}) {
   const d20 = Math.floor(Math.random() * 20) + 1;
   const numBonus = parseInt(bonus, 10) || 0;
   const total = d20 + numBonus;
@@ -55,12 +78,13 @@ export function rollCheck({ name, type = 'check', bonus = 0, subtitle = '' }) {
     id: 'roll_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
     name,
     type,
-    d20,
     bonus: numBonus,
+    d20,
     total,
     isCrit,
     isFumble,
     subtitle,
+    extra: extra || {},
     timestamp: new Date()
   };
 
@@ -68,13 +92,38 @@ export function rollCheck({ name, type = 'check', bonus = 0, subtitle = '' }) {
   rollHistory.unshift(rollObj);
   if (rollHistory.length > 8) rollHistory.pop();
 
+  // Dispatch custom event for MM3e to Roll20 VTT Bridge Chrome Extension
+  if (typeof window !== 'undefined') {
+    let charName = 'Hero';
+    try {
+      if (window.store && window.store.character && window.store.character.name) {
+        charName = window.store.character.name;
+      }
+    } catch (e) {}
+
+    window.dispatchEvent(new CustomEvent('mm3e-vtt-roll', {
+      detail: {
+        characterName: charName,
+        rollName: name,
+        type,
+        bonus: numBonus,
+        d20,
+        total,
+        isCrit,
+        isFumble,
+        subtitle,
+        ...(extra || {})
+      }
+    }));
+  }
+
   renderQuickRollHUD();
 
-  // Reset auto-dismiss timer (14 seconds)
+  // Reset auto-dismiss timer (15 seconds)
   if (hudTimeout) clearTimeout(hudTimeout);
   hudTimeout = setTimeout(() => {
     closeQuickRollHUD();
-  }, 14000);
+  }, 15000);
 
   return rollObj;
 }
@@ -184,7 +233,8 @@ export function renderQuickRollHUD() {
       name: currentRoll.name,
       type: currentRoll.type,
       bonus: currentRoll.bonus,
-      subtitle: currentRoll.subtitle
+      subtitle: currentRoll.subtitle,
+      extra: currentRoll.extra || {}
     });
   });
 }
@@ -221,6 +271,32 @@ function escapeHtml(str) {
     .replace(/'/g, '&#039;');
 }
 
+/**
+ * Dispatch a rich feature card (Power, Advantage, Equipment) to VTT (Roll20)
+ * @param {Object} featureData
+ */
+export function sendFeatureToVTT(featureData) {
+  if (typeof window === 'undefined') return;
+
+  let characterName = featureData.characterName;
+  if (!characterName) {
+    try {
+      if (window.store && window.store.character && window.store.character.name) {
+        characterName = window.store.character.name;
+      }
+    } catch (e) {}
+    characterName = characterName || 'Hero';
+  }
+
+  const payload = {
+    ...featureData,
+    characterName
+  };
+
+  window.dispatchEvent(new CustomEvent('mm3e-vtt-feature', { detail: payload }));
+  showToast(`Sent "${featureData.name || 'Feature'}" to Roll20 chat!`, 'info');
+}
+
 // Attach globally for browser convenience
 if (typeof window !== 'undefined') {
   window.quickDiceRoller = {
@@ -228,6 +304,27 @@ if (typeof window !== 'undefined') {
     renderQuickRollHUD,
     closeQuickRollHUD,
     calculateDegrees,
-    getRollHistory
+    getRollHistory,
+    sendFeatureToVTT
   };
+  window.sendFeatureToVTT = sendFeatureToVTT;
+
+  // Feedback listener when MM3e Chrome Extension delivers roll to Roll20
+  window.addEventListener('mm3e-bridge-status', (e) => {
+    const detail = e.detail;
+    if (detail && detail.success && detail.deliveredCount > 0) {
+      const hud = document.getElementById('quick-roll-hud');
+      if (hud && hud.classList.contains('visible')) {
+        let badge = hud.querySelector('.hud-vtt-status');
+        if (!badge) {
+          badge = document.createElement('div');
+          badge.className = 'hud-vtt-status';
+          badge.style.cssText = 'font-size: 0.72rem; color: #34d399; display: flex; align-items: center; justify-content: center; gap: 0.35rem; margin-top: 0.4rem; font-weight: 600; background: rgba(16, 185, 129, 0.12); padding: 0.25rem 0.5rem; border-radius: 4px; border: 1px solid rgba(16, 185, 129, 0.25);';
+          const card = hud.querySelector('.hud-card');
+          if (card) card.appendChild(badge);
+        }
+        badge.innerHTML = `<i class="ri-broadcast-line"></i> Sent to Roll20 (${detail.deliveredCount} active tab${detail.deliveredCount > 1 ? 's' : ''})`;
+      }
+    }
+  });
 }
