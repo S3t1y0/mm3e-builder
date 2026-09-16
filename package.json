@@ -1,0 +1,22 @@
+{
+  "name": "mm3e-builder",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Character builder and interactive sheet for Mutants & Masterminds 3rd Edition",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "lz-string": "^1.5.0",
+    "pinia": "^4.0.3",
+    "remixicon": "^4.9.1",
+    "vue": "^3.5.42"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.8",
+    "vite": "^8.3.0"
+  }
+}
