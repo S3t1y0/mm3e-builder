@@ -20,11 +20,23 @@ export const useUiStore = defineStore('ui', {
 
   actions: {
     setNavTab(tab) {
+      if (tab === 'rules') {
+        if (typeof window !== 'undefined') {
+          window.open('https://s3t1y0.github.io/mm3e-reference/', '_blank', 'noopener,noreferrer');
+        }
+        return;
+      }
       this.activeNavTab = tab;
       this.activeTab = tab;
     },
 
     setActiveTab(tab) {
+      if (tab === 'rules') {
+        if (typeof window !== 'undefined') {
+          window.open('https://s3t1y0.github.io/mm3e-reference/', '_blank', 'noopener,noreferrer');
+        }
+        return;
+      }
       this.activeNavTab = tab;
       this.activeTab = tab;
     },

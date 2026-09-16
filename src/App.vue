@@ -30,14 +30,17 @@
             <i class="ri-sparkling-line"></i>
             <span>Character Wizard</span>
           </button>
-          <button
+          <a
+            href="https://s3t1y0.github.io/mm3e-reference/"
+            target="_blank"
+            rel="noopener noreferrer"
             class="nav-tab-btn"
-            :class="{ active: uiStore.activeTab === 'rules' }"
-            @click="uiStore.setActiveTab('rules')"
+            title="Buka Mutants & Masterminds 3E Rules Reference di tab baru"
           >
             <i class="ri-book-open-line"></i>
             <span>Rules Reference</span>
-          </button>
+            <i class="ri-external-link-line nav-external-icon"></i>
+          </a>
         </nav>
       </div>
 
@@ -544,6 +547,19 @@ function loadSampleHero() {
   position: relative;
   transition: color var(--trans-fast), background-color var(--trans-fast), border-color var(--trans-fast);
   white-space: nowrap;
+  text-decoration: none;
+}
+
+.nav-external-icon {
+  font-size: 0.72rem !important;
+  opacity: 0.6;
+  margin-left: -0.15rem;
+  transition: opacity var(--trans-fast), transform var(--trans-fast);
+}
+
+.nav-tab-btn:hover .nav-external-icon {
+  opacity: 1;
+  transform: translate(1px, -1px);
 }
 
 .nav-tab-btn i {

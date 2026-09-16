@@ -360,6 +360,7 @@ button:active:not(:disabled),
   transition-property: var(--trans-props);
   transition-duration: var(--trans-fast);
   white-space: nowrap;
+  text-decoration: none;
 }
 
 .nav-tab-btn:hover {
