@@ -141,8 +141,8 @@
         <!-- GLANCE SUMMARY (Always visible on card) -->
         <!-- ================================================================= -->
         
-        <!-- Case 1: Standard or Array Power Glance -->
-        <div v-if="pow.type !== 'device'" class="pow-glance-summary">
+        <!-- Case 1: Standard or Array Power Glance (Collapsed Only) -->
+        <div v-if="pow.type !== 'device' && !isExpanded(pow.id || idx)" class="pow-glance-summary">
           <!-- Array Slot Switcher Bar (if Array or has Alternate Effects) -->
           <div v-if="pow.type === 'array' || pow.alternateEffects?.length > 0" class="array-glance-switcher">
             <span class="glance-label"><i class="ri-shuffle-line"></i> Mode:</span>
@@ -238,11 +238,6 @@
               <span class="dev-stat-tag">Toughness {{ pow.deviceConfig?.toughness || 10 }}</span>
               <span class="dev-count-tag">{{ (pow.devicePowers || []).length }} Systems</span>
             </div>
-            <div class="dev-meta-right">
-              <span v-if="pow.activation && pow.activation !== 'none'" class="dev-activation-note">
-                <i class="ri-timer-flash-line"></i> {{ pow.activation === 'move' ? 'Move Activation' : 'Standard Activation' }}
-              </span>
-            </div>
           </div>
 
           <!-- Systems Tab Switcher Bar -->
@@ -268,195 +263,132 @@
                 <span class="tab-label">{{ sub.name || `System ${sIdx + 1}` }}</span>
                 <span class="tab-ranks-pill">{{ getSubPowerActiveEffect(sub).ranks }}R</span>
               </button>
-
-              <!-- Overview Tab -->
-              <button
-                type="button"
-                class="device-tab-item overview-tab"
-                :class="{ active: getActiveDeviceSubIndex(pow.id || idx) === 'overview' }"
-                @click="setActiveDeviceSubIndex(pow.id || idx, 'overview')"
-                title="View All Systems Summary Table"
-              >
-                <i class="ri-dashboard-line"></i>
-                <span>All Systems</span>
-              </button>
             </div>
           </div>
 
-          <!-- TAB VIEW 1: Focused Active Sub-System Console -->
-          <template v-if="getActiveDeviceSubIndex(pow.id || idx) !== 'overview'">
-            <div
-              v-if="(pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]"
-              class="device-active-system-card"
-              :class="{ 'is-card-offline': (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active === false || pow.active === false }"
-            >
-              <!-- Card Top Row: Mini Toggle, Name, Effect, DC, Broadcast -->
-              <div class="active-sys-top-bar">
-                <div class="active-sys-identity">
-                  <button
-                    type="button"
-                    class="sub-power-toggle-btn"
-                    :class="{
-                      'is-active': (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active !== false && pow.active !== false,
-                      'is-off': (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active === false || pow.active === false
-                    }"
-                    :disabled="pow.active === false"
-                    :title="pow.active === false ? 'Parent device is Offline' : ((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active !== false ? 'System is Active (Click to Deactivate)' : 'System is Offline (Click to Activate)')"
-                    @click.stop="handleToggleSubPower(pow, getActiveDeviceSubIndex(pow.id || idx), (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])"
-                  >
-                    <i :class="(pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active !== false && pow.active !== false ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'"></i>
-                    <span class="sub-toggle-text">{{ (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active !== false && pow.active !== false ? 'ONLINE' : 'OFFLINE' }}</span>
-                  </button>
-
-                  <strong class="active-sys-name">{{ (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].name }}</strong>
-
-                  <span class="active-sys-effect-badge">
-                    {{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).baseEffect }}
-                    {{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).ranks }}R
-                    <small v-if="getEffectConfigDetails(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]))?.quickText" class="active-sys-config-text">
-                      • {{ getEffectConfigDetails(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])).quickText }}
-                    </small>
-                  </span>
-                </div>
-
-                <div class="active-sys-actions">
-                  <span v-if="calculateDC(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]))" class="sub-dc-pill">
-                    {{ calculateDC(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])) }}
-                  </span>
-                  <button
-                    type="button"
-                    class="btn-send-vtt-xs"
-                    title="Broadcast this Sub-System to Roll20"
-                    @click.stop="broadcastSubPower(pow, (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)], getActiveDeviceSubIndex(pow.id || idx))"
-                  >
-                    <i class="ri-broadcast-line"></i>
-                  </button>
-                </div>
-              </div>
-
-              <!-- Parameters Strip -->
-              <div class="active-sys-params-strip">
-                <span class="active-sys-param">
-                  <i class="ri-timer-line"></i> Action: <strong>{{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).action || 'Standard' }}</strong>
-                </span>
-                <span class="active-sys-param">
-                  <i class="ri-crosshair-2-line"></i> Range: <strong>{{ formatRange(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])) }}</strong>
-                </span>
-                <span class="active-sys-param">
-                  <i class="ri-time-line"></i> Duration: <strong>{{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).duration || 'Instant' }}</strong>
-                </span>
-                <span v-if="calculateDC(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])) && getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).resistance" class="active-sys-param">
-                  <i class="ri-shield-line"></i> vs <strong>{{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).resistance }}</strong>
-                </span>
-              </div>
-
-              <!-- Array Stunt Switcher Pills (if sub has Alternate Effects) -->
-              <div v-if="(pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].alternateEffects?.length > 0" class="sub-array-pills-wrap">
-                <span class="sub-pills-label"><i class="ri-shuffle-line"></i> Mode:</span>
-                <div class="sub-mode-pills" @click.stop>
-                  <button
-                    type="button"
-                    class="sub-mode-pill"
-                    :class="{ active: ((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].activeSlotId || 'main') === 'main' }"
-                    @click="heroStore.setActiveDeviceSubSlot(pow.id, getActiveDeviceSubIndex(pow.id || idx), 'main')"
-                  >
-                    ★ {{ (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].effect?.name || 'Primary' }}
-                  </button>
-                  <button
-                    v-for="alt in (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].alternateEffects"
-                    :key="'pill_' + alt.id"
-                    type="button"
-                    class="sub-mode-pill"
-                    :class="{ active: (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].activeSlotId === alt.id }"
-                    @click="heroStore.setActiveDeviceSubSlot(pow.id, getActiveDeviceSubIndex(pow.id || idx), alt.id)"
-                  >
-                    {{ alt.name }}
-                  </button>
-                </div>
-              </div>
-
-              <!-- Linked & Modifiers Row -->
-              <div
-                v-if="getSubPowerActiveLinkedEffects((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).length > 0 ||
-                      (getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).extras?.length || 0) + (getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).flaws?.length || 0) > 0"
-                class="active-sys-mods-strip"
-              >
-                <!-- Linked badges -->
-                <span
-                  v-for="(lnk, lIdx) in getSubPowerActiveLinkedEffects((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])"
-                  :key="'slnk_' + lIdx"
-                  class="sub-linked-badge"
-                >
-                  <i class="ri-links-line"></i> +Linked: {{ getLinkedDisplayName(lnk) }} ({{ lnk.ranks }}R)
-                </span>
-
-                <!-- Extras -->
-                <span
-                  v-for="e in getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).extras"
-                  :key="'e_' + e.name"
-                  class="glance-mod-tag extra"
-                >
-                  +{{ e.name }}
-                </span>
-
-                <!-- Flaws -->
-                <span
-                  v-for="f in getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).flaws"
-                  :key="'f_' + f.name"
-                  class="glance-mod-tag flaw"
-                >
-                  -{{ f.name }}
-                </span>
-              </div>
-            </div>
-          </template>
-
-          <!-- TAB VIEW 2: Overview Dense List (When 'overview' is selected) -->
-          <div v-else class="device-overview-dense-list">
-            <div
-              v-for="(sub, sIdx) in (pow.devicePowers || [])"
-              :key="'ov_' + (sub.id || sIdx)"
-              class="overview-row-item"
-              :class="{ 'is-offline': sub.active === false || pow.active === false }"
-              @click="setActiveDeviceSubIndex(pow.id || idx, sIdx)"
-            >
-              <div class="ov-left">
+          <!-- Focused Active Sub-System Console (Collapsed Glance Only) -->
+          <div
+            v-if="!isExpanded(pow.id || idx) && (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]"
+            class="device-active-system-card"
+            :class="{ 'is-card-offline': (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active === false || pow.active === false }"
+          >
+            <!-- Card Top Row: Mini Toggle, Name, Effect, DC, Broadcast -->
+            <div class="active-sys-top-bar">
+              <div class="active-sys-identity">
                 <button
                   type="button"
-                  class="sub-power-toggle-btn mini"
+                  class="sub-power-toggle-btn"
                   :class="{
-                    'is-active': sub.active !== false && pow.active !== false,
-                    'is-off': sub.active === false || pow.active === false
+                    'is-active': (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active !== false && pow.active !== false,
+                    'is-off': (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active === false || pow.active === false
                   }"
                   :disabled="pow.active === false"
-                  @click.stop="handleToggleSubPower(pow, sIdx, sub)"
+                  :title="pow.active === false ? 'Parent device is Offline' : ((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active !== false ? 'System is Active (Click to Deactivate)' : 'System is Offline (Click to Activate)')"
+                  @click.stop="handleToggleSubPower(pow, getActiveDeviceSubIndex(pow.id || idx), (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])"
                 >
-                  <i :class="sub.active !== false && pow.active !== false ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'"></i>
+                  <i :class="(pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active !== false && pow.active !== false ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'"></i>
+                  <span class="sub-toggle-text">{{ (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].active !== false && pow.active !== false ? 'ONLINE' : 'OFFLINE' }}</span>
                 </button>
-                <i :class="getEffectIcon(getSubPowerActiveEffect(sub).baseEffect)" class="ov-icon"></i>
-                <strong class="ov-name">{{ sub.name }}</strong>
-                <span class="ov-effect-badge">
-                  {{ getSubPowerActiveEffect(sub).baseEffect }} {{ getSubPowerActiveEffect(sub).ranks }}R
-                  <small v-if="getEffectConfigDetails(getSubPowerActiveEffect(sub))?.quickText" class="ov-config-text">
-                    ({{ getEffectConfigDetails(getSubPowerActiveEffect(sub)).quickText }})
+
+                <strong class="active-sys-name">{{ (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].name }}</strong>
+
+                <span class="active-sys-effect-badge">
+                  {{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).baseEffect }}
+                  {{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).ranks }}R
+                  <small v-if="getEffectConfigDetails(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]))?.quickText" class="active-sys-config-text">
+                    • {{ getEffectConfigDetails(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])).quickText }}
                   </small>
                 </span>
               </div>
 
-              <div class="ov-right">
-                <span class="ov-action-chip">{{ getSubPowerActiveEffect(sub).action || 'Std' }}</span>
-                <span v-if="calculateDC(getSubPowerActiveEffect(sub))" class="ov-dc-chip">
-                  {{ calculateDC(getSubPowerActiveEffect(sub)) }}
+              <div class="active-sys-actions">
+                <span v-if="calculateDC(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]))" class="sub-dc-pill">
+                  {{ calculateDC(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])) }}
                 </span>
                 <button
                   type="button"
                   class="btn-send-vtt-xs"
-                  title="Broadcast this system to Roll20"
-                  @click.stop="broadcastSubPower(pow, sub, sIdx)"
+                  title="Broadcast this Sub-System to Roll20"
+                  @click.stop="broadcastSubPower(pow, (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)], getActiveDeviceSubIndex(pow.id || idx))"
                 >
                   <i class="ri-broadcast-line"></i>
                 </button>
               </div>
+            </div>
+
+            <!-- Parameters Strip -->
+            <div class="active-sys-params-strip">
+              <span class="active-sys-param">
+                <i class="ri-timer-line"></i> Action: <strong>{{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).action || 'Standard' }}</strong>
+              </span>
+              <span class="active-sys-param">
+                <i class="ri-crosshair-2-line"></i> Range: <strong>{{ formatRange(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])) }}</strong>
+              </span>
+              <span class="active-sys-param">
+                <i class="ri-time-line"></i> Duration: <strong>{{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).duration || 'Instant' }}</strong>
+              </span>
+              <span v-if="calculateDC(getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])) && getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).resistance" class="active-sys-param">
+                <i class="ri-shield-line"></i> vs <strong>{{ getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).resistance }}</strong>
+              </span>
+            </div>
+
+            <!-- Array Stunt Switcher Pills (if sub has Alternate Effects) -->
+            <div v-if="(pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].alternateEffects?.length > 0" class="sub-array-pills-wrap">
+              <span class="sub-pills-label"><i class="ri-shuffle-line"></i> Mode:</span>
+              <div class="sub-mode-pills" @click.stop>
+                <button
+                  type="button"
+                  class="sub-mode-pill"
+                  :class="{ active: ((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].activeSlotId || 'main') === 'main' }"
+                  @click="heroStore.setActiveDeviceSubSlot(pow.id, getActiveDeviceSubIndex(pow.id || idx), 'main')"
+                >
+                  ★ {{ (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].effect?.name || 'Primary' }}
+                </button>
+                <button
+                  v-for="alt in (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].alternateEffects"
+                  :key="'pill_' + alt.id"
+                  type="button"
+                  class="sub-mode-pill"
+                  :class="{ active: (pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)].activeSlotId === alt.id }"
+                  @click="heroStore.setActiveDeviceSubSlot(pow.id, getActiveDeviceSubIndex(pow.id || idx), alt.id)"
+                >
+                  {{ alt.name }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Linked & Modifiers Row -->
+            <div
+              v-if="getSubPowerActiveLinkedEffects((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).length > 0 ||
+                    (getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).extras?.length || 0) + (getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).flaws?.length || 0) > 0"
+              class="active-sys-mods-strip"
+            >
+              <!-- Linked badges -->
+              <span
+                v-for="(lnk, lIdx) in getSubPowerActiveLinkedEffects((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)])"
+                :key="'slnk_' + lIdx"
+                class="sub-linked-badge"
+              >
+                <i class="ri-links-line"></i> +Linked: {{ getLinkedDisplayName(lnk) }} ({{ lnk.ranks }}R)
+              </span>
+
+              <!-- Extras -->
+              <span
+                v-for="e in getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).extras"
+                :key="'e_' + e.name"
+                class="glance-mod-tag extra"
+              >
+                +{{ e.name }}
+              </span>
+
+              <!-- Flaws -->
+              <span
+                v-for="f in getSubPowerActiveEffect((pow.devicePowers || [])[getActiveDeviceSubIndex(pow.id || idx)]).flaws"
+                :key="'f_' + f.name"
+                class="glance-mod-tag flaw"
+              >
+                -{{ f.name }}
+              </span>
             </div>
           </div>
         </div>
@@ -471,7 +403,7 @@
             <div class="dossier-block effect-rules-block">
               <div class="dossier-block-head">
                 <div class="dossier-head-left">
-                  <i class="ri-book-open-line"></i>
+                  <i class="ri-flashlight-line"></i>
                   <span>Base Effect: {{ getActiveEffect(pow).baseEffect }} (Rank {{ getActiveEffect(pow).ranks }})</span>
                 </div>
                 <button
@@ -484,26 +416,38 @@
                   <span>Broadcast Effect</span>
                 </button>
               </div>
-              <p class="dossier-desc-text">
-                {{ getEffectDesc(getActiveEffect(pow).baseEffect) }}
-              </p>
+
+              <!-- Combat Specs Matrix Grid (Placed First for instant battle reference) -->
               <div class="dossier-specs-grid">
                 <div class="spec-item">
-                  <span class="spec-label">Action</span>
+                  <span class="spec-label"><i class="ri-flashlight-line"></i> Action</span>
                   <span class="spec-value">{{ getActiveEffect(pow).action || 'Standard' }}</span>
                 </div>
                 <div class="spec-item">
-                  <span class="spec-label">Range</span>
+                  <span class="spec-label"><i class="ri-focus-line"></i> Range</span>
                   <span class="spec-value">{{ formatRange(getActiveEffect(pow)) }}</span>
                 </div>
                 <div class="spec-item">
-                  <span class="spec-label">Duration</span>
+                  <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
                   <span class="spec-value">{{ getActiveEffect(pow).duration || 'Instant' }}</span>
                 </div>
-                <div v-if="calculateDC(getActiveEffect(pow))" class="spec-item">
-                  <span class="spec-label">Resistance Check</span>
-                  <span class="spec-value highlight">{{ calculateDC(getActiveEffect(pow)) }}</span>
+                <div class="spec-item">
+                  <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
+                  <span class="spec-value highlight">{{ calculateDC(getActiveEffect(pow)) || (getActiveEffect(pow).resistance ? `vs ${getActiveEffect(pow).resistance}` : 'None') }}</span>
                 </div>
+              </div>
+
+              <!-- Official Rulebook Callout Reference -->
+              <div class="rulebook-callout-box">
+                <div class="rulebook-callout-head">
+                  <div class="rulebook-icon-tag">
+                    <i class="ri-book-open-line"></i>
+                    <span>Official Rulebook Mechanics</span>
+                  </div>
+                </div>
+                <p class="dossier-desc-text">
+                  {{ getEffectDesc(getActiveEffect(pow).baseEffect) }}
+                </p>
               </div>
             </div>
 
@@ -602,32 +546,42 @@
             <!-- 4. Linked Effects (Simultaneous Powers) -->
             <div v-if="getActiveLinkedEffects(pow).length > 0" class="dossier-block linked-block">
               <div class="dossier-block-head linked-head">
-                <i class="ri-links-line"></i>
-                <span>Simultaneous Linked Effects ({{ getActiveLinkedEffects(pow).length }})</span>
+                <div class="dossier-head-left">
+                  <i class="ri-links-line"></i>
+                  <span>Simultaneous Linked Effects ({{ getActiveLinkedEffects(pow).length }})</span>
+                </div>
+                <span class="linked-suite-hint">Active together on the exact same action</span>
               </div>
               <div class="linked-effects-roster">
                 <div
                   v-for="(linked, lIdx) in getActiveLinkedEffects(pow)"
                   :key="'dl_' + lIdx"
-                  class="dossier-linked-card"
+                  class="linked-full-dossier-card"
                 >
-                  <div class="linked-card-top">
-                    <div class="linked-id-group">
-                      <span class="linked-chain-badge"><i class="ri-link-m"></i> Linked</span>
-                      <strong class="linked-name">{{ getLinkedDisplayName(linked) }}</strong>
-                      <span
-                        v-if="linked.baseEffect && getLinkedDisplayName(linked) !== linked.baseEffect && getLinkedDisplayName(linked) !== `${linked.baseEffect} (Linked)`"
-                        class="linked-base-badge"
-                      >
-                        {{ linked.baseEffect }}
-                      </span>
-                      <span class="linked-ranks-pill">Rank {{ linked.ranks }}</span>
+                  <!-- 1. Master Header Card -->
+                  <div class="linked-card-master-header">
+                    <div class="linked-master-left">
+                      <div class="linked-index-badge">
+                        <i class="ri-links-line"></i>
+                        <span>#{{ lIdx + 1 }}</span>
+                      </div>
+                      <div class="linked-title-group">
+                        <div class="linked-title-row">
+                          <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
+                          <span class="linked-effect-chip">{{ linked.baseEffect }} (Rank {{ linked.ranks }})</span>
+                          <span v-if="getEffectCategory(linked.baseEffect)" class="linked-category-chip">
+                            {{ getEffectCategory(linked.baseEffect) }}
+                          </span>
+                        </div>
+                      </div>
                     </div>
-                    <div class="linked-actions">
-                      <span class="linked-dc-pill">{{ calculateDC(linked) }}</span>
+                    <div class="linked-master-actions">
+                      <span v-if="calculateDC(linked)" class="linked-dc-tag">
+                        {{ calculateDC(linked) }}
+                      </span>
                       <button
                         type="button"
-                        class="btn-mod-vtt linked"
+                        class="btn-linked-broadcast"
                         title="Broadcast Linked Effect to Roll20"
                         @click.stop="broadcastEffect(pow, linked, true)"
                       >
@@ -637,28 +591,86 @@
                     </div>
                   </div>
 
-                  <!-- Configured choices badge strip (e.g. Stamina, Darkvision, etc.) -->
-                  <div v-if="getEffectConfigDetails(linked)" class="linked-config-strip">
-                    <span class="linked-config-label">
-                      <i class="ri-focus-3-line"></i>
-                      <span>{{ getEffectConfigDetails(linked).title }}:</span>
-                    </span>
-                    <strong class="linked-config-value">{{ getEffectConfigDetails(linked).quickText }}</strong>
-                    <span v-if="getEffectConfigDetails(linked).badge" class="linked-config-badge">
-                      {{ getEffectConfigDetails(linked).badge }}
-                    </span>
+                  <!-- 2. Specs Matrix Grid (Placed First for instant battle reference) -->
+                  <div class="dossier-specs-grid linked-specs-grid">
+                    <div class="spec-item">
+                      <span class="spec-label"><i class="ri-flashlight-line"></i> Action</span>
+                      <span class="spec-value">{{ linked.action || 'Standard' }}</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label"><i class="ri-focus-line"></i> Range</span>
+                      <span class="spec-value">{{ formatRange(linked) }}</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
+                      <span class="spec-value">{{ linked.duration || 'Instant' }}</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
+                      <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : 'None') }}</span>
+                    </div>
                   </div>
-                  <p class="dossier-desc-text sub">{{ getEffectDesc(linked.baseEffect) }}</p>
-                  <div class="linked-specs-row">
-                    <span><strong>Action:</strong> {{ linked.action || 'Standard' }}</span>
-                    <span><strong>Range:</strong> {{ linked.range || 'Close' }}</span>
-                    <span><strong>Resist:</strong> {{ linked.resistance || 'Fortitude' }}</span>
-                    <span v-if="linked.extras?.length > 0" class="linked-extras-text">
-                      <strong>+Extras:</strong> {{ linked.extras.map(e => e.name).join(', ') }}
-                    </span>
-                    <span v-if="linked.flaws?.length > 0" class="linked-flaws-text">
-                      <strong>-Flaws:</strong> {{ linked.flaws.map(f => f.name).join(', ') }}
-                    </span>
+
+                  <!-- 3. Configured Choices / Selections Block -->
+                  <div v-if="getEffectConfigDetails(linked)" class="linked-config-block">
+                    <div class="linked-config-head">
+                      <div class="dossier-head-left">
+                        <i class="ri-checkbox-circle-fill"></i>
+                        <span>{{ getEffectConfigDetails(linked).title }}</span>
+                      </div>
+                      <span class="dossier-config-badge">{{ getEffectConfigDetails(linked).badge }}</span>
+                    </div>
+                    <div class="config-choices-grid">
+                      <div
+                        v-for="item in getEffectConfigDetails(linked).items"
+                        :key="item.name"
+                        class="config-choice-card linked-choice-card"
+                      >
+                        <div class="config-choice-top">
+                          <i :class="item.icon || 'ri-focus-3-line'" class="choice-icon"></i>
+                          <strong class="choice-name">{{ item.name }}</strong>
+                          <span v-if="item.pts" class="choice-pts">{{ item.pts }} PP</span>
+                          <span v-else-if="item.ranks" class="choice-pts">Rank {{ item.ranks }}</span>
+                        </div>
+                        <p v-if="item.desc" class="choice-desc">{{ item.desc }}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 4. Official Rules Reference in Callout Box -->
+                  <div class="rulebook-callout-box linked">
+                    <div class="rulebook-callout-head">
+                      <div class="rulebook-icon-tag">
+                        <i class="ri-book-open-line"></i>
+                        <span>Official Rulebook Mechanics</span>
+                      </div>
+                    </div>
+                    <p class="dossier-desc-text linked-rules-text">
+                      {{ getEffectDesc(linked.baseEffect) }}
+                    </p>
+                  </div>
+
+                  <!-- 5. Applied Modifiers Section -->
+                  <div
+                    v-if="(linked.extras?.length || 0) + (linked.flaws?.length || 0) > 0"
+                    class="linked-mods-container"
+                  >
+                    <div v-if="linked.extras?.length > 0" class="linked-mod-row">
+                      <span class="mod-row-label extra"><i class="ri-add-circle-line"></i> Extras:</span>
+                      <div class="mod-row-tags">
+                        <span v-for="e in linked.extras" :key="e.name" class="glance-mod-tag extra">
+                          +{{ e.name }}{{ (e.ranks || 1) > 1 ? ` x${e.ranks}` : '' }}
+                        </span>
+                      </div>
+                    </div>
+                    <div v-if="linked.flaws?.length > 0" class="linked-mod-row">
+                      <span class="mod-row-label flaw"><i class="ri-indeterminate-circle-line"></i> Flaws:</span>
+                      <div class="mod-row-tags">
+                        <span v-for="f in linked.flaws" :key="f.name" class="glance-mod-tag flaw">
+                          -{{ f.name }}{{ (f.ranks || 1) > 1 ? ` x${f.ranks}` : '' }}
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -707,31 +719,8 @@
 
           <!-- Device Container Detailed Breakdown -->
           <div v-else class="drawer-content-flow device-flow">
-            <div class="dossier-block device-meta-block">
-              <div class="dossier-block-head dev-head">
-                <i class="ri-shield-keyhole-line"></i>
-                <span>Device Specifications</span>
-              </div>
-              <div class="dossier-specs-grid">
-                <div class="spec-item">
-                  <span class="spec-label">Container Type</span>
-                  <span class="spec-value">{{ pow.deviceConfig?.type === 'easily_removable' ? 'Easily Removable (-2/5 PP)' : 'Removable (-1/5 PP)' }}</span>
-                </div>
-                <div class="spec-item">
-                  <span class="spec-label">Item Toughness</span>
-                  <span class="spec-value">Toughness {{ pow.deviceConfig?.toughness || 10 }}</span>
-                </div>
-                <div class="spec-item">
-                  <span class="spec-label">Descriptor</span>
-                  <span class="spec-value">{{ pow.deviceConfig?.descriptor || 'Personal Gear' }}</span>
-                </div>
-              </div>
-            </div>
-
-
-
-            <!-- Tab 1: Single Focused Sub-System Details Dossier -->
-            <template v-if="getActiveDeviceSubIndex(pow.id || idx) !== 'overview' && (pow.devicePowers || []).length > 0">
+            <!-- Single Focused Sub-System Details Dossier -->
+            <template v-if="(pow.devicePowers || []).length > 0">
               <div
                 v-for="({ sub, idx: sIdx }) in [getSelectedDeviceSub(pow, pow.id || idx)]"
                 :key="'dsub_' + sIdx"
@@ -739,72 +728,105 @@
               >
                 <!-- Sub-System Master Header -->
                 <div class="sub-card-master-header">
-                <div class="sub-sys-badge-lg">
-                  <i class="ri-flashlight-fill"></i>
-                  <span>#{{ sIdx + 1 }}</span>
-                </div>
-                <div class="sub-sys-title-block">
-                  <div class="sub-sys-title-line">
-                    <h4 class="sub-sys-heading">{{ sub.name }}</h4>
-                    <span class="sub-effect-chip">{{ getSubPowerActiveEffect(sub).baseEffect }} (Rank {{ getSubPowerActiveEffect(sub).ranks }})</span>
-                    <span v-if="sub.alternateEffects?.length > 0" class="sub-array-indicator">
-                      <i class="ri-shuffle-line"></i> Array ({{ sub.alternateEffects.length + 1 }} Modes)
+                  <button
+                    type="button"
+                    class="sub-power-toggle-btn master-toggle"
+                    :class="{
+                      'is-active': sub.active !== false && pow.active !== false,
+                      'is-off': sub.active === false || pow.active === false
+                    }"
+                    :disabled="pow.active === false"
+                    :title="pow.active === false ? 'Parent device is Offline' : (sub.active !== false ? 'System is Active (Click to Deactivate)' : 'System is Offline (Click to Activate)')"
+                    @click.stop="handleToggleSubPower(pow, sIdx, sub)"
+                  >
+                    <i :class="sub.active !== false && pow.active !== false ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'"></i>
+                    <span class="sub-toggle-text">{{ sub.active !== false && pow.active !== false ? 'ONLINE' : 'OFFLINE' }}</span>
+                  </button>
+                  <div class="sub-sys-badge-lg">
+                    <i class="ri-flashlight-fill"></i>
+                    <span>#{{ sIdx + 1 }}</span>
+                  </div>
+                  <div class="sub-sys-title-block">
+                    <div class="sub-sys-title-line">
+                      <h4 class="sub-sys-heading">{{ sub.name }}</h4>
+                      <span class="sub-effect-chip">{{ getSubPowerActiveEffect(sub).baseEffect }} (Rank {{ getSubPowerActiveEffect(sub).ranks }})</span>
+                      <span v-if="sub.alternateEffects?.length > 0" class="sub-array-indicator">
+                        <i class="ri-shuffle-line"></i> Array ({{ sub.alternateEffects.length + 1 }} Modes)
+                      </span>
+                    </div>
+                  </div>
+                  <div class="sub-sys-actions">
+                    <span v-if="calculateDC(getSubPowerActiveEffect(sub))" class="sub-dc-tag-lg">
+                      {{ calculateDC(getSubPowerActiveEffect(sub)) }}
                     </span>
+                    <button
+                      type="button"
+                      class="btn-send-vtt-sub"
+                      title="Broadcast this Sub-System to Roll20"
+                      @click.stop="broadcastSubPower(pow, sub, sIdx)"
+                    >
+                      <i class="ri-broadcast-line"></i>
+                      <span>Roll20</span>
+                    </button>
                   </div>
                 </div>
-                <div class="sub-sys-actions">
-                  <span v-if="calculateDC(getSubPowerActiveEffect(sub))" class="sub-dc-tag-lg">
-                    {{ calculateDC(getSubPowerActiveEffect(sub)) }}
-                  </span>
-                  <button
-                    type="button"
-                    class="btn-send-vtt-sub"
-                    title="Broadcast this Sub-System to Roll20"
-                    @click.stop="broadcastSubPower(pow, sub, sIdx)"
-                  >
-                    <i class="ri-broadcast-line"></i>
-                    <span>Roll20</span>
-                  </button>
-                </div>
-              </div>
 
-              <!-- Sub Base Effect Rules & Mechanics -->
-              <div class="sub-dossier-block sub-rules-block">
-                <div class="sub-dossier-label sub-dossier-label-flex">
-                  <div class="dossier-head-left">
-                    <i class="ri-book-open-line"></i>
-                    <span>Active Effect Mechanics: {{ getSubPowerActiveEffect(sub).baseEffect }}</span>
+                <!-- Sub Base Effect Rules & Mechanics -->
+                <div class="sub-dossier-block sub-rules-block">
+                  <!-- Combat Specs Matrix Grid (Placed First for instant battle reference) -->
+                  <div class="dossier-specs-grid sub-specs">
+                    <div class="spec-item">
+                      <span class="spec-label"><i class="ri-flashlight-line"></i> Action</span>
+                      <span class="spec-value">{{ getSubPowerActiveEffect(sub).action || 'Standard' }}</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label"><i class="ri-focus-line"></i> Range</span>
+                      <span class="spec-value">{{ formatRange(getSubPowerActiveEffect(sub)) }}</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
+                      <span class="spec-value">{{ getSubPowerActiveEffect(sub).duration || 'Instant' }}</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
+                      <span class="spec-value highlight">{{ calculateDC(getSubPowerActiveEffect(sub)) || (getSubPowerActiveEffect(sub).resistance ? `vs ${getSubPowerActiveEffect(sub).resistance}` : 'None') }}</span>
+                    </div>
                   </div>
-                  <button
-                    type="button"
-                    class="btn-effect-vtt sub"
-                    title="Broadcast Sub-Effect rules to Roll20"
-                    @click.stop="broadcastEffect({ name: `${pow.name} - ${sub.name}` }, getSubPowerActiveEffect(sub))"
+
+                  <!-- Sub-Power Extras & Flaws Modifiers (e.g. Impervious) -->
+                  <div
+                    v-if="(getSubPowerActiveEffect(sub).extras?.length || 0) + (getSubPowerActiveEffect(sub).flaws?.length || 0) > 0"
+                    class="linked-mods-container sub-mods-container"
                   >
-                    <i class="ri-broadcast-line"></i>
-                    <span>Broadcast Effect</span>
-                  </button>
+                    <div v-if="getSubPowerActiveEffect(sub).extras?.length > 0" class="linked-mod-row">
+                      <span class="mod-row-label extra"><i class="ri-add-circle-line"></i> Extras:</span>
+                      <div class="mod-row-tags">
+                        <span v-for="e in getSubPowerActiveEffect(sub).extras" :key="e.name" class="glance-mod-tag extra">
+                          +{{ e.name }}{{ (e.ranks || 1) > 1 ? ` x${e.ranks}` : '' }}
+                        </span>
+                      </div>
+                    </div>
+                    <div v-if="getSubPowerActiveEffect(sub).flaws?.length > 0" class="linked-mod-row">
+                      <span class="mod-row-label flaw"><i class="ri-indeterminate-circle-line"></i> Flaws:</span>
+                      <div class="mod-row-tags">
+                        <span v-for="f in getSubPowerActiveEffect(sub).flaws" :key="f.name" class="glance-mod-tag flaw">
+                          -{{ f.name }}{{ (f.ranks || 1) > 1 ? ` x${f.ranks}` : '' }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Official Rulebook Callout Reference -->
+                  <div class="rulebook-callout-box">
+                    <div class="rulebook-callout-head">
+                      <div class="rulebook-icon-tag">
+                        <i class="ri-book-open-line"></i>
+                        <span>Official Rulebook Mechanics</span>
+                      </div>
+                    </div>
+                    <p class="dossier-desc-text sub">{{ getEffectDesc(getSubPowerActiveEffect(sub).baseEffect) }}</p>
+                  </div>
                 </div>
-                <p class="dossier-desc-text sub">{{ getEffectDesc(getSubPowerActiveEffect(sub).baseEffect) }}</p>
-                <div class="dossier-specs-grid sub-specs">
-                  <div class="spec-item">
-                    <span class="spec-label">Action</span>
-                    <span class="spec-value">{{ getSubPowerActiveEffect(sub).action || 'Standard' }}</span>
-                  </div>
-                  <div class="spec-item">
-                    <span class="spec-label">Range</span>
-                    <span class="spec-value">{{ formatRange(getSubPowerActiveEffect(sub)) }}</span>
-                  </div>
-                  <div class="spec-item">
-                    <span class="spec-label">Duration</span>
-                    <span class="spec-value">{{ getSubPowerActiveEffect(sub).duration || 'Instant' }}</span>
-                  </div>
-                  <div v-if="calculateDC(getSubPowerActiveEffect(sub))" class="spec-item">
-                    <span class="spec-label">Resistance</span>
-                    <span class="spec-value">{{ getSubPowerActiveEffect(sub).resistance ? `DC Check vs ${getSubPowerActiveEffect(sub).resistance}` : 'None' }}</span>
-                  </div>
-                </div>
-              </div>
 
               <!-- Sub-power Configured Choices Block -->
               <div v-if="getEffectConfigDetails(getSubPowerActiveEffect(sub))" class="sub-dossier-block config-choices-block sub">
@@ -875,32 +897,42 @@
               <!-- Simultaneous Linked Effects Pod (if sub-power has linked effects) -->
               <div v-if="getSubPowerActiveLinkedEffects(sub).length > 0" class="sub-dossier-block sub-linked-block">
                 <div class="sub-dossier-label linked-accent">
-                  <i class="ri-links-line"></i>
-                  <span>Simultaneous Linked Sub-Effects ({{ getSubPowerActiveLinkedEffects(sub).length }})</span>
+                  <div class="dossier-head-left">
+                    <i class="ri-links-line"></i>
+                    <span>Simultaneous Linked Sub-Effects ({{ getSubPowerActiveLinkedEffects(sub).length }})</span>
+                  </div>
+                  <span class="linked-suite-hint">Active together on the exact same action</span>
                 </div>
                 <div class="linked-effects-roster">
                   <div
                     v-for="(linked, lIdx) in getSubPowerActiveLinkedEffects(sub)"
                     :key="'sub_dl_' + lIdx"
-                    class="dossier-linked-card"
+                    class="linked-full-dossier-card"
                   >
-                    <div class="linked-card-top">
-                      <div class="linked-id-group">
-                        <span class="linked-chain-badge"><i class="ri-link-m"></i> Linked</span>
-                        <strong class="linked-name">{{ getLinkedDisplayName(linked) }}</strong>
-                        <span
-                          v-if="linked.baseEffect && getLinkedDisplayName(linked) !== linked.baseEffect && getLinkedDisplayName(linked) !== `${linked.baseEffect} (Linked)`"
-                          class="linked-base-badge"
-                        >
-                          {{ linked.baseEffect }}
-                        </span>
-                        <span class="linked-ranks-pill">Rank {{ linked.ranks }}</span>
+                    <!-- 1. Master Header Card -->
+                    <div class="linked-card-master-header">
+                      <div class="linked-master-left">
+                        <div class="linked-index-badge">
+                          <i class="ri-links-line"></i>
+                          <span>#{{ lIdx + 1 }}</span>
+                        </div>
+                        <div class="linked-title-group">
+                          <div class="linked-title-row">
+                            <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
+                            <span class="linked-effect-chip">{{ linked.baseEffect }} (Rank {{ linked.ranks }})</span>
+                            <span v-if="getEffectCategory(linked.baseEffect)" class="linked-category-chip">
+                              {{ getEffectCategory(linked.baseEffect) }}
+                            </span>
+                          </div>
+                        </div>
                       </div>
-                      <div class="linked-actions">
-                        <span class="linked-dc-pill">{{ calculateDC(linked) }}</span>
+                      <div class="linked-master-actions">
+                        <span v-if="calculateDC(linked)" class="linked-dc-tag">
+                          {{ calculateDC(linked) }}
+                        </span>
                         <button
                           type="button"
-                          class="btn-mod-vtt linked"
+                          class="btn-linked-broadcast"
                           title="Broadcast Linked Effect to Roll20"
                           @click.stop="broadcastEffect({ name: `${pow.name} - ${sub.name}` }, linked, true)"
                         >
@@ -910,28 +942,86 @@
                       </div>
                     </div>
 
-                    <!-- Configured choices badge strip (e.g. Stamina, Darkvision, etc.) -->
-                    <div v-if="getEffectConfigDetails(linked)" class="linked-config-strip">
-                      <span class="linked-config-label">
-                        <i class="ri-focus-3-line"></i>
-                        <span>{{ getEffectConfigDetails(linked).title }}:</span>
-                      </span>
-                      <strong class="linked-config-value">{{ getEffectConfigDetails(linked).quickText }}</strong>
-                      <span v-if="getEffectConfigDetails(linked).badge" class="linked-config-badge">
-                        {{ getEffectConfigDetails(linked).badge }}
-                      </span>
+                    <!-- 2. Specs Matrix Grid (Placed First for instant battle reference) -->
+                    <div class="dossier-specs-grid linked-specs-grid">
+                      <div class="spec-item">
+                        <span class="spec-label"><i class="ri-flashlight-line"></i> Action</span>
+                        <span class="spec-value">{{ linked.action || 'Standard' }}</span>
+                      </div>
+                      <div class="spec-item">
+                        <span class="spec-label"><i class="ri-focus-line"></i> Range</span>
+                        <span class="spec-value">{{ formatRange(linked) }}</span>
+                      </div>
+                      <div class="spec-item">
+                        <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
+                        <span class="spec-value">{{ linked.duration || 'Instant' }}</span>
+                      </div>
+                      <div class="spec-item">
+                        <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
+                        <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : 'None') }}</span>
+                      </div>
                     </div>
-                    <p class="dossier-desc-text sub">{{ getEffectDesc(linked.baseEffect) }}</p>
-                    <div class="linked-specs-row">
-                      <span><strong>Action:</strong> {{ linked.action || 'Standard' }}</span>
-                      <span><strong>Range:</strong> {{ linked.range || 'Close' }}</span>
-                      <span><strong>Resist:</strong> {{ linked.resistance || 'Fortitude' }}</span>
-                      <span v-if="linked.extras?.length > 0" class="linked-extras-text">
-                        <strong>+Extras:</strong> {{ linked.extras.map(e => e.name).join(', ') }}
-                      </span>
-                      <span v-if="linked.flaws?.length > 0" class="linked-flaws-text">
-                        <strong>-Flaws:</strong> {{ linked.flaws.map(f => f.name).join(', ') }}
-                      </span>
+
+                    <!-- 3. Configured Choices / Selections Block -->
+                    <div v-if="getEffectConfigDetails(linked)" class="linked-config-block">
+                      <div class="linked-config-head">
+                        <div class="dossier-head-left">
+                          <i class="ri-checkbox-circle-fill"></i>
+                          <span>{{ getEffectConfigDetails(linked).title }}</span>
+                        </div>
+                        <span class="dossier-config-badge sub">{{ getEffectConfigDetails(linked).badge }}</span>
+                      </div>
+                      <div class="config-choices-grid">
+                        <div
+                          v-for="item in getEffectConfigDetails(linked).items"
+                          :key="item.name"
+                          class="config-choice-card linked-choice-card"
+                        >
+                          <div class="config-choice-top">
+                            <i :class="item.icon || 'ri-focus-3-line'" class="choice-icon"></i>
+                            <strong class="choice-name">{{ item.name }}</strong>
+                            <span v-if="item.pts" class="choice-pts">{{ item.pts }} PP</span>
+                            <span v-else-if="item.ranks" class="choice-pts">Rank {{ item.ranks }}</span>
+                          </div>
+                          <p v-if="item.desc" class="choice-desc">{{ item.desc }}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- 4. Official Rules Reference in Callout Box -->
+                    <div class="rulebook-callout-box linked">
+                      <div class="rulebook-callout-head">
+                        <div class="rulebook-icon-tag">
+                          <i class="ri-book-open-line"></i>
+                          <span>Official Rulebook Mechanics</span>
+                        </div>
+                      </div>
+                      <p class="dossier-desc-text linked-rules-text">
+                        {{ getEffectDesc(linked.baseEffect) }}
+                      </p>
+                    </div>
+
+                    <!-- 5. Applied Modifiers Section -->
+                    <div
+                      v-if="(linked.extras?.length || 0) + (linked.flaws?.length || 0) > 0"
+                      class="linked-mods-container"
+                    >
+                      <div v-if="linked.extras?.length > 0" class="linked-mod-row">
+                        <span class="mod-row-label extra"><i class="ri-add-circle-line"></i> Extras:</span>
+                        <div class="mod-row-tags">
+                          <span v-for="e in linked.extras" :key="e.name" class="glance-mod-tag extra">
+                            +{{ e.name }}{{ (e.ranks || 1) > 1 ? ` x${e.ranks}` : '' }}
+                          </span>
+                        </div>
+                      </div>
+                      <div v-if="linked.flaws?.length > 0" class="linked-mod-row">
+                        <span class="mod-row-label flaw"><i class="ri-indeterminate-circle-line"></i> Flaws:</span>
+                        <div class="mod-row-tags">
+                          <span v-for="f in linked.flaws" :key="f.name" class="glance-mod-tag flaw">
+                            -{{ f.name }}{{ (f.ranks || 1) > 1 ? ` x${f.ranks}` : '' }}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -998,73 +1088,6 @@
               </div>
             </div>
           </template>
-
-          <!-- Tab 2: All Systems Summary Roster (when 'overview' tab is active) -->
-          <div v-else class="dossier-all-systems-roster">
-            <div
-              v-for="(sItem, sI) in (pow.devicePowers || [])"
-              :key="'dall_' + (sItem.id || sI)"
-              class="dossier-roster-row"
-              :class="{ 'is-offline': sItem.active === false || pow.active === false }"
-              @click="setActiveDeviceSubIndex(pow.id || idx, sI)"
-            >
-              <div class="roster-left">
-                <span class="roster-sys-badge">#{{ sI + 1 }}</span>
-                <button
-                  type="button"
-                  class="sub-power-toggle-btn mini"
-                  :class="{
-                    'is-active': sItem.active !== false && pow.active !== false,
-                    'is-off': sItem.active === false || pow.active === false
-                  }"
-                  :disabled="pow.active === false"
-                  title="Toggle Sub-Power Active / Offline"
-                  @click.stop="handleToggleSubPower(pow, sI, sItem)"
-                >
-                  <i :class="sItem.active !== false && pow.active !== false ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'"></i>
-                </button>
-                <i :class="getEffectIcon(getSubPowerActiveEffect(sItem).baseEffect)" class="roster-icon"></i>
-                <div class="roster-title-group">
-                  <strong class="roster-name">{{ sItem.name }}</strong>
-                  <span class="roster-effect-chip">
-                    {{ getSubPowerActiveEffect(sItem).baseEffect }} (Rank {{ getSubPowerActiveEffect(sItem).ranks }})
-                    <small v-if="getEffectConfigDetails(getSubPowerActiveEffect(sItem))?.quickText">
-                      • {{ getEffectConfigDetails(getSubPowerActiveEffect(sItem)).quickText }}
-                    </small>
-                  </span>
-                </div>
-              </div>
-
-              <div class="roster-middle">
-                <span class="roster-meta-pill"><i class="ri-timer-line"></i> {{ getSubPowerActiveEffect(sItem).action || 'Standard' }}</span>
-                <span class="roster-meta-pill"><i class="ri-crosshair-2-line"></i> {{ formatRange(getSubPowerActiveEffect(sItem)) }}</span>
-                <span v-if="calculateDC(getSubPowerActiveEffect(sItem))" class="roster-dc-pill">
-                  {{ calculateDC(getSubPowerActiveEffect(sItem)) }}
-                </span>
-              </div>
-
-              <div class="roster-right">
-                <button
-                  type="button"
-                  class="btn-send-vtt-sub"
-                  title="Broadcast this Sub-System to Roll20"
-                  @click.stop="broadcastSubPower(pow, sItem, sI)"
-                >
-                  <i class="ri-broadcast-line"></i>
-                  <span>Roll20</span>
-                </button>
-                <button
-                  type="button"
-                  class="btn-inspect-system"
-                  title="Inspect System Mechanics"
-                  @click.stop="setActiveDeviceSubIndex(pow.id || idx, sI)"
-                >
-                  <span>Details</span>
-                  <i class="ri-arrow-right-s-line"></i>
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>
@@ -1119,6 +1142,12 @@ function getLinkedDisplayName(linked) {
   }
 
   return name;
+}
+
+function getEffectCategory(baseName) {
+  if (!baseName) return '';
+  const ref = BASE_EFFECTS.find(b => b.name.toLowerCase() === baseName.toLowerCase());
+  return ref?.category || '';
 }
 
 function formatLinkedEffectsList(list) {
@@ -2095,6 +2124,37 @@ function getModifierInfo(modName, isFlaw = false) {
   cursor: not-allowed;
 }
 
+.sub-power-toggle-btn.master-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--radius-xs);
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.sub-power-toggle-btn.master-toggle:hover:not(:disabled) {
+  background: rgba(16, 185, 129, 0.25);
+  transform: none;
+}
+
+.sub-power-toggle-btn.master-toggle.is-off {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
+}
+
+.sub-power-toggle-btn.master-toggle.is-off:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.22);
+}
+
 .sub-system-tile.is-sub-deactivated {
   opacity: 0.65;
   border-style: dashed;
@@ -2870,20 +2930,27 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .dossier-block {
-  background: var(--bg-card);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  padding: 0.65rem 0.8rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0.85rem 0 0 0;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.dossier-block:first-child,
+.dossier-block:first-of-type {
+  border-top: none;
+  padding-top: 0;
 }
 
 .dossier-block-head {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  font-size: 0.74rem;
+  gap: 0.4rem;
+  font-size: 0.82rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -2896,46 +2963,103 @@ function getModifierInfo(modName, isFlaw = false) {
 .dossier-block-head.array-head { color: #38bdf8; }
 .dossier-block-head.dev-head { color: #fbbf24; }
 
+/* Rulebook Reference Section (De-boxed open flow) */
+.rulebook-callout-box {
+  background: transparent;
+  border: none;
+  border-left: none;
+  border-radius: 0;
+  padding: 0.45rem 0 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.25rem;
+  border-top: 1px dashed rgba(255, 255, 255, 0.07);
+}
+
+.rulebook-callout-box.linked {
+  background: transparent;
+  border: none;
+  border-left: none;
+}
+
+.rulebook-callout-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #94a3b8;
+}
+
+.rulebook-icon-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #94a3b8;
+}
+
 .dossier-desc-text {
-  font-size: 0.75rem;
-  line-height: 1.5;
-  color: var(--text-secondary);
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: #e2e8f0;
   margin: 0;
   white-space: pre-line;
+  text-wrap: pretty;
 }
 
 .dossier-desc-text.sub {
-  font-size: 0.72rem;
-  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: #e2e8f0;
 }
 
+/* De-boxed Horizontal Parameters Bar */
 .dossier-specs-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  gap: 0.45rem;
-  padding-top: 0.45rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.65rem 1.6rem;
+  padding: 0.45rem 0.6rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: var(--radius-xs);
+  margin: 0.1rem 0;
 }
 
 .spec-item {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
+  background: transparent;
+  border: none;
+  padding: 0;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.45rem;
+}
+
+.spec-item:hover {
+  border-color: transparent;
 }
 
 .spec-label {
-  font-size: 0.62rem;
+  font-size: 0.68rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: #94a3b8;
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .spec-value {
-  font-size: 0.76rem;
+  font-size: 0.86rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: #ffffff;
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
 .spec-value.highlight {
@@ -3017,126 +3141,239 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .dossier-mod-desc {
-  font-size: 0.72rem;
-  line-height: 1.45;
-  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: #cbd5e1;
   margin: 0;
 }
 
-/* Linked Effects Dossier */
+/* Linked Effects Dossier - Full Parity with Main Effect (Anti-Slop Clean Solid Design) */
+.linked-suite-hint {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: none;
+  letter-spacing: normal;
+  margin-left: auto;
+}
+
 .linked-effects-roster {
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.75rem;
 }
 
-.dossier-linked-card {
+.linked-full-dossier-card {
   background: var(--bg-surface);
-  border: 1px solid rgba(6, 182, 212, 0.3);
+  border: 1px solid rgba(6, 182, 212, 0.25);
   border-left: 3px solid #06b6d4;
   border-radius: var(--radius-xs);
-  padding: 0.55rem 0.7rem;
+  padding: 0.75rem 0.85rem;
   display: flex;
   flex-direction: column;
-  gap: 0.35rem;
+  gap: 0.55rem;
+  transition: border-color var(--trans-fast);
 }
 
-.linked-card-top {
+.linked-full-dossier-card:hover {
+  border-color: rgba(6, 182, 212, 0.45);
+}
+
+/* Master Header Card */
+.linked-card-master-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
-.linked-id-group {
+.linked-master-left {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  min-width: 0;
+  flex: 1;
 }
 
-.linked-chain-badge {
-  font-size: 0.62rem;
+.linked-index-badge {
+  font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
-  background: rgba(6, 182, 212, 0.2);
+  background: rgba(6, 182, 212, 0.16);
   color: #22d3ee;
-  padding: 0.1rem 0.35rem;
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  padding: 0.14rem 0.45rem;
   border-radius: var(--radius-xs);
-}
-
-.linked-ranks-pill {
-  font-size: 0.65rem;
-  font-weight: 800;
-  background: rgba(255, 255, 255, 0.08);
-  padding: 0.1rem 0.35rem;
-  border-radius: var(--radius-xs);
-  color: var(--text-secondary);
-}
-
-.linked-base-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  background: rgba(147, 51, 234, 0.2);
-  color: #c084fc;
-  border: 1px solid rgba(147, 51, 234, 0.35);
-  padding: 0.1rem 0.4rem;
-  border-radius: var(--radius-xs);
-}
-
-.linked-config-strip {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  padding: 0.25rem 0.5rem;
-  background: rgba(6, 182, 212, 0.08);
-  border: 1px solid rgba(6, 182, 212, 0.2);
-  border-radius: var(--radius-xs);
-  font-size: 0.72rem;
-}
-
-.linked-config-label {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.linked-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.linked-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.linked-heading {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.linked-effect-chip {
+  font-size: 0.68rem;
+  font-weight: 700;
   color: #22d3ee;
-  font-weight: 600;
+  background: rgba(6, 182, 212, 0.1);
+  padding: 0.1rem 0.38rem;
+  border-radius: var(--radius-xs);
 }
 
-.linked-config-value {
-  color: #e2e8f0;
-}
-
-.linked-config-badge {
+.linked-category-chip {
   font-size: 0.62rem;
   font-weight: 700;
-  background: rgba(6, 182, 212, 0.25);
-  color: #67e8f9;
-  padding: 0.05rem 0.35rem;
-  border-radius: 999px;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.15);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  padding: 0.08rem 0.35rem;
+  border-radius: var(--radius-xs);
 }
 
-.linked-dc-pill {
+.linked-master-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.linked-dc-tag {
   font-size: 0.74rem;
   font-weight: 800;
   color: #38bdf8;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-xs);
   font-variant-numeric: tabular-nums;
 }
 
-.linked-specs-row {
+.btn-linked-broadcast {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: rgba(6, 182, 212, 0.14);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  color: #67e8f9;
+  padding: 0.18rem 0.5rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-linked-broadcast:hover {
+  background: #0891b2;
+  border-color: #06b6d4;
+  color: #ffffff;
+}
+
+/* Rules Text */
+.linked-rules-text {
+  font-size: 0.84rem;
+  line-height: 1.65;
+  color: #e2e8f0;
+}
+
+/* Specs Matrix Grid - Exact match with Main Effect */
+.linked-specs-grid {
+  border-top: none;
+  padding-top: 0.45rem;
+}
+
+/* Configured Choices Block inside Linked Dossier (De-boxed) */
+.linked-config-block {
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0.35rem 0 0 0;
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  font-size: 0.72rem;
-  color: var(--text-secondary);
-  padding-top: 0.3rem;
+  flex-direction: column;
+  gap: 0.4rem;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.linked-specs-row strong { color: var(--text-primary); }
-.linked-extras-text { color: #34d399; }
-.linked-flaws-text { color: #f87171; }
+.linked-config-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #22d3ee;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.linked-choice-card {
+  border-color: rgba(6, 182, 212, 0.2);
+}
+
+/* Applied Modifiers Section inside Linked Dossier */
+.linked-mods-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.linked-mod-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  font-size: 0.72rem;
+}
+
+.mod-row-label {
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.mod-row-label.extra { color: #34d399; }
+.mod-row-label.flaw { color: #f87171; }
+
+.mod-row-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
 
 /* Array Stunts Table */
 .array-stunts-table {
@@ -3405,20 +3642,27 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .sub-dossier-block {
-  background: rgba(0, 0, 0, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  border-radius: var(--radius-xs);
-  padding: 0.65rem 0.8rem;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0.75rem 0 0 0;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.6rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sub-dossier-block:first-of-type,
+.sub-dossier-block:first-child {
+  border-top: none;
+  padding-top: 0;
 }
 
 .sub-dossier-label {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.72rem;
+  font-size: 0.74rem;
   font-weight: 800;
   color: var(--text-primary);
   text-transform: uppercase;
@@ -3430,21 +3674,25 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .sub-dossier-label.linked-accent {
-  color: #38bdf8;
+  color: #22d3ee;
 }
 
 .sub-array-block {
-  border-color: rgba(56, 189, 248, 0.25);
-  background: rgba(56, 189, 248, 0.04);
+  background: transparent;
+  border: none;
+  border-top: 1px solid rgba(56, 189, 248, 0.2);
+  padding-top: 0.85rem;
 }
 
 .sub-linked-block {
-  border-color: rgba(6, 182, 212, 0.25);
-  background: rgba(6, 182, 212, 0.04);
+  background: transparent;
+  border: none;
+  border-top: 1px solid rgba(6, 182, 212, 0.2);
+  padding-top: 0.85rem;
 }
 
 .sub-specs {
-  margin-top: 0.25rem;
+  margin-top: 0.15rem;
 }
 
 .sub-mods-grid {
@@ -3465,16 +3713,17 @@ function getModifierInfo(modName, isFlaw = false) {
   margin-left: 0.2rem;
 }
 
-/* Configured Choices Dossier Block */
+/* Configured Choices Dossier Block (De-boxed) */
 .config-choices-block {
-  border-left: 3px solid #0ea5e9;
-  background: rgba(14, 165, 233, 0.05);
-  border-color: rgba(14, 165, 233, 0.25);
+  background: transparent;
+  border: none;
+  border-left: none;
 }
 
 .config-choices-block.sub {
-  border-left: 3px solid #0ea5e9;
-  background: rgba(14, 165, 233, 0.04);
+  background: transparent;
+  border: none;
+  border-left: none;
 }
 
 .dossier-block-head.config-head {
@@ -3515,45 +3764,52 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .config-choice-card {
   background: var(--bg-surface);
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(139, 92, 246, 0.25);
   border-radius: var(--radius-xs);
-  padding: 0.5rem 0.65rem;
+  padding: 0.55rem 0.75rem;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.3rem;
+  transition: border-color var(--trans-fast);
+}
+
+.config-choice-card:hover {
+  border-color: rgba(139, 92, 246, 0.45);
 }
 
 .config-choice-top {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  font-size: 0.78rem;
+  gap: 0.45rem;
+  font-size: 0.88rem;
 }
 
 .choice-icon {
-  font-size: 0.9rem;
-  color: #a855f7;
+  font-size: 1rem;
+  color: #c084fc;
 }
 
 .choice-name {
-  color: var(--text-primary);
+  color: #f8fafc;
   font-weight: 800;
+  font-size: 0.9rem;
 }
 
 .choice-pts {
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   font-weight: 800;
-  padding: 0.08rem 0.4rem;
+  padding: 0.12rem 0.45rem;
   border-radius: var(--radius-xs);
-  background: rgba(168, 85, 247, 0.15);
-  color: #ddd6fe;
+  background: rgba(168, 85, 247, 0.2);
+  color: #f3e8ff;
+  border: 1px solid rgba(168, 85, 247, 0.35);
   margin-left: auto;
 }
 
 .choice-desc {
-  font-size: 0.7rem;
-  line-height: 1.4;
-  color: var(--text-secondary);
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: #cbd5e1;
   margin: 0;
 }
 
