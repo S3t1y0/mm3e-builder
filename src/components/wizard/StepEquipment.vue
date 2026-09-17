@@ -78,19 +78,19 @@
 
         <!-- QUICK ADD DROPDOWN/BUTTONS -->
         <div class="quick-add-group">
-          <button type="button" class="btn-quick-add" @click="openQuickAdd('Weapons')">
+          <button type="button" class="btn-quick-add" @click="openCustomStudio('Weapons')">
             <i class="ri-sword-line"></i> Weapon
           </button>
-          <button type="button" class="btn-quick-add" @click="openQuickAdd('Armor')">
+          <button type="button" class="btn-quick-add" @click="openCustomStudio('Armor')">
             <i class="ri-shield-line"></i> Armor
           </button>
-          <button type="button" class="btn-quick-add" @click="openQuickAdd('Gadget')">
+          <button type="button" class="btn-quick-add" @click="openCustomStudio('Gadget')">
             <i class="ri-smartphone-line"></i> Gadget
           </button>
-          <button type="button" class="btn-quick-add" @click="openQuickAdd('Vehicle')">
+          <button type="button" class="btn-quick-add" @click="openCustomStudio('Vehicle')">
             <i class="ri-car-line"></i> Vehicle
           </button>
-          <button type="button" class="btn-quick-add" @click="openQuickAdd('Headquarters')">
+          <button type="button" class="btn-quick-add" @click="openCustomStudio('Headquarters')">
             <i class="ri-building-line"></i> HQ
           </button>
         </div>
@@ -216,9 +216,9 @@
             type="button"
             class="modal-tab-btn"
             :class="{ active: modalActiveTab === 'custom' }"
-            @click="modalActiveTab = 'custom'"
+            @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
           >
-            <i class="ri-edit-line"></i> Custom Item Creator
+            <i class="ri-tools-fill"></i> Custom Equipment Studio
           </button>
         </div>
 
@@ -233,6 +233,14 @@
               placeholder="Search weapons, gadgets, armor, vehicles, HQ..."
               style="padding-left: 2.3rem;"
             />
+            <button
+              type="button"
+              class="btn btn-primary btn-xs"
+              style="margin-left: 0.5rem; white-space: nowrap;"
+              @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
+            >
+              <i class="ri-add-line"></i> Custom
+            </button>
           </div>
 
           <div class="preset-items-scroll">
@@ -260,47 +268,34 @@
           </div>
         </div>
 
-        <!-- TAB 2: CUSTOM ITEM CREATOR -->
+        <!-- TAB 2: CUSTOM ITEM STUDIO LAUNCHER -->
         <div v-else class="modal-tab-body">
-          <div class="form-grid mb-3">
-            <div class="form-group">
-              <label class="form-label">Item Name *</label>
-              <input v-model="customForm.name" type="text" class="form-control" placeholder="e.g. Nanotech Suit, Plasma Rifle..." />
+          <div style="text-align: center; padding: 2rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
+            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
+              <i class="ri-tools-fill"></i>
             </div>
-            <div class="form-group">
-              <label class="form-label">Category *</label>
-              <select v-model="customForm.type" class="form-control">
-                <option value="Gear">Gear (General)</option>
-                <option value="Weapons">Weapon</option>
-                <option value="Armor">Armor</option>
-                <option value="Gadget">Gadget</option>
-                <option value="Vehicle">Vehicle</option>
-                <option value="Headquarters">Headquarters</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">Equipment Cost (EP) *</label>
-              <input v-model.number="customForm.epCost" type="number" min="1" class="form-control tabular-nums" />
-            </div>
-            <div class="form-group full-span">
-              <label class="form-label">Description & Rules Traits</label>
-              <textarea
-                v-model="customForm.desc"
-                rows="3"
-                class="form-control"
-                placeholder="Game stats, mechanical traits, damage rank, protection, or utility details..."
-              ></textarea>
-            </div>
-          </div>
-          <div style="display: flex; justify-content: flex-end; gap: 0.5rem;">
-            <button type="button" class="btn btn-secondary btn-sm" @click="showPresetModal = false">Cancel</button>
-            <button type="button" class="btn btn-primary btn-sm" @click="saveCustomItem">
-              <i class="ri-check-line"></i> Create & Add Item
+            <h4 style="color: #fff; margin: 0; font-size: 1.05rem; font-weight: 800;">Interactive Equipment Studio</h4>
+            <p style="font-size: 0.8rem; color: var(--text-secondary); max-width: 450px; margin: 0; line-height: 1.4;">
+              Build customized superhero weapons, body armor, vehicles, headquarters, and tech gadgets with real-time M&M 3e rules calculations.
+            </p>
+            <button
+              type="button"
+              class="btn btn-primary"
+              style="margin-top: 0.5rem;"
+              @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
+            >
+              <i class="ri-flashlight-fill"></i> Launch Equipment Studio
             </button>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- Dedicated Custom Equipment Studio Modal -->
+    <CustomEquipmentModal
+      v-model="showCustomStudio"
+      :initial-category="customStudioCategory"
+    />
   </div>
 </template>
 
@@ -309,21 +304,23 @@ import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { RESOURCE_CATEGORIES, RESOURCE_PRESETS } from '../../rules/resources.js';
+import CustomEquipmentModal from '../modals/CustomEquipmentModal.vue';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
 
 const activeFilter = ref('all');
 const showPresetModal = ref(false);
+const showCustomStudio = ref(false);
+const customStudioCategory = ref('Weapons');
 const modalActiveTab = ref('presets');
 const presetSearch = ref('');
 
-const customForm = ref({
-  name: '',
-  type: 'Gear',
-  epCost: 1,
-  desc: ''
-});
+function openCustomStudio(cat = 'Weapons') {
+  customStudioCategory.value = cat;
+  showCustomStudio.value = true;
+  showPresetModal.value = false;
+}
 
 const categories = RESOURCE_CATEGORIES;
 

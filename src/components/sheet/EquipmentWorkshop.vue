@@ -70,19 +70,19 @@
       </div>
 
       <div class="quick-add-group">
-        <button type="button" class="quick-add-btn" @click="openQuickAdd('Weapons')">
+        <button type="button" class="quick-add-btn" @click="openCustomStudio('Weapons')">
           <i class="ri-sword-line"></i> + Weapon
         </button>
-        <button type="button" class="quick-add-btn" @click="openQuickAdd('Armor')">
+        <button type="button" class="quick-add-btn" @click="openCustomStudio('Armor')">
           <i class="ri-shield-line"></i> + Armor
         </button>
-        <button type="button" class="quick-add-btn" @click="openQuickAdd('Gadget')">
+        <button type="button" class="quick-add-btn" @click="openCustomStudio('Gadget')">
           <i class="ri-smartphone-line"></i> + Gadget
         </button>
-        <button type="button" class="quick-add-btn" @click="openQuickAdd('Vehicle')">
+        <button type="button" class="quick-add-btn" @click="openCustomStudio('Vehicle')">
           <i class="ri-car-line"></i> + Vehicle
         </button>
-        <button type="button" class="quick-add-btn" @click="openQuickAdd('Headquarters')">
+        <button type="button" class="quick-add-btn" @click="openCustomStudio('Headquarters')">
           <i class="ri-building-line"></i> + HQ
         </button>
       </div>
@@ -209,9 +209,9 @@
               type="button"
               class="modal-tab-btn"
               :class="{ active: modalActiveTab === 'custom' }"
-              @click="modalActiveTab = 'custom'"
+              @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
             >
-              <i class="ri-edit-line"></i> Custom Item Creator
+              <i class="ri-tools-fill"></i> Custom Equipment Studio
             </button>
           </div>
 
@@ -225,6 +225,14 @@
                   type="text"
                   placeholder="Search weapons, gadgets, armor, vehicles..."
                 />
+                <button
+                  type="button"
+                  class="btn-search-studio-launch"
+                  @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
+                  title="Forge a custom item from scratch"
+                >
+                  <i class="ri-add-line"></i> Custom
+                </button>
               </div>
 
               <div class="preset-items-list">
@@ -252,40 +260,22 @@
               </div>
             </template>
 
-            <!-- 2. Custom Item Creator Tab -->
+            <!-- 2. Custom Equipment Studio Launcher Tab -->
             <template v-else>
-              <div class="custom-form-grid">
-                <div class="form-group">
-                  <label>Item Name *</label>
-                  <input v-model="customForm.name" type="text" placeholder="e.g. Plasma Rifle, Nanotech Suit..." />
+              <div class="studio-launcher-panel">
+                <div class="launcher-hero-icon">
+                  <i class="ri-tools-fill"></i>
                 </div>
-                <div class="form-group">
-                  <label>Category *</label>
-                  <select v-model="customForm.type">
-                    <option value="Gear">Gear (General)</option>
-                    <option value="Weapons">Weapon</option>
-                    <option value="Armor">Armor</option>
-                    <option value="Gadget">Gadget</option>
-                    <option value="Vehicle">Vehicle</option>
-                    <option value="Headquarters">Headquarters</option>
-                  </select>
-                </div>
-                <div class="form-group">
-                  <label>Equipment Cost (EP) *</label>
-                  <input v-model.number="customForm.epCost" type="number" min="0" />
-                </div>
-                <div class="form-group full-width">
-                  <label>Description & Rules Text</label>
-                  <textarea
-                    v-model="customForm.desc"
-                    rows="3"
-                    placeholder="Provide details, game stats, traits, or mechanical effects..."
-                  ></textarea>
-                </div>
-              </div>
-              <div class="custom-form-actions">
-                <button type="button" class="btn-create-custom" @click="saveCustomItem">
-                  <i class="ri-check-line"></i> Create & Add to Sheet
+                <h4 class="launcher-title">Interactive Equipment Studio</h4>
+                <p class="launcher-desc">
+                  Design specialized superhero gear, high-tech weaponry, powered armor, tactical vehicles, and secret headquarters with automatic M&M 3e cost calculations and guided step-by-step customization.
+                </p>
+                <button
+                  type="button"
+                  class="btn-launch-full-studio"
+                  @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
+                >
+                  <i class="ri-flashlight-fill"></i> Launch Equipment Studio
                 </button>
               </div>
             </template>
@@ -293,6 +283,12 @@
         </div>
       </div>
     </transition>
+
+    <!-- Dedicated Custom Equipment Studio Modal -->
+    <CustomEquipmentModal
+      v-model="showCustomStudio"
+      :initial-category="customStudioCategory"
+    />
   </div>
 </template>
 
@@ -302,21 +298,23 @@ import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { RESOURCE_CATEGORIES, RESOURCE_PRESETS } from '../../rules/resources.js';
 import { sendFeatureToVTT } from '../../services/vttBridge.js';
+import CustomEquipmentModal from '../modals/CustomEquipmentModal.vue';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
 
 const activeFilter = ref('all');
 const showPresetModal = ref(false);
+const showCustomStudio = ref(false);
+const customStudioCategory = ref('Weapons');
 const modalActiveTab = ref('presets');
 const presetSearch = ref('');
 
-const customForm = ref({
-  name: '',
-  type: 'Gear',
-  epCost: 1,
-  desc: ''
-});
+function openCustomStudio(cat = 'Weapons') {
+  customStudioCategory.value = cat;
+  showCustomStudio.value = true;
+  showPresetModal.value = false;
+}
 
 const categories = RESOURCE_CATEGORIES;
 
@@ -1214,6 +1212,89 @@ function exportRoll20(item) {
 .custom-form-actions {
   display: flex;
   justify-content: flex-end;
+}
+
+.btn-search-studio-launch {
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  font-size: 0.74rem;
+  font-weight: 700;
+  padding: 0.25rem 0.6rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  white-space: nowrap;
+  transition: all var(--trans-fast);
+}
+
+.btn-search-studio-launch:hover {
+  background: #38bdf8;
+  color: #090d16;
+}
+
+.studio-launcher-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  gap: 0.75rem;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px dashed rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-md);
+}
+
+.launcher-hero-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+}
+
+.launcher-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+}
+
+.launcher-desc {
+  font-size: 0.78rem;
+  color: #94a3b8;
+  max-width: 480px;
+  margin: 0;
+  line-height: 1.4;
+}
+
+.btn-launch-full-studio {
+  background: #38bdf8;
+  border: 1px solid #7dd3fc;
+  color: #090d16;
+  font-size: 0.84rem;
+  font-weight: 800;
+  padding: 0.55rem 1.4rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all var(--trans-fast);
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+}
+
+.btn-launch-full-studio:hover {
+  background: #7dd3fc;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(56, 189, 248, 0.4);
 }
 
 .btn-create-custom {

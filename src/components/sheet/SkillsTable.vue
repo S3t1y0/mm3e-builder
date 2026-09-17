@@ -183,23 +183,24 @@
         <template v-for="ruleSkill in filteredRuleSkills" :key="ruleSkill.name">
           <!-- 1. Specialization Skills Group (Close Combat, Ranged Combat, Expertise) -->
           <template v-if="ruleSkill.requiresSubtype">
-            <div class="spec-group-container">
-              <!-- Specialization Group Header -->
-              <div class="spec-group-header">
-                <div class="spec-group-left">
-                  <span 
-                    class="sheet-skill-ab-tag"
-                    :class="`ab-${ruleSkill.ability.toLowerCase()}`"
-                    :title="`Governed by ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0})`"
-                  >
-                    {{ ruleSkill.ability }}
-                  </span>
-                  <div class="spec-group-title-wrap">
-                    <span class="spec-group-name">{{ ruleSkill.name }}</span>
+            <div class="spec-group-container" :class="{ 'has-specs': getSubtypeInstances(ruleSkill.name).length > 0 }">
+              <!-- Specialization Category Header / Hub Row -->
+              <div class="spec-parent-row">
+                <span 
+                  class="sheet-skill-ab-tag"
+                  :class="`ab-${ruleSkill.ability.toLowerCase()}`"
+                  :title="`Governed by ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0})`"
+                >
+                  {{ ruleSkill.ability }}
+                </span>
+
+                <div class="sheet-skill-info spec-parent-info">
+                  <div class="sheet-skill-title-row">
+                    <span class="spec-parent-name">{{ ruleSkill.name }}</span>
                     <span 
                       v-if="getSubtypeInstances(ruleSkill.name).length > 0"
                       class="spec-count-tag"
-                      :title="`${getSubtypeInstances(ruleSkill.name).length} specialization(s) trained`"
+                      :title="`${getSubtypeInstances(ruleSkill.name).length} specialization(s) active`"
                     >
                       {{ getSubtypeInstances(ruleSkill.name).length }}
                     </span>
@@ -211,42 +212,59 @@
                       +{{ getAdvantageBonusForSkill(ruleSkill.name) }} {{ getAdvantageNameForSkill(ruleSkill.name) }}
                     </span>
                   </div>
+                  <div class="sheet-skill-math">
+                    <span v-if="getSubtypeInstances(ruleSkill.name).length === 0" class="math-base-quiet">
+                      Requires specialization (e.g. {{ ruleSkill.name === 'Close Combat' ? 'Unarmed, Swords' : (ruleSkill.name === 'Ranged Combat' ? 'Firearms, Bows' : 'Science, Magic') }})
+                    </span>
+                    <span v-else class="math-base-quiet">
+                      {{ getSubtypeInstances(ruleSkill.name).length }} specialization{{ getSubtypeInstances(ruleSkill.name).length > 1 ? 's' : '' }} • Base {{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}
+                    </span>
+                  </div>
                 </div>
 
-                <button
-                  type="button"
-                  class="btn-spec-inline-add"
-                  @click="openInlineSpecModal(ruleSkill.name)"
-                  :title="`Add new ${ruleSkill.name} specialization`"
-                >
-                  <i class="ri-add-line"></i> Add Spec
-                </button>
+                <!-- Action: Quick Add Specialization -->
+                <div class="spec-parent-actions">
+                  <button
+                    type="button"
+                    class="btn-spec-inline-add"
+                    @click="openInlineSpecModal(ruleSkill.name)"
+                    :title="`Add new ${ruleSkill.name} specialization`"
+                  >
+                    <i class="ri-add-line"></i> Spec
+                  </button>
+                </div>
               </div>
 
-              <!-- Specialization Child Rows (If already added) -->
+              <!-- Specialization Child Rows (Zero-Truncation Sub-List) -->
               <div v-if="getSubtypeInstances(ruleSkill.name).length > 0" class="spec-instances-list">
                 <div
                   v-for="inst in getSubtypeInstances(ruleSkill.name)"
                   :key="inst.id || (ruleSkill.name + '_' + inst.subtype)"
                   class="sheet-skill-row is-specialization"
-                  :class="{ 'is-trained': (Number(inst.ranks ?? inst.rank) || 0) + getEnhancedRanks(ruleSkill.name, inst.subtype) > 0 }"
+                  :class="{ 
+                    'is-trained': (Number(inst.ranks ?? inst.rank) || 0) + getEnhancedRanks(ruleSkill.name, inst.subtype) > 0,
+                    'is-signature': isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks)
+                  }"
                   :title="ruleSkill.desc"
                 >
-                  <!-- Ability Pip connector -->
-                  <div class="spec-connector-node">
+                  <!-- Minimal Tree Marker -->
+                  <div class="spec-tree-marker" aria-hidden="true">
                     <i class="ri-corner-down-right-line"></i>
                   </div>
 
-                  <!-- Name & Formula Breakdown -->
-                  <div class="sheet-skill-info">
+                  <!-- Name & Formula Breakdown (Zero Truncation) -->
+                  <div class="sheet-skill-info spec-child-info">
                     <div class="sheet-skill-title-row">
-                      <span class="spec-subtype-name">{{ inst.subtype || 'General' }}</span>
-                      <span class="spec-badge-chip">SPEC</span>
+                      <span class="spec-subtype-name" :title="inst.subtype || 'General'">{{ inst.subtype || 'General' }}</span>
+                      <span 
+                        v-if="isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks)" 
+                        class="sig-badge"
+                      >KEY</span>
                     </div>
                     <div class="sheet-skill-math">
                       <span>{{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}</span>
                       <span class="math-operator">+</span>
-                      <span>Rk {{ inst.ranks || 0 }}</span>
+                      <span class="math-rk">{{ inst.ranks || 0 }} Rk</span>
                       <span 
                         v-if="getEnhancedRanks(ruleSkill.name, inst.subtype) > 0" 
                         class="enh-math-tag"
@@ -266,7 +284,7 @@
 
                   <!-- Rank Stepper + Delete -->
                   <div class="sheet-skill-stepper-col">
-                    <div class="stepper-compact">
+                    <div class="stepper-compact has-ranks">
                       <button
                         type="button"
                         class="step-btn-xs"
@@ -300,11 +318,14 @@
                     </button>
                   </div>
 
-                  <!-- Roll Button -->
+                  <!-- Child Roll Button -->
                   <button
                     type="button"
                     class="sheet-skill-roll-btn"
-                    :class="{ 'has-bonus': calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name) > 0 }"
+                    :class="{ 
+                      'btn-trained': (Number(inst.ranks ?? inst.rank) || 0) + getEnhancedRanks(ruleSkill.name, inst.subtype) > 0,
+                      'btn-signature': isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks)
+                    }"
                     @click="rollSkill(ruleSkill.name + ': ' + (inst.subtype || 'General'), calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))"
                     :title="`Roll ${ruleSkill.name} (${inst.subtype}) check`"
                   >
@@ -315,20 +336,6 @@
                   </button>
                 </div>
               </div>
-
-              <!-- Specialization Empty State (No instances yet) -->
-              <div 
-                v-else 
-                class="spec-group-empty"
-                @click="openInlineSpecModal(ruleSkill.name)"
-                title="Click to add specialization"
-              >
-                <i class="ri-add-circle-line"></i>
-                <span v-if="getAdvantageBonusForSkill(ruleSkill.name) > 0">
-                  No specializations added. Base check: <strong>{{ formatMod(calculateTotalBonus(ruleSkill.ability, 0, 0, ruleSkill.name)) }}</strong> ({{ ruleSkill.ability }} + {{ getAdvantageBonusForSkill(ruleSkill.name) }} Adv). Click to specialize.
-                </span>
-                <span v-else>No specializations added yet. Click to specialize.</span>
-              </div>
             </div>
           </template>
 
@@ -336,7 +343,10 @@
           <template v-else>
             <div
               class="sheet-skill-row"
-              :class="{ 'is-trained': isStandardTrained(ruleSkill.name) }"
+              :class="{ 
+                'is-trained': isStandardTrained(ruleSkill.name),
+                'is-signature': isSignatureSkill(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)), getStandardRanks(ruleSkill.name)) && isStandardTrained(ruleSkill.name)
+              }"
               :title="ruleSkill.desc"
             >
               <!-- Ability Tag -->
@@ -352,24 +362,33 @@
               <div class="sheet-skill-info">
                 <div class="sheet-skill-title-row">
                   <span class="sheet-skill-name">{{ ruleSkill.name }}</span>
+                  <span 
+                    v-if="isSignatureSkill(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)), getStandardRanks(ruleSkill.name)) && isStandardTrained(ruleSkill.name)" 
+                    class="sig-badge"
+                  >KEY</span>
                 </div>
                 <div class="sheet-skill-math">
-                  <span>{{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}</span>
-                  <span class="math-operator">+</span>
-                  <span>Rk {{ getStandardRanks(ruleSkill.name) }}</span>
-                  <span 
-                    v-if="getEnhancedRanks(ruleSkill.name) > 0" 
-                    class="enh-math-tag"
-                    :title="`+${getEnhancedRanks(ruleSkill.name)} from Power`"
-                  >
-                    +{{ getEnhancedRanks(ruleSkill.name) }}p
-                  </span>
+                  <template v-if="getStandardRanks(ruleSkill.name) > 0 || getEnhancedRanks(ruleSkill.name) > 0">
+                    <span>{{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}</span>
+                    <span class="math-operator">+</span>
+                    <span class="math-rk">{{ getStandardRanks(ruleSkill.name) }} Rk</span>
+                    <span 
+                      v-if="getEnhancedRanks(ruleSkill.name) > 0" 
+                      class="enh-math-tag"
+                      :title="`+${getEnhancedRanks(ruleSkill.name)} from Power`"
+                    >
+                      +{{ getEnhancedRanks(ruleSkill.name) }}p
+                    </span>
+                  </template>
+                  <template v-else>
+                    <span class="math-base-quiet">Base {{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}</span>
+                  </template>
                 </div>
               </div>
 
               <!-- Rank Stepper Column -->
               <div class="sheet-skill-stepper-col">
-                <div class="stepper-compact">
+                <div class="stepper-compact" :class="{ 'has-ranks': getStandardRanks(ruleSkill.name) > 0 }">
                   <button
                     type="button"
                     class="step-btn-xs"
@@ -394,11 +413,14 @@
                 </div>
               </div>
 
-              <!-- Roll Button -->
+              <!-- Roll Button (Trained vs Untrained visual hierarchy) -->
               <button
                 type="button"
                 class="sheet-skill-roll-btn"
-                :class="{ 'has-bonus': calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)) > 0 }"
+                :class="{ 
+                  'btn-trained': isStandardTrained(ruleSkill.name),
+                  'btn-signature': isSignatureSkill(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)), getStandardRanks(ruleSkill.name)) && isStandardTrained(ruleSkill.name)
+                }"
                 @click="rollSkill(ruleSkill.name, calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)))"
                 :title="`Roll ${ruleSkill.name} check (d20 + ${calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name))})`"
               >
@@ -613,6 +635,10 @@ function confirmAddSpecialization() {
   showSpecModal.value = false;
 }
 
+function isSignatureSkill(bonus, ranks) {
+  return (Number(ranks) || 0) >= 5 || (Number(bonus) || 0) >= 10;
+}
+
 function rollSkill(skillTitle, bonus) {
   heroStore.rollCheck(skillTitle, bonus, null, 'Skill');
 }
@@ -797,9 +823,9 @@ function rollSkill(skillTitle, bonus) {
 /* 4-Column Table Header */
 .sheet-skills-table-header {
   display: grid;
-  grid-template-columns: 36px 1fr 66px 48px;
+  grid-template-columns: 32px minmax(0, 1fr) auto 60px;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   padding: 0.3rem 0.55rem;
   font-size: 0.64rem;
   font-weight: 800;
@@ -840,14 +866,14 @@ function rollSkill(skillTitle, bonus) {
 /* Skill Rows (Zero Truncation Grid) */
 .sheet-skill-row {
   display: grid;
-  grid-template-columns: 36px 1fr 66px 48px;
+  grid-template-columns: 32px minmax(0, 1fr) auto 60px;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.04);
-  border-left: 3px solid transparent;
+  border-left: 2.5px solid transparent;
   border-radius: var(--radius-sm);
-  padding: 0.35rem 0.55rem;
+  padding: 0.32rem 0.55rem;
   transition: background-color var(--trans-fast), border-color var(--trans-fast);
 }
 
@@ -857,18 +883,30 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .sheet-skill-row.is-trained {
-  background: rgba(16, 185, 129, 0.03);
+  background: rgba(16, 185, 129, 0.035);
   border-left-color: #10b981;
 }
 
-.sheet-skill-row.is-specialization {
-  background: rgba(56, 189, 248, 0.03);
-  border-left-color: #38bdf8;
+.sheet-skill-row.is-signature {
+  background: rgba(220, 38, 38, 0.04);
+  border-left-color: var(--accent-primary);
 }
 
-/* Ability Badges & Color Coding */
+.sheet-skill-row.is-specialization {
+  background: rgba(56, 189, 248, 0.025);
+  border-left-color: #38bdf8;
+  border-radius: var(--radius-xs);
+  padding: 0.26rem 0.45rem;
+}
+
+.sheet-skill-row.is-specialization:hover {
+  background: rgba(56, 189, 248, 0.06);
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+/* Ability Badges (Refined Triad Calibration) */
 .sheet-skill-ab-tag {
-  font-size: 0.64rem;
+  font-size: 0.63rem;
   font-weight: 800;
   padding: 0.12rem 0;
   border-radius: 3px;
@@ -878,55 +916,36 @@ function rollSkill(skillTitle, bonus) {
   display: block;
   width: 100%;
   letter-spacing: 0.02em;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary);
 }
 
-/* Ability Color Variations */
-.ab-fgt {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #f87171;
-}
-
-.ab-str {
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fbbf24;
+/* Physical */
+.ab-fgt, .ab-str, .ab-sta {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
 }
 
 .ab-agl {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #34d399;
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
 }
 
-.ab-dex {
-  background: rgba(6, 182, 212, 0.15);
-  border: 1px solid rgba(6, 182, 212, 0.35);
-  color: #22d3ee;
+/* Mental & Dexterity */
+.ab-dex, .ab-int, .ab-awe {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
 }
 
-.ab-int {
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.35);
-  color: #818cf8;
-}
-
-.ab-awe {
-  background: rgba(20, 184, 166, 0.15);
-  border: 1px solid rgba(20, 184, 166, 0.35);
-  color: #2dd4bf;
-}
-
+/* Presence */
 .ab-pre {
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  color: #fbbf24;
-}
-
-.ab-sta {
-  background: rgba(244, 63, 94, 0.15);
-  border: 1px solid rgba(244, 63, 94, 0.35);
-  color: #fb7185;
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fde68a;
 }
 
 /* Skill Info (Name & Math Formula) */
@@ -941,35 +960,60 @@ function rollSkill(skillTitle, bonus) {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  overflow: hidden;
+  min-width: 0;
 }
 
 .sheet-skill-name {
   font-size: 0.82rem;
-  font-weight: 700;
-  color: var(--text-primary);
+  font-weight: 600;
+  color: var(--text-secondary);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
+  line-height: 1.25;
 }
 
 .sheet-skill-row.is-trained .sheet-skill-name {
   color: #fff;
+  font-weight: 800;
+}
+
+.sig-badge {
+  font-size: 0.54rem;
+  font-weight: 800;
+  color: #fca5a5;
+  background: rgba(220, 38, 38, 0.2);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  padding: 0.04rem 0.25rem;
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  flex-shrink: 0;
+  line-height: 1.1;
 }
 
 .sheet-skill-math {
-  font-size: 0.66rem;
+  font-size: 0.65rem;
   color: var(--text-muted);
   display: flex;
   align-items: center;
   gap: 0.2rem;
+  font-family: var(--font-mono, monospace);
   font-variant-numeric: tabular-nums;
   line-height: 1;
 }
 
+.math-base-quiet {
+  opacity: 0.65;
+}
+
+.math-rk {
+  color: #e2e8f0;
+  font-weight: 700;
+}
+
 .math-operator {
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .enh-math-tag {
@@ -982,14 +1026,16 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .spec-adv-chip {
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 800;
   color: #fbbf24;
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  padding: 0.08rem 0.38rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  padding: 0.05rem 0.32rem;
   border-radius: 3px;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 /* Stepper Column */
@@ -1001,32 +1047,37 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .stepper-compact {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.15rem;
   background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 4px;
-  padding: 1px 3px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: var(--radius-xs);
+  padding: 1px 2px;
+}
+
+.stepper-compact.has-ranks {
+  background: rgba(0, 0, 0, 0.45);
+  border-color: rgba(56, 189, 248, 0.25);
 }
 
 .step-btn-xs {
-  width: 19px;
-  height: 19px;
+  width: 18px;
+  height: 18px;
   font-size: 0.72rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: var(--text-secondary);
-  border-radius: 3px;
+  border-radius: 2px;
   cursor: pointer;
   transition: all var(--trans-fast);
 }
 
 .step-btn-xs:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.18);
   color: #fff;
 }
 
@@ -1035,17 +1086,23 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .step-btn-xs:disabled {
-  opacity: 0.25;
+  opacity: 0.2;
   cursor: not-allowed;
 }
 
 .step-val-xs {
   font-size: 0.74rem;
-  font-weight: 800;
-  min-width: 16px;
+  font-weight: 700;
+  min-width: 15px;
   text-align: center;
-  color: #e2e8f0;
+  color: var(--text-muted);
+  font-family: var(--font-mono, monospace);
   font-variant-numeric: tabular-nums;
+}
+
+.stepper-compact.has-ranks .step-val-xs {
+  color: #38bdf8;
+  font-weight: 900;
 }
 
 .enh-pip-tag {
@@ -1053,121 +1110,172 @@ function rollSkill(skillTitle, bonus) {
   color: #38bdf8;
 }
 
-/* Roll Button */
+/* Roll Button (Tactile Monospace D20) */
 .sheet-skill-roll-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xs, 4px);
   color: var(--text-secondary);
-  padding: 0.22rem 0.35rem;
+  height: 25px;
+  padding: 0 0.35rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.25rem;
+  gap: 0.28rem;
   cursor: pointer;
   transition: all var(--trans-fast);
+  font-family: var(--font-mono, monospace);
   font-variant-numeric: tabular-nums;
   width: 100%;
   box-sizing: border-box;
 }
 
+.sheet-skill-roll-btn i {
+  font-size: 0.82rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+  opacity: 0.85;
+  transition: opacity var(--trans-fast), transform var(--trans-fast);
+}
+
+.sheet-skill-roll-btn .skill-roll-val {
+  font-size: 0.84rem;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  color: currentColor;
+}
+
 .sheet-skill-roll-btn:hover {
-  background: #dc2626;
-  border-color: #ef4444;
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
   color: #fff;
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+  transform: translateY(-1px);
+}
+
+.sheet-skill-roll-btn:hover i {
+  opacity: 1;
+  transform: rotate(12deg);
 }
 
 .sheet-skill-roll-btn:active {
-  transform: scale(0.95);
+  transform: translateY(1px) scale(0.97);
 }
 
-.sheet-skill-roll-btn.has-bonus {
-  background: rgba(220, 38, 38, 0.12);
-  border-color: rgba(239, 68, 68, 0.3);
+/* Trained Roll Button */
+.sheet-skill-roll-btn.btn-trained {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+}
+
+.sheet-skill-roll-btn.btn-trained:hover {
+  background: #10b981;
+  border-color: #34d399;
+  color: #09090b;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Signature Roll Button */
+.sheet-skill-roll-btn.btn-signature {
+  background: rgba(220, 38, 38, 0.15);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  font-weight: 800;
+}
+
+.sheet-skill-roll-btn.btn-signature:hover {
+  background: #dc2626;
+  border-color: #ef4444;
   color: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
-.sheet-skill-roll-btn i {
-  font-size: 0.75rem;
-}
-
-.skill-roll-val {
-  font-size: 0.78rem;
-  font-weight: 900;
-}
-
-/* Specialization Grouping */
+/* Specialization Grouping (Dashboard Hardening) */
 .spec-group-container {
   display: flex;
   flex-direction: column;
-  gap: 0.2rem;
-  background: rgba(20, 20, 30, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  gap: 0.25rem;
+  background: rgba(15, 23, 42, 0.35);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 0.35rem;
+  transition: border-color var(--trans-fast);
 }
 
-.spec-group-header {
-  display: flex;
+.spec-group-container.has-specs {
+  border-color: rgba(56, 189, 248, 0.25);
+}
+
+.spec-parent-row {
+  display: grid;
+  grid-template-columns: 32px minmax(0, 1fr) auto;
   align-items: center;
-  justify-content: space-between;
-  padding: 0.15rem 0.25rem;
+  gap: 0.5rem;
+  padding: 0.2rem 0.3rem;
 }
 
-.spec-group-left {
+.spec-parent-info {
   display: flex;
-  align-items: center;
-  gap: 0.45rem;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
 }
 
-.spec-group-left .sheet-skill-ab-tag {
-  width: 36px;
-}
-
-.spec-group-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.spec-group-name {
-  font-size: 0.8rem;
+.spec-parent-name {
+  font-size: 0.82rem;
   font-weight: 800;
   color: #fff;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .spec-count-tag {
   background: rgba(56, 189, 248, 0.15);
   border: 1px solid rgba(56, 189, 248, 0.35);
   color: #38bdf8;
-  font-size: 0.62rem;
+  font-size: 0.6rem;
   font-weight: 800;
-  padding: 0.05rem 0.35rem;
+  padding: 0.05rem 0.3rem;
   border-radius: 9999px;
   line-height: 1;
+  flex-shrink: 0;
+}
+
+.spec-parent-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 .btn-spec-inline-add {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-secondary);
-  font-size: 0.66rem;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #7dd3fc;
+  font-size: 0.68rem;
   font-weight: 700;
-  padding: 0.15rem 0.45rem;
-  border-radius: 3px;
+  padding: 0.22rem 0.6rem;
+  border-radius: var(--radius-xs);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.25rem;
   transition: all var(--trans-fast);
+  white-space: nowrap;
 }
 
 .btn-spec-inline-add:hover {
-  background: rgba(220, 38, 38, 0.2);
-  border-color: #ef4444;
+  background: rgba(56, 189, 248, 0.22);
+  border-color: #38bdf8;
   color: #fff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(56, 189, 248, 0.2);
 }
 
 .btn-spec-inline-add:active {
@@ -1178,37 +1286,38 @@ function rollSkill(skillTitle, bonus) {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  padding-left: 0.5rem;
+  padding-left: 0.35rem;
+  margin-top: 0.15rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding-top: 0.35rem;
 }
 
-.spec-connector-node {
+.spec-tree-marker {
   display: flex;
   align-items: center;
   justify-content: center;
   color: #38bdf8;
   font-size: 0.85rem;
-  opacity: 0.8;
+  opacity: 0.75;
+}
+
+/* Zero Truncation Subtype Name */
+.spec-child-info {
+  min-width: 0;
 }
 
 .spec-subtype-name {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 800;
   color: #e2e8f0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.25;
 }
 
-.spec-badge-chip {
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  color: #38bdf8;
-  font-size: 0.55rem;
-  font-weight: 800;
-  padding: 0.05rem 0.25rem;
-  border-radius: 2px;
-  letter-spacing: 0.04em;
-  flex-shrink: 0;
+.sheet-skill-row.is-trained .spec-subtype-name {
+  color: #fff;
 }
 
 .btn-delete-spec {
@@ -1227,31 +1336,6 @@ function rollSkill(skillTitle, bonus) {
   color: #ef4444;
 }
 
-.spec-group-empty {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.4rem 0.6rem;
-  background: rgba(255, 255, 255, 0.015);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: 4px;
-  color: var(--text-muted);
-  font-size: 0.72rem;
-  cursor: pointer;
-  transition: all var(--trans-fast);
-  margin-top: 0.15rem;
-}
-
-.spec-group-empty:hover {
-  background: rgba(220, 38, 38, 0.06);
-  border-color: rgba(239, 68, 68, 0.3);
-  color: #fca5a5;
-}
-
-.spec-group-empty i {
-  font-size: 0.85rem;
-}
-
 .empty-hint {
   padding: 2.5rem 1rem;
   text-align: center;
@@ -1268,13 +1352,13 @@ function rollSkill(skillTitle, bonus) {
   opacity: 0.4;
 }
 
-/* Modal Redesign */
+/* Modal Styling */
 .spec-modal-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.75);
   backdrop-filter: blur(8px);
-  z-index: 1000;
+  z-index: var(--z-modal-backdrop, 80);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1291,6 +1375,7 @@ function rollSkill(skillTitle, bonus) {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  z-index: var(--z-modal, 90);
 }
 
 .modal-pop-enter-active,
@@ -1535,7 +1620,7 @@ function rollSkill(skillTitle, bonus) {
 
 .spec-btn-confirm:hover {
   background: #ef4444;
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.5);
+  box-shadow: var(--shadow-sm);
 }
 
 .spec-btn-confirm:active {
