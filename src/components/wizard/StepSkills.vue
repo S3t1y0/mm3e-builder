@@ -773,6 +773,8 @@ function confirmSpecialtySkill() {
 .skills-table-responsive {
   max-height: 560px;
   overflow-y: auto;
+  overscroll-behavior-y: auto;
+  will-change: scroll-position;
   scrollbar-width: thin;
   scrollbar-color: rgba(234, 179, 8, 0.4) rgba(15, 15, 20, 0.45);
 }

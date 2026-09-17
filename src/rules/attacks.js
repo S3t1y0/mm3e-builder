@@ -231,5 +231,85 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     }
   }
 
+  // 3. Iterate Equipped Weapons from Resources / Equipment
+  const resources = character.resources || [];
+  for (const r of resources) {
+    if ((r.status || 'equipped') !== 'equipped') continue;
+    const isWpn = r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor') && !r.subtype?.includes('shield'));
+    if (!isWpn) continue;
+
+    const w = r.weapon || {};
+    const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
+    const isArea = (w.traits || []).some(t => /area/i.test(t)) || /Area/i.test(r.desc || '');
+    const isAffliction = (w.traits || []).some(t => /affliction/i.test(t)) || /Affliction/i.test(r.desc || '');
+
+    // Safe skill matching (no crash-prone RegExp on arbitrary weapon names)
+    const rNameLower = (r.name || '').toLowerCase();
+    const skills = character.skills || [];
+    let skillBonus = 0;
+    if (isRanged) {
+      const matchSkill = skills.find(s => {
+        if (s.name !== 'Ranged Combat') return false;
+        const sub = (s.subtype || '').toLowerCase().trim();
+        if (!sub) return false;
+        return rNameLower.includes(sub) || sub.includes(rNameLower) || /firearms?|guns?|pistols?|rifles?|bows?/i.test(sub);
+      });
+      if (matchSkill) skillBonus = Number(matchSkill.ranks) || 0;
+    } else {
+      const matchSkill = skills.find(s => {
+        if (s.name !== 'Close Combat') return false;
+        const sub = (s.subtype || '').toLowerCase().trim();
+        if (!sub) return false;
+        return rNameLower.includes(sub) || sub.includes(rNameLower) || /blades?|swords?|knives|melee|unarmed/i.test(sub);
+      });
+      if (matchSkill) skillBonus = Number(matchSkill.ranks) || 0;
+    }
+
+    const rollBonus = isRanged
+      ? (dex + rangedAttackBonus + skillBonus + (w.attackBonus || 0))
+      : (fgt + closeAttackBonus + skillBonus + (w.attackBonus || 0));
+
+    // DC and damage calculation
+    const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
+    let dmgRank = w.damageRank;
+    if (dmgRank === undefined) {
+      const m = (r.desc || '').match(/Damage\s+(\d+)/i) || (r.desc || '').match(/Affliction\s+(\d+)/i);
+      dmgRank = m ? parseInt(m[1], 10) : 1;
+    }
+    const effectiveDmg = isStrengthBased ? (str + dmgRank) : dmgRank;
+    const dc = (isAffliction ? 10 : 15) + effectiveDmg;
+    const resistance = w.resistance || (isAffliction ? 'Fortitude' : 'Toughness');
+
+    // Weapon Critical
+    let weaponCrit = defaultCrit;
+    if (w.crit) {
+      weaponCrit = w.crit;
+    } else {
+      const mCrit = (r.desc || '').match(/Critical\s+([0-9-]+)/i);
+      if (mCrit) weaponCrit = mCrit[1];
+    }
+
+    attacks.push({
+      id: `atk_res_${r.id || r.name}`,
+      type: 'equipment',
+      name: r.name,
+      source: 'Equipment',
+      rollBonus: isArea ? null : rollBonus,
+      range: isRanged ? 'Ranged' : 'Close',
+      action: 'Standard',
+      effectName: isAffliction ? 'Affliction' : 'Damage',
+      effectRank: effectiveDmg,
+      dc,
+      dcDescription: `DC ${dc} vs ${resistance}`,
+      resistance,
+      crit: weaponCrit,
+      isArea,
+      isPerception: false,
+      isStandby: false,
+      isActive: true,
+      tags: [isRanged ? 'Ranged Weapon' : 'Melee Weapon', ...(w.traits || [])]
+    });
+  }
+
   return attacks;
 }

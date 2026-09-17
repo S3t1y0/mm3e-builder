@@ -1049,6 +1049,8 @@ function removeAdvantage(name) {
   min-height: 0;
   max-height: 600px;
   overflow-y: auto;
+  overscroll-behavior-y: auto;
+  will-change: scroll-position;
   scrollbar-width: thin;
   scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
 }

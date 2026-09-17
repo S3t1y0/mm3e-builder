@@ -16,6 +16,9 @@
             <span v-if="enhDefenses.DODGE > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.DODGE}`">
               +{{ enhDefenses.DODGE }} Enh
             </span>
+            <span v-if="equipmentShieldBonus > 0" class="def-enh-badge" :title="`Equipped Shield: +${equipmentShieldBonus}`">
+              +{{ equipmentShieldBonus }} Shield
+            </span>
             <span class="def-base-info">AGL {{ heroStore.effectiveAbilities.AGL || 0 }}</span>
           </div>
         </div>
@@ -40,6 +43,9 @@
           <div class="def-meta-row">
             <span v-if="enhDefenses.PARRY > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.PARRY}`">
               +{{ enhDefenses.PARRY }} Enh
+            </span>
+            <span v-if="equipmentShieldBonus > 0" class="def-enh-badge" :title="`Equipped Shield: +${equipmentShieldBonus}`">
+              +{{ equipmentShieldBonus }} Shield
             </span>
             <span class="def-base-info">FGT {{ heroStore.effectiveAbilities.FGT || 0 }}</span>
           </div>
@@ -91,11 +97,14 @@
             <span v-if="enhDefenses.TOUGHNESS > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.TOUGHNESS}`">
               +{{ enhDefenses.TOUGHNESS }} Enh
             </span>
+            <span v-if="equipmentArmorBonus > 0" class="def-enh-badge" :title="`Equipped Armor: +${equipmentArmorBonus}`">
+              +{{ equipmentArmorBonus }} Armor
+            </span>
             <span v-if="heroStore.character.injuries > 0" class="def-base-info def-injured-text" :title="`Base STA ${heroStore.effectiveAbilities.STA || 0}, minus ${heroStore.character.injuries} bruise penalty`">
               STA {{ heroStore.effectiveAbilities.STA || 0 }} (-{{ heroStore.character.injuries }} Bruised)
             </span>
             <span v-else class="def-base-info">
-              STA {{ heroStore.effectiveAbilities.STA || 0 }}{{ protectionBonus > 0 ? ` (+${protectionBonus} Arm)` : '' }}{{ defensiveRollBonus > 0 ? ` (+${defensiveRollBonus} Adv)` : '' }}
+              STA {{ heroStore.effectiveAbilities.STA || 0 }}{{ protectionBonus > 0 ? ` (+${protectionBonus} Power)` : '' }}{{ defensiveRollBonus > 0 ? ` (+${defensiveRollBonus} Adv)` : '' }}
             </span>
           </div>
         </div>
@@ -184,13 +193,22 @@ const protectionBonus = computed(() => {
   return bonus;
 });
 
+const equipmentArmorBonus = computed(() => {
+  return heroStore.equipmentArmorBonus || 0;
+});
+
+const equipmentShieldBonus = computed(() => {
+  return heroStore.equipmentShieldBonus || 0;
+});
+
 const defensiveRollBonus = computed(() => {
   return heroStore.getAdvantageRanks('Defensive Roll');
 });
 
 const toughnessDerivedLabel = computed(() => {
   const parts = [];
-  if (protectionBonus.value > 0) parts.push(`+${protectionBonus.value} Armor`);
+  if (protectionBonus.value > 0) parts.push(`+${protectionBonus.value} Power`);
+  if (equipmentArmorBonus.value > 0) parts.push(`+${equipmentArmorBonus.value} Armor`);
   if (defensiveRollBonus.value > 0) parts.push(`+${defensiveRollBonus.value} Def Roll`);
   return parts.length > 0 ? parts.join(' • ') : 'Via STA';
 });

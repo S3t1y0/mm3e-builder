@@ -198,25 +198,59 @@ export const useHeroStore = defineStore('hero', {
       const traits = this.activeEnhancedTraits;
       const bought = state.character.defensesBought || {};
 
-      // Calculate Protection / Armor bonus to Toughness
-      let protectionBonus = 0;
-      for (const effect of this.activeEffects) {
-        const b = (effect.baseEffect || effect.name || '').toLowerCase();
-        if (b === 'protection') {
-          protectionBonus += (parseInt(effect.ranks, 10) || 0);
-        }
-      }
+      // Calculate Protection bonus from Powers
+      const powerProtBonus = this.protectionBonus;
+      // Calculate Armor Protection bonus from equipped equipment (non-stacking, take highest)
+      const armorBonus = this.equipmentArmorBonus;
+      // Calculate Active Defense bonus from equipped shields (Dodge & Parry)
+      const shieldBonus = this.equipmentShieldBonus;
 
       // Calculate Defensive Roll advantage bonus to Toughness
       const defRoll = (this.effectiveAdvantages || []).find(a => (a.name || '').toLowerCase() === 'defensive roll')?.ranks || 0;
 
       return {
-        DODGE: (eff.AGL || 0) + (bought.DODGE || 0) + (traits.defenses.DODGE || 0),
-        PARRY: (eff.FGT || 0) + (bought.PARRY || 0) + (traits.defenses.PARRY || 0),
+        DODGE: (eff.AGL || 0) + (bought.DODGE || 0) + (traits.defenses.DODGE || 0) + shieldBonus,
+        PARRY: (eff.FGT || 0) + (bought.PARRY || 0) + (traits.defenses.PARRY || 0) + shieldBonus,
         FORTITUDE: (eff.STA || 0) + (bought.FORTITUDE || 0) + (traits.defenses.FORTITUDE || 0),
-        TOUGHNESS: (eff.STA || 0) + (bought.TOUGHNESS || 0) + protectionBonus + defRoll + (traits.defenses.TOUGHNESS || 0),
+        TOUGHNESS: (eff.STA || 0) + (bought.TOUGHNESS || 0) + powerProtBonus + armorBonus + defRoll + (traits.defenses.TOUGHNESS || 0),
         WILL: (eff.AWE || 0) + (bought.WILL || 0) + (traits.defenses.WILL || 0)
       };
+    },
+
+    equipmentArmorBonus(state) {
+      let maxProt = 0;
+      const resources = state.character.resources || [];
+      for (const r of resources) {
+        if ((r.status || 'equipped') !== 'equipped') continue;
+        if (r.subtype === 'armor' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')) {
+          const a = r.armor || {};
+          let rank = Number(a.protectionRank);
+          if (isNaN(rank)) {
+            const m = (r.desc || '').match(/Protection\s+(\d+)/i);
+            rank = m ? parseInt(m[1], 10) : 0;
+          }
+          if (rank > maxProt) maxProt = rank;
+        }
+      }
+      return maxProt;
+    },
+
+    equipmentShieldBonus(state) {
+      let maxShield = 0;
+      const resources = state.character.resources || [];
+      for (const r of resources) {
+        if ((r.status || 'equipped') !== 'equipped') continue;
+        if (r.subtype === 'shield' || (r.armor && (r.armor.shieldRank || r.armor.activeDefenseBonus))) {
+          const a = r.armor || {};
+          let shieldVal = Number(a.activeDefenseBonus ?? a.shieldRank ?? 0);
+          if (isNaN(shieldVal) || shieldVal <= 0) {
+            const m = (r.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (r.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
+            shieldVal = m ? parseInt(m[1], 10) : 0;
+          }
+          if (shieldVal > maxShield) maxShield = shieldVal;
+        }
+      }
+      return maxShield;
     },
 
     protectionBonus() {

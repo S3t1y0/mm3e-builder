@@ -850,7 +850,8 @@ function rollSkill(skillTitle, bonus) {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
-  overscroll-behavior: auto;
+  overscroll-behavior-y: auto;
+  will-change: scroll-position;
   padding-right: 2px;
   scrollbar-width: thin;
   scrollbar-color: rgba(220, 38, 38, 0.4) rgba(15, 15, 20, 0.45);

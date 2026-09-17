@@ -5,8 +5,8 @@
         <!-- Studio Header -->
         <div class="eq-studio-header">
           <div class="header-branding">
-            <span class="studio-badge"><i class="ri-tools-fill"></i> GEAR FORGE</span>
-            <h3 class="studio-title">Custom Equipment Studio</h3>
+            <span class="studio-badge">M&M 3E RULES</span>
+            <h3 class="studio-title">Custom Equipment Workshop</h3>
           </div>
 
           <!-- Stepper Indicator in Header -->
@@ -75,7 +75,6 @@
               <div class="eq-form-group mt-4">
                 <div class="eq-label-row">
                   <label for="eq-item-name">Item Name *</label>
-                  <span class="eq-hint-text">Choose a distinctive, realistic superhero or tactical name</span>
                 </div>
                 <input
                   id="eq-item-name"
@@ -85,22 +84,6 @@
                   :placeholder="getNamePlaceholder(selectedCategory)"
                   @keyup.enter="nextStep"
                 />
-              </div>
-
-              <!-- Suggestions Chips -->
-              <div class="preset-name-suggestions">
-                <span class="sug-label">QUICK IDEAS:</span>
-                <div class="sug-chips">
-                  <button
-                    v-for="sug in getNameSuggestions(selectedCategory)"
-                    :key="sug"
-                    type="button"
-                    class="sug-chip"
-                    @click="itemName = sug"
-                  >
-                    {{ sug }}
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -1675,6 +1658,7 @@ function saveEquipmentItem() {
       protectionRank: armorConfig.value.protectionRank,
       imperviousRank: armorConfig.value.imperviousRank,
       shieldRank: armorConfig.value.shieldRank,
+      activeDefenseBonus: armorConfig.value.shieldRank,
       subtle: armorConfig.value.subtle,
       immunities: armorConfig.value.immunities
     };
@@ -1699,7 +1683,7 @@ function saveEquipmentItem() {
   }
 
   heroStore.addResource(newResource);
-  uiStore.showToast(`Forged & added "${name}" (${totalEP} EP) to equipment!`, 'success');
+  uiStore.showToast(`Added "${name}" (${totalEP} EP) to equipment!`, 'success');
   emit('item-created', newResource);
   closeModal();
 }
@@ -1710,9 +1694,9 @@ function saveEquipmentItem() {
 .eq-modal-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(4, 7, 14, 0.82);
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  background: rgba(4, 7, 14, 0.85);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1778,7 +1762,7 @@ function saveEquipmentItem() {
   gap: 0.35rem;
   background: rgba(0, 0, 0, 0.35);
   padding: 0.25rem 0.4rem;
-  border-radius: var(--radius-pill, 9999px);
+  border-radius: var(--radius-sm, 4px);
   border: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -1792,7 +1776,7 @@ function saveEquipmentItem() {
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-pill, 9999px);
+  border-radius: var(--radius-xs, 3px);
   cursor: pointer;
   transition: all var(--trans-fast, 0.15s ease);
 }
@@ -1815,7 +1799,7 @@ function saveEquipmentItem() {
 .step-num {
   width: 18px;
   height: 18px;
-  border-radius: 50%;
+  border-radius: 3px;
   background: rgba(255, 255, 255, 0.1);
   display: flex;
   align-items: center;
@@ -2018,37 +2002,6 @@ function saveEquipmentItem() {
   flex-direction: column;
   gap: 0.4rem;
   margin-top: -0.5rem;
-}
-
-.sug-label {
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: #64748b;
-  letter-spacing: 0.05em;
-}
-
-.sug-chips {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.sug-chip {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  color: #94a3b8;
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-pill, 9999px);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.sug-chip:hover {
-  background: rgba(56, 189, 248, 0.15);
-  border-color: #38bdf8;
-  color: #fff;
 }
 
 /* Stepper Boxes & Controls */
@@ -2564,7 +2517,7 @@ function saveEquipmentItem() {
   color: #38bdf8;
   background: rgba(56, 189, 248, 0.15);
   padding: 0.1rem 0.45rem;
-  border-radius: var(--radius-pill, 9999px);
+  border-radius: var(--radius-xs, 3px);
 }
 
 .features-chips-grid {
@@ -2582,7 +2535,7 @@ function saveEquipmentItem() {
   font-size: 0.74rem;
   font-weight: 600;
   padding: 0.3rem 0.65rem;
-  border-radius: var(--radius-pill, 9999px);
+  border-radius: var(--radius-sm, 4px);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
@@ -2983,7 +2936,7 @@ function saveEquipmentItem() {
 .budget-progress-track {
   height: 6px;
   background: rgba(0, 0, 0, 0.4);
-  border-radius: var(--radius-pill, 9999px);
+  border-radius: var(--radius-xs, 3px);
   overflow: hidden;
 }
 

@@ -52,48 +52,29 @@
           </button>
         </template>
 
+        <button type="button" class="btn btn-secondary btn-sm" @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')">
+          <i class="ri-tools-line"></i> Custom Gear Studio
+        </button>
         <button type="button" class="btn btn-primary btn-sm" @click="showPresetModal = true">
-          <i class="ri-add-line"></i> Add Item / Preset
+          <i class="ri-book-read-line"></i> Preset Library
         </button>
       </div>
     </div>
 
-    <!-- CATEGORY FILTER PILLS & QUICK ADD -->
-    <div class="card mb-4" style="padding: 1rem 1.25rem;">
-      <div class="filter-and-actions-row">
-        <!-- FILTER CHIPS -->
-        <div class="filter-pills-bar">
-          <button
-            v-for="cat in categories"
-            :key="cat.id"
-            type="button"
-            class="filter-chip"
-            :class="{ active: activeFilter === cat.id }"
-            @click="activeFilter = cat.id"
-          >
-            <i v-if="cat.icon" :class="cat.icon"></i>
-            <span>{{ cat.label }} ({{ getCategoryCount(cat.id) }})</span>
-          </button>
-        </div>
-
-        <!-- QUICK ADD DROPDOWN/BUTTONS -->
-        <div class="quick-add-group">
-          <button type="button" class="btn-quick-add" @click="openCustomStudio('Weapons')">
-            <i class="ri-sword-line"></i> Weapon
-          </button>
-          <button type="button" class="btn-quick-add" @click="openCustomStudio('Armor')">
-            <i class="ri-shield-line"></i> Armor
-          </button>
-          <button type="button" class="btn-quick-add" @click="openCustomStudio('Gadget')">
-            <i class="ri-smartphone-line"></i> Gadget
-          </button>
-          <button type="button" class="btn-quick-add" @click="openCustomStudio('Vehicle')">
-            <i class="ri-car-line"></i> Vehicle
-          </button>
-          <button type="button" class="btn-quick-add" @click="openCustomStudio('Headquarters')">
-            <i class="ri-building-line"></i> HQ
-          </button>
-        </div>
+    <!-- CATEGORY FILTER CHIPS -->
+    <div class="card mb-4" style="padding: 0.75rem 1.25rem;">
+      <div class="filter-pills-bar">
+        <button
+          v-for="cat in categories"
+          :key="cat.id"
+          type="button"
+          class="filter-chip"
+          :class="{ active: activeFilter === cat.id }"
+          @click="activeFilter = cat.id"
+        >
+          <i v-if="cat.icon" :class="cat.icon"></i>
+          <span>{{ cat.label }} ({{ getCategoryCount(cat.id) }})</span>
+        </button>
       </div>
     </div>
 
@@ -120,25 +101,25 @@
       <div
         v-for="item in filteredResources"
         :key="item.id"
-        class="card item-card"
-        :class="item.status === 'equipped' ? 'item-equipped' : 'item-unequipped'"
+        class="card equipment-item-card"
+        :class="item.status === 'equipped' ? 'card-equipped' : 'card-unequipped'"
       >
         <div class="item-card-header">
           <div class="item-meta-info">
-            <span class="item-icon-box" :class="item.subtype || item.type">
+            <div class="item-icon-box">
               <i :class="getResIconClass(item)"></i>
-            </span>
+            </div>
             <div>
               <div class="item-tags-row">
-                <span class="badge badge-subtle">{{ getSubtypeLabel(item) }}</span>
+                <span class="badge-subtle">{{ getSubtypeLabel(item) }}</span>
                 <button
                   type="button"
                   class="status-toggle-pill"
-                  :class="'status-' + (item.status || 'equipped')"
+                  :class="{ 'text-emerald': item.status === 'equipped' }"
                   @click="toggleStatus(item.id)"
-                  title="Click to cycle status"
+                  title="Click to cycle status (Equipped -> In Bag -> Stored)"
                 >
-                  <i v-if="item.status === 'equipped' || !item.status" class="ri-checkbox-circle-fill text-emerald"></i>
+                  <i v-if="item.status === 'equipped' || !item.status" class="ri-checkbox-circle-fill"></i>
                   <i v-else-if="item.status === 'carried'" class="ri-inbox-line"></i>
                   <i v-else class="ri-archive-line"></i>
                   <span>{{ formatStatus(item.status) }}</span>
@@ -166,10 +147,10 @@
         <!-- TACTICAL SUMMARY CHIPS -->
         <div v-if="isWeapon(item)" class="tactical-chips-row">
           <span class="tactical-chip atk-chip tabular-nums">
-            <i class="ri-crosshair-2-line"></i> Atk +{{ getWeaponAttackBonus(item) }}
+            <i class="ri-dice-line"></i> Atk +{{ getWeaponAttackBonus(item) }}
           </span>
           <span class="tactical-chip dc-chip tabular-nums">
-            <i class="ri-shield-flash-line"></i> DC {{ getWeaponDC(item) }} {{ getWeaponResistance(item) }}
+            DC {{ getWeaponDC(item) }} {{ getWeaponResistance(item) }}
           </span>
           <span class="tactical-chip range-chip">
             {{ getWeaponRange(item) }}
@@ -179,9 +160,15 @@
           </span>
         </div>
 
+        <div v-else-if="isShield(item)" class="tactical-chips-row">
+          <span class="tactical-chip shield-chip tabular-nums">
+            <i class="ri-shield-line"></i> +{{ getShieldBonus(item) }} Active Defense (Dodge & Parry)
+          </span>
+        </div>
+
         <div v-else-if="isArmor(item)" class="tactical-chips-row">
           <span class="tactical-chip armor-chip tabular-nums">
-            <i class="ri-shield-line"></i> +{{ getArmorProtection(item) }} Protection
+            <i class="ri-shield-check-line"></i> +{{ getArmorProtection(item) }} Protection
           </span>
         </div>
 
@@ -190,40 +177,28 @@
       </div>
     </div>
 
-    <!-- PRESET CATALOG & CUSTOM ITEM MODAL -->
+    <!-- PRESET CATALOG MODAL -->
     <div v-if="showPresetModal" class="modal-overlay" @click.self="showPresetModal = false">
       <div class="modal-content preset-modal-box">
         <div class="modal-header-row">
           <h4 style="font-weight: 800; color: #fff; margin: 0; font-size: 1.1rem; display: flex; align-items: center; gap: 0.5rem;">
-            <i class="ri-shopping-bag-3-line text-accent"></i> Equipment Catalog & Creator
+            <i class="ri-book-read-line text-accent"></i> Standard Equipment Presets
           </h4>
-          <button class="btn-icon text-muted" style="font-size: 1.25rem;" @click="showPresetModal = false" aria-label="Close dialog">
-            <i class="ri-close-line"></i>
-          </button>
+          <div style="display: flex; align-items: center; gap: 0.5rem;">
+            <button
+              type="button"
+              class="btn btn-secondary btn-xs"
+              @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
+            >
+              <i class="ri-tools-line"></i> Custom Equipment Studio
+            </button>
+            <button class="btn-icon text-muted" style="font-size: 1.25rem;" @click="showPresetModal = false" aria-label="Close dialog">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
         </div>
 
-        <!-- MODAL SUB-TABS -->
-        <div class="modal-nav-tabs">
-          <button
-            type="button"
-            class="modal-tab-btn"
-            :class="{ active: modalActiveTab === 'presets' }"
-            @click="modalActiveTab = 'presets'"
-          >
-            <i class="ri-list-check"></i> Standard Presets ({{ RESOURCE_PRESETS.length }})
-          </button>
-          <button
-            type="button"
-            class="modal-tab-btn"
-            :class="{ active: modalActiveTab === 'custom' }"
-            @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
-          >
-            <i class="ri-tools-fill"></i> Custom Equipment Studio
-          </button>
-        </div>
-
-        <!-- TAB 1: PRESETS BROWSER -->
-        <div v-if="modalActiveTab === 'presets'" class="modal-tab-body">
+        <div class="modal-tab-body">
           <div class="search-input-wrapper mb-3">
             <i class="ri-search-line search-icon"></i>
             <input
@@ -233,14 +208,6 @@
               placeholder="Search weapons, gadgets, armor, vehicles, HQ..."
               style="padding-left: 2.3rem;"
             />
-            <button
-              type="button"
-              class="btn btn-primary btn-xs"
-              style="margin-left: 0.5rem; white-space: nowrap;"
-              @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
-            >
-              <i class="ri-add-line"></i> Custom
-            </button>
           </div>
 
           <div class="preset-items-scroll">
@@ -265,27 +232,6 @@
                 <i class="ri-add-line"></i> Add
               </button>
             </div>
-          </div>
-        </div>
-
-        <!-- TAB 2: CUSTOM ITEM STUDIO LAUNCHER -->
-        <div v-else class="modal-tab-body">
-          <div style="text-align: center; padding: 2rem 1rem; display: flex; flex-direction: column; align-items: center; gap: 0.75rem;">
-            <div style="width: 48px; height: 48px; border-radius: 12px; background: rgba(56, 189, 248, 0.15); color: #38bdf8; display: flex; align-items: center; justify-content: center; font-size: 1.5rem;">
-              <i class="ri-tools-fill"></i>
-            </div>
-            <h4 style="color: #fff; margin: 0; font-size: 1.05rem; font-weight: 800;">Interactive Equipment Studio</h4>
-            <p style="font-size: 0.8rem; color: var(--text-secondary); max-width: 450px; margin: 0; line-height: 1.4;">
-              Build customized superhero weapons, body armor, vehicles, headquarters, and tech gadgets with real-time M&M 3e rules calculations.
-            </p>
-            <button
-              type="button"
-              class="btn btn-primary"
-              style="margin-top: 0.5rem;"
-              @click="openCustomStudio(activeFilter !== 'all' ? activeFilter : 'Weapons')"
-            >
-              <i class="ri-flashlight-fill"></i> Launch Equipment Studio
-            </button>
           </div>
         </div>
       </div>
@@ -313,7 +259,6 @@ const activeFilter = ref('all');
 const showPresetModal = ref(false);
 const showCustomStudio = ref(false);
 const customStudioCategory = ref('Weapons');
-const modalActiveTab = ref('presets');
 const presetSearch = ref('');
 
 function openCustomStudio(cat = 'Weapons') {
@@ -332,10 +277,10 @@ function getCategoryCount(catId) {
   const list = heroStore.character.resources || [];
   if (catId === 'all') return list.length;
   if (catId === 'Weapons') {
-    return list.filter(r => r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor'))).length;
+    return list.filter(r => isWeapon(r)).length;
   }
   if (catId === 'Armor') {
-    return list.filter(r => r.subtype === 'armor' || r.subtype === 'shield' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')).length;
+    return list.filter(r => isArmor(r) || isShield(r)).length;
   }
   if (catId === 'Gadget') {
     return list.filter(r => r.type === 'Gadget' || r.subtype === 'gadget').length;
@@ -353,10 +298,10 @@ const filteredResources = computed(() => {
   const list = heroStore.character.resources || [];
   if (activeFilter.value === 'all') return list;
   if (activeFilter.value === 'Weapons') {
-    return list.filter(r => r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor')));
+    return list.filter(r => isWeapon(r));
   }
   if (activeFilter.value === 'Armor') {
-    return list.filter(r => r.subtype === 'armor' || r.subtype === 'shield' || r.armor != null || /Protection\s+\d+/i.test(r.desc || ''));
+    return list.filter(r => isArmor(r) || isShield(r));
   }
   if (activeFilter.value === 'Gadget') {
     return list.filter(r => r.type === 'Gadget' || r.subtype === 'gadget');
@@ -386,12 +331,6 @@ function syncEquipmentAdvantage() {
   uiStore.showToast('Synchronized Equipment Advantage PP budget!', 'success');
 }
 
-function openQuickAdd(cat) {
-  activeFilter.value = cat;
-  showPresetModal.value = true;
-  modalActiveTab.value = 'presets';
-}
-
 function toggleStatus(id) {
   heroStore.toggleResourceStatus(id);
 }
@@ -415,29 +354,11 @@ function addPreset(preset) {
   uiStore.showToast(`Added ${preset.name} (${preset.epCost} EP)!`, 'success');
 }
 
-function saveCustomItem() {
-  if (!customForm.value.name.trim()) {
-    uiStore.showToast('Please enter an item name', 'error');
-    return;
-  }
-  heroStore.addResource({
-    id: 'res_' + Date.now() + Math.random().toString(36).substr(2, 4),
-    name: customForm.value.name.trim(),
-    type: customForm.value.type,
-    epCost: Number(customForm.value.epCost) || 1,
-    status: 'equipped',
-    desc: customForm.value.desc.trim()
-  });
-  uiStore.showToast(`Created ${customForm.value.name}!`, 'success');
-  customForm.value = { name: '', type: 'Gear', epCost: 1, desc: '' };
-  showPresetModal.value = false;
-}
-
 function getResIconClass(r) {
+  if (isShield(r) || r.subtype === 'shield') return 'ri-shield-line';
   if (r.subtype === 'weapon_ranged' || (r.weapon?.range === 'Ranged')) return 'ri-focus-2-line';
   if (r.subtype?.startsWith('weapon') || r.weapon != null) return 'ri-sword-line';
   if (r.subtype === 'armor') return 'ri-shield-check-line';
-  if (r.subtype === 'shield') return 'ri-shield-line';
   if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'ri-car-line';
   if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'ri-building-line';
   if (r.type === 'Gadget' || r.subtype === 'gadget') return 'ri-smartphone-line';
@@ -445,36 +366,62 @@ function getResIconClass(r) {
 }
 
 function getSubtypeLabel(r) {
+  if (isShield(r) || r.subtype === 'shield') return 'SHIELD';
   if (r.subtype === 'weapon_ranged') return 'RANGED WEAPON';
   if (r.subtype === 'weapon_melee') return 'MELEE WEAPON';
   if (r.weapon) return r.weapon.range === 'Ranged' ? 'RANGED WEAPON' : 'MELEE WEAPON';
   if (r.subtype === 'armor') return 'BODY ARMOR';
-  if (r.subtype === 'shield') return 'SHIELD';
   if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'VEHICLE';
   if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'HEADQUARTERS';
   return (r.type || 'GEAR').toUpperCase();
 }
 
 function isWeapon(r) {
-  return r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor'));
+  return r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor') && !r.subtype?.includes('shield'));
+}
+
+function isShield(r) {
+  return r.subtype === 'shield' || (r.armor && (r.armor.shieldRank || r.armor.activeDefenseBonus)) || /Active Defense/i.test(r.desc || '') || /Shield/i.test(r.name || '');
 }
 
 function isArmor(r) {
-  return r.subtype === 'armor' || r.subtype === 'shield' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '');
+  return (r.subtype === 'armor' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')) && !isShield(r);
+}
+
+function getShieldBonus(r) {
+  const a = r.armor || {};
+  let bonus = Number(a.activeDefenseBonus ?? a.shieldRank ?? 0);
+  if (isNaN(bonus) || bonus <= 0) {
+    const m = (r.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (r.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
+    bonus = m ? parseInt(m[1], 10) : 2;
+  }
+  return bonus;
 }
 
 function getWeaponAttackBonus(r) {
   const w = r.weapon || {};
   const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
   const skills = heroStore.character.skills || [];
+  const rNameLower = (r.name || '').toLowerCase();
+
   if (isRanged) {
     const dex = Number(heroStore.effectiveAbilities.DEX) || 0;
-    const skill = skills.find(s => s.name === 'Ranged Combat' && (new RegExp(r.name, 'i').test(s.subtype || '') || /firearm|guns|pistol|rifle/i.test(s.subtype || '')));
-    return dex + (skill ? Number(skill.ranks) || 0 : 0) + (w.attackBonus || 0);
+    const rangedAdv = Number(heroStore.getAdvantageRanks('Ranged Attack')) || 0;
+    const skill = skills.find(s => {
+      if (s.name !== 'Ranged Combat') return false;
+      const sub = (s.subtype || '').toLowerCase().trim();
+      return sub && (rNameLower.includes(sub) || sub.includes(rNameLower) || /firearms?|guns?|pistols?|rifles?|bows?/i.test(sub));
+    });
+    return dex + rangedAdv + (skill ? Number(skill.ranks) || 0 : 0) + (w.attackBonus || 0);
   } else {
     const fgt = Number(heroStore.effectiveAbilities.FGT) || 0;
-    const skill = skills.find(s => s.name === 'Close Combat' && (new RegExp(r.name, 'i').test(s.subtype || '') || /blades|swords|melee|unarmed/i.test(s.subtype || '')));
-    return fgt + (skill ? Number(skill.ranks) || 0 : 0) + (w.attackBonus || 0);
+    const closeAdv = Number(heroStore.getAdvantageRanks('Close Attack')) || 0;
+    const skill = skills.find(s => {
+      if (s.name !== 'Close Combat') return false;
+      const sub = (s.subtype || '').toLowerCase().trim();
+      return sub && (rNameLower.includes(sub) || sub.includes(rNameLower) || /blades?|swords?|knives|melee|unarmed/i.test(sub));
+    });
+    return fgt + closeAdv + (skill ? Number(skill.ranks) || 0 : 0) + (w.attackBonus || 0);
   }
 }
 
@@ -484,7 +431,7 @@ function getWeaponDC(r) {
   const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
   let dmgRank = w.damageRank;
   if (dmgRank === undefined) {
-    const m = (r.desc || '').match(/Damage\s+(\d+)/i);
+    const m = (r.desc || '').match(/Damage\s+(\d+)/i) || (r.desc || '').match(/Affliction\s+(\d+)/i);
     dmgRank = m ? parseInt(m[1], 10) : 1;
   }
   const effectiveDmg = isStrengthBased ? (str + dmgRank) : dmgRank;
@@ -682,33 +629,7 @@ function getArmorProtection(r) {
   box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
 }
 
-.quick-add-group {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-}
 
-.btn-quick-add {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.25rem 0.55rem;
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.btn-quick-add:hover {
-  background: rgba(6, 182, 212, 0.15);
-  border-color: #06b6d4;
-  color: #fff;
-}
 
 /* Empty Card */
 .empty-equipment-card {
@@ -878,6 +799,12 @@ function getArmorProtection(r) {
   color: #34d399;
 }
 
+.shield-chip {
+  background: rgba(14, 165, 233, 0.12);
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+}
+
 .item-desc {
   font-size: 0.76rem;
   color: var(--text-secondary);
@@ -899,35 +826,6 @@ function getArmorProtection(r) {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 0.85rem;
-}
-
-.modal-nav-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.5rem;
-}
-
-.modal-tab-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-secondary);
-  font-size: 0.82rem;
-  font-weight: 700;
-  padding: 0.4rem 0.75rem;
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: background-color 0.15s ease, color 0.15s ease;
-}
-
-.modal-tab-btn.active {
-  background: rgba(220, 38, 38, 0.15);
-  color: #fff;
-  border: 1px solid rgba(220, 38, 38, 0.35);
 }
 
 .modal-tab-body {
@@ -989,25 +887,5 @@ function getArmorProtection(r) {
   color: var(--text-secondary);
   margin: 0;
   line-height: 1.4;
-}
-
-.form-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 0.85rem;
-}
-
-.form-grid .full-span {
-  grid-column: 1 / -1;
-}
-
-.form-label {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  margin-bottom: 0.35rem;
 }
 </style>
