@@ -4,7 +4,6 @@
       <div class="card-title-group">
         <i class="ri-flashlight-line icon-primary"></i>
         <h3>Powers & Devices Deck</h3>
-        <span class="cost-tag-badge">Custom System</span>
       </div>
 
       <div class="header-right-actions">

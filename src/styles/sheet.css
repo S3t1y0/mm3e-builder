@@ -4898,7 +4898,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding-right: 4px;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;
   scrollbar-color: rgba(220, 38, 38, 0.4) rgba(15, 15, 20, 0.45);
@@ -5022,7 +5022,7 @@
   overflow-y: auto;
   overflow-x: hidden;
   padding: 1.25rem;
-  overscroll-behavior: contain;
+  overscroll-behavior: auto;
   scroll-behavior: smooth;
   -webkit-overflow-scrolling: touch;
   scrollbar-width: thin;

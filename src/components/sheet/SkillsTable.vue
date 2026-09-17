@@ -256,10 +256,6 @@
                   <div class="sheet-skill-info spec-child-info">
                     <div class="sheet-skill-title-row">
                       <span class="spec-subtype-name" :title="inst.subtype || 'General'">{{ inst.subtype || 'General' }}</span>
-                      <span 
-                        v-if="isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks)" 
-                        class="sig-badge"
-                      >KEY</span>
                     </div>
                     <div class="sheet-skill-math">
                       <span>{{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}</span>
@@ -362,10 +358,6 @@
               <div class="sheet-skill-info">
                 <div class="sheet-skill-title-row">
                   <span class="sheet-skill-name">{{ ruleSkill.name }}</span>
-                  <span 
-                    v-if="isSignatureSkill(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)), getStandardRanks(ruleSkill.name)) && isStandardTrained(ruleSkill.name)" 
-                    class="sig-badge"
-                  >KEY</span>
                 </div>
                 <div class="sheet-skill-math">
                   <template v-if="getStandardRanks(ruleSkill.name) > 0 || getEnhancedRanks(ruleSkill.name) > 0">
@@ -858,6 +850,7 @@ function rollSkill(skillTitle, bonus) {
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: auto;
   padding-right: 2px;
   scrollbar-width: thin;
   scrollbar-color: rgba(220, 38, 38, 0.4) rgba(15, 15, 20, 0.45);

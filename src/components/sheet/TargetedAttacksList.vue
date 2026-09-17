@@ -3,8 +3,7 @@
     <div class="card-header-row">
       <div class="card-title-group">
         <i class="ri-sword-line icon-primary"></i>
-        <h3>Tactical Combat Matrix (Targeted Attacks)</h3>
-        <span class="cost-tag-badge">d20 System</span>
+        <h3>Targeted Attacks</h3>
       </div>
 
       <!-- Filter Controls -->
