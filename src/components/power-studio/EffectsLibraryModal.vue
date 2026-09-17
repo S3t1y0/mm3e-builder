@@ -567,7 +567,7 @@ function selectEffect(effectName) {
 
 .btn-select-effect.btn-selected:hover {
   background: #10b981;
-  color: #000;
+  color: #09090b;
 }
 
 .modal-footer {

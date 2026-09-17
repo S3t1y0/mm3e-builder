@@ -445,7 +445,7 @@ function handleTurnOnAndRoll(atk) {
 
 .btn-switch-roll:hover {
   background: #f59e0b;
-  color: #000;
+  color: #09090b;
 }
 
 .btn-turnon-roll {
@@ -465,8 +465,8 @@ function handleTurnOnAndRoll(atk) {
 
 .btn-turnon-roll:hover {
   background: #f59e0b;
-  color: #000;
-  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.35);
+  color: #09090b;
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 

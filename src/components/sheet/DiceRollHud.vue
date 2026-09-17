@@ -550,8 +550,8 @@ onBeforeUnmount(() => {
 
 .crit-badge {
   background: #fbbf24;
-  color: #000;
-  box-shadow: 0 0 10px rgba(251, 191, 36, 0.6);
+  color: #09090b;
+  box-shadow: var(--shadow-sm);
   animation: pulseCrit 1s infinite alternate;
 }
 

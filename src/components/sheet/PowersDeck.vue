@@ -1858,9 +1858,9 @@ function getModifierInfo(modName, isFlaw = false) {
 .header-total-badge {
   font-size: 0.78rem;
   font-weight: 800;
-  color: #c084fc;
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.35);
+  color: #f43f5e;
+  background: rgba(225, 29, 72, 0.12);
+  border: 1px solid rgba(225, 29, 72, 0.3);
   padding: 0.2rem 0.65rem;
   border-radius: var(--radius-pill);
   font-variant-numeric: tabular-nums;
@@ -2196,7 +2196,7 @@ function getModifierInfo(modName, isFlaw = false) {
 .glance-label {
   font-size: 0.68rem;
   font-weight: 800;
-  color: #c084fc;
+  color: #38bdf8;
   text-transform: uppercase;
   display: flex;
   align-items: center;
@@ -2222,13 +2222,13 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .slot-btn:hover {
-  border-color: #8b5cf6;
+  border-color: var(--accent-primary);
   color: #fff;
 }
 
 .slot-btn.active {
-  background: #8b5cf6;
-  border-color: #8b5cf6;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary);
   color: #fff;
   font-weight: 800;
 }
@@ -2267,7 +2267,7 @@ function getModifierInfo(modName, isFlaw = false) {
   text-overflow: ellipsis;
 }
 
-.glance-param-pill.base .param-v { color: #c084fc; }
+.glance-param-pill.base .param-v { color: var(--accent-primary); }
 .glance-param-pill.dc .param-v { color: #38bdf8; }
 
 .glance-modifiers-row {
@@ -2420,19 +2420,19 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .device-tab-item.overview-tab {
   margin-left: auto;
-  border-color: rgba(168, 85, 247, 0.3);
-  color: #c084fc;
+  border-color: rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
 }
 
 .device-tab-item.overview-tab:hover {
-  border-color: #a855f7;
+  border-color: #38bdf8;
 }
 
 .device-tab-item.overview-tab.active {
-  background: rgba(168, 85, 247, 0.15);
-  border-color: #a855f7;
-  color: #e9d5ff;
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.2);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: #38bdf8;
+  color: #f0f9ff;
+  box-shadow: var(--shadow-sm);
 }
 
 .device-tab-item.is-sub-offline {
@@ -2621,7 +2621,7 @@ function getModifierInfo(modName, isFlaw = false) {
 .sub-pills-label {
   font-size: 0.64rem;
   font-weight: 700;
-  color: #c084fc;
+  color: #38bdf8;
   display: inline-flex;
   align-items: center;
   gap: 0.2rem;
@@ -2831,7 +2831,7 @@ function getModifierInfo(modName, isFlaw = false) {
 .dossier-block-head.extra-head { color: #34d399; }
 .dossier-block-head.flaw-head { color: #f87171; }
 .dossier-block-head.linked-head { color: #22d3ee; }
-.dossier-block-head.array-head { color: #c084fc; }
+.dossier-block-head.array-head { color: #38bdf8; }
 .dossier-block-head.dev-head { color: #fbbf24; }
 
 .dossier-desc-text {
@@ -3070,7 +3070,7 @@ function getModifierInfo(modName, isFlaw = false) {
   min-width: 60px;
 }
 
-.active-dot { color: #c084fc; font-weight: 800; }
+.active-dot { color: #10b981; font-weight: 800; }
 .inactive-dot { color: var(--text-muted); }
 
 .stunt-info {
@@ -3151,9 +3151,9 @@ function getModifierInfo(modName, isFlaw = false) {
 .sub-array-indicator {
   font-size: 0.68rem;
   font-weight: 700;
-  color: #c084fc;
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
   padding: 0.15rem 0.45rem;
   border-radius: 4px;
   display: inline-flex;
@@ -3182,9 +3182,9 @@ function getModifierInfo(modName, isFlaw = false) {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #ddd6fe;
+  background: rgba(225, 29, 72, 0.12);
+  border: 1px solid rgba(225, 29, 72, 0.3);
+  color: #ffe4e6;
   font-size: 0.7rem;
   font-weight: 700;
   padding: 0.18rem 0.5rem;
@@ -3194,10 +3194,10 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .btn-send-vtt-sub:hover {
-  background: #a855f7;
+  background: var(--accent-primary);
   color: #ffffff;
-  border-color: #c084fc;
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.4);
+  border-color: var(--accent-primary);
+  box-shadow: var(--shadow-sm);
 }
 
 .dossier-head-left {
@@ -3321,7 +3321,7 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .sub-dossier-label.array-accent {
-  color: #c084fc;
+  color: #38bdf8;
 }
 
 .sub-dossier-label.linked-accent {
@@ -3329,8 +3329,8 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .sub-array-block {
-  border-color: rgba(168, 85, 247, 0.25);
-  background: rgba(168, 85, 247, 0.04);
+  border-color: rgba(56, 189, 248, 0.25);
+  background: rgba(56, 189, 248, 0.04);
 }
 
 .sub-linked-block {
@@ -3348,36 +3348,36 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .glance-config-text {
   font-size: 0.68rem;
-  color: #c084fc;
+  color: #38bdf8;
   font-weight: 700;
   margin-left: 0.25rem;
 }
 
 .sub-config-text {
   font-size: 0.68rem;
-  color: #c084fc;
+  color: #38bdf8;
   font-weight: 700;
   margin-left: 0.2rem;
 }
 
 /* Configured Choices Dossier Block */
 .config-choices-block {
-  border-left: 3px solid #8b5cf6;
-  background: rgba(139, 92, 246, 0.05);
-  border-color: rgba(139, 92, 246, 0.25);
+  border-left: 3px solid #0ea5e9;
+  background: rgba(14, 165, 233, 0.05);
+  border-color: rgba(14, 165, 233, 0.25);
 }
 
 .config-choices-block.sub {
-  border-left: 3px solid #8b5cf6;
-  background: rgba(139, 92, 246, 0.04);
+  border-left: 3px solid #0ea5e9;
+  background: rgba(14, 165, 233, 0.04);
 }
 
 .dossier-block-head.config-head {
-  color: #c084fc;
+  color: #38bdf8;
 }
 
 .sub-dossier-label.config-head {
-  color: #c084fc;
+  color: #38bdf8;
   display: flex;
   align-items: center;
   gap: 0.4rem;
@@ -3598,9 +3598,9 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .btn-inspect-system:hover {
   background: #f59e0b;
-  color: #000000;
+  color: #09090b;
   border-color: #fbbf24;
   font-weight: 800;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  box-shadow: var(--shadow-sm);
 }
 </style>

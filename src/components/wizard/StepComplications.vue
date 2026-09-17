@@ -218,7 +218,7 @@
           <!-- Presets Quick-Pick Section -->
           <div class="presets-section mb-3">
             <div class="presets-label">
-              <i class="ri-sparkling-fill" style="color: #c084fc;"></i>
+              <i class="ri-sparkling-fill" style="color: #fbbf24;"></i>
               <span>Official M&M 3e Motivations (Click to pre-fill):</span>
             </div>
             <div class="presets-chips-grid">
@@ -710,9 +710,9 @@ function confirmAddComp() {
 }
 
 .pill-motivation {
-  background: rgba(168, 85, 247, 0.18);
-  border: 1px solid rgba(168, 85, 247, 0.4);
-  color: #c084fc;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
 }
 
 .pill-complication {
@@ -814,8 +814,8 @@ function confirmAddComp() {
 }
 
 .theme-motivation .header-icon-badge {
-  background: rgba(168, 85, 247, 0.2);
-  color: #c084fc;
+  background: rgba(245, 158, 11, 0.18);
+  color: #fbbf24;
 }
 
 .theme-complication .header-icon-badge {
@@ -902,14 +902,14 @@ function confirmAddComp() {
 }
 
 .segmented-btn.active.btn-tab-motivation {
-  background: rgba(168, 85, 247, 0.18);
-  border-color: rgba(168, 85, 247, 0.5);
-  color: #e9d5ff;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #fef3c7;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .segmented-btn.active.btn-tab-motivation .segmented-pill {
-  color: #c084fc;
+  color: #fbbf24;
   opacity: 1;
 }
 
@@ -1047,13 +1047,13 @@ function confirmAddComp() {
 }
 
 .callout-motivation {
-  background: rgba(168, 85, 247, 0.1);
-  border: 1px solid rgba(168, 85, 247, 0.25);
-  color: #d8b4fe;
+  background: rgba(245, 158, 11, 0.1);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  color: #fde68a;
 }
 
 .callout-motivation i {
-  color: #c084fc;
+  color: #fbbf24;
   font-size: 1rem;
   margin-top: 1px;
 }

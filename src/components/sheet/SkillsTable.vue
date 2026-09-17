@@ -862,8 +862,8 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .sheet-skill-row.is-specialization {
-  background: rgba(192, 132, 252, 0.03);
-  border-left-color: #c084fc;
+  background: rgba(56, 189, 248, 0.03);
+  border-left-color: #38bdf8;
 }
 
 /* Ability Badges & Color Coding */
@@ -918,9 +918,9 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .ab-pre {
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #c084fc;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
 }
 
 .ab-sta {
@@ -1139,9 +1139,9 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .spec-count-tag {
-  background: rgba(192, 132, 252, 0.2);
-  border: 1px solid rgba(192, 132, 252, 0.4);
-  color: #c084fc;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
   font-size: 0.62rem;
   font-weight: 800;
   padding: 0.05rem 0.35rem;
@@ -1185,7 +1185,7 @@ function rollSkill(skillTitle, bonus) {
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #c084fc;
+  color: #38bdf8;
   font-size: 0.85rem;
   opacity: 0.8;
 }
@@ -1200,9 +1200,9 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .spec-badge-chip {
-  background: rgba(192, 132, 252, 0.15);
-  border: 1px solid rgba(192, 132, 252, 0.3);
-  color: #c084fc;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #38bdf8;
   font-size: 0.55rem;
   font-weight: 800;
   padding: 0.05rem 0.25rem;

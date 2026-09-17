@@ -869,12 +869,12 @@ function broadcastComplication(item) {
 }
 
 .comp-modal-card.theme-motivation .comp-modal-header {
-  background: rgba(168, 85, 247, 0.1);
-  border-bottom-color: rgba(168, 85, 247, 0.3);
+  background: rgba(245, 158, 11, 0.1);
+  border-bottom-color: rgba(245, 158, 11, 0.3);
 }
 
 .comp-modal-card.theme-motivation .comp-modal-header h4 i {
-  color: #c084fc;
+  color: #fbbf24;
 }
 
 .comp-modal-card.theme-complication {
@@ -939,14 +939,14 @@ function broadcastComplication(item) {
 }
 
 .segmented-btn.active.btn-tab-motivation {
-  background: rgba(168, 85, 247, 0.18);
-  border-color: rgba(168, 85, 247, 0.5);
-  color: #e9d5ff;
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.2);
+  background: rgba(245, 158, 11, 0.16);
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #fef3c7;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
 .segmented-btn.active.btn-tab-motivation .segmented-pill {
-  color: #c084fc;
+  color: #fbbf24;
   opacity: 1;
 }
 

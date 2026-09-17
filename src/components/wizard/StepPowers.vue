@@ -9,10 +9,10 @@
     </div>
 
     <!-- POWERS SUMMARY STRIP -->
-    <div class="card mb-3" style="padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; background: rgba(168, 85, 247, 0.08); border-color: rgba(168, 85, 247, 0.25);">
+    <div class="card mb-3" style="padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; background: rgba(225, 29, 72, 0.06); border-color: rgba(225, 29, 72, 0.25);">
       <div>
         <div style="font-size: 0.88rem; font-weight: 800; color: #fff;">
-          Powers Point Total: <span class="tabular-nums" style="color: #c084fc; font-size: 1.1rem;">{{ heroStore.powersCost }} PP</span> (<span class="tabular-nums">{{ heroStore.character.powers?.length || 0 }}</span> Powers Active)
+          Powers Point Total: <span class="tabular-nums" style="color: var(--accent-primary); font-size: 1.1rem;">{{ heroStore.powersCost }} PP</span> (<span class="tabular-nums">{{ heroStore.character.powers?.length || 0 }}</span> Powers Active)
         </div>
         <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem;">
           Full modular Power Studio editor featuring official M&M 3e extras, flaws, and modifier calculations.
@@ -30,7 +30,7 @@
 
     <!-- POWERS LIST CARDS -->
     <div v-if="!heroStore.character.powers || heroStore.character.powers.length === 0" class="card" style="padding: 3rem 1.5rem; text-align: center;">
-      <i class="ri-flashlight-line" style="font-size: 3rem; color: #a855f7; display: block; margin-bottom: 0.75rem;"></i>
+      <i class="ri-flashlight-line" style="font-size: 2.5rem; color: var(--text-muted); display: block; margin-bottom: 0.75rem;"></i>
       <h4 style="font-weight: 800; color: #fff; margin-bottom: 0.35rem;">No Superhuman Powers Yet</h4>
       <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 450px; margin: 0 auto 1.25rem;">
         Click above to craft powers using the Power Studio or load an archetype template in Step 1.
@@ -58,7 +58,7 @@
               {{ power.name || 'Unnamed Power' }}
             </div>
           </div>
-          <div class="tabular-nums" style="font-weight: 800; font-size: 0.92rem; color: #c084fc;">
+          <div class="tabular-nums" style="font-weight: 800; font-size: 0.92rem; color: var(--accent-primary);">
             {{ getPowerCost(power) }} PP
           </div>
         </div>
@@ -134,12 +134,12 @@ function getTypeBadgeClass(type) {
   width: 40px;
   height: 40px;
   border-radius: var(--radius-sm);
-  background: rgba(168, 85, 247, 0.2);
+  background: rgba(225, 29, 72, 0.15);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.3rem;
-  color: #c084fc;
+  color: #f43f5e;
 }
 
 .step-title {

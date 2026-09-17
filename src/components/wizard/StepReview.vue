@@ -100,17 +100,17 @@
     </div>
 
     <!-- ACTION CALLOUT -->
-    <div class="card launch-ready-card" style="padding: 1.5rem; text-align: center; background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(59, 130, 246, 0.12)); border-color: rgba(16, 185, 129, 0.35);">
+    <div class="card launch-ready-card" style="padding: 1.5rem; text-align: center; background: var(--bg-surface); border: 1px solid rgba(16, 185, 129, 0.3);">
       <div class="launch-badge">
         <i class="ri-checkbox-circle-fill"></i> Build Complete
       </div>
-      <h4 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0.5rem 0 0.35rem;">
-        Hero Ready for Play!
+      <h4 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0.6rem 0 0.35rem;">
+        Hero Ready for Play
       </h4>
       <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 520px; margin: 0 auto 1.25rem; line-height: 1.5;">
         Your hero build is ready. You can switch to the character sheet anytime to view traits, roll dice, and manage attacks.
       </p>
-      <button class="btn btn-primary btn-lg" style="padding: 0.75rem 2rem; font-weight: 800; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);" @click="finishWizard">
+      <button class="btn btn-primary btn-lg" style="padding: 0.75rem 2rem; font-weight: 800; box-shadow: var(--shadow-sm);" @click="finishWizard">
         <i class="ri-file-user-line"></i> Open Character Sheet
       </button>
     </div>

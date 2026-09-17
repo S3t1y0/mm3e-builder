@@ -54,7 +54,14 @@
   --line-height-tight: 1.15;
   --line-height-body: 1.55;
   --letter-spacing-tight: -0.03em;
-  --letter-spacing-caps: 0.06em;
+  /* Systemic Layer Contexts (Z-Index Restraint) */
+  --z-normal: 1;
+  --z-dropdown: 20;
+  --z-sticky: 40;
+  --z-hud: 60;
+  --z-modal-backdrop: 80;
+  --z-modal: 90;
+  --z-toast: 100;
 }
 
 /* Reduced Motion Safety Guardrail (Section 6.B) */
@@ -272,14 +279,14 @@ button:active:not(:disabled),
   border: 1px solid rgba(220, 38, 38, 0.4);
   color: #ef4444;
   font-size: 1.2rem;
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.1);
+  box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.12);
   transition: border-color var(--trans-fast), box-shadow var(--trans-fast), color var(--trans-fast);
   flex-shrink: 0;
 }
 
 .app-brand:hover .brand-emblem {
   border-color: rgba(239, 68, 68, 0.65);
-  box-shadow: 0 0 14px rgba(220, 38, 38, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255, 255, 255, 0.18);
   color: #f87171;
 }
 
@@ -961,7 +968,7 @@ button:active:not(:disabled),
   font-size: 1.35rem;
   color: #f87171;
   flex-shrink: 0;
-  box-shadow: 0 0 14px rgba(220, 38, 38, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .share-title-group {

@@ -84,9 +84,9 @@
             </div>
             <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 9999px; overflow: hidden;">
               <div
-                style="height: 100%; transition: width 0.3s ease;"
+                style="height: 100%; width: 100%; transform-origin: left; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);"
                 :style="{
-                  width: Math.min(100, Math.round((heroStore.totalSpentPP / heroStore.totalBudgetPP) * 100)) + '%',
+                  transform: `scaleX(${Math.min(1, Math.max(0, (heroStore.totalSpentPP / Math.max(1, heroStore.totalBudgetPP))))})`,
                   background: heroStore.remainingPP < 0 ? '#ef4444' : 'var(--accent-primary)'
                 }"
               ></div>
@@ -106,17 +106,17 @@
           <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.65rem;">
             Point Allocation by Category
           </div>
-          <div style="display: flex; flex-direction: column; gap: 0.45rem; font-size: 0.78rem;">
+          <div style="display: flex; flex-direction: column; gap: 0.35rem; font-size: 0.78rem;">
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #93c5fd;">Abilities</span>
+              <span style="color: #60a5fa;">Abilities</span>
               <strong class="tabular-nums" style="color: #fff;">{{ heroStore.abilitiesCost }} PP</strong>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #6ee7b7;">Defenses</span>
+              <span style="color: #34d399;">Defenses</span>
               <strong class="tabular-nums" style="color: #fff;">{{ heroStore.defensesCost }} PP</strong>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #fde047;">Skills</span>
+              <span style="color: #fbbf24;">Skills</span>
               <strong class="tabular-nums" style="color: #fff;">{{ heroStore.skillsCost }} PP</strong>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -124,7 +124,7 @@
               <strong class="tabular-nums" style="color: #fff;">{{ heroStore.advantagesCost }} PP</strong>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #c084fc;">Powers & Devices</span>
+              <span style="color: #38bdf8;">Powers & Devices</span>
               <strong class="tabular-nums" style="color: #fff;">{{ heroStore.powersCost }} PP</strong>
             </div>
           </div>
@@ -295,6 +295,7 @@ function finishWizard() {
   position: sticky;
   top: 4.5rem;
   max-height: calc(100vh - 5.5rem);
+  max-height: calc(100dvh - 5.5rem);
   overflow-y: auto;
   scrollbar-width: thin;
 }

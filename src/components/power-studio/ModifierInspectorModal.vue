@@ -714,7 +714,7 @@ const netEffectCost = computed(() => {
 
 .option-chip.active {
   background: #38bdf8;
-  color: #000;
+  color: #09090b;
   border-color: #38bdf8;
   font-weight: 800;
 }
@@ -793,7 +793,7 @@ const netEffectCost = computed(() => {
 
 .btn-add-modifier.btn-extra:hover {
   background: #10b981;
-  color: #000;
+  color: #09090b;
 }
 
 .btn-add-modifier.btn-flaw {

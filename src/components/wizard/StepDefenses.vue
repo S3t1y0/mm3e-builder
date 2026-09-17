@@ -21,7 +21,7 @@
           <div class="progress-bar-bg">
             <div
               class="progress-bar-fill"
-              :style="{ width: getCapPercent(dodgeTotal + toughnessTotal) + '%' }"
+              :style="{ transform: `scaleX(${getCapPercent(dodgeTotal + toughnessTotal) / 100})` }"
               :class="{ over: isCapExceeded(dodgeTotal + toughnessTotal) }"
             ></div>
           </div>
@@ -40,7 +40,7 @@
           <div class="progress-bar-bg">
             <div
               class="progress-bar-fill"
-              :style="{ width: getCapPercent(parryTotal + toughnessTotal) + '%' }"
+              :style="{ transform: `scaleX(${getCapPercent(parryTotal + toughnessTotal) / 100})` }"
               :class="{ over: isCapExceeded(parryTotal + toughnessTotal) }"
             ></div>
           </div>
@@ -59,7 +59,7 @@
           <div class="progress-bar-bg">
             <div
               class="progress-bar-fill"
-              :style="{ width: getCapPercent(fortitudeTotal + willTotal) + '%' }"
+              :style="{ transform: `scaleX(${getCapPercent(fortitudeTotal + willTotal) / 100})` }"
               :class="{ over: isCapExceeded(fortitudeTotal + willTotal) }"
             ></div>
           </div>
@@ -341,9 +341,11 @@ function setDefense(key, val) {
 }
 
 .progress-bar-fill {
+  width: 100%;
   height: 100%;
   background: #10b981;
-  transition: width 0.3s ease;
+  transform-origin: left;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .progress-bar-fill.over {

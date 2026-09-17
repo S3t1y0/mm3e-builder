@@ -508,7 +508,7 @@
 
 .attack-badge.basic { background: #3b82f6; color: #fff; }
 .attack-badge.power { background: var(--accent-primary); color: #fff; }
-.attack-badge.custom { background: var(--accent-amber); color: #000; }
+.attack-badge.custom { background: var(--accent-amber); color: #09090b; }
 
 .attack-name {
   font-size: 1rem;
@@ -530,7 +530,7 @@
 
 .roll-btn:hover {
   background: var(--accent-secondary);
-  color: #000;
+  color: #09090b;
 }
 
 .roll-btn:active {
@@ -608,7 +608,7 @@
 
 .crit-badge {
   background: #f59e0b;
-  color: #000;
+  color: #09090b;
   font-size: 0.72rem;
   font-weight: 800;
   padding: 0.2rem 0.6rem;
@@ -739,7 +739,7 @@
 .injury-tracker-panel.has-injuries {
   border-color: rgba(239, 68, 68, 0.45);
   background: rgba(239, 68, 68, 0.06);
-  box-shadow: 0 0 15px rgba(239, 68, 68, 0.1);
+  box-shadow: var(--shadow-sm);
 }
 
 .injury-tracker-header {
@@ -798,7 +798,7 @@
   background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.5);
   color: #fca5a5;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .injury-controls-row {
@@ -879,7 +879,7 @@
 
 .defense-card.card-injured {
   border-color: rgba(239, 68, 68, 0.4) !important;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.12);
+  box-shadow: var(--shadow-sm);
 }
 
 .def-injured-text {
@@ -946,7 +946,6 @@
 
 .condition-chip.active .chip-dot {
   background: #ef4444;
-  box-shadow: 0 0 6px #ef4444;
 }
 
 .combo-hint {
@@ -2483,13 +2482,13 @@
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.2) 0%, rgba(14, 165, 233, 0.3) 100%);
   border-color: #38bdf8;
   color: #fff;
-  box-shadow: 0 0 14px rgba(56, 189, 248, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .array-mode-btn.dynamic.active {
   background: linear-gradient(135deg, rgba(245, 158, 11, 0.2) 0%, rgba(217, 119, 6, 0.3) 100%);
   border-color: #f59e0b;
-  box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .array-mode-btn.disabled {
@@ -2613,7 +2612,7 @@
 .overview-slot-card.active-combat {
   border-color: #38bdf8;
   background: rgba(56, 189, 248, 0.08);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .overview-slot-header {
@@ -3354,7 +3353,7 @@
 .btn-power-master-toggle.active:hover {
   background: rgba(16, 185, 129, 0.25);
   border-color: #10b981;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.35);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-power-master-toggle.inactive {
@@ -3366,7 +3365,7 @@
 .btn-power-master-toggle.inactive:hover {
   background: rgba(239, 68, 68, 0.22);
   border-color: #ef4444;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.35);
+  box-shadow: var(--shadow-sm);
 }
 
 .power-toggle-dot {
@@ -3378,7 +3377,6 @@
 
 .btn-power-master-toggle.active .power-toggle-dot {
   background: #10b981;
-  box-shadow: 0 0 6px #10b981;
 }
 
 .btn-power-master-toggle.inactive .power-toggle-dot {
@@ -3467,7 +3465,6 @@
   background: rgba(16, 185, 129, 0.2);
   color: #34d399;
   border: 1px solid rgba(16, 185, 129, 0.5);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.25);
 }
 
 .btn-slot-activate {
@@ -3490,7 +3487,7 @@
   background: rgba(56, 189, 248, 0.18);
   border-color: #38bdf8;
   color: #fff;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-1px);
 }
 
@@ -3555,7 +3552,7 @@
 .btn-switch-and-roll:hover {
   background: rgba(56, 189, 248, 0.3);
   color: #fff;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.35);
+  box-shadow: var(--shadow-sm);
 }
 
 /* ==========================================================================
@@ -3581,7 +3578,7 @@
   border-color: var(--accent-primary);
   background: rgba(185, 28, 28, 0.18);
   transform: scale(1.05);
-  box-shadow: 0 0 8px rgba(185, 28, 28, 0.35);
+  box-shadow: var(--shadow-sm);
 }
 
 .ab-roll-btn i {
@@ -3613,7 +3610,7 @@
   border-color: #10b981;
   background: rgba(16, 185, 129, 0.15);
   transform: translateY(-1px) scale(1.03);
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .def-roll-btn i {
@@ -3657,7 +3654,7 @@
   border-color: var(--accent-primary);
   background: rgba(56, 189, 248, 0.15);
   transform: scale(1.04);
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .sheet-skill-roll-btn i {
@@ -3979,7 +3976,7 @@
 .btn-hud-action:hover {
   background: rgba(56, 189, 248, 0.28);
   color: #fff;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .hud-history-summary {
@@ -4037,7 +4034,7 @@
   border: 1px solid rgba(220, 38, 38, 0.35);
   border-top: 3px solid #dc2626;
   border-radius: var(--radius-lg);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.45), 0 0 16px rgba(220, 38, 38, 0.12);
+  box-shadow: var(--shadow-lg);
   padding: 1.15rem 1.5rem;
   display: flex;
   align-items: center;
@@ -4072,7 +4069,7 @@
   border-radius: 50%;
   background: radial-gradient(circle, rgba(220, 38, 38, 0.25) 0%, rgba(15, 15, 20, 0.95) 75%);
   border: 2px solid rgba(239, 68, 68, 0.6);
-  box-shadow: 0 0 16px rgba(220, 38, 38, 0.35), inset 0 0 10px rgba(220, 38, 38, 0.2);
+  box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -4318,7 +4315,7 @@
 .btn-injury-quick-heal:hover {
   background: #10b981;
   border-color: #10b981;
-  color: #000;
+  color: #09090b;
   transform: scale(1.1);
 }
 
@@ -4688,7 +4685,7 @@
 .dndb-defenses-grid .def-roll-btn:hover {
   background: #dc2626;
   border-color: #ef4444;
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
+  box-shadow: var(--shadow-sm);
 }
 
 .dndb-defenses-grid .def-total {
@@ -5008,7 +5005,7 @@
 .sheet-skill-roll-btn:hover {
   background: #dc2626;
   border-color: #ef4444;
-  box-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
+  box-shadow: var(--shadow-sm);
 }
 
 .skill-roll-val {

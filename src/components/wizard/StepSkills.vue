@@ -892,9 +892,9 @@ function confirmSpecialtySkill() {
 }
 
 .ab-pre {
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #c084fc;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
 }
 
 .ab-sta {
@@ -1010,9 +1010,9 @@ function confirmSpecialtySkill() {
 }
 
 .spec-count-tag {
-  background: rgba(192, 132, 252, 0.2);
-  border: 1px solid rgba(192, 132, 252, 0.4);
-  color: #c084fc;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
   font-size: 0.65rem;
   font-weight: 800;
   padding: 0.05rem 0.4rem;
@@ -1043,7 +1043,7 @@ function confirmSpecialtySkill() {
 
 /* Specialization Child */
 .spec-child-row {
-  background: rgba(192, 132, 252, 0.02);
+  background: rgba(56, 189, 248, 0.02);
 }
 
 .spec-child-title-wrap {
@@ -1054,7 +1054,7 @@ function confirmSpecialtySkill() {
 }
 
 .spec-branch-icon {
-  color: #c084fc;
+  color: #38bdf8;
   font-size: 0.9rem;
   opacity: 0.8;
 }
@@ -1078,9 +1078,9 @@ function confirmSpecialtySkill() {
 }
 
 .spec-badge-chip {
-  background: rgba(192, 132, 252, 0.15);
-  border: 1px solid rgba(192, 132, 252, 0.3);
-  color: #c084fc;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  color: #38bdf8;
   font-size: 0.58rem;
   font-weight: 800;
   padding: 0.05rem 0.3rem;

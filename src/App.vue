@@ -107,7 +107,7 @@
             </button>
 
             <button class="dropdown-item" @click="handleToolAction('roll20')">
-              <i class="ri-printer-line icon-purple"></i>
+              <i class="ri-printer-line icon-crimson"></i>
               <div class="dropdown-item-text">
                 <strong>Print / Roll20 Sheet</strong>
                 <span>Print sheet & Roll20 macros</span>
@@ -121,7 +121,7 @@
               <i class="ri-user-shared-line icon-amber"></i>
               <div class="dropdown-item-text">
                 <strong>Sample Hero</strong>
-                <span>Load PL 10 Apex Sentinel</span>
+                <span>Load PL 10 Aegis Valkyrie</span>
               </div>
             </button>
 
@@ -197,7 +197,7 @@
     <DiceRollHud />
 
     <!-- TOAST NOTIFICATIONS CONTAINER -->
-    <div style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 9999; display: flex; flex-direction: column; gap: 0.5rem;">
+    <div style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: var(--z-toast); display: flex; flex-direction: column; gap: 0.5rem;">
       <div
         v-for="toast in uiStore.toasts"
         :key="toast.id"
@@ -329,9 +329,9 @@ onBeforeUnmount(() => {
 });
 
 function loadSampleHero() {
-  heroStore.character.name = 'Apex Sentinel';
-  heroStore.character.player = 'Commander Vance';
-  heroStore.character.identity = 'Caleb Vance';
+  heroStore.character.name = 'Aegis Valkyrie';
+  heroStore.character.player = 'Campaign Player';
+  heroStore.character.identity = 'Elena Ward';
   heroStore.character.powerLevel = 10;
 
   // Abilities
@@ -439,16 +439,17 @@ function loadSampleHero() {
   heroStore.character.powers = [p1, p2];
   heroStore.pushHistory();
 
-  uiStore.showToast('Loaded complete sample hero "Apex Sentinel" (PL 10)!', 'success');
+  uiStore.showToast('Loaded complete sample hero "Aegis Valkyrie" (PL 10)!', 'success');
 }
 </script>
 
 <style scoped>
 .app-container {
   min-height: 100vh;
+  min-height: 100dvh;
   background-color: var(--bg-app);
   color: var(--text-primary);
-  font-family: var(--font-family, 'Geist', sans-serif);
+  font-family: var(--font-sans);
 }
 
 .top-menubar {
@@ -462,7 +463,7 @@ function loadSampleHero() {
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
   position: sticky;
   top: 0;
-  z-index: 60;
+  z-index: var(--z-sticky);
   gap: 1rem;
 }
 
@@ -781,7 +782,7 @@ function loadSampleHero() {
   border-radius: var(--radius-md);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.2);
   padding: 0.45rem;
-  z-index: 100;
+  z-index: var(--z-dropdown);
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -841,7 +842,8 @@ function loadSampleHero() {
 }
 
 .icon-teal { color: #2dd4bf; }
-.icon-purple { color: #c084fc; }
+.icon-crimson { color: var(--accent-primary); }
+.icon-blue { color: #38bdf8; }
 .icon-amber { color: #fbbf24; }
 .icon-red { color: #f87171; }
 

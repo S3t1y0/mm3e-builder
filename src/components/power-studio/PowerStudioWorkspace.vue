@@ -198,7 +198,8 @@ function handleSave() {
   inset: 0;
   width: 100vw;
   height: 100vh;
-  z-index: 5000;
+  height: 100dvh;
+  z-index: var(--z-modal, 90);
   background: var(--bg-main, #0b0f19);
   display: flex;
   flex-direction: column;
@@ -337,9 +338,9 @@ function handleSave() {
 .array-indicator-pill {
   font-size: 0.68rem;
   font-weight: 800;
-  background: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  background: rgba(56, 189, 248, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.35);
   padding: 0.15rem 0.45rem;
   border-radius: var(--radius-xs);
   display: inline-flex;
@@ -389,7 +390,7 @@ function handleSave() {
 }
 
 .btn-save-power {
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.4);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-save-power:active {

@@ -40,7 +40,7 @@ export function getSavedRoster() {
 export function createDefaultCharacter() {
   return {
     id: 'char_' + Date.now(),
-    name: 'Hero Name',
+    name: '',
     player: '',
     identity: '',
     isSecretIdentity: true,

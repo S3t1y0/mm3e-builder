@@ -18,7 +18,7 @@
             v-model="heroStore.character.name"
             type="text"
             class="form-control"
-            placeholder="e.g. Apex Sentinel, Chronos, Valkyrie"
+            placeholder="e.g. Aegis Valkyrie, Chronos, Iron Weaver"
           />
         </div>
         <div class="form-group">
