@@ -3,7 +3,7 @@
     <!-- Header Banner of Canvas -->
     <div class="canvas-header">
       <div class="canvas-title-group">
-        <span class="canvas-badge">{{ title || 'Effect Configuration' }}</span>
+        <span v-if="title" class="canvas-badge">{{ title }}</span>
         <h4 class="canvas-effect-name">{{ effect.name || effect.baseEffect }}</h4>
       </div>
       <div class="canvas-cost-pill">
@@ -35,7 +35,7 @@
           <div class="base-col-control">
             <div class="base-col-identity">
               <div class="base-effect-icon-box">
-                <i class="ri-magic-line"></i>
+                <i class="ri-flashlight-line"></i>
               </div>
               <div class="base-identity-text">
                 <div class="base-effect-name-row">
@@ -43,7 +43,6 @@
                   <span class="badge badge-accent">{{ currentBaseInfo?.category || 'Effect' }}</span>
                   <span class="base-effect-cost-tag">{{ currentBaseInfo?.cost || 1 }} PP / Rank</span>
                 </div>
-                <span class="base-type-subtitle">Official M&M 3E Base Effect</span>
               </div>
             </div>
 
@@ -59,7 +58,6 @@
 
               <div class="base-rank-stepper-box">
                 <label class="base-rank-label">
-                  <i class="ri-bar-chart-line"></i>
                   <span>Effect Rank:</span>
                 </label>
                 <div class="rank-stepper-row">
@@ -155,12 +153,9 @@
             :key="extra.name + '_' + idx"
             class="modifier-card mod-card-extra"
           >
-            <!-- Card Header: Category Badge, Title, Cost Badge, Delete -->
+            <!-- Card Header: Title, Cost Badge, Delete -->
             <div class="mod-card-header">
               <div class="mod-card-identity">
-                <span class="mod-cat-badge extra-badge">
-                  {{ getModifierMeta(extra, false).category }}
-                </span>
                 <span class="mod-card-title">{{ extra.name }}</span>
               </div>
               <div class="mod-card-header-actions">
@@ -257,12 +252,9 @@
             :key="flaw.name + '_' + idx"
             class="modifier-card mod-card-flaw"
           >
-            <!-- Card Header: Category Badge, Title, Cost Badge, Delete -->
+            <!-- Card Header: Title, Cost Badge, Delete -->
             <div class="mod-card-header">
               <div class="mod-card-identity">
-                <span class="mod-cat-badge flaw-badge">
-                  {{ getModifierMeta(flaw, true).category }}
-                </span>
                 <span class="mod-card-title">{{ flaw.name }}</span>
               </div>
               <div class="mod-card-header-actions">
@@ -969,7 +961,7 @@ function calculateModSubtotal(mod, isFlaw = false) {
   background: rgba(220, 38, 38, 0.15);
   border: 1px solid rgba(220, 38, 38, 0.35);
   padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
 }
 
 .cost-calc-label {

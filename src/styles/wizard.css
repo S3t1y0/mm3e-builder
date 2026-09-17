@@ -26,7 +26,7 @@
   position: sticky;
   top: 3.75rem; /* just below top menubar */
   z-index: 40;
-  backdrop-filter: blur(12px);
+  backdrop-filter: blur(8px);
   background: rgba(15, 23, 42, 0.92);
 }
 
@@ -70,7 +70,6 @@
   background: rgba(220, 38, 38, 0.12);
   border-color: rgba(220, 38, 38, 0.35);
   color: var(--text-primary);
-  box-shadow: 0 0 12px rgba(220, 38, 38, 0.15);
 }
 
 .stepper-item.completed {
@@ -98,7 +97,6 @@
   background: var(--accent-primary);
   border-color: var(--accent-primary-hover);
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
 }
 
 .stepper-item.completed .stepper-bubble {

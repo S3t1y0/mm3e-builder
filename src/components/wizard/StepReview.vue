@@ -3,7 +3,7 @@
     <div class="step-banner">
       <div class="step-banner-icon"><i class="ri-checkbox-circle-line"></i></div>
       <div>
-        <h3 class="step-title">Step 9: Character Audit & Final Review</h3>
+        <h3 class="step-title">Character Review & Audit</h3>
         <p class="step-subtitle">Audit Power Level caps compliance, verify point allocations (PP), check equipment capacity (EP), and complete final hero validation.</p>
       </div>
     </div>
@@ -70,10 +70,10 @@
 
     <!-- ITEMIZED POINT BREAKDOWN -->
     <div class="card mb-4" style="padding: 1.25rem;">
-      <h4 class="section-title"><i class="ri-pie-chart-line text-accent"></i> Point Allocation Breakdown</h4>
+      <h4 class="section-title">Point Allocation Breakdown</h4>
       <div class="breakdown-grid">
         <div class="breakdown-item">
-          <span class="breakdown-label">Abilities (8 Stats)</span>
+          <span class="breakdown-label">Abilities</span>
           <span class="breakdown-val tabular-nums">{{ heroStore.abilitiesCost }} PP</span>
         </div>
         <div class="breakdown-item">
@@ -331,7 +331,7 @@ function finishWizard() {
   align-items: center;
   gap: 0.35rem;
   padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-xs);
   background: rgba(16, 185, 129, 0.2);
   border: 1px solid rgba(16, 185, 129, 0.4);
   color: #34d399;

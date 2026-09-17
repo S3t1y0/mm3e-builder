@@ -5,8 +5,8 @@
       <div class="invitation-left">
         <div class="icon-cube"><i class="ri-shuffle-line"></i></div>
         <div>
-          <span class="badge-tag">M&M 3E Alternate Effects</span>
-          <h5 class="invitation-title">Power Array / Alternate Stunts Suite</h5>
+          <span class="badge-tag">Alternate Effects</span>
+          <h5 class="invitation-title">Power Array (Alternate Effects)</h5>
           <p class="invitation-desc">
             Build alternate powers or modes that share the primary effect's PP pool at an economical rate (+1 PP for standard alternate effect, +2 PP for dynamic alternate effect).
           </p>
@@ -488,7 +488,7 @@ const capacityPercent = computed(() => {
   font-size: 0.68rem;
   font-weight: 800;
   padding: 0.1rem 0.4rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;

@@ -7,7 +7,7 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'actions' }"
         @click="activeTab = 'actions'"
-        title="Tactical combat maneuvers, weapon strikes, and power attacks"
+        title="Combat maneuvers, weapon strikes, and power attacks"
       >
         <i class="ri-sword-line"></i>
         <span>Actions</span>

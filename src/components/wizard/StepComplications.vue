@@ -4,7 +4,7 @@
     <div class="step-banner">
       <div class="step-banner-icon"><i class="ri-compass-3-line"></i></div>
       <div>
-        <h3 class="step-title">Step 8: Motivations & Complications</h3>
+        <h3 class="step-title">Motivations & Complications</h3>
         <p class="step-subtitle">
           Define core motivations and dramatic complications. In M&M 3e, facing personal obstacles or vulnerabilities earns players valuable <strong>Hero Points</strong> during gameplay.
         </p>
@@ -15,7 +15,7 @@
     <div class="card mb-4" style="padding: 1.25rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
-          <h4 class="section-title" style="margin-bottom: 0.2rem;"><i class="ri-flag-2-line text-accent"></i> Core Heroic Motivation</h4>
+          <h4 class="section-title" style="margin-bottom: 0.2rem;">Core Heroic Motivation</h4>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
             Select the primary conviction that drives your hero into danger:
           </p>
@@ -39,7 +39,7 @@
           :class="{ active: isMotivationActive(mot) }"
           @click="toggleMotivation(mot)"
         >
-          <i class="ri-flag-line" style="margin-right: 0.25rem;"></i> {{ mot }}
+          {{ mot }}
         </button>
       </div>
     </div>
@@ -49,7 +49,7 @@
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
           <h4 class="section-title" style="margin-bottom: 0.2rem;">
-            <i class="ri-alert-line text-accent"></i> Active Motivations & Complications
+            Active Motivations & Complications
           </h4>
           <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">
             Heroes require at least 2 narrative traits (1 Motivation + 1 other complication).
@@ -703,7 +703,7 @@ function confirmAddComp() {
   align-items: center;
   gap: 0.3rem;
   padding: 0.2rem 0.55rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-xs);
   font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.03em;

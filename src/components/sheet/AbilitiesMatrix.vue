@@ -2,7 +2,7 @@
   <!-- Core Abilities Ribbon -->
   <section class="dndb-abilities-ribbon">
     <div class="dndb-ribbon-header">
-      <span class="dndb-ribbon-title"><i class="ri-brain-line"></i> ABILITIES</span>
+      <span class="dndb-ribbon-title">ABILITIES</span>
       <div style="display: flex; align-items: center; gap: 0.65rem;">
         <span class="dndb-ribbon-cost">2 PP / Rank</span>
         <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-secondary); font-family: var(--font-mono);">

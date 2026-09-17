@@ -1,10 +1,7 @@
 <template>
   <div class="dndb-card dndb-senses-card">
     <div class="dndb-card-header">
-      <div class="dndb-card-title-wrap">
-        <i class="ri-eye-2-line dndb-card-icon"></i>
-        <h3 class="dndb-card-title">SENSES & PERCEPTION</h3>
-      </div>
+      <h3 class="dndb-card-title">SENSES & PERCEPTION</h3>
       <button 
         type="button" 
         class="sense-roll-btn" 

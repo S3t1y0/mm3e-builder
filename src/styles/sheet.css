@@ -4419,14 +4419,12 @@
   text-transform: uppercase;
 }
 
-.dndb-ribbon-cost {
+.dndb-ribbon-cost,
+.dndb-cost-indicator {
   font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.18rem 0.6rem;
-  background: rgba(220, 38, 38, 0.12);
-  border: 1px solid rgba(220, 38, 38, 0.3);
-  color: #f87171;
-  border-radius: var(--radius-pill);
+  font-weight: 600;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
 }
 
 .dndb-abilities-grid {
@@ -4609,11 +4607,11 @@
 .dndb-card-badge {
   font-size: 0.68rem;
   font-weight: 700;
-  padding: 0.15rem 0.55rem;
-  background: rgba(220, 38, 38, 0.12);
-  border: 1px solid rgba(220, 38, 38, 0.28);
+  padding: 0.15rem 0.5rem;
+  background: rgba(220, 38, 38, 0.08);
+  border: 1px solid rgba(220, 38, 38, 0.2);
   color: #f87171;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -5001,16 +4999,18 @@
 
 .hub-tab-badge {
   font-family: var(--font-mono);
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 0.1rem 0.4rem;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-pill);
-  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.38rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
 }
 
 .dndb-hub-tab-btn.active .hub-tab-badge {
-  background: rgba(225, 29, 72, 0.25);
+  background: rgba(225, 29, 72, 0.15);
+  border-color: rgba(225, 29, 72, 0.3);
   color: #fda4af;
 }
 

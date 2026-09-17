@@ -706,7 +706,7 @@ const getConfigIcon = computed(() => {
     case 'Enhanced Trait': return 'ri-user-star-line';
     case 'Senses': return 'ri-eye-2-line';
     case 'Affliction': return 'ri-virus-line';
-    case 'Illusion': return 'ri-magic-line';
+    case 'Illusion': return 'ri-ghost-line';
     case 'Immunity': return 'ri-shield-star-line';
     case 'Movement': return 'ri-walk-line';
     case 'Morph': return 'ri-user-shared-line';

@@ -4,9 +4,9 @@
     <div class="step-banner">
       <div class="step-banner-icon"><i class="ri-tools-line"></i></div>
       <div>
-        <h3 class="step-title">Step 7: Equipment, Gadgets & Gear</h3>
+        <h3 class="step-title">Equipment & Gear</h3>
         <p class="step-subtitle">
-          Equip your hero with weapons, ballistic armor, utility gadgets, combat vehicles, and secret headquarters.
+          Equip your hero with weapons, armor, utility gadgets, vehicles, and headquarters.
           In M&M 3e, gear is bought with <strong>Equipment Points (EP)</strong> where <strong>1 PP Advantage = 5 EP</strong>.
         </p>
       </div>
@@ -103,7 +103,7 @@
       <div v-if="(heroStore.character.resources || []).length === 0">
         <h4 style="color: #fff; margin: 0 0 0.4rem; font-size: 1rem; font-weight: 800;">No Equipment Added Yet</h4>
         <p style="font-size: 0.8rem; color: var(--text-secondary); max-width: 480px; margin: 0 auto 1rem;">
-          Give your hero signature tools of the trade. Click below to browse the official M&M 3e arsenal or create custom high-tech gear.
+          Equip your hero with standard weapons, armor, gadgets, vehicles, or headquarters.
         </p>
         <button type="button" class="btn btn-primary btn-sm" @click="showPresetModal = true">
           <i class="ri-shopping-bag-3-line"></i> Browse Equipment Catalog
@@ -657,7 +657,7 @@ function getArmorProtection(r) {
 .filter-chip {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border-color);
-  border-radius: 9999px;
+  border-radius: var(--radius-xs);
   color: var(--text-secondary);
   font-size: 0.74rem;
   font-weight: 700;
@@ -798,7 +798,7 @@ function getArmorProtection(r) {
 .status-toggle-pill {
   background: transparent;
   border: 1px solid var(--border-color);
-  border-radius: 9999px;
+  border-radius: var(--radius-xs);
   font-size: 0.65rem;
   font-weight: 700;
   color: var(--text-secondary);

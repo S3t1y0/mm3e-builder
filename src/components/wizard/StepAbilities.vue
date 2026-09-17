@@ -3,7 +3,7 @@
     <div class="step-banner">
       <div class="step-banner-icon"><i class="ri-heart-pulse-line"></i></div>
       <div>
-        <h3 class="step-title">Step 2: 8 Core Abilities (Attributes)</h3>
+        <h3 class="step-title">Core Abilities</h3>
         <p class="step-subtitle">Allocate hero physical and mental attributes. Cost: <strong>2 PP per Rank</strong>. Normal human average is 0.</p>
       </div>
     </div>

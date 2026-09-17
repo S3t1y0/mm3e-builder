@@ -4,7 +4,7 @@
     <div class="step-banner">
       <div class="step-banner-icon"><i class="ri-briefcase-4-line"></i></div>
       <div>
-        <h3 class="step-title">Step 4: Skills & Specialties</h3>
+        <h3 class="step-title">Skills & Specialties</h3>
         <p class="step-subtitle">Acquire specialized training (<strong>1 PP per 2 Ranks</strong>). Skill ranks are added to their associated ability modifiers.</p>
       </div>
     </div>
@@ -138,7 +138,6 @@
                           <div class="spec-child-name-block">
                             <div class="spec-name-tag-row">
                               <span class="spec-subtype-name">{{ inst.subtype || 'General' }}</span>
-                              <span class="spec-badge-chip">SPEC</span>
                             </div>
                             <span class="spec-math-subtext">
                               {{ ruleSkill.ability }} {{ heroStore.effectiveAbilities[ruleSkill.ability] || 0 }} + Rk {{ inst.ranks || 0 }}
@@ -683,7 +682,7 @@ function confirmSpecialtySkill() {
 .skill-cat-pill {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   color: var(--text-muted);
   font-size: 0.72rem;
   font-weight: 700;

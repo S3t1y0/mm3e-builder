@@ -45,19 +45,17 @@
           />
           <div class="power-meta-tags">
             <span class="type-pill" :class="builderStore.power.type">
-              <i :class="builderStore.power.type === 'device' ? 'ri-shield-keyhole-line' : 'ri-flashlight-line'"></i>
               {{ builderStore.power.type === 'device' ? 'Device Container' : 'Standard Power' }}
             </span>
             <span v-if="builderStore.power.alternateEffects?.length > 0" class="array-indicator-pill">
-              <i class="ri-shuffle-line"></i> Array ({{ builderStore.power.alternateEffects.length + 1 }} Modes)
+              Array ({{ builderStore.power.alternateEffects.length + 1 }} Modes)
             </span>
             <span v-if="builderStore.power.linkedEffects?.length > 0" class="linked-indicator-pill">
-              <i class="ri-links-line"></i> Linked ({{ builderStore.power.linkedEffects.length }})
+              Linked ({{ builderStore.power.linkedEffects.length }})
             </span>
             <span v-if="builderStore.power.activation && builderStore.power.activation !== 'none'" class="activation-indicator-pill">
-              <i class="ri-timer-flash-line"></i> {{ builderStore.power.activation === 'move' ? 'Activation (Move, -1 PP)' : 'Activation (Standard, -2 PP)' }}
+              {{ builderStore.power.activation === 'move' ? 'Activation (Move, -1 PP)' : 'Activation (Standard, -2 PP)' }}
             </span>
-            <span class="rules-source-tag">Mutants & Masterminds 3E</span>
           </div>
         </div>
       </div>
@@ -156,9 +154,9 @@ const currentPowerSelectValue = computed(() => {
 const canvasTitle = computed(() => {
   if (builderStore.activeTargetType === 'slot') {
     const slot = builderStore.power.alternateEffects?.[builderStore.activeSlotIndex];
-    return `Editing Alternate Slot: ${slot?.name || 'Slot'}`;
+    return `Alternate Slot: ${slot?.name || 'Slot'}`;
   }
-  return `Primary Superhuman Effect: ${builderStore.power.mainEffect?.name || 'Primary'}`;
+  return `Primary Effect: ${builderStore.power.mainEffect?.name || 'Primary'}`;
 });
 
 function handlePowerSelectChange(val) {

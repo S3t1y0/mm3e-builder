@@ -2,7 +2,7 @@
   <!-- Hero Vitals & Identity Bar -->
   <section class="dndb-hero-banner">
     <div class="dndb-hero-identity">
-      <div class="dndb-avatar-crest" title="Tactical Operative Registry Emblem">
+      <div class="dndb-avatar-crest" title="Hero Crest">
         <i class="ri-shield-star-fill"></i>
       </div>
       <div class="dndb-name-block">
@@ -11,11 +11,11 @@
             v-model="heroStore.character.name"
             type="text"
             class="dndb-name-input"
-            placeholder="Hero Codex / Codename"
+            placeholder="Hero Name / Codename"
             @change="heroStore.pushHistory()"
           />
           <span class="dndb-pl-pill">
-            <i class="ri-shield-check-line"></i> PL <span class="font-mono">{{ heroStore.character.powerLevel }}</span>
+            PL <span class="font-mono">{{ heroStore.character.powerLevel }}</span>
           </span>
         </div>
         <div class="dndb-sub-identity-row">
@@ -31,7 +31,7 @@
             v-model="heroStore.character.player"
             type="text"
             class="dndb-sub-input"
-            placeholder="Tactical Operative"
+            placeholder="Player Name"
             @change="heroStore.pushHistory()"
           />
           <span class="dndb-dot-sep">•</span>
@@ -96,7 +96,7 @@
         :class="{ 'has-injuries': heroStore.character.injuries > 0 }"
         title="Tracks cumulative bruised penalties from failed Toughness checks"
       >
-        <span class="dndb-vital-label"><i class="ri-shield-cross-line"></i> DAMAGE / BRUISES</span>
+        <span class="dndb-vital-label"><i class="ri-shield-cross-line"></i> BRUISES & INJURIES</span>
         <div class="dndb-vital-stepper">
           <button
             type="button"

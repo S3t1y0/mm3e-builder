@@ -5,9 +5,9 @@
       <div class="step-banner-icon"><i class="ri-medal-line"></i></div>
       <div class="step-banner-content">
         <div class="step-title-row">
-          <h3 class="step-title">Step 5: Advantages & Feats</h3>
+          <h3 class="step-title">Advantages</h3>
           <span class="badge-total-pp tabular-nums">
-            <i class="ri-fire-fill"></i> Total: {{ heroStore.advantagesCost }} PP ({{ selectedCount }} Selected)
+            Total: {{ heroStore.advantagesCost }} PP ({{ selectedCount }} Selected)
           </span>
         </div>
         <p class="step-subtitle">
@@ -18,10 +18,10 @@
         type="button"
         class="btn btn-secondary btn-sm btn-open-modal"
         @click="uiStore.openModal('advantage')"
-        title="Open Full Advantage Library Catalog Window"
+        title="Open Full Advantage Library"
       >
-        <i class="ri-window-line"></i>
-        <span>Full Library Window</span>
+        <i class="ri-book-open-line"></i>
+        <span>Browse Advantage Library</span>
       </button>
     </div>
 
@@ -32,10 +32,9 @@
         <div class="panel-header">
           <div class="panel-title-wrap">
             <h4 class="panel-title">
-              <i class="ri-checkbox-circle-fill text-accent"></i>
-              <span>Active Hero Feats</span>
+              <span>Active Advantages</span>
             </h4>
-            <span class="active-count-badge tabular-nums">{{ selectedCount }} Feats</span>
+            <span class="active-count-badge tabular-nums">{{ selectedCount }} Advantages</span>
           </div>
 
           <!-- MINI BREAKDOWN PILLS -->
@@ -92,13 +91,6 @@
               <!-- Card Top Row -->
               <div class="active-feat-top">
                 <div class="active-feat-identity">
-                  <span
-                    class="active-cat-tag"
-                    :class="(getAdvantageMeta(adv.name).category || 'general').toLowerCase()"
-                  >
-                    <i :class="getCategoryIconClass(getAdvantageMeta(adv.name).category)"></i>
-                    {{ getAdvantageMeta(adv.name).category || 'General' }}
-                  </span>
                   <strong class="active-feat-name">{{ adv.name }}</strong>
                 </div>
 
@@ -242,13 +234,6 @@
               <!-- Card Header -->
               <div class="catalog-card-header">
                 <div class="card-title-group">
-                  <span
-                    class="adv-cat-tag"
-                    :class="(item.category || 'general').toLowerCase()"
-                  >
-                    <i :class="getCategoryIconClass(item.category)"></i>
-                    {{ item.category || 'General' }}
-                  </span>
                   <strong class="catalog-card-name">{{ item.name }}</strong>
                 </div>
 
@@ -525,7 +510,7 @@ function removeAdvantage(name) {
   font-size: 0.76rem;
   font-weight: 800;
   padding: 0.2rem 0.65rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
 }
 
 .step-subtitle {
@@ -568,7 +553,6 @@ function removeAdvantage(name) {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-glass);
-  backdrop-filter: blur(12px);
   display: flex;
   flex-direction: column;
   overflow: hidden;
@@ -609,7 +593,7 @@ function removeAdvantage(name) {
   font-size: 0.72rem;
   font-weight: 800;
   padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
 }
 
 .catalog-count-hint {
@@ -631,7 +615,7 @@ function removeAdvantage(name) {
   font-size: 0.68rem;
   font-weight: 800;
   padding: 0.12rem 0.45rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;

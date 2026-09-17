@@ -3,14 +3,14 @@
     <div class="step-banner">
       <div class="step-banner-icon"><i class="ri-user-star-line"></i></div>
       <div>
-        <h3 class="step-title">Step 1: Hero Concept & Archetype</h3>
+        <h3 class="step-title">Hero Concept & Archetypes</h3>
         <p class="step-subtitle">Define hero identity, Power Level, power origins, or select a ready-to-play archetype preset.</p>
       </div>
     </div>
 
     <!-- IDENTITY SECTION -->
     <div class="card mb-4" style="padding: 1.25rem;">
-      <h4 class="section-title"><i class="ri-id-card-line text-accent"></i> Hero Identity</h4>
+      <h4 class="section-title">Hero Identity</h4>
       <div class="grid-2-col" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem;">
         <div class="form-group">
           <label class="form-label">Hero / Codename</label>
@@ -36,7 +36,7 @@
             v-model="heroStore.character.player"
             type="text"
             class="form-control"
-            placeholder="e.g. Commander Vance"
+            placeholder="e.g. Alex Mercer, Morgan Vance"
           />
         </div>
         <div class="form-group">
@@ -79,7 +79,7 @@
 
     <!-- ORIGIN TAGS -->
     <div class="card mb-4" style="padding: 1.25rem;">
-      <h4 class="section-title"><i class="ri-fingerprint-line text-accent"></i> Origin Descriptor</h4>
+      <h4 class="section-title">Origin Descriptors</h4>
       <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
         Select one or more power sources to establish character descriptors and narrative counter-measures.
       </p>
@@ -100,7 +100,7 @@
     <div class="card" style="padding: 1.25rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
         <div>
-          <h4 class="section-title" style="margin-bottom: 0.2rem;"><i class="ri-sparkling-fill text-accent"></i> 10 Standard Archetype Presets</h4>
+          <h4 class="section-title" style="margin-bottom: 0.2rem;">Standard Archetype Presets</h4>
           <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">
             Use official M&M 3e Hero's Handbook archetypes as instant templates with balanced point distributions.
           </p>

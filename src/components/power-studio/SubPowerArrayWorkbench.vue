@@ -77,7 +77,7 @@
         @click="builderStore.selectMainForEditing()"
       >
         <div class="slot-left-meta">
-          <span class="slot-type-badge primary">Primary Anchor</span>
+          <span class="slot-type-badge primary">Primary Effect</span>
           <span class="slot-name-label">{{ subPower.effect?.name || subPower.effect?.baseEffect || 'Primary Effect' }}</span>
         </div>
 
@@ -488,7 +488,7 @@ const capacityPercent = computed(() => {
   display: inline-flex;
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   padding: 2px;
 }
 
@@ -499,7 +499,7 @@ const capacityPercent = computed(() => {
   font-weight: 700;
   color: var(--text-muted);
   padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-xs);
   cursor: pointer;
   transition: all var(--trans-fast);
 }

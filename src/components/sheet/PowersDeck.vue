@@ -546,7 +546,6 @@
                   class="dossier-mod-card extra-mod"
                 >
                   <div class="dossier-mod-top">
-                    <span class="dossier-cat-badge extra">{{ getModifierInfo(extra.name, false).category }}</span>
                     <strong class="dossier-mod-name">{{ extra.name }}</strong>
                     <span class="dossier-cost-tag extra">
                       {{ extra.cost >= 0 ? `+${extra.cost}` : extra.cost }} {{ extra.type === 'per_rank' ? 'PP/R' : 'Flat' }}
@@ -580,7 +579,6 @@
                   class="dossier-mod-card flaw-mod"
                 >
                   <div class="dossier-mod-top">
-                    <span class="dossier-cat-badge flaw">{{ getModifierInfo(flaw.name, true).category }}</span>
                     <strong class="dossier-mod-name">{{ flaw.name }}</strong>
                     <span class="dossier-cost-tag flaw">
                       {{ flaw.cost }} {{ flaw.type === 'per_rank' ? 'PP/R' : 'Flat' }}
@@ -725,7 +723,7 @@
                 <div class="sub-card-master-header">
                 <div class="sub-sys-badge-lg">
                   <i class="ri-flashlight-fill"></i>
-                  <span>SYS-{{ sIdx + 1 < 10 ? '0' + (sIdx + 1) : (sIdx + 1) }}</span>
+                  <span>#{{ sIdx + 1 }}</span>
                 </div>
                 <div class="sub-sys-title-block">
                   <div class="sub-sys-title-line">
@@ -919,7 +917,6 @@
                     class="dossier-mod-card extra-mod"
                   >
                     <div class="dossier-mod-top">
-                      <span class="dossier-cat-badge extra">{{ getModifierInfo(extra.name, false).category }}</span>
                       <strong class="dossier-mod-name">{{ extra.name }}</strong>
                       <span class="dossier-cost-tag extra">
                         +{{ extra.cost }} {{ extra.type === 'per_rank' ? 'PP/R' : 'Flat' }}
@@ -944,7 +941,6 @@
                     class="dossier-mod-card flaw-mod"
                   >
                     <div class="dossier-mod-top">
-                      <span class="dossier-cat-badge flaw">{{ getModifierInfo(flaw.name, true).category }}</span>
                       <strong class="dossier-mod-name">{{ flaw.name }}</strong>
                       <span class="dossier-cost-tag flaw">
                         {{ flaw.cost }} {{ flaw.type === 'per_rank' ? 'PP/R' : 'Flat' }}
@@ -977,7 +973,7 @@
               @click="setActiveDeviceSubIndex(pow.id || idx, sI)"
             >
               <div class="roster-left">
-                <span class="roster-sys-badge">SYS-{{ sI + 1 < 10 ? '0' + (sI + 1) : (sI + 1) }}</span>
+                <span class="roster-sys-badge">#{{ sI + 1 }}</span>
                 <button
                   type="button"
                   class="sub-power-toggle-btn mini"
@@ -986,7 +982,7 @@
                     'is-off': sItem.active === false || pow.active === false
                   }"
                   :disabled="pow.active === false"
-                  title="Toggle System Active / Offline"
+                  title="Toggle Sub-Power Active / Offline"
                   @click.stop="handleToggleSubPower(pow, sI, sItem)"
                 >
                   <i :class="sItem.active !== false && pow.active !== false ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'"></i>

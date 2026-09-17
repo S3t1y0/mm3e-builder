@@ -3,8 +3,8 @@
     <div class="step-banner">
       <div class="step-banner-icon"><i class="ri-flashlight-line"></i></div>
       <div>
-        <h3 class="step-title">Step 6: Superhuman Powers Studio</h3>
-        <p class="step-subtitle">Design superhuman powers, versatile weapon arrays, or high-tech device containers.</p>
+        <h3 class="step-title">Powers Studio</h3>
+        <p class="step-subtitle">Design custom powers, weapon arrays, or device containers.</p>
       </div>
     </div>
 
@@ -15,7 +15,7 @@
           Powers Point Total: <span class="tabular-nums" style="color: var(--accent-primary); font-size: 1.1rem;">{{ heroStore.powersCost }} PP</span> (<span class="tabular-nums">{{ heroStore.character.powers?.length || 0 }}</span> Powers Active)
         </div>
         <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem;">
-          Full modular Power Studio editor featuring official M&M 3e extras, flaws, and modifier calculations.
+          Create and customize power effects, linked suites, and alternate effect arrays using the Power Studio.
         </div>
       </div>
       <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
@@ -31,7 +31,7 @@
     <!-- POWERS LIST CARDS -->
     <div v-if="!heroStore.character.powers || heroStore.character.powers.length === 0" class="card" style="padding: 3rem 1.5rem; text-align: center;">
       <i class="ri-flashlight-line" style="font-size: 2.5rem; color: var(--text-muted); display: block; margin-bottom: 0.75rem;"></i>
-      <h4 style="font-weight: 800; color: #fff; margin-bottom: 0.35rem;">No Superhuman Powers Yet</h4>
+      <h4 style="font-weight: 800; color: #fff; margin-bottom: 0.35rem;">No Powers Added Yet</h4>
       <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 450px; margin: 0 auto 1.25rem;">
         Click above to craft powers using the Power Studio or load an archetype template in Step 1.
       </p>

@@ -3,14 +3,14 @@
     <div class="step-banner">
       <div class="step-banner-icon"><i class="ri-shield-check-line"></i></div>
       <div>
-        <h3 class="step-title">Step 3: Defenses & Power Level Cap Audits</h3>
+        <h3 class="step-title">Defenses & Power Level Caps</h3>
         <p class="step-subtitle">Purchase defense ranks (<strong>1 PP per Rank</strong>) and balance paired PL caps (Dodge+Toughness, Parry+Toughness, Fortitude+Will).</p>
       </div>
     </div>
 
     <!-- PL CAP AUDIT METERS -->
     <div class="card mb-4" style="padding: 1.25rem;">
-      <h4 class="section-title"><i class="ri-scales-3-line text-accent"></i> PL {{ heroStore.character.powerLevel }} Defense Caps (Max {{ heroStore.character.powerLevel * 2 }})</h4>
+      <h4 class="section-title">PL {{ heroStore.character.powerLevel }} Defense Caps (Max {{ heroStore.character.powerLevel * 2 }})</h4>
       <div class="caps-grid">
         <!-- CAP 1: DODGE + TOUGHNESS -->
         <div class="cap-card" :class="{ overflow: isCapExceeded(dodgeTotal + toughnessTotal) }">

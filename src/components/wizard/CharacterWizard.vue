@@ -58,7 +58,7 @@
             style="background: #10b981; border-color: #059669;"
             @click="finishWizard"
           >
-            <i class="ri-check-double-line"></i> Finish & Launch Sheet
+            <i class="ri-check-double-line"></i> Finish & Open Sheet
           </button>
         </div>
       </div>
@@ -82,7 +82,7 @@
                 {{ heroStore.totalSpentPP }} / {{ heroStore.totalBudgetPP }} PP
               </span>
             </div>
-            <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: 9999px; overflow: hidden;">
+            <div style="height: 6px; background: rgba(255,255,255,0.08); border-radius: var(--radius-xs); overflow: hidden;">
               <div
                 style="height: 100%; width: 100%; transform-origin: left; transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);"
                 :style="{
@@ -173,7 +173,7 @@ const steps = [
   { id: 6, title: 'Powers', component: StepPowers, tip: 'Group alternate powers into an Array at a fraction of the cost (+1 PP per alternate slot).' },
   { id: 7, title: 'Equipment', component: StepEquipment, tip: 'Equipment is purchased with Equipment Points (EP) at 1 PP = 5 EP. Vehicles and Headquarters can also be shared with team members.' },
   { id: 8, title: 'Complications', component: StepComplications, tip: 'Complications provide the GM dramatic story hooks that award valuable Hero Points during play.' },
-  { id: 9, title: 'Review', component: StepReview, tip: 'Audit your total PP budget, EP equipment capacity, and verify all Power Level caps before entering the battlefield.' }
+  { id: 9, title: 'Review', component: StepReview, tip: 'Audit your total PP budget, EP equipment capacity, and verify all Power Level caps before finalizing your hero sheet.' }
 ];
 
 const activeStepComponent = computed(() => {
@@ -188,7 +188,7 @@ const activeStepInfo = computed(() => {
 
 function finishWizard() {
   uiStore.setActiveTab('sheet');
-  uiStore.showToast(`Hero ${heroStore.character.name || 'Hero'} is ready for action!`, 'success');
+  uiStore.showToast(`Hero ${heroStore.character.name || 'Hero'} is ready!`, 'success');
 }
 </script>
 
@@ -246,7 +246,6 @@ function finishWizard() {
   border-color: var(--accent-primary);
   background: var(--accent-primary);
   color: #fff;
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.4);
 }
 
 .step-node.completed .step-circle {

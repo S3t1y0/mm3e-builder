@@ -9,14 +9,14 @@
         <!-- HEADER -->
         <div class="modal-header">
           <div class="modal-title-group">
-            <span class="icon"><i class="ri-magic-line"></i></span>
+            <span class="icon"><i class="ri-flashlight-line"></i></span>
             <div>
-              <h3>M&M 3e Power Effects Library</h3>
-              <p class="modal-subtitle">Official Mutants & Masterminds 3rd Edition Base Effects (Hero's Handbook Ch. 6)</p>
+              <h3>Power Effects Library</h3>
+              <p class="modal-subtitle">Base Effects (Hero's Handbook Ch. 6)</p>
             </div>
           </div>
           <div class="modal-header-actions">
-            <span class="badge badge-accent">{{ BASE_EFFECTS.length }} Effects Catalog</span>
+            <span class="badge badge-accent">{{ BASE_EFFECTS.length }} Effects</span>
             <button
               type="button"
               class="modal-close-btn"

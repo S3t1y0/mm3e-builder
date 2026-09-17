@@ -1,11 +1,8 @@
 <template>
   <div class="dndb-card dndb-defenses-card">
     <div class="dndb-card-header">
-      <div class="dndb-card-title-wrap">
-        <i class="ri-shield-check-fill dndb-card-icon"></i>
-        <h3 class="dndb-card-title">DEFENSES</h3>
-      </div>
-      <span class="dndb-card-badge">1 PP / Rank</span>
+      <h3 class="dndb-card-title">DEFENSES</h3>
+      <span class="dndb-cost-indicator">1 PP / Rank</span>
     </div>
     <p class="dndb-card-sub">Resistance checks to withstand damage and hazardous effects.</p>
 

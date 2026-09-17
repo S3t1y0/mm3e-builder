@@ -2,7 +2,7 @@
   <div class="structure-selector-container">
     <div class="structure-selector-label">
       <i class="ri-node-tree"></i>
-      <span>Power Architecture / Structure</span>
+      <span>Power Structure</span>
     </div>
 
     <div class="structure-pills-grid">
@@ -15,7 +15,7 @@
         <div class="pill-icon"><i class="ri-flashlight-line"></i></div>
         <div class="pill-text">
           <span class="pill-title">Standard Power</span>
-          <span class="pill-desc">Primary superhuman power with optional Linked & Alternate Effects</span>
+          <span class="pill-desc">Primary power with optional Linked & Alternate Effects</span>
         </div>
         <i v-if="builderStore.power.type === 'standard' || builderStore.power.type === 'array'" class="ri-checkbox-circle-fill active-check"></i>
       </button>
@@ -38,7 +38,7 @@
     <div class="architecture-guidance-note">
       <i class="ri-information-line"></i>
       <span>
-        <strong>Official M&M 3E Architecture:</strong> Use <strong>Linked Effects</strong> below to fire multiple effects together as one action. Use <strong>Array / Alternate Effects</strong> to build switchable power stunt modes sharing a PP pool.
+        Use <strong>Linked Effects</strong> to trigger multiple effects together in a single action. Use <strong>Alternate Effects (Array)</strong> for switchable modes sharing a power point pool.
       </span>
     </div>
 
