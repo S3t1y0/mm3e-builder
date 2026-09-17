@@ -383,7 +383,7 @@
                   v-model="linkedEff.name"
                   type="text"
                   class="linked-title-input"
-                  placeholder="Linked Effect Name (e.g. Toxin, Entangle)..."
+                  :placeholder="`${linkedEff.baseEffect || 'Effect'} (Linked)`"
                 />
               </div>
             </div>

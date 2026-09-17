@@ -366,9 +366,30 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
       if (!ref) return;
       const prevBase = effect.baseEffect;
       effect.baseEffect = ref.name;
-      if (!effect.name || effect.name === prevBase || effect.name === 'Unnamed Effect' || effect.name === 'Damage') {
+
+      const isDefaultLinked = Boolean(effect.name && (
+        effect.name === `${prevBase} (Linked)` ||
+        effect.name.toLowerCase() === 'affliction (linked)' ||
+        BASE_EFFECTS.some(b => effect.name.trim().toLowerCase() === `${b.name.toLowerCase()} (linked)`)
+      ));
+
+      const isLinkedEffect = isDefaultLinked ||
+        (Array.isArray(this.currentLinkedEffects) && this.currentLinkedEffects.includes(effect)) ||
+        (Array.isArray(this.power.linkedEffects) && this.power.linkedEffects.includes(effect)) ||
+        (Array.isArray(this.activeSubPower?.linkedEffects) && this.activeSubPower.linkedEffects.includes(effect));
+
+      const isDefaultBase = !effect.name ||
+        effect.name === prevBase ||
+        effect.name === 'Unnamed Effect' ||
+        effect.name === 'Damage' ||
+        BASE_EFFECTS.some(b => b.name.toLowerCase() === (effect.name || '').trim().toLowerCase());
+
+      if (isDefaultLinked || (isLinkedEffect && isDefaultBase)) {
+        effect.name = `${ref.name} (Linked)`;
+      } else if (isDefaultBase) {
         effect.name = ref.name;
       }
+
       if (this.power.type !== 'device' && (!this.power.name || this.power.name === prevBase || this.power.name === 'Unnamed Power' || this.power.name === 'Damage')) {
         this.power.name = ref.name;
       }

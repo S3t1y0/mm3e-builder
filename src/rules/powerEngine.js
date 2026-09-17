@@ -1610,6 +1610,21 @@ export function normalizeEffect(rawEffect) {
   eff.id = eff.id || ('eff_' + Date.now() + Math.random().toString(36).substr(2, 4));
   eff.baseEffect = eff.baseEffect || eff.name || 'Damage';
   eff.name = eff.name || eff.baseEffect;
+
+  // Heal stale auto-generated default linked names where baseEffect was switched but name was not updated
+  if (eff.name && eff.baseEffect && eff.name.trim().toLowerCase() !== eff.baseEffect.toLowerCase()) {
+    const linkedMatch = /^(.*)\s*\(Linked\)$/i.exec(eff.name.trim());
+    if (linkedMatch) {
+      const oldBase = linkedMatch[1].trim();
+      if (oldBase.toLowerCase() !== eff.baseEffect.toLowerCase() &&
+          (oldBase.toLowerCase() === 'affliction' || BASE_EFFECTS.some(b => b.name.toLowerCase() === oldBase.toLowerCase()))) {
+        eff.name = `${eff.baseEffect} (Linked)`;
+      }
+    } else if (BASE_EFFECTS.some(b => b.name.toLowerCase() === eff.name.trim().toLowerCase())) {
+      eff.name = eff.baseEffect;
+    }
+  }
+
   eff.ranks = Math.max(1, Number(eff.ranks) || 1);
 
   const baseRef = BASE_EFFECTS.find(b => b.name === eff.baseEffect);

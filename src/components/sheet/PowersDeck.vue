@@ -225,7 +225,7 @@
               class="glance-mod-tag linked"
             >
               <i class="ri-link-m"></i>
-              <span>Linked: {{ link.baseEffect || link.name }} {{ link.ranks }}R</span>
+              <span>Linked: {{ getLinkedDisplayName(link) }} {{ link.ranks }}R</span>
             </span>
           </div>
         </div>
@@ -387,7 +387,7 @@
                   :key="'slnk_' + lIdx"
                   class="sub-linked-badge"
                 >
-                  <i class="ri-links-line"></i> +Linked: {{ lnk.name || lnk.baseEffect }} ({{ lnk.ranks }}R)
+                  <i class="ri-links-line"></i> +Linked: {{ getLinkedDisplayName(lnk) }} ({{ lnk.ranks }}R)
                 </span>
 
                 <!-- Extras -->
@@ -614,7 +614,13 @@
                   <div class="linked-card-top">
                     <div class="linked-id-group">
                       <span class="linked-chain-badge"><i class="ri-link-m"></i> Linked</span>
-                      <strong class="linked-name">{{ linked.name || linked.baseEffect }}</strong>
+                      <strong class="linked-name">{{ getLinkedDisplayName(linked) }}</strong>
+                      <span
+                        v-if="linked.baseEffect && getLinkedDisplayName(linked) !== linked.baseEffect && getLinkedDisplayName(linked) !== `${linked.baseEffect} (Linked)`"
+                        class="linked-base-badge"
+                      >
+                        {{ linked.baseEffect }}
+                      </span>
                       <span class="linked-ranks-pill">Rank {{ linked.ranks }}</span>
                     </div>
                     <div class="linked-actions">
@@ -629,6 +635,18 @@
                         <span>Roll20</span>
                       </button>
                     </div>
+                  </div>
+
+                  <!-- Configured choices badge strip (e.g. Stamina, Darkvision, etc.) -->
+                  <div v-if="getEffectConfigDetails(linked)" class="linked-config-strip">
+                    <span class="linked-config-label">
+                      <i class="ri-focus-3-line"></i>
+                      <span>{{ getEffectConfigDetails(linked).title }}:</span>
+                    </span>
+                    <strong class="linked-config-value">{{ getEffectConfigDetails(linked).quickText }}</strong>
+                    <span v-if="getEffectConfigDetails(linked).badge" class="linked-config-badge">
+                      {{ getEffectConfigDetails(linked).badge }}
+                    </span>
                   </div>
                   <p class="dossier-desc-text sub">{{ getEffectDesc(linked.baseEffect) }}</p>
                   <div class="linked-specs-row">
@@ -869,7 +887,13 @@
                     <div class="linked-card-top">
                       <div class="linked-id-group">
                         <span class="linked-chain-badge"><i class="ri-link-m"></i> Linked</span>
-                        <strong class="linked-name">{{ linked.name || linked.baseEffect }}</strong>
+                        <strong class="linked-name">{{ getLinkedDisplayName(linked) }}</strong>
+                        <span
+                          v-if="linked.baseEffect && getLinkedDisplayName(linked) !== linked.baseEffect && getLinkedDisplayName(linked) !== `${linked.baseEffect} (Linked)`"
+                          class="linked-base-badge"
+                        >
+                          {{ linked.baseEffect }}
+                        </span>
                         <span class="linked-ranks-pill">Rank {{ linked.ranks }}</span>
                       </div>
                       <div class="linked-actions">
@@ -884,6 +908,18 @@
                           <span>Roll20</span>
                         </button>
                       </div>
+                    </div>
+
+                    <!-- Configured choices badge strip (e.g. Stamina, Darkvision, etc.) -->
+                    <div v-if="getEffectConfigDetails(linked)" class="linked-config-strip">
+                      <span class="linked-config-label">
+                        <i class="ri-focus-3-line"></i>
+                        <span>{{ getEffectConfigDetails(linked).title }}:</span>
+                      </span>
+                      <strong class="linked-config-value">{{ getEffectConfigDetails(linked).quickText }}</strong>
+                      <span v-if="getEffectConfigDetails(linked).badge" class="linked-config-badge">
+                        {{ getEffectConfigDetails(linked).badge }}
+                      </span>
                     </div>
                     <p class="dossier-desc-text sub">{{ getEffectDesc(linked.baseEffect) }}</p>
                     <div class="linked-specs-row">
@@ -1058,11 +1094,41 @@ function formatModifierList(mods, isFlaw = false) {
   }).join(', ');
 }
 
+function getLinkedDisplayName(linked) {
+  if (!linked) return 'Linked Effect';
+  const name = linked.name ? linked.name.trim() : '';
+  const base = linked.baseEffect || 'Effect';
+
+  if (!name || name === 'Unnamed Effect' || name.toLowerCase() === base.toLowerCase()) {
+    return `${base} (Linked)`;
+  }
+
+  const linkedMatch = /^(.*)\s*\(Linked\)$/i.exec(name);
+  if (linkedMatch) {
+    const prefix = linkedMatch[1].trim();
+    if (prefix.toLowerCase() !== base.toLowerCase() &&
+        (prefix.toLowerCase() === 'affliction' || BASE_EFFECTS.some(b => b.name.toLowerCase() === prefix.toLowerCase()))) {
+      return `${base} (Linked)`;
+    }
+    return name;
+  }
+
+  // If name matches another base effect name completely (stale non-linked default)
+  if (BASE_EFFECTS.some(b => b.name.toLowerCase() === name.toLowerCase()) && name.toLowerCase() !== base.toLowerCase()) {
+    return `${base} (Linked)`;
+  }
+
+  return name;
+}
+
 function formatLinkedEffectsList(list) {
   if (!Array.isArray(list) || list.length === 0) return '';
   return list.map(le => {
     const dcStr = calculateDC(le);
-    return `${le.baseEffect || 'Effect'} (Rank ${le.ranks || 1}${dcStr ? ', ' + dcStr : ''})`;
+    const name = getLinkedDisplayName(le);
+    const cfg = getEffectConfigDetails(le);
+    const cfgStr = cfg?.quickText ? ` [${cfg.quickText}]` : '';
+    return `${name} (Rank ${le.ranks || 1}${cfgStr}${dcStr ? ', ' + dcStr : ''})`;
   }).join('; ');
 }
 
@@ -1474,11 +1540,12 @@ function broadcastEffect(pow, effect, isLinked = false) {
   const cfgDetails = getEffectConfigDetails(effect);
   const configuredChoices = cfgDetails?.quickText || '';
   const configuredTitle = cfgDetails?.title || 'Selections';
+  const displayName = isLinked ? getLinkedDisplayName(effect) : (effect.baseEffect || 'Effect');
 
   sendFeatureToVTT({
-    name: `${effect.baseEffect || 'Effect'}`,
+    name: displayName,
     category: 'power_effect',
-    parentPower: parentName,
+    parentPower: isLinked ? `${parentName} (Linked)` : parentName,
     ranks: effect.ranks || 1,
     configuredChoices,
     configuredTitle,
@@ -1491,7 +1558,7 @@ function broadcastEffect(pow, effect, isLinked = false) {
     description: rules
   }, heroStore.character);
 
-  uiStore.showToast(`Broadcasted effect "${effect.baseEffect}" to Roll20!`, 'info');
+  uiStore.showToast(`Broadcasted ${isLinked ? 'linked ' : ''}effect "${displayName}" to Roll20!`, 'info');
 }
 
 function broadcastExtra(pow, extra, parentEffectName = null) {
@@ -3005,6 +3072,49 @@ function getModifierInfo(modName, isFlaw = false) {
   padding: 0.1rem 0.35rem;
   border-radius: var(--radius-xs);
   color: var(--text-secondary);
+}
+
+.linked-base-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  background: rgba(147, 51, 234, 0.2);
+  color: #c084fc;
+  border: 1px solid rgba(147, 51, 234, 0.35);
+  padding: 0.1rem 0.4rem;
+  border-radius: var(--radius-xs);
+}
+
+.linked-config-strip {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: var(--radius-xs);
+  font-size: 0.72rem;
+}
+
+.linked-config-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #22d3ee;
+  font-weight: 600;
+}
+
+.linked-config-value {
+  color: #e2e8f0;
+}
+
+.linked-config-badge {
+  font-size: 0.62rem;
+  font-weight: 700;
+  background: rgba(6, 182, 212, 0.25);
+  color: #67e8f9;
+  padding: 0.05rem 0.35rem;
+  border-radius: 999px;
 }
 
 .linked-dc-pill {

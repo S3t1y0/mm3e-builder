@@ -21,7 +21,8 @@ document.documentElement.setAttribute('data-builder-framework', 'vue3');
 window.__MM3E_BUILDER_VUE__ = {
   version: '2.0.0',
   framework: 'vue3',
-  loadedAt: Date.now()
+  loadedAt: Date.now(),
+  pinia
 };
 
 // Initialize smooth, stutter-free scroll chaining from dynamic containers to page window
