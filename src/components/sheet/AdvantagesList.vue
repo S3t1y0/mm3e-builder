@@ -162,12 +162,6 @@
           </div>
         </div>
 
-        <!-- Active Mechanics Strip (If Applicable) -->
-        <div v-if="getAdvMechanicBadge(adv)" class="adv-mechanic-strip" :class="getAdvMechanicBadge(adv).type">
-          <i :class="getAdvMechanicBadge(adv).icon"></i>
-          <span>{{ getAdvMechanicBadge(adv).text }}</span>
-        </div>
-
         <!-- Rules Description (Proportional & Clean) -->
         <p class="adv-card-desc">{{ getAdvDesc(adv.name) }}</p>
       </article>
@@ -240,44 +234,6 @@ const filteredAdvantages = computed(() => {
 function clearFilter() {
   selectedCategory.value = 'all';
   searchQuery.value = '';
-}
-
-function getAdvMechanicBadge(adv) {
-  if (!adv || !adv.name) return null;
-  const name = adv.name.trim().toLowerCase();
-  const ranks = Number(adv.ranks) || 1;
-
-  if (name === 'close attack') {
-    return { icon: 'ri-sword-fill', type: 'combat', text: `+${ranks} Close Attack Check Bonus` };
-  }
-  if (name === 'ranged attack') {
-    return { icon: 'ri-crosshair-2-fill', type: 'ranged', text: `+${ranks} Ranged Attack Check Bonus` };
-  }
-  if (name === 'defensive roll') {
-    return { icon: 'ri-shield-fill', type: 'defense', text: `+${ranks} Active Toughness Bonus` };
-  }
-  if (name === 'improved initiative') {
-    return { icon: 'ri-speed-up-fill', type: 'init', text: `+${ranks * 4} Initiative Modifier` };
-  }
-  if (name === 'equipment') {
-    return { icon: 'ri-briefcase-4-fill', type: 'equip', text: `${ranks * 5} Equipment Points (EP)` };
-  }
-  if (name === 'throwing mastery') {
-    return { icon: 'ri-knife-blood-fill', type: 'damage', text: `+${ranks} Thrown Weapon Damage` };
-  }
-  if (name === 'improved critical') {
-    return { icon: 'ri-sparkling-fill', type: 'crit', text: `Crit Range: ${Math.max(1, 20 - ranks)}-20` };
-  }
-  if (name === 'jack-of-all-trades') {
-    return { icon: 'ri-tools-fill', type: 'skill', text: 'Untrained Skill Checks Allowed' };
-  }
-  if (name === 'eidetic memory') {
-    return { icon: 'ri-brain-line', type: 'circumstance', text: '+5 Bonus on Recall Checks' };
-  }
-  if (name === 'great endurance') {
-    return { icon: 'ri-heart-pulse-line', type: 'circumstance', text: '+5 Bonus on Hazard/Fatigue' };
-  }
-  return null;
 }
 
 function getAdvRule(name) {
@@ -750,68 +706,6 @@ function broadcastAdvantage(adv) {
   padding: 0 0.35rem;
   font-family: var(--font-mono, monospace);
   white-space: nowrap;
-}
-
-/* Active Mechanics Strip */
-.adv-mechanic-strip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.2rem 0.45rem;
-  border-radius: var(--radius-xs);
-  font-size: 0.68rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  width: fit-content;
-}
-
-.adv-mechanic-strip.combat {
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fbbf24;
-}
-
-.adv-mechanic-strip.ranged {
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #38bdf8;
-}
-
-.adv-mechanic-strip.defense {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #34d399;
-}
-
-.adv-mechanic-strip.init {
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.35);
-  color: #c084fc;
-}
-
-.adv-mechanic-strip.equip {
-  background: rgba(59, 130, 246, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  color: #60a5fa;
-}
-
-.adv-mechanic-strip.damage {
-  background: rgba(249, 115, 22, 0.15);
-  border: 1px solid rgba(249, 115, 22, 0.35);
-  color: #fb923c;
-}
-
-.adv-mechanic-strip.crit {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #f87171;
-}
-
-.adv-mechanic-strip.skill,
-.adv-mechanic-strip.circumstance {
-  background: rgba(148, 163, 184, 0.12);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-  color: #cbd5e1;
 }
 
 /* Rules Description (Proportional & Clean) */
