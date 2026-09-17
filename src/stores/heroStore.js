@@ -851,12 +851,31 @@ export const useHeroStore = defineStore('hero', {
       this.pushHistory();
     },
 
+    updateComplication(id, updatedData) {
+      if (!Array.isArray(this.character.complications)) return;
+      const idx = this.character.complications.findIndex(c => c.id === id);
+      if (idx !== -1) {
+        this.character.complications[idx] = {
+          ...this.character.complications[idx],
+          ...updatedData
+        };
+        this.pushHistory();
+      }
+    },
+
     removeComplication(index) {
       if (this.character.complications?.[index]) {
         this.character.complications.splice(index, 1);
         this.pushHistory();
       }
     },
+
+    adjustHeroPoints(delta) {
+      const cur = Number(this.character.heroPoints ?? 1) || 0;
+      this.character.heroPoints = Math.max(0, cur + delta);
+      this.pushHistory();
+    },
+
 
     // d20 Dice Roll System
     rollCheck(name, modifier = 0, dc = null, category = 'General', extraData = {}) {

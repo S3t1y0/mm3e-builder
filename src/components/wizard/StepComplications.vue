@@ -11,39 +11,6 @@
       </div>
     </div>
 
-    <!-- MOTIVATION PRESETS CHIPS -->
-    <div class="card mb-4" style="padding: 1.25rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
-        <div>
-          <h4 class="section-title" style="margin-bottom: 0.2rem;">Core Heroic Motivation</h4>
-          <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">
-            Select the primary conviction that drives your hero into danger:
-          </p>
-        </div>
-        <button
-          type="button"
-          class="btn btn-xs btn-add-motivation"
-          @click="openAddDialog('motivation')"
-          title="Add a custom or detailed heroic motivation"
-        >
-          <i class="ri-compass-3-line"></i> + Add Motivation
-        </button>
-      </div>
-
-      <div class="motivation-chips-group">
-        <button
-          v-for="mot in motivationOptions"
-          :key="mot"
-          type="button"
-          class="badge-chip"
-          :class="{ active: isMotivationActive(mot) }"
-          @click="toggleMotivation(mot)"
-        >
-          {{ mot }}
-        </button>
-      </div>
-    </div>
-
     <!-- COMPLICATIONS & MOTIVATIONS ACTIVE LIST -->
     <div class="card mb-4" style="padding: 1.25rem;">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
@@ -129,15 +96,27 @@
               </p>
             </div>
 
-            <!-- Delete Button -->
-            <button
-              type="button"
-              class="btn-icon btn-remove-comp text-danger"
-              @click="heroStore.removeComplication(idx)"
-              title="Remove this trait"
-            >
-              <i class="ri-delete-bin-line"></i>
-            </button>
+            <!-- Actions -->
+            <div class="comp-card-actions">
+              <button
+                type="button"
+                class="comp-action-btn btn-edit-comp"
+                @click="openEditDialog(comp, idx)"
+                title="Edit this trait"
+                aria-label="Edit trait"
+              >
+                <i class="ri-edit-line"></i>
+              </button>
+              <button
+                type="button"
+                class="comp-action-btn btn-remove-comp"
+                @click="heroStore.removeComplication(idx)"
+                title="Remove this trait"
+                aria-label="Remove trait"
+              >
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -169,7 +148,8 @@
             </div>
             <div>
               <h4 class="narrative-modal-title">
-                {{ modalMode === 'motivation' ? 'Add Heroic Motivation' : 'Add Dramatic Complication' }}
+                {{ editingCompIndex !== null ? 'Edit ' : 'Add ' }}
+                {{ modalMode === 'motivation' ? 'Heroic Motivation' : 'Dramatic Complication' }}
               </h4>
               <p class="narrative-modal-subtitle">
                 {{ modalMode === 'motivation'
@@ -190,7 +170,7 @@
         </div>
 
         <!-- TOP SEGMENTED SWITCHER (Choose What to Add) -->
-        <div class="narrative-segmented-nav">
+        <div v-if="editingCompIndex === null" class="narrative-segmented-nav">
           <button
             type="button"
             class="segmented-btn"
@@ -351,8 +331,8 @@
             :disabled="!newCompName.trim()"
             @click="confirmAddComp"
           >
-            <i :class="modalMode === 'motivation' ? 'ri-compass-3-fill' : 'ri-alert-fill'"></i>
-            {{ modalMode === 'motivation' ? 'Add Motivation' : 'Add Complication' }}
+            <i :class="editingCompIndex !== null ? 'ri-save-line' : (modalMode === 'motivation' ? 'ri-compass-3-fill' : 'ri-alert-fill')"></i>
+            {{ editingCompIndex !== null ? 'Save Changes' : (modalMode === 'motivation' ? 'Add Motivation' : 'Add Complication') }}
           </button>
         </div>
       </div>
@@ -372,17 +352,13 @@ import {
 const heroStore = useHeroStore();
 
 const showAddDialog = ref(false);
+const editingCompIndex = ref(null);
 const modalMode = ref('motivation'); // 'motivation' | 'complication'
 const selectedPresetId = ref('');
 const selectedCompCategory = ref('Enemy');
 const newCompType = ref('Motivation');
 const newCompName = ref('');
 const newCompDesc = ref('');
-
-const motivationOptions = [
-  'Justice', 'Responsibility', 'Doing Good', 'Thrills',
-  'Acceptance', 'Patriotism', 'Recognition', 'Greed', 'Revenge'
-];
 
 const complicationCategories = [
   'Enemy', 'Secret Identity', 'Weakness', 'Power Loss', 'Relationship',
@@ -426,26 +402,8 @@ function getComplicationIcon(type) {
   }
 }
 
-function isMotivationActive(mot) {
-  return (heroStore.character.complications || []).some(
-    c => c.type === 'Motivation' && c.name.toLowerCase().includes(mot.toLowerCase())
-  );
-}
-
-function toggleMotivation(mot) {
-  const comps = heroStore.character.complications || [];
-  const existingIdx = comps.findIndex(
-    c => c.type === 'Motivation' && c.name.toLowerCase().includes(mot.toLowerCase())
-  );
-
-  if (existingIdx !== -1) {
-    heroStore.removeComplication(existingIdx);
-  } else {
-    heroStore.addComplication('Motivation', `Motivation: ${mot}`, `Inner conviction driving the hero to champion ${mot.toLowerCase()}.`);
-  }
-}
-
 function openAddDialog(mode = 'motivation') {
+  editingCompIndex.value = null;
   modalMode.value = mode;
   selectedPresetId.value = '';
   if (mode === 'motivation') {
@@ -458,6 +416,18 @@ function openAddDialog(mode = 'motivation') {
     newCompName.value = '';
     newCompDesc.value = '';
   }
+  showAddDialog.value = true;
+}
+
+function openEditDialog(comp, idx) {
+  editingCompIndex.value = idx;
+  const isMot = isItemMotivation(comp);
+  modalMode.value = isMot ? 'motivation' : 'complication';
+  selectedPresetId.value = '';
+  newCompType.value = comp.type || (isMot ? 'Motivation' : 'Complication');
+  selectedCompCategory.value = comp.type || 'Enemy';
+  newCompName.value = comp.name || '';
+  newCompDesc.value = comp.desc || '';
   showAddDialog.value = true;
 }
 
@@ -511,10 +481,20 @@ function handleCategoryChange() {
 function confirmAddComp() {
   if (!newCompName.value.trim()) return;
   const type = modalMode.value === 'motivation' ? 'Motivation' : (newCompType.value || selectedCompCategory.value || 'Complication');
-  heroStore.addComplication(type, newCompName.value.trim(), newCompDesc.value.trim());
+  const name = newCompName.value.trim();
+  const desc = newCompDesc.value.trim();
+
+  if (editingCompIndex.value !== null && heroStore.character.complications?.[editingCompIndex.value]) {
+    const existing = heroStore.character.complications[editingCompIndex.value];
+    heroStore.updateComplication(existing.id, { type, name, desc });
+  } else {
+    heroStore.addComplication(type, name, desc);
+  }
+
   newCompName.value = '';
   newCompDesc.value = '';
   selectedPresetId.value = '';
+  editingCompIndex.value = null;
   showAddDialog.value = false;
 }
 </script>
@@ -628,41 +608,6 @@ function confirmAddComp() {
   transform: translateY(-1px);
 }
 
-/* Motivation Presets Chips */
-.motivation-chips-group {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-}
-
-.badge-chip {
-  padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
-  border: 1px solid var(--border-color);
-  background: var(--bg-card);
-  color: var(--text-secondary);
-  font-size: 0.78rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
-}
-
-.badge-chip:hover {
-  background: var(--bg-card-hover);
-  color: #fff;
-}
-
-.badge-chip:active {
-  transform: scale(0.96);
-}
-
-.badge-chip.active {
-  background: rgba(168, 85, 247, 0.2);
-  border-color: #a855f7;
-  color: #d8b4fe;
-  font-weight: 700;
-}
-
 /* Complications List & Cards */
 .empty-comp-box {
   text-align: center;
@@ -754,37 +699,72 @@ function confirmAddComp() {
   line-height: 1.5;
 }
 
+.comp-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-shrink: 0;
+}
+
+.comp-action-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.comp-action-btn:active {
+  transform: scale(0.93);
+}
+
+.btn-edit-comp {
+  color: #94a3b8;
+}
+
+.btn-edit-comp:hover {
+  color: #60a5fa;
+  background: rgba(59, 130, 246, 0.18);
+  border-color: rgba(59, 130, 246, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+}
+
 .btn-remove-comp {
-  opacity: 0.6;
-  transition: opacity 0.2s ease, transform 0.15s ease;
+  color: #94a3b8;
 }
 
 .btn-remove-comp:hover {
-  opacity: 1;
-  transform: scale(1.1);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
-/* =========================================================
-   DUAL-MODE SEGMENTED NARRATIVE MODAL STYLING
-   ========================================================= */
+/* Dual-Mode Narrative Modal */
 .narrative-modal-box {
   max-width: 540px;
   background: #0f172a;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 12px;
-  box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.85);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
   padding: 1.4rem;
   transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .narrative-modal-box.theme-motivation {
-  border-color: rgba(168, 85, 247, 0.45);
-  box-shadow: 0 25px 60px -15px rgba(124, 58, 237, 0.25);
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
 }
 
 .narrative-modal-box.theme-complication {
-  border-color: rgba(244, 63, 94, 0.45);
-  box-shadow: 0 25px 60px -15px rgba(225, 29, 72, 0.25);
+  border-color: rgba(239, 68, 68, 0.45);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
 }
 
 .narrative-modal-header {
@@ -1024,15 +1004,15 @@ function confirmAddComp() {
 .theme-motivation .input-narrative:focus,
 .theme-motivation .select-narrative:focus {
   outline: none;
-  border-color: #a855f7;
-  box-shadow: 0 0 0 2px rgba(168, 85, 247, 0.25);
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
 }
 
 .theme-complication .input-narrative:focus,
 .theme-complication .select-narrative:focus {
   outline: none;
-  border-color: #f43f5e;
-  box-shadow: 0 0 0 2px rgba(244, 63, 94, 0.25);
+  border-color: #ef4444;
+  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
 }
 
 /* Narrative Rule Callout */
@@ -1094,25 +1074,25 @@ function confirmAddComp() {
 }
 
 .btn-submit-motivation {
-  background: linear-gradient(135deg, #7c3aed, #9333ea);
-  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.35);
+  background: #f59e0b;
+  color: #0b0f17;
+  border: 1px solid #fbbf24;
 }
 
 .btn-submit-motivation:hover:not(:disabled) {
-  background: linear-gradient(135deg, #6d28d9, #7e22ce);
+  background: #d97706;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(124, 58, 237, 0.45);
 }
 
 .btn-submit-complication {
-  background: linear-gradient(135deg, #e11d48, #be123c);
-  box-shadow: 0 4px 14px rgba(225, 29, 72, 0.35);
+  background: #dc2626;
+  color: #ffffff;
+  border: 1px solid #ef4444;
 }
 
 .btn-submit-complication:hover:not(:disabled) {
-  background: linear-gradient(135deg, #be123c, #9f1239);
+  background: #b91c1c;
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(225, 29, 72, 0.45);
 }
 
 .btn-narrative-submit:disabled {

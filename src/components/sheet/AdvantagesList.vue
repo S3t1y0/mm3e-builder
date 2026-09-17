@@ -8,22 +8,50 @@
       </div>
       <div class="dndb-pane-actions">
         <button
-          v-if="effectiveAdvantages.length > 0"
           type="button"
-          class="btn-pane-action"
-          @click="toggleCollapseAll"
-        >
-          <i :class="allCollapsed ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line'"></i>
-          <span>{{ allCollapsed ? 'Expand All' : 'Collapse All' }}</span>
-        </button>
-
-        <button
-          type="button"
-          class="btn-browse-catalog"
+          class="btn-add-advantage"
           @click="uiStore.openModal('advantage')"
-          title="Open Advantages Library Catalog Window"
+          title="Open Advantages Library Catalog"
         >
-          <i class="ri-add-line"></i> Browse Catalog (56 Choices)
+          <i class="ri-add-line"></i>
+          <span>Add Advantage</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Category Filter Tabs & Quick Search -->
+    <div v-if="effectiveAdvantages.length > 0" class="adv-filter-row">
+      <div class="adv-filter-tabs">
+        <button
+          v-for="cat in availableCategories"
+          :key="cat.id"
+          type="button"
+          class="adv-filter-tab"
+          :class="{ active: selectedCategory === cat.id }"
+          @click="selectedCategory = cat.id"
+        >
+          <span>{{ cat.label }}</span>
+          <span class="tab-count">{{ cat.count }}</span>
+        </button>
+      </div>
+
+      <div v-if="effectiveAdvantages.length > 4" class="adv-search-mini">
+        <i class="ri-search-line"></i>
+        <input
+          v-model="searchQuery"
+          type="text"
+          placeholder="Filter feats..."
+          class="adv-search-input"
+          aria-label="Filter feats"
+        />
+        <button
+          v-if="searchQuery"
+          type="button"
+          class="adv-search-clear"
+          @click="searchQuery = ''"
+          aria-label="Clear search"
+        >
+          <i class="ri-close-line"></i>
         </button>
       </div>
     </div>
@@ -40,112 +68,43 @@
         class="btn-browse-empty-cta"
         @click="uiStore.openModal('advantage')"
       >
-        <i class="ri-search-line"></i> Browse Advantages Library (56 Choices)
+        <i class="ri-search-line"></i> Browse Advantages Library
       </button>
     </div>
 
-    <!-- ACTIVE ADVANTAGES LIST -->
-    <div v-else class="sheet-advantages-library">
-      <div
-        v-for="adv in effectiveAdvantages"
+    <!-- ACTIVE ADVANTAGES 2-COLUMN GRID -->
+    <div v-else-if="filteredAdvantages.length > 0" class="sheet-advantages-grid">
+      <article
+        v-for="adv in filteredAdvantages"
         :key="adv.name"
         class="sheet-adv-card"
         :class="{
-          'is-collapsed': isAdvCollapsed(adv.name),
           'is-power-granted': adv.isPowerGranted
         }"
       >
-        <!-- Card Header -->
-        <div class="adv-card-header" @click="toggleAdvCollapse(adv.name)">
+        <!-- Card Top Bar: Title & Actions -->
+        <div class="adv-card-header">
           <div class="adv-card-title-group">
-            <i :class="getCategoryIcon(adv.name)" class="adv-card-icon"></i>
-            <h4 class="adv-card-name">{{ adv.name }}</h4>
+            <i :class="[getCategoryIcon(adv.name), 'adv-card-icon', getAdvCategory(adv.name).toLowerCase()]"></i>
+            <h4 class="adv-card-name" :title="adv.name">{{ adv.name }}</h4>
           </div>
 
-          <div class="adv-card-badges" @click.stop>
-            <!-- Power Granted / Standard Badges -->
-            <template v-if="adv.isPowerGranted">
-              <span class="adv-cat-tag power">
-                <i class="ri-flashlight-line"></i> Power Buff
-              </span>
-              <span class="adv-cost-tag power">Power Buff</span>
-            </template>
-            <template v-else>
-              <span class="adv-cat-tag" :class="getAdvCategory(adv.name).toLowerCase()">
-                {{ getAdvCategory(adv.name) }}
-              </span>
-              <span class="adv-cost-tag">
-                {{ adv.naturalRanks }} PP{{ adv.hasPowerBonus ? ` (+${adv.enhancedRanks} Power)` : '' }}
-              </span>
-            </template>
-
-            <!-- VTT / Roll20 Broadcast Button -->
+          <div class="adv-action-cluster">
             <button
               type="button"
-              class="btn-send-vtt"
+              class="adv-act-btn btn-broadcast"
               @click="broadcastAdvantage(adv)"
-              :title="`Send ${adv.name} description to clipboard / VTT`"
+              :title="`Broadcast ${adv.name} to Roll20`"
+              aria-label="Broadcast to Roll20"
             >
               <i class="ri-broadcast-line"></i>
             </button>
-
-            <!-- Collapse / Expand Chevron -->
-            <button
-              type="button"
-              class="btn-adv-collapse-toggle"
-              :class="{ collapsed: isAdvCollapsed(adv.name) }"
-              @click="toggleAdvCollapse(adv.name)"
-              :title="isAdvCollapsed(adv.name) ? 'Expand Details' : 'Collapse Details'"
-            >
-              <i :class="isAdvCollapsed(adv.name) ? 'ri-arrow-down-s-line' : 'ri-arrow-up-s-line'"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Card Body (Collapsible) -->
-        <div v-show="!isAdvCollapsed(adv.name)" class="adv-card-body">
-          <!-- Active Mechanics Linked Badge -->
-          <div v-if="getAdvMechanicBadge(adv)" class="adv-mechanic-strip" :class="getAdvMechanicBadge(adv).type">
-            <i :class="getAdvMechanicBadge(adv).icon"></i>
-            <span>{{ getAdvMechanicBadge(adv).text }}</span>
-          </div>
-
-          <p class="adv-card-desc">{{ getAdvDesc(adv.name) }}</p>
-
-          <div class="adv-card-footer">
-            <div class="adv-card-stepper-wrap">
-              <span v-if="adv.isPowerGranted" class="adv-status-tag power">
-                <i class="ri-flashlight-line"></i> Granted by Active Power (Rank {{ adv.ranks }})
-              </span>
-              <div v-else-if="isAdvRanked(adv.name)" class="stepper-compact">
-                <button
-                  type="button"
-                  class="step-btn-xs"
-                  :disabled="adv.naturalRanks <= 1"
-                  @click="stepRank(adv, -1)"
-                  title="Decrease Rank"
-                >-</button>
-                <span class="step-val-xs">
-                  Rank {{ adv.ranks }}{{ adv.hasPowerBonus ? ` (${adv.naturalRanks}+${adv.enhancedRanks}p)` : '' }}
-                </span>
-                <button
-                  type="button"
-                  class="step-btn-xs"
-                  :disabled="getMaxRanks(adv.name) && adv.naturalRanks >= getMaxRanks(adv.name)"
-                  @click="stepRank(adv, 1)"
-                  title="Increase Rank"
-                >+</button>
-              </div>
-              <span v-else class="adv-status-tag">
-                <i class="ri-check-line"></i> Active Trait
-              </span>
-            </div>
-
             <button
               v-if="adv.isPowerGranted"
               type="button"
-              class="btn-adv-del locked"
-              title="Granted by active power. To remove, modify or deactivate the power."
+              class="adv-act-btn btn-locked"
+              title="Granted by active power. Modify or deactivate power to remove."
+              aria-label="Granted by power (locked)"
               disabled
             >
               <i class="ri-lock-line"></i>
@@ -153,15 +112,74 @@
             <button
               v-else
               type="button"
-              class="btn-adv-del"
+              class="adv-act-btn btn-delete"
               @click="deleteAdvantage(adv)"
               :title="`Remove ${adv.name} from sheet`"
+              aria-label="Remove advantage"
             >
               <i class="ri-delete-bin-line"></i>
             </button>
           </div>
         </div>
-      </div>
+
+        <!-- Meta Bar: Category, Cost & Compact Rank Stepper -->
+        <div class="adv-card-meta">
+          <div class="adv-meta-tags">
+            <span v-if="adv.isPowerGranted" class="adv-cat-tag power">
+              <i class="ri-flashlight-line"></i> Power Buff
+            </span>
+            <span v-else class="adv-cat-tag" :class="getAdvCategory(adv.name).toLowerCase()">
+              {{ getAdvCategory(adv.name) }}
+            </span>
+            <span class="adv-cost-tag">
+              {{ adv.naturalRanks }} PP{{ adv.hasPowerBonus ? ` (+${adv.enhancedRanks}p)` : '' }}
+            </span>
+          </div>
+
+          <!-- Compact Rank Stepper for Ranked Traits -->
+          <div v-if="isAdvRanked(adv.name) && !adv.isPowerGranted" class="adv-card-stepper">
+            <button
+              type="button"
+              class="adv-step-btn"
+              :disabled="adv.naturalRanks <= 1"
+              @click="stepRank(adv, -1)"
+              title="Decrease Rank"
+              aria-label="Decrease Rank"
+            >
+              <i class="ri-subtract-line"></i>
+            </button>
+            <span class="adv-step-text">Rank {{ adv.ranks }}</span>
+            <button
+              type="button"
+              class="adv-step-btn"
+              :disabled="getMaxRanks(adv.name) && adv.naturalRanks >= getMaxRanks(adv.name)"
+              @click="stepRank(adv, 1)"
+              title="Increase Rank"
+              aria-label="Increase Rank"
+            >
+              <i class="ri-add-line"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Active Mechanics Strip (If Applicable) -->
+        <div v-if="getAdvMechanicBadge(adv)" class="adv-mechanic-strip" :class="getAdvMechanicBadge(adv).type">
+          <i :class="getAdvMechanicBadge(adv).icon"></i>
+          <span>{{ getAdvMechanicBadge(adv).text }}</span>
+        </div>
+
+        <!-- Rules Description (Proportional & Clean) -->
+        <p class="adv-card-desc">{{ getAdvDesc(adv.name) }}</p>
+      </article>
+    </div>
+
+    <!-- No Match Indicator -->
+    <div v-else class="adv-no-filter-match">
+      <i class="ri-filter-off-line"></i>
+      <span>No advantages found matching filter.</span>
+      <button type="button" class="btn-clear-filter" @click="clearFilter">
+        Reset Filter
+      </button>
     </div>
   </div>
 </template>
@@ -176,11 +194,53 @@ import { sendFeatureToVTT } from '../../services/vttBridge.js';
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
 
-const collapsedNames = ref(new Set());
+const selectedCategory = ref('all');
+const searchQuery = ref('');
 
 const effectiveAdvantages = computed(() => {
   return heroStore.effectiveAdvantages || [];
 });
+
+const availableCategories = computed(() => {
+  const all = effectiveAdvantages.value;
+  const counts = { all: all.length, combat: 0, skill: 0, fortune: 0, general: 0 };
+  all.forEach(adv => {
+    const cat = getAdvCategory(adv.name).toLowerCase();
+    if (counts[cat] !== undefined) {
+      counts[cat]++;
+    } else {
+      counts.general = (counts.general || 0) + 1;
+    }
+  });
+  return [
+    { id: 'all', label: 'All', count: counts.all },
+    { id: 'combat', label: 'Combat', count: counts.combat },
+    { id: 'skill', label: 'Skill', count: counts.skill },
+    { id: 'fortune', label: 'Fortune', count: counts.fortune },
+    { id: 'general', label: 'General', count: counts.general },
+  ].filter(c => c.id === 'all' || c.count > 0);
+});
+
+const filteredAdvantages = computed(() => {
+  return effectiveAdvantages.value.filter(adv => {
+    if (selectedCategory.value !== 'all') {
+      const cat = getAdvCategory(adv.name).toLowerCase();
+      if (cat !== selectedCategory.value) return false;
+    }
+    if (searchQuery.value.trim()) {
+      const q = searchQuery.value.trim().toLowerCase();
+      const name = adv.name.toLowerCase();
+      const desc = getAdvDesc(adv.name).toLowerCase();
+      if (!name.includes(q) && !desc.includes(q)) return false;
+    }
+    return true;
+  });
+});
+
+function clearFilter() {
+  selectedCategory.value = 'all';
+  searchQuery.value = '';
+}
 
 function getAdvMechanicBadge(adv) {
   if (!adv || !adv.name) return null;
@@ -188,61 +248,36 @@ function getAdvMechanicBadge(adv) {
   const ranks = Number(adv.ranks) || 1;
 
   if (name === 'close attack') {
-    return { icon: 'ri-sword-fill', type: 'combat', text: `+${ranks} Bonus to All Close Attacks & Close Combat` };
+    return { icon: 'ri-sword-fill', type: 'combat', text: `+${ranks} Close Attack Check Bonus` };
   }
   if (name === 'ranged attack') {
-    return { icon: 'ri-crosshair-2-fill', type: 'ranged', text: `+${ranks} Bonus to All Ranged Attacks & Ranged Combat` };
+    return { icon: 'ri-crosshair-2-fill', type: 'ranged', text: `+${ranks} Ranged Attack Check Bonus` };
   }
   if (name === 'defensive roll') {
-    return { icon: 'ri-shield-fill', type: 'defense', text: `+${ranks} Active Toughness Defense Bonus` };
+    return { icon: 'ri-shield-fill', type: 'defense', text: `+${ranks} Active Toughness Bonus` };
   }
   if (name === 'improved initiative') {
     return { icon: 'ri-speed-up-fill', type: 'init', text: `+${ranks * 4} Initiative Modifier` };
   }
   if (name === 'equipment') {
-    return { icon: 'ri-briefcase-4-fill', type: 'equip', text: `${ranks * 5} Equipment Points (EP) Budget` };
+    return { icon: 'ri-briefcase-4-fill', type: 'equip', text: `${ranks * 5} Equipment Points (EP)` };
   }
   if (name === 'throwing mastery') {
-    return { icon: 'ri-knife-blood-fill', type: 'damage', text: `+${ranks} Damage Rank to Thrown Weapons` };
+    return { icon: 'ri-knife-blood-fill', type: 'damage', text: `+${ranks} Thrown Weapon Damage` };
   }
   if (name === 'improved critical') {
-    return { icon: 'ri-sparkling-fill', type: 'crit', text: `Threat Range: ${Math.max(1, 20 - ranks)}–20 Critical Hits` };
+    return { icon: 'ri-sparkling-fill', type: 'crit', text: `Crit Range: ${Math.max(1, 20 - ranks)}-20` };
   }
   if (name === 'jack-of-all-trades') {
-    return { icon: 'ri-tools-fill', type: 'skill', text: 'Untrained Skill Checks Allowed (No Penalty)' };
+    return { icon: 'ri-tools-fill', type: 'skill', text: 'Untrained Skill Checks Allowed' };
   }
   if (name === 'eidetic memory') {
-    return { icon: 'ri-brain-line', type: 'circumstance', text: '+5 Circumstance Bonus on Memory / Recall Checks' };
+    return { icon: 'ri-brain-line', type: 'circumstance', text: '+5 Bonus on Recall Checks' };
   }
   if (name === 'great endurance') {
-    return { icon: 'ri-heart-pulse-line', type: 'circumstance', text: '+5 Circumstance Bonus on Hazard / Fatigue Checks' };
+    return { icon: 'ri-heart-pulse-line', type: 'circumstance', text: '+5 Bonus on Hazard/Fatigue' };
   }
   return null;
-}
-
-const allCollapsed = computed(() => {
-  if (effectiveAdvantages.value.length === 0) return false;
-  return effectiveAdvantages.value.every(a => collapsedNames.value.has(a.name));
-});
-
-function toggleCollapseAll() {
-  if (allCollapsed.value) {
-    collapsedNames.value.clear();
-  } else {
-    effectiveAdvantages.value.forEach(a => collapsedNames.value.add(a.name));
-  }
-}
-
-function isAdvCollapsed(name) {
-  return collapsedNames.value.has(name);
-}
-
-function toggleAdvCollapse(name) {
-  if (collapsedNames.value.has(name)) {
-    collapsedNames.value.delete(name);
-  } else {
-    collapsedNames.value.add(name);
-  }
 }
 
 function getAdvRule(name) {
@@ -261,7 +296,7 @@ function getCategoryIcon(name) {
     case 'Fortune': return 'ri-clover-line';
     case 'Skill': return 'ri-focus-3-line';
     case 'General': return 'ri-shield-line';
-    default: return 'ri-star-line';
+    default: return 'ri-shield-line';
   }
 }
 
@@ -297,7 +332,6 @@ function broadcastAdvantage(adv) {
   const desc = getAdvDesc(adv.name);
   const text = `**${adv.name}** [Rank ${adv.ranks}]\n${desc}`;
 
-  // Broadcast to Roll20 via Chrome Extension
   sendFeatureToVTT({
     name: adv.name,
     category: 'advantage',
@@ -310,7 +344,7 @@ function broadcastAdvantage(adv) {
 
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text);
-    uiStore.showToast(`Broadcasted "${adv.name}" to Roll20 & copied to clipboard!`, 'info');
+    uiStore.showToast(`Broadcasted "${adv.name}" to Roll20 and copied to clipboard!`, 'info');
   } else {
     uiStore.showToast(`Broadcasted "${adv.name}" to Roll20!`, 'info');
   }
@@ -321,17 +355,19 @@ function broadcastAdvantage(adv) {
 .advantages-hub-pane {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .adv-pp-badge {
   font-size: 0.72rem;
   font-weight: 800;
   color: #fca5a5;
-  background: rgba(220, 38, 38, 0.15);
+  background: rgba(220, 38, 38, 0.14);
   border: 1px solid rgba(220, 38, 38, 0.3);
-  padding: 0.15rem 0.55rem;
-  border-radius: var(--radius-pill);
+  padding: 0.18rem 0.55rem;
+  border-radius: var(--radius-xs);
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.02em;
 }
 
 .dndb-pane-actions {
@@ -340,13 +376,56 @@ function broadcastAdvantage(adv) {
   gap: 0.5rem;
 }
 
-.btn-pane-action {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-secondary);
-  font-size: 0.74rem;
+.btn-add-advantage {
+  background: rgba(220, 38, 38, 0.14);
+  border: 1px solid rgba(220, 38, 38, 0.38);
+  color: #fca5a5;
+  font-size: 0.75rem;
   font-weight: 700;
-  padding: 0.3rem 0.65rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all var(--trans-fast);
+}
+
+.btn-add-advantage:hover {
+  background: rgba(220, 38, 38, 0.28);
+  border-color: #ef4444;
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+.btn-add-advantage:active {
+  transform: scale(0.95);
+}
+
+/* Category Filter Tabs & Quick Search */
+.adv-filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.1rem;
+}
+
+.adv-filter-tabs {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+}
+
+.adv-filter-tab {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
   border-radius: var(--radius-xs);
   cursor: pointer;
   display: inline-flex;
@@ -355,30 +434,68 @@ function broadcastAdvantage(adv) {
   transition: all var(--trans-fast);
 }
 
-.btn-pane-action:hover {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+.adv-filter-tab:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
 }
 
-.btn-browse-catalog {
-  background: #dc2626;
-  border: 1px solid #ef4444;
-  color: #fff;
-  font-size: 0.76rem;
+.adv-filter-tab.active {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+}
+
+.adv-filter-tab .tab-count {
+  font-size: 0.62rem;
   font-weight: 800;
-  padding: 0.32rem 0.75rem;
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
-  transition: all var(--trans-fast);
+  padding: 0.05rem 0.25rem;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
 }
 
-.btn-browse-catalog:hover {
-  background: #ef4444;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.5);
+.adv-filter-tab.active .tab-count {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.adv-search-mini {
+  display: flex;
+  align-items: center;
+  background: rgba(11, 15, 23, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-xs);
+  padding: 0.18rem 0.45rem;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.adv-search-input {
+  background: transparent;
+  border: none;
+  color: #ffffff;
+  font-size: 0.72rem;
+  outline: none;
+  width: 95px;
+}
+
+.adv-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.adv-search-clear {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.adv-search-clear:hover {
+  color: #ffffff;
 }
 
 /* Empty State */
@@ -387,133 +504,188 @@ function broadcastAdvantage(adv) {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  padding: 2.8rem 1.5rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px dashed rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-lg);
-  gap: 0.65rem;
+  padding: 2.2rem 1.25rem;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px dashed rgba(255, 255, 255, 0.09);
+  border-radius: var(--radius-md);
+  gap: 0.55rem;
 }
 
 .adv-empty-icon {
-  font-size: 2.4rem;
-  color: rgba(220, 38, 38, 0.4);
+  font-size: 2rem;
+  color: rgba(220, 38, 38, 0.45);
 }
 
 .adv-empty-title {
-  font-size: 1.05rem;
+  font-size: 0.95rem;
   font-weight: 800;
-  color: #fff;
+  color: #ffffff;
   margin: 0;
 }
 
 .adv-empty-desc {
-  font-size: 0.78rem;
+  font-size: 0.76rem;
   color: var(--text-muted);
-  max-width: 460px;
+  max-width: 420px;
   margin: 0;
   line-height: 1.4;
 }
 
 .btn-browse-empty-cta {
-  margin-top: 0.5rem;
-  background: #dc2626;
-  border: 1px solid #ef4444;
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 800;
-  padding: 0.45rem 1rem;
+  margin-top: 0.35rem;
+  background: rgba(220, 38, 38, 0.18);
+  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: #fca5a5;
+  font-size: 0.76rem;
+  font-weight: 700;
+  padding: 0.4rem 0.9rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+  transition: all var(--trans-fast);
 }
 
 .btn-browse-empty-cta:hover {
-  background: #ef4444;
+  background: rgba(220, 38, 38, 0.3);
+  color: #ffffff;
 }
 
-/* Sheet Advantages Library Grid */
-.sheet-advantages-library {
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
+/* 2-COLUMN RESPONSIVE ADVANTAGES GRID (OPTION 2) */
+.sheet-advantages-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.55rem;
 }
 
 .sheet-adv-card {
-  background: rgba(20, 20, 28, 0.6);
+  background: rgba(17, 24, 39, 0.55);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  padding: 0.65rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
   transition: all var(--trans-fast);
 }
 
 .sheet-adv-card:hover {
-  border-color: rgba(220, 38, 38, 0.3);
-  background: rgba(25, 25, 35, 0.8);
+  border-color: rgba(255, 255, 255, 0.18);
+  background: rgba(23, 31, 49, 0.75);
 }
 
 .sheet-adv-card.is-power-granted {
   border-left: 3px solid #38bdf8;
 }
 
-.sheet-adv-card.is-collapsed .adv-card-header {
-  border-bottom: none;
-}
-
+/* Card Header Row */
 .adv-card-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  padding: 0.65rem 0.85rem;
-  cursor: pointer;
-  user-select: none;
-  border-bottom: 1px solid var(--border-subtle);
-  gap: 0.75rem;
+  gap: 0.4rem;
 }
 
 .adv-card-title-group {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.4rem;
   min-width: 0;
+  flex: 1;
 }
 
 .adv-card-icon {
-  color: #ef4444;
-  font-size: 1rem;
-}
-
-.adv-card-name {
-  font-size: 0.86rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.adv-card-badges {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
+  font-size: 0.95rem;
   flex-shrink: 0;
 }
 
-.adv-cat-tag {
-  font-size: 0.62rem;
+.adv-card-icon.combat { color: #f87171; }
+.adv-card-icon.fortune { color: #34d399; }
+.adv-card-icon.skill { color: #38bdf8; }
+.adv-card-icon.general { color: #c084fc; }
+
+.adv-card-name {
+  font-size: 0.84rem;
   font-weight: 800;
-  padding: 0.1rem 0.4rem;
-  border-radius: 3px;
-  text-transform: uppercase;
+  color: #ffffff;
+  margin: 0;
+  line-height: 1.25;
+  word-break: break-word;
 }
 
-.adv-cat-tag.combat { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
-.adv-cat-tag.fortune { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
-.adv-cat-tag.skill { background: rgba(56, 189, 248, 0.15); color: #7dd3fc; }
-.adv-cat-tag.general { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
+/* Tactile Action Cluster */
+.adv-action-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.2rem;
+  flex-shrink: 0;
+}
+
+.adv-act-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.82rem;
+  transition: all var(--trans-fast);
+}
+
+.adv-act-btn:active {
+  transform: scale(0.92);
+}
+
+.adv-act-btn.btn-broadcast:hover {
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.16);
+  border-color: rgba(56, 189, 248, 0.45);
+}
+
+.adv-act-btn.btn-delete:hover {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.5);
+}
+
+.adv-act-btn.btn-locked {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+/* Meta Bar: Tags & Compact Rank Stepper */
+.adv-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.adv-meta-tags {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.adv-cat-tag {
+  font-size: 0.6rem;
+  font-weight: 800;
+  padding: 0.08rem 0.38rem;
+  border-radius: var(--radius-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.adv-cat-tag.combat { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.28); }
+.adv-cat-tag.fortune { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.28); }
+.adv-cat-tag.skill { background: rgba(56, 189, 248, 0.15); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.28); }
+.adv-cat-tag.general { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.28); }
 .adv-cat-tag.power {
   background: rgba(56, 189, 248, 0.15);
   color: #38bdf8;
@@ -521,126 +693,75 @@ function broadcastAdvantage(adv) {
 }
 
 .adv-cost-tag {
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   font-weight: 800;
-  padding: 0.1rem 0.4rem;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.06);
+  padding: 0.08rem 0.38rem;
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
   color: var(--text-secondary);
+  font-family: var(--font-mono, monospace);
 }
 
-.adv-cost-tag.power {
-  background: rgba(56, 189, 248, 0.15);
-  color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.35);
+/* Compact Rank Stepper */
+.adv-card-stepper {
+  display: inline-flex;
+  align-items: center;
+  background: rgba(11, 15, 23, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-xs);
+  padding: 1px;
+  gap: 2px;
 }
 
-.btn-send-vtt {
-  background: transparent;
+.adv-step-btn {
+  width: 20px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.06);
   border: none;
-  color: var(--text-muted);
+  border-radius: calc(var(--radius-xs) - 1px);
+  color: #ffffff;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  padding: 0.15rem;
-  font-size: 0.85rem;
-  border-radius: 3px;
   transition: all var(--trans-fast);
 }
 
-.btn-send-vtt:hover {
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.1);
+.adv-step-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+  color: #ffffff;
 }
 
-.btn-adv-collapse-toggle {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0.15rem;
-  font-size: 0.95rem;
-  display: flex;
-  align-items: center;
-  transition: color var(--trans-fast);
+.adv-step-btn:active:not(:disabled) {
+  transform: scale(0.92);
 }
 
-.btn-adv-collapse-toggle:hover {
-  color: #fff;
-}
-
-.adv-card-body {
-  padding: 0.75rem 0.85rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.65rem;
-  background: rgba(10, 10, 15, 0.3);
-}
-
-.adv-card-desc {
-  font-size: 0.76rem;
-  color: var(--text-secondary);
-  line-height: 1.45;
-  margin: 0;
-}
-
-.adv-card-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding-top: 0.5rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  gap: 0.5rem;
-}
-
-.adv-card-stepper-wrap {
-  display: flex;
-  align-items: center;
-}
-
-.adv-status-tag {
-  font-size: 0.72rem;
-  color: #34d399;
-  font-weight: 700;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.adv-status-tag.power {
-  color: #38bdf8;
-}
-
-.btn-adv-del {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0.2rem;
-  border-radius: 3px;
-  transition: color var(--trans-fast);
-}
-
-.btn-adv-del:hover {
-  color: #ef4444;
-}
-
-.btn-adv-del.locked {
-  opacity: 0.4;
+.adv-step-btn:disabled {
+  opacity: 0.3;
   cursor: not-allowed;
 }
 
-/* Active Mechanics Linked Badge */
+.adv-step-text {
+  font-size: 0.7rem;
+  font-weight: 800;
+  color: #ffffff;
+  padding: 0 0.35rem;
+  font-family: var(--font-mono, monospace);
+  white-space: nowrap;
+}
+
+/* Active Mechanics Strip */
 .adv-mechanic-strip {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  padding: 0.28rem 0.6rem;
+  gap: 0.35rem;
+  padding: 0.2rem 0.45rem;
   border-radius: var(--radius-xs);
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
   letter-spacing: 0.02em;
-  margin-bottom: 0.25rem;
-  transition: all var(--trans-fast);
   width: fit-content;
 }
 
@@ -691,5 +812,54 @@ function broadcastAdvantage(adv) {
   background: rgba(148, 163, 184, 0.12);
   border: 1px solid rgba(148, 163, 184, 0.25);
   color: #cbd5e1;
+}
+
+/* Rules Description (Proportional & Clean) */
+.adv-card-desc {
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sheet-adv-card:hover .adv-card-desc {
+  -webkit-line-clamp: unset;
+  overflow: visible;
+}
+
+/* No Match Indicator */
+.adv-no-filter-match {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.015);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  font-size: 0.76rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-clear-filter {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-clear-filter:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 </style>
