@@ -89,8 +89,33 @@
         </div>
       </div>
 
-      <!-- 4. Toughness -->
-      <div class="defense-card" :class="{ 'card-injured': heroStore.character.injuries > 0 }" title="Resistance to direct damage (Derived from STA + Protection, reduced by bruises).">
+      <!-- 4. Will -->
+      <div class="defense-card" title="Mental stability, determination, and psychic resistance.">
+        <div class="def-header">
+          <span class="def-name">Will</span>
+          <div class="def-meta-row">
+            <span v-if="enhDefenses.WILL > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.WILL}`">
+              +{{ enhDefenses.WILL }} Enh
+            </span>
+            <span class="def-base-info">AWE {{ heroStore.effectiveAbilities.AWE || 0 }}</span>
+          </div>
+        </div>
+        <div class="def-body">
+          <button type="button" class="def-roll-btn" @click="rollDefense('Will', heroStore.defenseTotals.WILL)" title="Click to Roll Will Check">
+            <i class="ri-dice-line"></i>
+            <span class="def-total">{{ heroStore.defenseTotals.WILL >= 0 ? `+${heroStore.defenseTotals.WILL}` : heroStore.defenseTotals.WILL }}</span>
+            <span class="def-roll-label">ROLL</span>
+          </button>
+          <div class="def-stepper">
+            <button type="button" class="step-btn" @click="stepDefense('WILL', -1)" title="Decrease Will">-</button>
+            <span class="def-bought-val">+{{ heroStore.character.defensesBought.WILL || 0 }} PP</span>
+            <button type="button" class="step-btn" @click="stepDefense('WILL', 1)" title="Increase Will">+</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Toughness (Spans full width on row 3) -->
+      <div class="defense-card card-toughness" :class="{ 'card-injured': heroStore.character.injuries > 0 }" title="Resistance to direct damage (Derived from STA + Protection, reduced by bruises).">
         <div class="def-header">
           <span class="def-name">Toughness</span>
           <div class="def-meta-row">
@@ -116,53 +141,6 @@
           </button>
           <div class="def-stepper derived">
             <span class="def-derived-label">{{ toughnessDerivedLabel }}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- 5. Will -->
-      <div class="defense-card" title="Mental stability, determination, and psychic resistance.">
-        <div class="def-header">
-          <span class="def-name">Will</span>
-          <div class="def-meta-row">
-            <span v-if="enhDefenses.WILL > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.WILL}`">
-              +{{ enhDefenses.WILL }} Enh
-            </span>
-            <span class="def-base-info">AWE {{ heroStore.effectiveAbilities.AWE || 0 }}</span>
-          </div>
-        </div>
-        <div class="def-body">
-          <button type="button" class="def-roll-btn" @click="rollDefense('Will', heroStore.defenseTotals.WILL)" title="Click to Roll Will Check">
-            <i class="ri-dice-line"></i>
-            <span class="def-total">{{ heroStore.defenseTotals.WILL >= 0 ? `+${heroStore.defenseTotals.WILL}` : heroStore.defenseTotals.WILL }}</span>
-            <span class="def-roll-label">ROLL</span>
-          </button>
-          <div class="def-stepper">
-            <button type="button" class="step-btn" @click="stepDefense('WILL', -1)" title="Decrease Will">-</button>
-            <span class="def-bought-val">+{{ heroStore.character.defensesBought.WILL || 0 }} PP</span>
-            <button type="button" class="step-btn" @click="stepDefense('WILL', 1)" title="Increase Will">+</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- 6. Initiative -->
-      <div class="defense-card" title="Combat reaction order (AGL + Improved Initiative advantage).">
-        <div class="def-header">
-          <span class="def-name">Initiative</span>
-          <div class="def-meta-row">
-            <span class="def-base-info">
-              AGL {{ heroStore.effectiveAbilities.AGL || 0 }}{{ improvedInitBonus > 0 ? ` (+${improvedInitBonus} Adv)` : '' }}
-            </span>
-          </div>
-        </div>
-        <div class="def-body">
-          <button type="button" class="def-roll-btn init-roll-btn" @click="rollDefense('Initiative', totalInitiative)" title="Click to Roll Initiative">
-            <i class="ri-speed-up-line"></i>
-            <span class="def-total">{{ totalInitiative >= 0 ? `+${totalInitiative}` : totalInitiative }}</span>
-            <span class="def-roll-label">ROLL</span>
-          </button>
-          <div class="def-stepper derived">
-            <span class="def-derived-label">AGL + Adv</span>
           </div>
         </div>
       </div>
@@ -213,14 +191,6 @@ const toughnessDerivedLabel = computed(() => {
   return parts.length > 0 ? parts.join(' • ') : 'Via STA';
 });
 
-const improvedInitBonus = computed(() => {
-  return heroStore.getAdvantageRanks('Improved Initiative') * 4;
-});
-
-const totalInitiative = computed(() => {
-  return (heroStore.effectiveAbilities.AGL || 0) + improvedInitBonus.value;
-});
-
 const effectiveToughnessCheck = computed(() => {
   const baseToughness = heroStore.defenseTotals.TOUGHNESS;
   const injuries = heroStore.character.injuries || 0;
@@ -238,6 +208,10 @@ function rollDefense(name, bonus) {
 </script>
 
 <style scoped>
+.card-toughness {
+  grid-column: 1 / -1;
+}
+
 .def-meta-row {
   display: flex;
   align-items: center;

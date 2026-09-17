@@ -6,18 +6,30 @@
         <h3>Targeted Attacks</h3>
       </div>
 
-      <!-- Filter Controls -->
-      <div class="filter-pills-row">
+      <!-- Quick Initiative & Filter Controls -->
+      <div class="header-actions-wrap">
         <button
-          v-for="flt in ['All', 'Active Only', 'Close', 'Ranged']"
-          :key="flt"
           type="button"
-          class="filter-pill-btn"
-          :class="{ active: currentFilter === flt }"
-          @click="currentFilter = flt"
+          class="quick-init-btn"
+          @click="heroStore.rollInitiative()"
+          title="Roll Combat Initiative (Turn Order)"
         >
-          {{ flt }}
+          <i class="ri-speed-up-line"></i>
+          <span>Init {{ heroStore.initiativeTotal >= 0 ? `+${heroStore.initiativeTotal}` : heroStore.initiativeTotal }}</span>
         </button>
+
+        <div class="filter-pills-row">
+          <button
+            v-for="flt in ['All', 'Active Only', 'Close', 'Ranged']"
+            :key="flt"
+            type="button"
+            class="filter-pill-btn"
+            :class="{ active: currentFilter === flt }"
+            @click="currentFilter = flt"
+          >
+            {{ flt }}
+          </button>
+        </div>
       </div>
     </div>
 
@@ -242,6 +254,38 @@ function handleTurnOnAndRoll(atk) {
   background: rgba(220, 38, 38, 0.15);
   color: #fca5a5;
   border: 1px solid rgba(220, 38, 38, 0.3);
+}
+
+.header-actions-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex-wrap: wrap;
+}
+
+.quick-init-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.25rem 0.65rem;
+  border-radius: var(--radius-xs, 4px);
+  cursor: pointer;
+  transition: all var(--trans-fast, 0.2s ease);
+}
+
+.quick-init-btn:hover {
+  background: rgba(245, 158, 11, 0.22);
+  border-color: #f59e0b;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+}
+
+.quick-init-btn:active {
+  transform: translateY(1px);
 }
 
 .filter-pills-row {

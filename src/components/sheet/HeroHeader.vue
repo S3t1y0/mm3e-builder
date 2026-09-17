@@ -187,7 +187,6 @@ function adjustHeroPoints(delta) {
 }
 
 function rollInitiative() {
-  const initBonus = heroStore.initiativeTotal;
-  heroStore.rollCheck('Initiative Roll', initBonus, null, 'Initiative');
+  heroStore.rollInitiative();
 }
 </script>

@@ -859,7 +859,7 @@ export const useHeroStore = defineStore('hero', {
     },
 
     // d20 Dice Roll System
-    rollCheck(name, modifier = 0, dc = null, category = 'General') {
+    rollCheck(name, modifier = 0, dc = null, category = 'General', extraData = {}) {
       const d20 = rollD20();
       const isCrit = (d20 === 20);
       const isCritFail = (d20 === 1);
@@ -877,7 +877,8 @@ export const useHeroStore = defineStore('hero', {
         degrees,
         dc,
         category,
-        timestamp: new Date().toLocaleTimeString()
+        timestamp: new Date().toLocaleTimeString(),
+        ...extraData
       };
 
       this.lastRoll = rollData;
@@ -888,6 +889,22 @@ export const useHeroStore = defineStore('hero', {
       sendRollToVTT(rollData, this.character);
 
       return rollData;
+    },
+
+    rollInitiative() {
+      const initBonus = this.initiativeTotal;
+      const agl = this.effectiveAbilities?.AGL || 0;
+      const advRanks = this.getAdvantageRanks('Improved Initiative');
+      const hasSeize = (this.character.advantages || []).some(
+        a => (a.name || '').trim().toLowerCase() === 'seize initiative'
+      );
+
+      return this.rollCheck('Initiative Check', initBonus, null, 'Initiative', {
+        aglBonus: agl,
+        improvedInitBonus: advRanks * 4,
+        improvedInitRanks: advRanks,
+        hasSeizeInitiative: hasSeize
+      });
     },
 
     clearLastRoll() {

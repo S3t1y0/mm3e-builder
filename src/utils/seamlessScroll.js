@@ -1,15 +1,15 @@
 /**
- * Seamless Scroll Chaining Engine
- * Eliminates browser gesture-locking, dropped delta, and scroll stutter between
- * dynamic inner scroll containers (skills table, tabbed action hub panes, wizard catalogs)
- * and the outer document window.
+ * Seamless Scroll Chaining Engine with Dual-Mode Interpolation
+ * - Trackpad: Direct micro-delta passthrough (responsive, 1:1 hardware tracked).
+ * - Mouse Wheel: Smooth rAF momentum easing (eliminates choppy 100px notch jumps
+ *   and seamlessly transitions from dynamic containers to page window).
  */
 
 function getNormalizedDelta(event) {
   let delta = event.deltaY;
   if (event.deltaMode === 1) {
-    // DOM_DELTA_LINE (typically 20-24px per line)
-    delta *= 24;
+    // DOM_DELTA_LINE (typically 28-32px per line on desktop)
+    delta *= 32;
   } else if (event.deltaMode === 2) {
     // DOM_DELTA_PAGE
     delta *= window.innerHeight;
@@ -39,13 +39,92 @@ function findScrollableContainer(target) {
       ) {
         return el;
       }
+
+      // Automatically identify any dynamic element with vertical overflow
+      const style = window.getComputedStyle(el);
+      const overflowY = style.overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && el.scrollHeight > el.clientHeight + 2) {
+        return el;
+      }
     }
     el = el.parentElement;
   }
   return null;
 }
 
+function isMouseWheel(event) {
+  // Line or page delta modes are physical mouse wheels
+  if (event.deltaMode !== 0) return true;
+  // Fractional deltas are high-precision trackpads (e.g. 1.25, 2.5)
+  if (!Number.isInteger(event.deltaY)) return false;
+  // High-magnitude integer deltas (e.g. 100, 120) typical of notched wheels
+  return Math.abs(event.deltaY) >= 40;
+}
+
+function applyScrollStep(scroller, step) {
+  if (!scroller || !scroller.isConnected) {
+    window.scrollBy({ top: step, behavior: 'auto' });
+    return;
+  }
+
+  const maxScroll = Math.max(0, scroller.scrollHeight - scroller.clientHeight);
+  if (maxScroll <= 1) {
+    window.scrollBy({ top: step, behavior: 'auto' });
+    return;
+  }
+
+  const currentTop = scroller.scrollTop;
+
+  if (step > 0) {
+    // Scrolling DOWN
+    const available = maxScroll - currentTop;
+    if (available <= 0.8) {
+      window.scrollBy({ top: step, behavior: 'auto' });
+    } else if (step > available) {
+      scroller.scrollTop = maxScroll;
+      window.scrollBy({ top: step - available, behavior: 'auto' });
+    } else {
+      scroller.scrollTop = currentTop + step;
+    }
+  } else if (step < 0) {
+    // Scrolling UP
+    const available = currentTop;
+    if (available <= 0.8) {
+      window.scrollBy({ top: step, behavior: 'auto' });
+    } else if (-step > available) {
+      scroller.scrollTop = 0;
+      window.scrollBy({ top: step + available, behavior: 'auto' });
+    } else {
+      scroller.scrollTop = currentTop + step;
+    }
+  }
+}
+
 let isInitialized = false;
+
+// Mouse wheel rAF accumulator state
+let pendingMouseDelta = 0;
+let activeScroller = null;
+let rafId = null;
+
+function runMouseWheelLoop() {
+  if (Math.abs(pendingMouseDelta) < 0.6) {
+    if (pendingMouseDelta !== 0) {
+      applyScrollStep(activeScroller, pendingMouseDelta);
+      pendingMouseDelta = 0;
+    }
+    rafId = null;
+    return;
+  }
+
+  // Smooth momentum easing: 0.20 per frame provides crisp, silky deceleration (~140ms)
+  const step = pendingMouseDelta * 0.20;
+  pendingMouseDelta -= step;
+
+  applyScrollStep(activeScroller, step);
+
+  rafId = requestAnimationFrame(runMouseWheelLoop);
+}
 
 export function initSeamlessScroll() {
   if (typeof window === 'undefined' || isInitialized) return;
@@ -61,54 +140,28 @@ export function initSeamlessScroll() {
       const scroller = findScrollableContainer(event.target);
       if (!scroller) return;
 
-      const maxScroll = scroller.scrollHeight - scroller.clientHeight;
       const deltaY = getNormalizedDelta(event);
-
-      // If container fits without scrolling, delegate immediately to window
-      if (maxScroll <= 1) {
-        window.scrollBy({ top: deltaY, behavior: 'auto' });
-        event.preventDefault();
-        return;
-      }
-
       if (deltaY === 0) return;
 
-      const currentTop = scroller.scrollTop;
+      event.preventDefault();
 
-      if (deltaY > 0) {
-        // Scrolling DOWN
-        const available = maxScroll - currentTop;
-        if (available <= 0.5) {
-          // Already at bottom boundary: forward 100% of delta to page
-          window.scrollBy({ top: deltaY, behavior: 'auto' });
-          event.preventDefault();
-        } else if (deltaY > available) {
-          // Crosses boundary: absorb available into container, remainder into page
-          scroller.scrollTop = maxScroll;
-          window.scrollBy({ top: deltaY - available, behavior: 'auto' });
-          event.preventDefault();
-        } else {
-          // Within container bounds
-          scroller.scrollTop = currentTop + deltaY;
-          event.preventDefault();
+      if (isMouseWheel(event)) {
+        // Physical mouse wheel with discrete notch clicks:
+        // Accumulate delta into rAF momentum loop to eliminate jagged/patah-patah jumps
+        activeScroller = scroller;
+        pendingMouseDelta = Math.max(-800, Math.min(800, pendingMouseDelta + deltaY));
+        if (!rafId) {
+          rafId = requestAnimationFrame(runMouseWheelLoop);
         }
       } else {
-        // Scrolling UP (deltaY < 0)
-        const available = currentTop;
-        if (available <= 0.5) {
-          // Already at top boundary: forward 100% of delta to page
-          window.scrollBy({ top: deltaY, behavior: 'auto' });
-          event.preventDefault();
-        } else if (-deltaY > available) {
-          // Crosses boundary: absorb available to 0, remainder into page
-          scroller.scrollTop = 0;
-          window.scrollBy({ top: deltaY + available, behavior: 'auto' });
-          event.preventDefault();
-        } else {
-          // Within container bounds
-          scroller.scrollTop = currentTop + deltaY;
-          event.preventDefault();
+        // Precision trackpad with continuous micro-deltas:
+        // Immediate 1:1 passthrough for instant, responsive hardware tracking
+        if (rafId) {
+          cancelAnimationFrame(rafId);
+          rafId = null;
+          pendingMouseDelta = 0;
         }
+        applyScrollStep(scroller, deltaY);
       }
     },
     { passive: false, capture: true }

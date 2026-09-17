@@ -41,11 +41,11 @@ export function sendRollToVTT(rollData, character = null) {
   const charName = character?.name || window.__MM3E_ACTIVE_HERO__?.name || 'Hero';
   const category = (rollData.category || 'check').toLowerCase();
 
-  // Normalize roll type to match Roll20 macro builders (attack, defense, skill, initiative, check)
+  // Normalize roll type to match Roll20 macro builders (initiative, attack, defense, skill, check)
   let rollType = 'check';
-  if (category.includes('attack')) rollType = 'attack';
+  if (category.includes('initiative')) rollType = 'initiative';
+  else if (category.includes('attack')) rollType = 'attack';
   else if (category.includes('defense') || category.includes('save') || category.includes('resistance')) rollType = 'defense';
-  else if (category.includes('initiative')) rollType = 'initiative';
   else if (category.includes('skill')) rollType = 'skill';
 
   const payload = {
@@ -67,6 +67,10 @@ export function sendRollToVTT(rollData, character = null) {
     effectRank: rollData.effectRank || null,
     descriptor: rollData.descriptor || null,
     range: rollData.range || null,
+    aglBonus: rollData.aglBonus !== undefined ? rollData.aglBonus : null,
+    improvedInitBonus: rollData.improvedInitBonus || 0,
+    improvedInitRanks: rollData.improvedInitRanks || 0,
+    hasSeizeInitiative: !!rollData.hasSeizeInitiative,
     builderSource: 'mm3e-builder-vue',
     builderVersion: '2.0.0',
     timestamp: Date.now()
