@@ -14,9 +14,6 @@
             placeholder="Hero Name / Codename"
             @change="heroStore.pushHistory()"
           />
-          <span class="dndb-pl-pill">
-            PL <span class="font-mono">{{ heroStore.character.powerLevel }}</span>
-          </span>
         </div>
         <div class="dndb-sub-identity-row">
           <input
@@ -115,15 +112,11 @@
             @click="heroStore.adjustInjuries(1)"
           >+</button>
         </div>
-        <div class="dndb-injury-status-row">
-          <span v-if="heroStore.character.injuries > 0" class="dndb-vital-sub wounded">
+        <div v-if="heroStore.character.injuries > 0" class="dndb-injury-status-row">
+          <span class="dndb-vital-sub wounded">
             <i class="ri-arrow-down-line"></i> -{{ heroStore.character.injuries }} Toughness
           </span>
-          <span v-else class="dndb-vital-sub normal">
-            <i class="ri-shield-check-line"></i> Full Toughness
-          </span>
           <button
-            v-if="heroStore.character.injuries > 0"
             type="button"
             class="btn-injury-quick-heal"
             title="Heal all injuries (Reset to 0)"
@@ -135,7 +128,14 @@
       </div>
 
       <!-- Speed / Movement Badge -->
-      <div class="dndb-vital-box speed-box">
+      <div
+        class="dndb-vital-box speed-box"
+        :class="{
+          'is-immobile': heroStore.speedTotal.isImmobile,
+          'is-hindered': heroStore.speedTotal.isHindered
+        }"
+        :title="heroStore.speedTotal.isImmobile ? 'Immobile: Speed 0 (cannot move)' : (heroStore.speedTotal.isHindered ? 'Hindered: Moves at half speed' : 'Normal movement speed')"
+      >
         <span class="dndb-vital-label">SPEED</span>
         <strong class="dndb-vital-val font-mono">{{ heroStore.speedTotal.val }}</strong>
         <span class="dndb-vital-sub">{{ heroStore.speedTotal.sub }}</span>

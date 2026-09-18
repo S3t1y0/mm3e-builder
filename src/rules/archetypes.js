@@ -8,7 +8,7 @@ export const ARCHETYPES = [
     icon: 'ri-robot-2-line',
     tagline: 'High-tech powered armor with heavy blasters, force fields, and flight systems.',
     origin: 'High-Tech',
-    description: 'A brilliant engineer, inventor, or military pilot protected by an exoskeleton of advanced alloys and micro-circuitry. The suit provides immense firepower, computer-assisted targeting, flight, and near-impervious armor.',
+    description: 'An engineer, inventor, or pilot protected by an armored exoskeleton. The suit provides heavy firepower, flight, and reinforced armor.',
     tradeoffStyle: 'High Toughness / Moderate Dodge (Dodge 8, Toughness 12)',
     recommendedPL: 10,
     budgetGuidelines: {
@@ -87,7 +87,7 @@ export const ARCHETYPES = [
     id: 'energy_controller',
     name: 'Energy Controller',
     icon: 'ri-fire-line',
-    tagline: 'Master of raw elemental force, hurling devastating bolts and soaring through the sky.',
+    tagline: 'Projects elemental attacks and flies through the sky.',
     origin: 'Mutant',
     description: 'Whether channeling stellar radiation, plasma, electricity, or mystical fire, the Energy Controller commands energy at a cellular level. Capable of pinpoint blast attacks, defensive force fields, and explosive area bombardments.',
     tradeoffStyle: 'High Dodge / Moderate Toughness (Dodge 12, Toughness 8)',
@@ -169,7 +169,7 @@ export const ARCHETYPES = [
     icon: 'ri-tools-line',
     tagline: 'Master of clever gadgets, tactical gear, utility belts, and rapid innovation.',
     origin: 'Training & Tech',
-    description: 'Unmatched intellect and resourcefulness. The Gadgeteer carries a customized arsenal of specialized non-lethal weapons, grappling hooks, smoke pellets, hacking rigs, and armored clothing.',
+    description: 'Relies on intellect and tools. The Gadgeteer carries gadgets, smoke pellets, hacking gear, and light armor.',
     tradeoffStyle: 'High Dodge / Balanced Toughness (Dodge 11, Toughness 9)',
     recommendedPL: 10,
     budgetGuidelines: {
@@ -526,7 +526,7 @@ export const ARCHETYPES = [
     icon: 'ri-brain-line',
     tagline: 'Master of telepathy, psychokinesis, mental illusions, and astral perception.',
     origin: 'Psionic / Mutant',
-    description: 'Possessing an ascended mind capable of perceiving thoughts, projecting devastating psychic blasts directly into minds, and moving objects effortlessly with telekinesis.',
+    description: 'Reads thoughts, projects psychic blasts, and moves objects with telekinesis.',
     tradeoffStyle: 'Balanced Defenses with Perception Attack (Dodge 10, Toughness 10)',
     recommendedPL: 10,
     budgetGuidelines: {
@@ -663,7 +663,7 @@ export const ARCHETYPES = [
     icon: 'ri-flashlight-line',
     tagline: 'Velocity beyond sound, hypersonic reactions, rapid punches, and defensive vibration.',
     origin: 'Accident / Mutation',
-    description: 'Tapping into hyper-metabolic or dimensional speed force. The Speedster runs across water, up vertical walls, performs hundreds of tasks in a single second, and avoids incoming fire with effortless evasion.',
+    description: 'Tapping into enhanced speed. The Speedster runs across water, up vertical walls, performs tasks in seconds, and avoids attacks through rapid movement.',
     tradeoffStyle: 'Extreme Dodge / Low Toughness (Dodge 15, Toughness 5)',
     recommendedPL: 10,
     budgetGuidelines: {

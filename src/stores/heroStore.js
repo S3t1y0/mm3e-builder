@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { calculatePowerTotalCost, normalizePower, createEmptyPower, createEmptyEffect } from '../rules/powerEngine.js';
 import { compileTargetedAttacks, calculateDegrees } from '../rules/attacks.js';
 import { ARCHETYPES } from '../rules/archetypes.js';
+import { calculateConditionModifiers, resolveActiveConditionSet } from '../rules/conditions.js';
 import { sendRollToVTT, syncActiveHero } from '../services/vttBridge.js';
 import { rollD20, isCryptoAvailable } from '../utils/diceRoller.js';
 
@@ -376,13 +377,7 @@ export const useHeroStore = defineStore('hero', {
       return compileTargetedAttacks(state.character, this.effectiveAbilities, this.getAdvantageRanks);
     },
 
-    initiativeTotal() {
-      const eff = this.effectiveAbilities || {};
-      const initBonus = this.getAdvantageRanks('Improved Initiative') * 4;
-      return (eff.AGL || 0) + initBonus;
-    },
-
-    speedTotal() {
+    speedBaseRank() {
       let speedRank = 0;
       for (const eff of this.activeEffects) {
         const base = (eff.baseEffect || eff.effectType || eff.name || '').toLowerCase();
@@ -391,10 +386,45 @@ export const useHeroStore = defineStore('hero', {
           if (r > speedRank) speedRank = r;
         }
       }
-      if (speedRank > 0) {
-        return { val: `Rank ${speedRank}`, sub: `${Math.pow(2, speedRank) * 30} ft.` };
-      }
-      return { val: '30 ft.', sub: 'Rank 0' };
+      return speedRank;
+    },
+
+    conditionModifiers(state) {
+      const defRoll = this.getAdvantageRanks('Defensive Roll');
+      return calculateConditionModifiers({
+        activeConditions: state.character.activeConditions || [],
+        injuries: state.character.injuries || 0,
+        defenses: this.defenseTotals,
+        speedRank: this.speedBaseRank,
+        defensiveRollBonus: defRoll
+      });
+    },
+
+    activeConditionSet(state) {
+      return resolveActiveConditionSet(state.character.activeConditions || []);
+    },
+
+    effectiveCombatDefenses() {
+      return this.conditionModifiers.effectiveDefenses;
+    },
+
+    circumstancePenalty() {
+      return this.conditionModifiers.checkPenalty;
+    },
+
+    actionState() {
+      return this.conditionModifiers.actionState;
+    },
+
+    initiativeTotal() {
+      const eff = this.effectiveAbilities || {};
+      const initBonus = this.getAdvantageRanks('Improved Initiative') * 4;
+      const circ = this.circumstancePenalty || 0;
+      return (eff.AGL || 0) + initBonus + circ;
+    },
+
+    speedTotal() {
+      return this.conditionModifiers.effectiveSpeed;
     },
 
     totalEP(state) {
@@ -425,6 +455,44 @@ export const useHeroStore = defineStore('hero', {
         isOverBudget: total > maxEP,
         remainingEP: maxEP - total
       };
+    },
+
+    motivations(state) {
+      const list = Array.isArray(state.character.complications) ? state.character.complications : [];
+      return list.filter(c => {
+        const typeStr = (c.type || '').toLowerCase();
+        const nameStr = (c.name || '').toLowerCase();
+        return typeStr === 'motivation' || nameStr.startsWith('motivation:');
+      });
+    },
+
+    generalComplications(state) {
+      const list = Array.isArray(state.character.complications) ? state.character.complications : [];
+      return list.filter(c => {
+        const typeStr = (c.type || '').toLowerCase();
+        const nameStr = (c.name || '').toLowerCase();
+        return typeStr !== 'motivation' && !nameStr.startsWith('motivation:');
+      });
+    },
+
+    narrativeTraitsStatus() {
+      const motCount = this.motivations.length;
+      const compCount = this.generalComplications.length;
+      const hasMotivation = motCount >= 1;
+      const hasComplication = compCount >= 1;
+      const isValid = hasMotivation && hasComplication;
+      return {
+        hasMotivation,
+        hasComplication,
+        isValid,
+        motivationsCount: motCount,
+        complicationsCount: compCount,
+        totalCount: motCount + compCount
+      };
+    },
+
+    isComplicationsRuleCompliant() {
+      return this.narrativeTraitsStatus.isValid;
     }
   },
 
@@ -863,10 +931,19 @@ export const useHeroStore = defineStore('hero', {
       }
     },
 
-    removeComplication(index) {
-      if (this.character.complications?.[index]) {
-        this.character.complications.splice(index, 1);
-        this.pushHistory();
+    removeComplication(identifier) {
+      if (!Array.isArray(this.character.complications)) return;
+      if (typeof identifier === 'number') {
+        if (this.character.complications[identifier]) {
+          this.character.complications.splice(identifier, 1);
+          this.pushHistory();
+        }
+      } else if (typeof identifier === 'string') {
+        const idx = this.character.complications.findIndex(c => c.id === identifier || c.name === identifier);
+        if (idx !== -1) {
+          this.character.complications.splice(idx, 1);
+          this.pushHistory();
+        }
       }
     },
 

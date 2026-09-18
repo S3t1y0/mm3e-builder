@@ -8,7 +8,7 @@ export const MOTIVATIONS_CATALOG = [
     type: 'Motivation',
     icon: 'ri-scales-3-line',
     summary: 'Uphold the law, punish the guilty, and protect fairness.',
-    defaultDesc: 'Driven by a strict moral compass to bring wrongdoers to justice and ensure the law prevails equally for everyone.'
+    defaultDesc: 'Wants to see the right thing done, bring criminals to justice, and protect people from harm.'
   },
   {
     id: 'responsibility',
@@ -16,79 +16,79 @@ export const MOTIVATIONS_CATALOG = [
     type: 'Motivation',
     icon: 'ri-shield-user-line',
     summary: 'With great power comes the duty to protect others.',
-    defaultDesc: 'Feels a profound obligation to use superhuman gifts to shelter those who cannot protect themselves.'
+    defaultDesc: 'Believes having powers means an obligation to help and protect others.'
   },
   {
     id: 'doing_good',
     name: 'Doing Good',
     type: 'Motivation',
     icon: 'ri-heart-pulse-line',
-    summary: 'Pure altruism and desire to make the world better.',
-    defaultDesc: 'Believes in simply helping people in need without seeking glory, personal profit, or recognition.'
+    summary: 'Help people and make the world a better place.',
+    defaultDesc: 'Helps anyone in need without looking for fame, reward, or recognition.'
   },
   {
     id: 'acceptance',
     name: 'Acceptance',
     type: 'Motivation',
     icon: 'ri-team-line',
-    summary: 'Prove value and overcome prejudice to fit in.',
-    defaultDesc: 'Strives through heroic sacrifice to gain public understanding and respect despite being an outsider, mutant, or alien.'
+    summary: 'Overcome prejudice and earn respect.',
+    defaultDesc: 'Wants to be accepted by society and prove that people like them can be trusted.'
   },
   {
     id: 'patriotism',
     name: 'Patriotism',
     type: 'Motivation',
     icon: 'ri-flag-line',
-    summary: 'Devotion to country, ideals, and constitutional liberty.',
-    defaultDesc: 'Guided by supreme dedication to one’s homeland, government service, or foundational ideals of freedom and democracy.'
+    summary: 'Dedication to your country and its ideals.',
+    defaultDesc: 'Guided by loyalty to your nation, its people, and principles of freedom and democracy.'
   },
   {
     id: 'redemption',
     name: 'Redemption',
     type: 'Motivation',
     icon: 'ri-hand-heart-line',
-    summary: 'Atoning for past crimes, dark mistakes, or failure.',
-    defaultDesc: 'Fighting on the side of angels to atone for past errors, criminal deeds, or harm caused before turning a new leaf.'
+    summary: 'Make up for past mistakes or misdeeds.',
+    defaultDesc: 'Seeks to make up for past crimes or mistakes by using powers to do good.'
   },
   {
     id: 'thrills',
     name: 'Thrills',
     type: 'Motivation',
     icon: 'ri-flashlight-line',
-    summary: 'Craves high-stakes action, adrenaline, and superhuman tests.',
-    defaultDesc: 'Finds mundane civilian existence boring; loves the pure rush of superheroics and testing superhuman boundaries.'
+    summary: 'Excitement, adventure, and testing powers.',
+    defaultDesc: 'Enjoys the excitement of adventure, testing abilities, and facing danger.'
   },
   {
     id: 'recognition',
     name: 'Recognition',
     type: 'Motivation',
     icon: 'ri-trophy-line',
-    summary: 'Desires public fame, celebrity admiration, and validation.',
-    defaultDesc: 'Driven by the pursuit of acclaim, media spotlight, and being celebrated by peers and the general public.'
+    summary: 'Fame, attention, and public appreciation.',
+    defaultDesc: 'Wants public appreciation, media attention, or the respect of peers.'
   },
   {
     id: 'revenge',
     name: 'Revenge',
     type: 'Motivation',
     icon: 'ri-fire-line',
-    summary: 'Obsessed with punishing a specific enemy or syndicate.',
-    defaultDesc: 'Vowed vengeance against the syndicate, villain, or organization responsible for personal tragedy or grief.'
+    summary: 'Retribution against an enemy or group.',
+    defaultDesc: 'Wants payback against a specific villain, group, or organization that caused personal harm.'
   },
   {
     id: 'greed',
     name: 'Greed',
     type: 'Motivation',
     icon: 'ri-coin-line',
-    summary: 'Motivated by financial bounty, wealth, and material gain.',
-    defaultDesc: 'Acts as a hero-for-hire, mercenary, or treasure-seeker expecting substantial material payoff for dangerous assignments.'
+    summary: 'Money, rewards, or profit.',
+    defaultDesc: 'Operates as a hero-for-hire or mercenary expecting payment for dangerous jobs.'
   },
   {
     id: 'custom_motivation',
     name: 'Custom Motivation',
     type: 'Motivation',
     icon: 'ri-compass-3-line',
-    summary: 'Unique personal philosophical driving force.',
-    defaultDesc: 'A personal mission or unique philosophy that drives the hero forward through hardship.'
+    summary: 'A custom personal reason to act as a hero.',
+    defaultDesc: 'A personal goal, oath, or ideal that drives the character to act.'
   }
 ];
 
@@ -98,168 +98,168 @@ export const COMPLICATIONS_CATALOG = [
     name: 'Secret Identity',
     type: 'Complication',
     icon: 'ri-spy-line',
-    summary: 'Maintains a civilian double-life that must stay hidden.',
-    defaultDesc: 'Has a civilian identity and day-to-day life that must be protected from villains, paparazzi, and authorities.'
+    summary: 'A civilian identity that must remain secret.',
+    defaultDesc: 'Maintains a normal civilian life and identity that must be protected from enemies and the public.'
   },
   {
     id: 'enemy',
     name: 'Enemy',
     type: 'Complication',
     icon: 'ri-skull-line',
-    summary: 'Persistent nemesis or hostile organization targeting the hero.',
-    defaultDesc: 'Hounded by a recurring villain, criminal cabal, or agency that actively schemes to defeat, disgrace, or eliminate the hero.'
+    summary: 'A recurring villain or hostile organization.',
+    defaultDesc: 'Targeted by an enemy or organization that regularly schemes against you.'
   },
   {
     id: 'weakness',
     name: 'Weakness',
     type: 'Complication',
     icon: 'ri-radioactive-line',
-    summary: 'Vulnerable to a specific substance, energy, or environmental factor.',
-    defaultDesc: 'Suffers debilitating harm, loss of powers, or severe penalty when exposed to a specific substance or condition.'
+    summary: 'Vulnerable to a specific substance or condition.',
+    defaultDesc: 'Suffers harmful effects, penalties, or power loss when exposed to a specific substance or condition.'
   },
   {
     id: 'power_loss',
     name: 'Power Loss',
     type: 'Complication',
     icon: 'ri-battery-low-line',
-    summary: 'Powers temporarily shut down under specific circumstances.',
-    defaultDesc: 'Certain conditions (e.g. solar deprivation, special nullifiers, severe stress) temporarily render powers useless.'
+    summary: 'Powers stop working under certain conditions.',
+    defaultDesc: 'Certain conditions, like lack of sunlight or extreme cold, temporarily shut down your powers.'
   },
   {
     id: 'relationship',
     name: 'Relationship',
     type: 'Complication',
     icon: 'ri-parent-line',
-    summary: 'Loved ones, friends, or dependents frequently placed in danger.',
-    defaultDesc: 'Close family, romantic partners, or civilian dependents can become targets or require urgent intervention.'
+    summary: 'Friends, family, or partners who can be placed in danger.',
+    defaultDesc: 'Has close friends, family, or loved ones whose safety complicates superhero duties.'
   },
   {
     id: 'responsibility',
     name: 'Responsibility',
     type: 'Complication',
     icon: 'ri-briefcase-line',
-    summary: 'Demanding day job, civic duty, or family care limits heroics.',
-    defaultDesc: 'Civilian career commitments, family obligations, or public offices frequently conflict with sudden emergencies.'
+    summary: 'A job, family duty, or public role that conflicts with hero work.',
+    defaultDesc: 'Work, family obligations, or public responsibilities regularly pull time away from heroics.'
   },
   {
     id: 'phobia',
     name: 'Phobia',
     type: 'Complication',
     icon: 'ri-ghost-line',
-    summary: 'Paralyzing fear of a specific creature, environment, or event.',
-    defaultDesc: 'Overcome with intense dread or panicked hesitation when confronted by the object of their phobia.'
+    summary: 'An intense fear of a specific thing or situation.',
+    defaultDesc: 'Suffers penalties or panics when confronted with the object of your phobia.'
   },
   {
     id: 'accident',
     name: 'Accident',
     type: 'Complication',
     icon: 'ri-alarm-warning-line',
-    summary: 'Powers risk unintended collateral damage or volatility.',
-    defaultDesc: 'Superhuman abilities are volatile, occasionally causing collateral devastation or unpredictable energy surges.'
+    summary: 'Powers can cause unintended damage or side effects.',
+    defaultDesc: 'Powers are hard to control and can cause accidental collateral damage or power surges.'
   },
   {
     id: 'addiction',
     name: 'Addiction',
     type: 'Complication',
     icon: 'ri-capsule-line',
-    summary: 'Physiological or psychological dependence on a substance or routine.',
-    defaultDesc: 'Requires regular doses of a serum, power battery recharge, or substance to remain functional and avoid withdrawal.'
+    summary: 'Dependence on a substance, serum, or recharge.',
+    defaultDesc: 'Needs regular access to a substance, medication, or power charge to stay functional.'
   },
   {
     id: 'disability',
     name: 'Disability',
     type: 'Complication',
     icon: 'ri-wheelchair-line',
-    summary: 'Physical or sensory challenge affecting non-powered tasks.',
-    defaultDesc: 'Lives with a sensory impairment, mobility restriction, or chronic condition that complicates situations.'
+    summary: 'A physical, sensory, or mental limitation.',
+    defaultDesc: 'Has a physical limitation, loss of a sense, or health condition that creates challenges.'
   },
   {
     id: 'fame',
     name: 'Fame',
     type: 'Complication',
     icon: 'ri-camera-lens-line',
-    summary: 'High public profile makes stealth and privacy nearly impossible.',
-    defaultDesc: 'Recognized everywhere; media swarms and enthusiastic fans hamper covert actions and private moments.'
+    summary: 'Being a recognizable public figure.',
+    defaultDesc: 'Widely recognized in public, making it hard to go unnoticed, maintain privacy, or operate undercover.'
   },
   {
     id: 'flashbacks',
     name: 'Flashbacks',
     type: 'Complication',
     icon: 'ri-film-line',
-    summary: 'Traumatic memories trigger disorientation or freezing in crisis.',
-    defaultDesc: 'Specific sights, sounds, or battlefield stresses can induce vivid traumatic memories and disorienting panic.'
+    summary: 'Traumatic memories that trigger during stressful moments.',
+    defaultDesc: 'Certain sounds, sights, or stressful moments trigger memories that leave you distracted or shaken.'
   },
   {
     id: 'hatred',
     name: 'Hatred',
     type: 'Complication',
     icon: 'ri-forbid-line',
-    summary: 'Intense animosity toward a concept, group, or creature type.',
-    defaultDesc: 'Blinded by fierce hatred when facing certain foes or social evils, making rational tactical restraint very hard.'
+    summary: 'Strong hatred for a specific group, villain, or concept.',
+    defaultDesc: 'Has a deep hatred for a particular enemy or injustice, making it hard to stay calm or show restraint.'
   },
   {
     id: 'honor',
     name: 'Honor',
     type: 'Complication',
     icon: 'ri-shield-star-line',
-    summary: 'Strict moral oath, code of chivalry, or sacred vows.',
-    defaultDesc: 'Bound by an unbreakable code of conduct (e.g. never strike from behind, never lie, defend the defenseless first).'
+    summary: 'A strict code of conduct or personal oath.',
+    defaultDesc: 'Follows a strict code of conduct, such as never lying, refusing to strike from behind, or always accepting a surrender.'
   },
   {
     id: 'obsession',
     name: 'Obsession',
     type: 'Complication',
     icon: 'ri-search-eye-line',
-    summary: 'Monomaniacal pursuit of an investigation, nemesis, or crusade.',
-    defaultDesc: 'Compelled to investigate clues or chase an ongoing obsession, sometimes neglecting immediate tactical prudence.'
+    summary: 'Fixated on a goal, mystery, or foe.',
+    defaultDesc: 'Fixated on a case, rival, or mystery, sometimes ignoring personal safety or other priorities to pursue it.'
   },
   {
     id: 'prejudice',
     name: 'Prejudice',
     type: 'Complication',
     icon: 'ri-group-line',
-    summary: 'Subject to discrimination, social fear, or systemic distrust.',
-    defaultDesc: 'Feared, hated, or distrusted by the populace due to origin, mutation, alien appearance, or background.'
+    summary: 'Faces bias or distrust from the public.',
+    defaultDesc: 'Treated with suspicion or fear because of your appearance, mutation, species, or background.'
   },
   {
     id: 'reputation',
     name: 'Reputation',
     type: 'Complication',
     icon: 'ri-newspaper-line',
-    summary: 'Notorious past or misunderstood public perception.',
-    defaultDesc: 'Considered a menace, loose cannon, or dangerous vigilante by media outlets, city officials, or law enforcement.'
+    summary: 'A bad reputation or misunderstood public image.',
+    defaultDesc: 'Viewed as dangerous, reckless, or untrustworthy by the media, police, or the public.'
   },
   {
     id: 'rivalry',
     name: 'Rivalry',
     type: 'Complication',
     icon: 'ri-sword-line',
-    summary: 'Competitive tension with a fellow hero or professional peer.',
-    defaultDesc: 'Engaged in persistent competitive friction with a rival who constantly tries to upstage or critique them.'
+    summary: 'A competitive rivalry with another character.',
+    defaultDesc: 'Has a rival who regularly tries to outdo, challenge, or criticize you.'
   },
   {
     id: 'secret',
     name: 'Secret',
     type: 'Complication',
     icon: 'ri-lock-line',
-    summary: 'Dangerous truth that would cause immense harm if uncovered.',
-    defaultDesc: 'Harbors a compromising secret about their origin, powers, or past that would devastate them if exposed.'
+    summary: 'A damaging secret that must remain hidden.',
+    defaultDesc: 'Carries a secret about your past, identity, or origins that would cause problems if exposed.'
   },
   {
     id: 'temper',
     name: 'Temper',
     type: 'Complication',
     icon: 'ri-temp-hot-line',
-    summary: 'Easily provoked into reckless fury or berserk aggression.',
-    defaultDesc: 'Has a short fuse; insulting remarks or brazen cruelty can provoke an explosive, reckless loss of composure.'
+    summary: 'Easily angered or provoked.',
+    defaultDesc: 'Has a short temper and can lose control when insulted, provoked, or confronted with cruelty.'
   },
   {
     id: 'custom_complication',
     name: 'Custom Complication',
     type: 'Complication',
     icon: 'ri-error-warning-line',
-    summary: 'Unique complication tailored to the character.',
-    defaultDesc: 'A unique personal challenge, curse, or circumstance agreed upon between player and Gamemaster.'
+    summary: 'A custom complication made for your character.',
+    defaultDesc: 'A specific complication created with your Gamemaster.'
   }
 ];
 
@@ -272,4 +272,42 @@ export function findComplicationPreset(categoryOrId) {
     const itemName = item.name.toLowerCase().replace(/[\s_-]+/g, '');
     return itemId === target || itemName === target;
   }) || null;
+}
+
+export function isMotivation(comp) {
+  if (!comp) return false;
+  const typeStr = (comp.type || '').toLowerCase();
+  const nameStr = (comp.name || '').toLowerCase();
+  return typeStr === 'motivation' || nameStr.startsWith('motivation:');
+}
+
+export function validateNarrativeTraits(complicationsList) {
+  const list = Array.isArray(complicationsList) ? complicationsList : [];
+  const motivations = list.filter(isMotivation);
+  const generalComplications = list.filter(c => !isMotivation(c));
+
+  const hasMotivation = motivations.length >= 1;
+  const hasComplication = generalComplications.length >= 1;
+  const isValid = hasMotivation && hasComplication;
+
+  let message = '';
+  if (!hasMotivation && !hasComplication) {
+    message = 'Needs at least 1 motivation and 1 complication.';
+  } else if (!hasMotivation) {
+    message = 'Needs at least 1 motivation.';
+  } else if (!hasComplication) {
+    message = 'Needs at least 1 complication.';
+  } else {
+    message = 'Requirements met (1+ motivation, 1+ complication).';
+  }
+
+  return {
+    hasMotivation,
+    hasComplication,
+    isValid,
+    message,
+    motivationsCount: motivations.length,
+    complicationsCount: generalComplications.length,
+    totalCount: list.length
+  };
 }

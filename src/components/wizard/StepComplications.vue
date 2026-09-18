@@ -6,113 +6,224 @@
       <div>
         <h3 class="step-title">Motivations & Complications</h3>
         <p class="step-subtitle">
-          Define core motivations and dramatic complications. In M&M 3e, facing personal obstacles or vulnerabilities earns players valuable <strong>Hero Points</strong> during gameplay.
+          Every hero needs at least one motivation and one complication. When they cause setbacks during play, you earn Hero Points.
         </p>
       </div>
     </div>
 
-    <!-- COMPLICATIONS & MOTIVATIONS ACTIVE LIST -->
-    <div class="card mb-4" style="padding: 1.25rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-        <div>
-          <h4 class="section-title" style="margin-bottom: 0.2rem;">
-            Active Motivations & Complications
+    <!-- RULES COMPLIANCE CHECKLIST BANNER -->
+    <div class="card mb-4 rule-checklist-card">
+      <div class="rule-checklist-header">
+        <div class="checklist-title-group">
+          <h4 class="section-title mb-0">
+            <i class="ri-shield-star-line text-accent"></i>
+            Narrative Requirements
           </h4>
-          <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">
-            Heroes require at least 2 narrative traits (1 Motivation + 1 other complication).
-            <span class="tabular-nums" :style="{ color: isComplicationsCountValid ? '#10b981' : '#f59e0b', fontWeight: '700', marginLeft: '0.35rem' }">
-              Current: {{ (heroStore.character.complications || []).length }} defined
-            </span>
-          </p>
+          <span class="checklist-status-badge" :class="narrativeStatus.isValid ? 'status-pass' : 'status-pending'">
+            <i :class="narrativeStatus.isValid ? 'ri-checkbox-circle-fill' : 'ri-alert-fill'"></i>
+            {{ narrativeStatus.isValid ? 'Complete' : 'Incomplete' }}
+          </span>
         </div>
 
-        <!-- TWO DEDICATED ACTION BUTTONS -->
-        <div class="actions-button-cluster">
+        <div class="checklist-actions-cluster">
           <button
             type="button"
             class="btn btn-xs btn-add-motivation"
             @click="openAddDialog('motivation')"
           >
-            <i class="ri-compass-3-line"></i> + Add Motivation
+            <i class="ri-compass-3-line"></i> Add Motivation
           </button>
           <button
             type="button"
             class="btn btn-xs btn-add-complication"
             @click="openAddDialog('complication')"
           >
-            <i class="ri-alert-line"></i> + Add Complication
-          </button>
-        </div>
-      </div>
-
-      <div v-if="!heroStore.character.complications || heroStore.character.complications.length === 0" class="empty-comp-box">
-        <i class="ri-shield-user-line" style="font-size: 2.2rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;"></i>
-        No motivations or complications added yet. Every hero needs at least 1 Motivation and 1 dramatic Complication.
-        <div style="margin-top: 1rem; display: flex; justify-content: center; gap: 0.75rem;">
-          <button type="button" class="btn btn-sm btn-add-motivation" @click="openAddDialog('motivation')">
-            <i class="ri-compass-3-line"></i> Add Motivation
-          </button>
-          <button type="button" class="btn btn-sm btn-add-complication" @click="openAddDialog('complication')">
             <i class="ri-alert-line"></i> Add Complication
           </button>
         </div>
       </div>
 
+      <!-- Two Pillars Status Row -->
+      <div class="pillars-status-grid">
+        <!-- Pillar 1: Motivation -->
+        <div class="pillar-status-card" :class="narrativeStatus.hasMotivation ? 'pillar-valid' : 'pillar-warning'">
+          <div class="pillar-icon-wrap icon-mot">
+            <i :class="narrativeStatus.hasMotivation ? 'ri-checkbox-circle-line' : 'ri-compass-3-line'"></i>
+          </div>
+          <div class="pillar-info">
+            <div class="pillar-label">1. MOTIVATION</div>
+            <div class="pillar-val">
+              <span v-if="narrativeStatus.hasMotivation" class="val-pass">
+                {{ motivations.length }} added
+              </span>
+              <span v-else class="val-warn">
+                0 added (requires 1)
+              </span>
+            </div>
+            <p class="pillar-hint">
+              Why your character acts as a hero (Justice, Responsibility, Doing Good, etc.).
+            </p>
+          </div>
+        </div>
+
+        <!-- Pillar 2: Other Complications -->
+        <div class="pillar-status-card" :class="narrativeStatus.hasComplication ? 'pillar-valid' : 'pillar-warning'">
+          <div class="pillar-icon-wrap icon-comp">
+            <i :class="narrativeStatus.hasComplication ? 'ri-checkbox-circle-line' : 'ri-alert-line'"></i>
+          </div>
+          <div class="pillar-info">
+            <div class="pillar-label">2. COMPLICATIONS</div>
+            <div class="pillar-val">
+              <span v-if="narrativeStatus.hasComplication" class="val-pass">
+                {{ generalComplications.length }} added
+              </span>
+              <span v-else class="val-warn">
+                0 added (requires 1)
+              </span>
+            </div>
+            <p class="pillar-hint">
+              Enemies, secrets, or weaknesses that cause problems during play.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. ACTIVE HEROIC MOTIVATIONS SECTION -->
+    <div class="card mb-4 group-block mot-group-block">
+      <div class="group-header">
+        <div class="group-title">
+          <i class="ri-compass-3-fill text-mot"></i>
+          <span>Motivations</span>
+          <span class="group-counter">{{ motivations.length }}</span>
+        </div>
+        <button
+          type="button"
+          class="btn btn-xs btn-add-motivation"
+          @click="openAddDialog('motivation')"
+        >
+          <i class="ri-add-line"></i> Add Motivation
+        </button>
+      </div>
+
+      <div v-if="motivations.length === 0" class="empty-pillar-box">
+        <i class="ri-compass-3-line empty-icon-mot"></i>
+        <p class="empty-text">
+          No motivation added yet. Add the reason your character acts as a hero.
+        </p>
+        <button type="button" class="btn btn-sm btn-add-motivation" @click="openAddDialog('motivation')">
+          <i class="ri-compass-3-line"></i> Add Motivation
+        </button>
+      </div>
+
       <div v-else class="complications-list">
         <div
-          v-for="(comp, idx) in heroStore.character.complications"
-          :key="comp.id || idx"
-          class="card comp-item"
-          :class="isItemMotivation(comp) ? 'item-motivation' : 'item-complication'"
+          v-for="item in motivations"
+          :key="item.id"
+          class="card comp-item item-motivation"
         >
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem;">
-            <div style="flex: 1; min-width: 0;">
-              <!-- Header Badges -->
-              <div style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.35rem; flex-wrap: wrap;">
-                <span
-                  class="badge-pill"
-                  :class="isItemMotivation(comp) ? 'pill-motivation' : 'pill-complication'"
-                >
-                  <i :class="isItemMotivation(comp) ? 'ri-compass-3-fill' : getComplicationIcon(comp.type)"></i>
-                  {{ (comp.type || 'COMPLICATION').toUpperCase() }}
+          <div class="comp-item-layout">
+            <div class="comp-item-main">
+              <div class="comp-header-row">
+                <span class="badge-pill pill-motivation">
+                  <i :class="getComplicationIcon(item)"></i>
+                  MOTIVATION
                 </span>
-
-                <span v-if="!isItemMotivation(comp)" class="hp-reward-tag" title="Awards +1 Hero Point when GM triggers this complication">
-                  <i class="ri-copper-diamond-line"></i> +1 Hero Point
-                </span>
-                <span v-else class="hp-reward-tag tag-drive" title="Primary moral driving force">
-                  <i class="ri-heart-pulse-line"></i> Core Drive
-                </span>
+                <span class="comp-title-text">{{ item.name }}</span>
               </div>
-
-              <!-- Name -->
-              <div class="comp-title-text">
-                {{ comp.name }}
-              </div>
-
-              <!-- Description -->
-              <p v-if="comp.desc" class="comp-desc-text">
-                {{ comp.desc }}
+              <p v-if="item.desc" class="comp-desc-text quote-mot">
+                {{ item.desc }}
               </p>
             </div>
 
-            <!-- Actions -->
             <div class="comp-card-actions">
               <button
                 type="button"
                 class="comp-action-btn btn-edit-comp"
-                @click="openEditDialog(comp, idx)"
-                title="Edit this trait"
-                aria-label="Edit trait"
+                @click="openEditDialog(item)"
+                title="Edit motivation"
+                aria-label="Edit motivation"
               >
                 <i class="ri-edit-line"></i>
               </button>
               <button
                 type="button"
                 class="comp-action-btn btn-remove-comp"
-                @click="heroStore.removeComplication(idx)"
-                title="Remove this trait"
-                aria-label="Remove trait"
+                @click="removeTrait(item)"
+                title="Remove motivation"
+                aria-label="Remove motivation"
+              >
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. ACTIVE COMPLICATIONS SECTION -->
+    <div class="card mb-4 group-block comp-group-block">
+      <div class="group-header">
+        <div class="group-title">
+          <i class="ri-alert-fill text-comp"></i>
+          <span>Complications</span>
+          <span class="group-counter">{{ generalComplications.length }}</span>
+        </div>
+        <button
+          type="button"
+          class="btn btn-xs btn-add-complication"
+          @click="openAddDialog('complication')"
+        >
+          <i class="ri-add-line"></i> Add Complication
+        </button>
+      </div>
+
+      <div v-if="generalComplications.length === 0" class="empty-pillar-box">
+        <i class="ri-alert-line empty-icon-comp"></i>
+        <p class="empty-text">
+          No complications added yet. Add enemies, secrets, or weaknesses that cause problems in play.
+        </p>
+        <button type="button" class="btn btn-sm btn-add-complication" @click="openAddDialog('complication')">
+          <i class="ri-add-line"></i> Add Complication
+        </button>
+      </div>
+
+      <div v-else class="complications-list">
+        <div
+          v-for="item in generalComplications"
+          :key="item.id"
+          class="card comp-item item-complication"
+        >
+          <div class="comp-item-layout">
+            <div class="comp-item-main">
+              <div class="comp-header-row">
+                <span class="badge-pill pill-complication">
+                  <i :class="getComplicationIcon(item)"></i>
+                  {{ (item.type || 'COMPLICATION').toUpperCase() }}
+                </span>
+                <span class="comp-title-text">{{ item.name }}</span>
+              </div>
+              <p v-if="item.desc" class="comp-desc-text quote-comp">
+                {{ item.desc }}
+              </p>
+            </div>
+
+            <div class="comp-card-actions">
+              <button
+                type="button"
+                class="comp-action-btn btn-edit-comp"
+                @click="openEditDialog(item)"
+                title="Edit complication"
+                aria-label="Edit complication"
+              >
+                <i class="ri-edit-line"></i>
+              </button>
+              <button
+                type="button"
+                class="comp-action-btn btn-remove-comp"
+                @click="removeTrait(item)"
+                title="Remove complication"
+                aria-label="Remove complication"
               >
                 <i class="ri-delete-bin-line"></i>
               </button>
@@ -129,7 +240,7 @@
         v-model="heroStore.character.notes"
         class="form-control"
         rows="4"
-        placeholder="Write hero origin story, secret identity details, personality traits, and team affiliations..."
+        placeholder="Origin story, identity details, personality traits, and team affiliations..."
         style="resize: vertical; font-size: 0.82rem;"
       ></textarea>
     </div>
@@ -147,192 +258,169 @@
               <i :class="modalMode === 'motivation' ? 'ri-compass-3-fill' : 'ri-alert-fill'"></i>
             </div>
             <div>
-              <h4 class="narrative-modal-title">
-                {{ editingCompIndex !== null ? 'Edit ' : 'Add ' }}
-                {{ modalMode === 'motivation' ? 'Heroic Motivation' : 'Dramatic Complication' }}
+              <h4 class="modal-title">
+                {{ editingId ? 'Edit ' : 'Add ' }}
+                {{ modalMode === 'motivation' ? 'Motivation' : 'Complication' }}
               </h4>
-              <p class="narrative-modal-subtitle">
+              <p class="modal-subtitle">
                 {{ modalMode === 'motivation'
-                  ? 'Define the core conviction or noble calling that drives your hero into danger.'
-                  : 'Define dramatic obstacles, personal flaws, or recurring foes that award Hero Points.'
-                }}
+                  ? 'The reason this character fights or acts as a hero.'
+                  : 'An obstacle or weakness that creates setbacks during play.' }}
               </p>
             </div>
           </div>
-          <button
-            type="button"
-            class="modal-close-btn"
-            @click="showAddDialog = false"
-            aria-label="Close dialog"
-          >
+          <button type="button" class="btn-close-modal" @click="showAddDialog = false" aria-label="Close dialog">
             <i class="ri-close-line"></i>
           </button>
         </div>
 
-        <!-- TOP SEGMENTED SWITCHER (Choose What to Add) -->
-        <div v-if="editingCompIndex === null" class="narrative-segmented-nav">
+        <!-- Segmented Mode Switcher (only when adding new) -->
+        <div v-if="!editingId" class="segmented-mode-bar">
           <button
             type="button"
-            class="segmented-btn"
+            class="segmented-tab-btn"
             :class="{ active: modalMode === 'motivation', 'btn-tab-motivation': true }"
             @click="switchModalMode('motivation')"
           >
             <i class="ri-compass-3-line"></i>
-            <span class="segmented-label">Heroic Motivation</span>
-            <span class="segmented-pill">Core Drive</span>
+            <span class="segmented-label">Motivation</span>
           </button>
           <button
             type="button"
-            class="segmented-btn"
+            class="segmented-tab-btn"
             :class="{ active: modalMode === 'complication', 'btn-tab-complication': true }"
             @click="switchModalMode('complication')"
           >
             <i class="ri-alert-line"></i>
-            <span class="segmented-label">Dramatic Complication</span>
-            <span class="segmented-pill">+1 Hero Point</span>
+            <span class="segmented-label">Complication</span>
           </button>
         </div>
 
         <!-- BODY: MOTIVATION MODE -->
         <div v-if="modalMode === 'motivation'" class="narrative-mode-body">
-          <!-- Presets Quick-Pick Section -->
-          <div class="presets-section mb-3">
-            <div class="presets-label">
-              <i class="ri-sparkling-fill" style="color: #fbbf24;"></i>
-              <span>Official M&M 3e Motivations (Click to pre-fill):</span>
+          <div class="catalog-recommendation-banner">
+            <div class="catalog-rec-header">
+              <i class="ri-sparkling-fill text-mot"></i>
+              <span>Motivations catalog:</span>
             </div>
             <div class="presets-chips-grid">
               <button
                 v-for="preset in MOTIVATIONS_CATALOG"
                 :key="preset.id"
                 type="button"
-                class="preset-chip chip-motivation"
-                :class="{ active: selectedPresetId === preset.id }"
+                class="chip-preset-btn chip-mot"
+                :class="{ selected: selectedPresetId === preset.id }"
                 @click="selectMotivationPreset(preset)"
+                :title="preset.summary"
               >
-                <i :class="preset.icon || 'ri-flag-line'"></i>
+                <i :class="preset.icon"></i>
                 <span>{{ preset.name }}</span>
               </button>
             </div>
           </div>
 
-          <!-- Title Input -->
           <div class="form-group mb-3">
             <label class="form-label">
-              Motivation Title / Conviction <span class="required-star">*</span>
+              Motivation <span class="required-star">*</span>
             </label>
             <input
               v-model="newCompName"
               type="text"
-              class="form-control input-narrative"
-              placeholder="e.g. Motivation: Justice, Doing Good, Protecting Family..."
+              class="form-control"
+              placeholder="e.g. Justice, Responsibility, Doing Good, Thrills..."
+              autocomplete="off"
             />
           </div>
 
-          <!-- Description Textarea -->
-          <div class="form-group mb-3">
-            <label class="form-label">Moral Creed & Narrative Drive</label>
+          <div class="form-group mb-0">
+            <label class="form-label">
+              Description
+            </label>
             <textarea
               v-model="newCompDesc"
-              class="form-control input-narrative"
+              class="form-control"
               rows="3"
-              placeholder="Describe what drives your hero to risk everything and make sacrifices for others..."
+              placeholder="Why this hero fights, or what principles guide them..."
             ></textarea>
-          </div>
-
-          <!-- Rule Callout -->
-          <div class="narrative-rule-callout callout-motivation">
-            <i class="ri-information-line"></i>
-            <div>
-              <strong>M&M 3E Hero Requirement:</strong> Every superhero starts with at least <strong>1 Motivation</strong> to establish why they answer the call of heroism.
-            </div>
           </div>
         </div>
 
         <!-- BODY: COMPLICATION MODE -->
         <div v-else class="narrative-mode-body">
-          <!-- Presets Quick-Pick Section -->
-          <div class="presets-section mb-3">
-            <div class="presets-label">
-              <i class="ri-fire-fill" style="color: #fb7185;"></i>
-              <span>Common Complications Catalog (Click to pre-fill):</span>
+          <div class="catalog-recommendation-banner">
+            <div class="catalog-rec-header">
+              <i class="ri-sparkling-fill text-comp"></i>
+              <span>Complications catalog:</span>
             </div>
             <div class="presets-chips-grid">
               <button
                 v-for="preset in popularComplicationPresets"
                 :key="preset.id"
                 type="button"
-                class="preset-chip chip-complication"
-                :class="{ active: selectedPresetId === preset.id }"
+                class="chip-preset-btn chip-comp"
+                :class="{ selected: selectedPresetId === preset.id }"
                 @click="selectComplicationPreset(preset)"
+                :title="preset.summary"
               >
-                <i :class="preset.icon || 'ri-alert-line'"></i>
+                <i :class="preset.icon"></i>
                 <span>{{ preset.name }}</span>
               </button>
             </div>
           </div>
 
-          <!-- Category and Title Row -->
-          <div class="row-two-col mb-3">
-            <div class="form-group">
-              <label class="form-label">Category</label>
-              <select
-                v-model="selectedCompCategory"
-                class="form-control select-narrative"
-                @change="handleCategoryChange"
-              >
-                <option v-for="cat in complicationCategories" :key="cat" :value="cat">
-                  {{ cat }}
-                </option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label class="form-label">
-                Specific Title / Descriptor <span class="required-star">*</span>
-              </label>
-              <input
-                v-model="newCompName"
-                type="text"
-                class="form-control input-narrative"
-                placeholder="e.g. Arch-Nemesis: Doctor Oblivion"
-              />
-            </div>
+          <div class="form-group mb-3">
+            <label class="form-label">Category</label>
+            <select
+              v-model="selectedCompCategory"
+              class="form-control"
+              @change="handleCategoryChange"
+            >
+              <option v-for="cat in complicationCategories" :key="cat" :value="cat">
+                {{ cat }}
+              </option>
+            </select>
           </div>
 
-          <!-- Description Textarea -->
           <div class="form-group mb-3">
-            <label class="form-label">Description & Narrative Impact</label>
+            <label class="form-label">
+              Complication <span class="required-star">*</span>
+            </label>
+            <input
+              v-model="newCompName"
+              type="text"
+              class="form-control"
+              placeholder="e.g. Secret Identity, Nemesis, Weakness, Temper..."
+              autocomplete="off"
+            />
+          </div>
+
+          <div class="form-group mb-0">
+            <label class="form-label">
+              Description
+            </label>
             <textarea
               v-model="newCompDesc"
-              class="form-control input-narrative"
+              class="form-control"
               rows="3"
-              placeholder="How this complication creates dramatic obstacles or challenges for the GM to award Hero Points..."
+              placeholder="How this causes setbacks or trouble during play..."
             ></textarea>
-          </div>
-
-          <!-- Rule Callout -->
-          <div class="narrative-rule-callout callout-complication">
-            <i class="ri-copper-diamond-line"></i>
-            <div>
-              <strong>Hero Points Award:</strong> When this complication actively hinders your hero or complicates a scene, the GM awards you <strong>+1 Hero Point</strong>!
-            </div>
           </div>
         </div>
 
-        <!-- Footer Actions -->
+        <!-- Modal Actions Footer -->
         <div class="narrative-modal-footer">
-          <button type="button" class="btn btn-secondary btn-sm" @click="showAddDialog = false">
+          <button type="button" class="btn btn-secondary" @click="showAddDialog = false">
             Cancel
           </button>
           <button
             type="button"
-            class="btn btn-sm btn-narrative-submit"
-            :class="modalMode === 'motivation' ? 'btn-submit-motivation' : 'btn-submit-complication'"
+            class="btn"
+            :class="modalMode === 'motivation' ? 'btn-confirm-mot' : 'btn-confirm-comp'"
             :disabled="!newCompName.trim()"
             @click="confirmAddComp"
           >
-            <i :class="editingCompIndex !== null ? 'ri-save-line' : (modalMode === 'motivation' ? 'ri-compass-3-fill' : 'ri-alert-fill')"></i>
-            {{ editingCompIndex !== null ? 'Save Changes' : (modalMode === 'motivation' ? 'Add Motivation' : 'Add Complication') }}
+            <i :class="editingId ? 'ri-save-line' : (modalMode === 'motivation' ? 'ri-compass-3-line' : 'ri-add-line')"></i>
+            {{ editingId ? 'Save Changes' : (modalMode === 'motivation' ? 'Add Motivation' : 'Add Complication') }}
           </button>
         </div>
       </div>
@@ -346,13 +434,14 @@ import { useHeroStore } from '../../stores/heroStore.js';
 import {
   MOTIVATIONS_CATALOG,
   COMPLICATIONS_CATALOG,
-  findComplicationPreset
+  findComplicationPreset,
+  isMotivation
 } from '../../rules/complications.js';
 
 const heroStore = useHeroStore();
 
 const showAddDialog = ref(false);
-const editingCompIndex = ref(null);
+const editingId = ref(null);
 const modalMode = ref('motivation'); // 'motivation' | 'complication'
 const selectedPresetId = ref('');
 const selectedCompCategory = ref('Enemy');
@@ -368,42 +457,33 @@ const complicationCategories = [
 ];
 
 const popularComplicationPresets = computed(() => {
-  return COMPLICATIONS_CATALOG.slice(0, 14);
+  return COMPLICATIONS_CATALOG.slice(0, 16);
 });
 
-const isComplicationsCountValid = computed(() => {
-  return (heroStore.character.complications || []).length >= 2;
+const motivations = computed(() => {
+  return heroStore.motivations;
 });
 
-function isItemMotivation(comp) {
-  if (!comp) return false;
-  return (comp.type || '').toLowerCase() === 'motivation' || (comp.name || '').toLowerCase().startsWith('motivation:');
-}
+const generalComplications = computed(() => {
+  return heroStore.generalComplications;
+});
 
-function getComplicationIcon(type) {
-  const preset = findComplicationPreset(type);
-  if (preset && preset.icon) return preset.icon;
-  switch ((type || '').toLowerCase()) {
-    case 'enemy': return 'ri-skull-line';
-    case 'secret identity': return 'ri-spy-line';
-    case 'weakness': return 'ri-radioactive-line';
-    case 'power loss': return 'ri-battery-low-line';
-    case 'relationship': return 'ri-parent-line';
-    case 'responsibility': return 'ri-briefcase-line';
-    case 'phobia': return 'ri-ghost-line';
-    case 'accident': return 'ri-alarm-warning-line';
-    case 'addiction': return 'ri-capsule-line';
-    case 'disability': return 'ri-wheelchair-line';
-    case 'honor': return 'ri-shield-star-line';
-    case 'temper': return 'ri-temp-hot-line';
-    case 'fame': return 'ri-camera-lens-line';
-    case 'prejudice': return 'ri-group-line';
-    default: return 'ri-alert-line';
+const narrativeStatus = computed(() => {
+  return heroStore.narrativeTraitsStatus;
+});
+
+function getComplicationIcon(comp) {
+  if (!comp) return 'ri-alert-line';
+  if (isMotivation(comp)) {
+    const p = findComplicationPreset(comp.name);
+    return p?.icon || 'ri-compass-3-line';
   }
+  const p = findComplicationPreset(comp.type) || findComplicationPreset(comp.name);
+  return p?.icon || 'ri-alert-line';
 }
 
 function openAddDialog(mode = 'motivation') {
-  editingCompIndex.value = null;
+  editingId.value = null;
   modalMode.value = mode;
   selectedPresetId.value = '';
   if (mode === 'motivation') {
@@ -419,12 +499,12 @@ function openAddDialog(mode = 'motivation') {
   showAddDialog.value = true;
 }
 
-function openEditDialog(comp, idx) {
-  editingCompIndex.value = idx;
-  const isMot = isItemMotivation(comp);
+function openEditDialog(comp) {
+  editingId.value = comp.id;
+  const isMot = isMotivation(comp);
   modalMode.value = isMot ? 'motivation' : 'complication';
   selectedPresetId.value = '';
-  newCompType.value = comp.type || (isMot ? 'Motivation' : 'Complication');
+  newCompType.value = comp.type || (isMot ? 'Motivation' : 'Enemy');
   selectedCompCategory.value = comp.type || 'Enemy';
   newCompName.value = comp.name || '';
   newCompDesc.value = comp.desc || '';
@@ -449,7 +529,7 @@ function switchModalMode(mode) {
 function selectMotivationPreset(preset) {
   selectedPresetId.value = preset.id;
   newCompType.value = 'Motivation';
-  newCompName.value = preset.id === 'custom_motivation' ? '' : `Motivation: ${preset.name}`;
+  newCompName.value = preset.id === 'custom_motivation' ? '' : preset.name;
   newCompDesc.value = preset.defaultDesc || '';
 }
 
@@ -484,9 +564,8 @@ function confirmAddComp() {
   const name = newCompName.value.trim();
   const desc = newCompDesc.value.trim();
 
-  if (editingCompIndex.value !== null && heroStore.character.complications?.[editingCompIndex.value]) {
-    const existing = heroStore.character.complications[editingCompIndex.value];
-    heroStore.updateComplication(existing.id, { type, name, desc });
+  if (editingId.value) {
+    heroStore.updateComplication(editingId.value, { type, name, desc });
   } else {
     heroStore.addComplication(type, name, desc);
   }
@@ -494,8 +573,12 @@ function confirmAddComp() {
   newCompName.value = '';
   newCompDesc.value = '';
   selectedPresetId.value = '';
-  editingCompIndex.value = null;
+  editingId.value = null;
   showAddDialog.value = false;
+}
+
+function removeTrait(item) {
+  heroStore.removeComplication(item.id || item.name);
 }
 </script>
 
@@ -549,29 +632,57 @@ function confirmAddComp() {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  margin-bottom: 0.85rem;
 }
 
-.form-label {
-  display: block;
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  color: var(--text-secondary);
-  margin-bottom: 0.35rem;
+/* Rule Checklist Card */
+.rule-checklist-card {
+  padding: 1.15rem;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.09);
 }
 
-.required-star {
-  color: #ef4444;
+.rule-checklist-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.75rem;
 }
 
-/* Actions Button Cluster */
-.actions-button-cluster {
+.checklist-title-group {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
   flex-wrap: wrap;
+  gap: 0.65rem;
+}
+
+.checklist-status-badge {
+  font-size: 0.72rem;
+  font-weight: 800;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.checklist-status-badge.status-pass {
+  background: rgba(16, 185, 129, 0.14);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #34d399;
+}
+
+.checklist-status-badge.status-pending {
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+}
+
+.checklist-actions-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
 }
 
 .btn-add-motivation {
@@ -585,8 +696,7 @@ function confirmAddComp() {
 }
 
 .btn-add-motivation:hover {
-  background: rgba(168, 85, 247, 0.3);
-  border-color: #a855f7;
+  background: #a855f7;
   color: #fff;
   transform: translateY(-1px);
 }
@@ -602,37 +712,185 @@ function confirmAddComp() {
 }
 
 .btn-add-complication:hover {
-  background: rgba(244, 63, 94, 0.3);
-  border-color: #f43f5e;
+  background: #f43f5e;
   color: #fff;
   transform: translateY(-1px);
 }
 
-/* Complications List & Cards */
-.empty-comp-box {
-  text-align: center;
-  padding: 2rem;
+/* Two Pillars Status Grid */
+.pillars-status-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+.pillar-status-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-sm);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.pillar-status-card.pillar-valid {
+  border-color: rgba(16, 185, 129, 0.3);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.pillar-status-card.pillar-warning {
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.05);
+}
+
+.pillar-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.icon-mot {
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
+}
+
+.icon-comp {
+  background: rgba(244, 63, 94, 0.2);
+  color: #fb7185;
+}
+
+.pillar-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.pillar-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+}
+
+.pillar-val {
+  font-size: 0.84rem;
+  font-weight: 800;
+  margin: 0.1rem 0;
+}
+
+.val-pass {
+  color: #34d399;
+}
+
+.val-warn {
+  color: #fbbf24;
+}
+
+.pillar-hint {
+  font-size: 0.72rem;
   color: var(--text-secondary);
-  font-size: 0.82rem;
+  margin: 0;
+  line-height: 1.35;
+}
+
+/* Group Blocks */
+.group-block {
+  padding: 1.15rem;
+}
+
+.mot-group-block {
+  border-top: 2px solid #a855f7;
+}
+
+.comp-group-block {
+  border-top: 2px solid #f43f5e;
+}
+
+.group-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.85rem;
+}
+
+.group-title {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.text-mot {
+  color: #c084fc;
+}
+
+.text-comp {
+  color: #fb7185;
+}
+
+.group-counter {
+  font-size: 0.68rem;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+}
+
+.empty-pillar-box {
+  text-align: center;
+  padding: 1.5rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm);
+}
+
+.empty-icon-mot {
+  font-size: 2rem;
+  color: #c084fc;
+  opacity: 0.5;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.empty-icon-comp {
+  font-size: 2rem;
+  color: #fb7185;
+  opacity: 0.5;
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.empty-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  max-width: 440px;
+  margin: 0 auto 0.75rem;
+  line-height: 1.4;
 }
 
 .complications-list {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.55rem;
 }
 
 .comp-item {
   background: rgba(15, 23, 42, 0.75);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: var(--radius-sm);
-  padding: 0.9rem 1.1rem;
-  transition: border-color 0.2s ease, transform 0.15s ease;
+  padding: 0.75rem 1rem;
+  transition: all 0.2s ease;
 }
 
 .comp-item:hover {
   border-color: rgba(255, 255, 255, 0.2);
-  transform: translateY(-1px);
 }
 
 .comp-item.item-motivation {
@@ -643,159 +901,174 @@ function confirmAddComp() {
   border-left: 3.5px solid #f43f5e;
 }
 
+.comp-item-layout {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.comp-item-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.comp-header-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-bottom: 0.3rem;
+  flex-wrap: wrap;
+}
+
 .badge-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  padding: 0.2rem 0.55rem;
+  gap: 0.25rem;
+  padding: 0.15rem 0.45rem;
   border-radius: var(--radius-xs);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
   letter-spacing: 0.03em;
 }
 
 .pill-motivation {
-  background: rgba(245, 158, 11, 0.15);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  color: #fbbf24;
+  background: rgba(168, 85, 247, 0.15);
+  color: #d8b4fe;
+  border: 1px solid rgba(168, 85, 247, 0.3);
 }
 
 .pill-complication {
-  background: rgba(244, 63, 94, 0.18);
-  border: 1px solid rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.15);
   color: #fda4af;
-}
-
-.hp-reward-tag {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: #fbbf24;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.3);
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
-}
-
-.hp-reward-tag.tag-drive {
-  color: #a7f3d0;
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.3);
+  border: 1px solid rgba(244, 63, 94, 0.3);
 }
 
 .comp-title-text {
+  font-size: 0.88rem;
   font-weight: 800;
-  color: #fff;
-  font-size: 0.95rem;
-  line-height: 1.35;
+  color: #ffffff;
 }
 
 .comp-desc-text {
-  font-size: 0.8rem;
+  font-size: 0.76rem;
   color: var(--text-secondary);
-  margin: 0.3rem 0 0;
-  line-height: 1.5;
+  margin: 0;
+  line-height: 1.4;
+  padding: 0.3rem 0.55rem;
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.quote-mot {
+  border-left: 2px solid rgba(168, 85, 247, 0.4);
+}
+
+.quote-comp {
+  border-left: 2px solid rgba(244, 63, 94, 0.4);
 }
 
 .comp-card-actions {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
-  flex-shrink: 0;
+  gap: 0.25rem;
 }
 
 .comp-action-btn {
-  width: 32px;
-  height: 32px;
-  border-radius: 6px;
+  width: 26px;
+  height: 26px;
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-muted);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: 0.8rem;
   cursor: pointer;
-  transition: all 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
 }
 
-.comp-action-btn:active {
-  transform: scale(0.93);
+.comp-action-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
 }
 
-.btn-edit-comp {
-  color: #94a3b8;
-}
-
-.btn-edit-comp:hover {
-  color: #60a5fa;
-  background: rgba(59, 130, 246, 0.18);
-  border-color: rgba(59, 130, 246, 0.5);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
-}
-
-.btn-remove-comp {
-  color: #94a3b8;
-}
-
-.btn-remove-comp:hover {
-  color: #fca5a5;
-  background: rgba(239, 68, 68, 0.18);
+.comp-action-btn.btn-remove-comp:hover {
+  background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.5);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
+  color: #fca5a5;
 }
 
-/* Dual-Mode Narrative Modal */
+/* Modal Overlay & Card */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem;
+}
+
 .narrative-modal-box {
-  max-width: 540px;
-  background: #0f172a;
+  background: #111827;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 12px;
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
-  padding: 1.4rem;
-  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+  width: 100%;
+  max-width: 540px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 90vh;
 }
 
 .narrative-modal-box.theme-motivation {
-  border-color: rgba(245, 158, 11, 0.45);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  border-color: rgba(168, 85, 247, 0.4);
 }
 
 .narrative-modal-box.theme-complication {
-  border-color: rgba(239, 68, 68, 0.45);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  border-color: rgba(244, 63, 94, 0.4);
 }
 
 .narrative-modal-header {
   display: flex;
-  justify-content: space-between;
   align-items: flex-start;
-  gap: 0.75rem;
-  margin-bottom: 1.15rem;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.theme-motivation .narrative-modal-header {
+  background: rgba(168, 85, 247, 0.08);
+}
+
+.theme-complication .narrative-modal-header {
+  background: rgba(244, 63, 94, 0.08);
 }
 
 .header-title-cluster {
   display: flex;
-  align-items: center;
-  gap: 0.75rem;
+  align-items: flex-start;
+  gap: 0.65rem;
 }
 
 .header-icon-badge {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--radius-xs);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
+  font-size: 1.1rem;
 }
 
 .theme-motivation .header-icon-badge {
-  background: rgba(245, 158, 11, 0.18);
-  color: #fbbf24;
+  background: rgba(168, 85, 247, 0.2);
+  color: #c084fc;
 }
 
 .theme-complication .header-icon-badge {
@@ -803,302 +1076,169 @@ function confirmAddComp() {
   color: #fb7185;
 }
 
-.narrative-modal-title {
+.modal-title {
+  font-size: 1rem;
   font-weight: 800;
-  color: #fff;
+  color: #ffffff;
   margin: 0;
-  font-size: 1.15rem;
-  letter-spacing: -0.01em;
 }
 
-.narrative-modal-subtitle {
-  font-size: 0.76rem;
-  color: var(--text-secondary);
-  margin: 0.2rem 0 0;
-  line-height: 1.4;
+.modal-subtitle {
+  font-size: 0.74rem;
+  color: var(--text-muted);
+  margin: 0.15rem 0 0;
+  line-height: 1.35;
 }
 
-.modal-close-btn {
+.btn-close-modal {
   background: transparent;
   border: none;
   color: var(--text-muted);
-  font-size: 1.3rem;
+  font-size: 1.2rem;
   cursor: pointer;
   padding: 0.2rem;
-  border-radius: 6px;
-  line-height: 1;
-  transition: color 0.2s ease;
+  border-radius: var(--radius-xs);
+  transition: all 0.2s ease;
 }
 
-.modal-close-btn:hover {
-  color: #fff;
+.btn-close-modal:hover {
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
 }
 
-/* TOP SEGMENTED NAV CONTROL */
-.narrative-segmented-nav {
+.segmented-mode-bar {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.35rem;
-  background: rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: 10px;
-  padding: 0.3rem;
-  margin-bottom: 1.25rem;
+  padding: 0.5rem 1.25rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.segmented-btn {
+.segmented-tab-btn {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.2rem;
-  padding: 0.65rem 0.5rem;
-  border-radius: 8px;
+  gap: 0.45rem;
+  padding: 0.45rem;
+  border-radius: var(--radius-xs);
   border: 1px solid transparent;
   background: transparent;
-  color: var(--text-secondary);
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.segmented-btn i {
-  font-size: 1.15rem;
+.segmented-tab-btn.active.btn-tab-motivation {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: rgba(168, 85, 247, 0.45);
+  color: #d8b4fe;
 }
 
-.segmented-btn .segmented-label {
-  font-size: 0.82rem;
-  font-weight: 700;
+.segmented-tab-btn.active.btn-tab-complication {
+  background: rgba(244, 63, 94, 0.2);
+  border-color: rgba(244, 63, 94, 0.45);
+  color: #fda4af;
 }
 
-.segmented-btn .segmented-pill {
-  font-size: 0.66rem;
-  font-weight: 600;
-  opacity: 0.7;
+.narrative-mode-body {
+  padding: 1.15rem 1.25rem;
+  overflow-y: auto;
+  max-height: 60vh;
 }
 
-.segmented-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.04);
+.catalog-recommendation-banner {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 0.65rem;
+  margin-bottom: 1rem;
 }
 
-.segmented-btn.active.btn-tab-motivation {
-  background: rgba(245, 158, 11, 0.16);
-  border-color: rgba(245, 158, 11, 0.45);
-  color: #fef3c7;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-}
-
-.segmented-btn.active.btn-tab-motivation .segmented-pill {
-  color: #fbbf24;
-  opacity: 1;
-}
-
-.segmented-btn.active.btn-tab-complication {
-  background: rgba(244, 63, 94, 0.18);
-  border-color: rgba(244, 63, 94, 0.5);
-  color: #ffe4e6;
-  box-shadow: 0 4px 12px rgba(225, 29, 72, 0.2);
-}
-
-.segmented-btn.active.btn-tab-complication .segmented-pill {
-  color: #fb7185;
-  opacity: 1;
-}
-
-/* Presets Chips Grid */
-.presets-section {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  border-radius: 8px;
-  padding: 0.75rem;
-}
-
-.presets-label {
+.catalog-rec-header {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.74rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--text-secondary);
-  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+  margin-bottom: 0.45rem;
 }
 
 .presets-chips-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem;
-  max-height: 110px;
-  overflow-y: auto;
-  padding-right: 0.25rem;
-}
-
-.presets-chips-grid::-webkit-scrollbar {
-  width: 4px;
-}
-
-.presets-chips-grid::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
-}
-
-.preset-chip {
-  display: inline-flex;
-  align-items: center;
   gap: 0.3rem;
-  padding: 0.25rem 0.55rem;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  background: rgba(15, 23, 42, 0.8);
-  color: var(--text-secondary);
-  font-size: 0.74rem;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+.chip-preset-btn {
+  font-size: 0.68rem;
   font-weight: 600;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-xs);
   cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.preset-chip:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
-
-.preset-chip.chip-motivation.active {
-  background: rgba(168, 85, 247, 0.25);
-  border-color: #a855f7;
-  color: #f3e8ff;
-  font-weight: 700;
-}
-
-.preset-chip.chip-complication.active {
-  background: rgba(244, 63, 94, 0.25);
-  border-color: #f43f5e;
-  color: #ffe4e6;
-  font-weight: 700;
-}
-
-/* Two-column Row */
-.row-two-col {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 0.75rem;
-}
-
-@media (max-width: 480px) {
-  .row-two-col {
-    grid-template-columns: 1fr;
-  }
-}
-
-.input-narrative,
-.select-narrative {
-  background: rgba(0, 0, 0, 0.35);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 6px;
-  color: #fff;
-  font-size: 0.82rem;
-  padding: 0.5rem 0.65rem;
-  width: 100%;
-  box-sizing: border-box;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
-}
-
-.theme-motivation .input-narrative:focus,
-.theme-motivation .select-narrative:focus {
-  outline: none;
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25);
-}
-
-.theme-complication .input-narrative:focus,
-.theme-complication .select-narrative:focus {
-  outline: none;
-  border-color: #ef4444;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.25);
-}
-
-/* Narrative Rule Callout */
-.narrative-rule-callout {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.55rem;
-  padding: 0.65rem 0.85rem;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  line-height: 1.45;
-}
-
-.callout-motivation {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.25);
-  color: #fde68a;
-}
-
-.callout-motivation i {
-  color: #fbbf24;
-  font-size: 1rem;
-  margin-top: 1px;
-}
-
-.callout-complication {
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.25);
-  color: #fcd34d;
-}
-
-.callout-complication i {
-  color: #fbbf24;
-  font-size: 1rem;
-  margin-top: 1px;
-}
-
-/* Modal Footer */
-.narrative-modal-footer {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  margin-top: 1.25rem;
-  padding-top: 0.85rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.btn-narrative-submit {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.5rem 1rem;
-  font-weight: 700;
-  border-radius: 6px;
-  color: #fff;
-  border: none;
-  cursor: pointer;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
   transition: all 0.2s ease;
 }
 
-.btn-submit-motivation {
-  background: #f59e0b;
-  color: #0b0f17;
-  border: 1px solid #fbbf24;
+.chip-preset-btn.chip-mot:hover,
+.chip-preset-btn.chip-mot.selected {
+  background: rgba(168, 85, 247, 0.2);
+  border-color: #a855f7;
+  color: #d8b4fe;
 }
 
-.btn-submit-motivation:hover:not(:disabled) {
-  background: #d97706;
-  transform: translateY(-1px);
+.chip-preset-btn.chip-comp:hover,
+.chip-preset-btn.chip-comp.selected {
+  background: rgba(244, 63, 94, 0.2);
+  border-color: #f43f5e;
+  color: #fda4af;
 }
 
-.btn-submit-complication {
-  background: #dc2626;
+.narrative-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 0.75rem 1.25rem;
+  background: rgba(11, 15, 23, 0.75);
+  border-top: 1px solid var(--border-subtle);
+}
+
+.btn-confirm-mot {
+  background: #a855f7;
+  border: 1px solid #c084fc;
   color: #ffffff;
-  border: 1px solid #ef4444;
+  font-weight: 700;
 }
 
-.btn-submit-complication:hover:not(:disabled) {
-  background: #b91c1c;
-  transform: translateY(-1px);
+.btn-confirm-mot:hover {
+  background: #9333ea;
 }
 
-.btn-narrative-submit:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  box-shadow: none;
-  transform: none;
+.btn-confirm-comp {
+  background: #f43f5e;
+  border: 1px solid #fb7185;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.btn-confirm-comp:hover {
+  background: #e11d48;
+}
+
+@media (max-width: 768px) {
+  .pillars-status-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>

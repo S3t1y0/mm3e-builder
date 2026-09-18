@@ -166,14 +166,14 @@ const currentStep = ref(1);
 
 const steps = [
   { id: 1, title: 'Concept', component: StepConcept, tip: 'Start with a strong narrative concept or select one of the 10 official Archetypes for a balanced baseline point distribution.' },
-  { id: 2, title: 'Abilities', component: StepAbilities, tip: 'Focus points on 2-3 primary attributes. Combat abilities (FGT/DEX) are vital for attack accuracy.' },
-  { id: 3, title: 'Defenses', component: StepDefenses, tip: 'Ensure Dodge+Toughness, Parry+Toughness, and Fortitude+Will totals do not exceed 2x your Power Level.' },
+  { id: 2, title: 'Abilities', component: StepAbilities, tip: 'Focus points on 2-3 primary attributes. Combat abilities (Fighting and Dexterity) determine your attack checks.' },
+  { id: 3, title: 'Defenses', component: StepDefenses, tip: 'Dodge+Toughness, Parry+Toughness, and Fortitude+Will sums cannot exceed twice your Power Level.' },
   { id: 4, title: 'Skills', component: StepSkills, tip: 'Skills cost 1 PP per 2 ranks. Add Close Combat or Ranged Combat skills to specialize with specific weapons or powers.' },
   { id: 5, title: 'Advantages', component: StepAdvantages, tip: 'Power Attack and All-out Attack provide tactical versatility by trading attack bonuses for effect rank or defense.' },
   { id: 6, title: 'Powers', component: StepPowers, tip: 'Group alternate powers into an Array at a fraction of the cost (+1 PP per alternate slot).' },
   { id: 7, title: 'Equipment', component: StepEquipment, tip: 'Equipment is purchased with Equipment Points (EP) at 1 PP = 5 EP. Vehicles and Headquarters can also be shared with team members.' },
-  { id: 8, title: 'Complications', component: StepComplications, tip: 'Complications provide the GM dramatic story hooks that award valuable Hero Points during play.' },
-  { id: 9, title: 'Review', component: StepReview, tip: 'Audit your total PP budget, EP equipment capacity, and verify all Power Level caps before finalizing your hero sheet.' }
+  { id: 8, title: 'Complications', component: StepComplications, tip: 'Complications give the GM story hooks and award Hero Points during play.' },
+  { id: 9, title: 'Review', component: StepReview, tip: 'Check your PP budget, equipment points, and defense limits before finalizing your character.' }
 ];
 
 const activeStepComponent = computed(() => {

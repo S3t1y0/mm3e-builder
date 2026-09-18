@@ -11,6 +11,7 @@ import './styles/roll20-print.css';
 
 import App from './App.vue';
 import { initSeamlessScroll } from './utils/seamlessScroll.js';
+import { vDragScroll } from './utils/dragScroll.js';
 
 const app = createApp(App);
 const pinia = createPinia();
@@ -27,6 +28,8 @@ window.__MM3E_BUILDER_VUE__ = {
 
 // Initialize smooth, stutter-free scroll chaining from dynamic containers to page window
 initSeamlessScroll();
+
+app.directive('drag-scroll', vDragScroll);
 
 app.use(pinia);
 app.mount('#app');

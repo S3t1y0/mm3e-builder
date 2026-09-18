@@ -7,10 +7,24 @@
         <h3 class="dndb-card-title">SKILLS</h3>
       </div>
       <div class="dndb-skills-header-right">
-        <div class="skills-budget-pill" :title="`Total points invested in skills: ${heroStore.totalSkillPP} PP (${totalRanksBought} Ranks)`">
-          <span class="budget-ranks">{{ totalRanksBought }} Rks</span>
-          <span class="budget-divider">•</span>
-          <span class="budget-pp">{{ heroStore.totalSkillPP }} PP</span>
+        <span
+          v-if="heroStore.circumstancePenalty !== 0"
+          class="skills-cond-debuff-badge"
+          :class="heroStore.conditionModifiers.isDisabled ? 'danger' : 'warn'"
+          :title="heroStore.conditionModifiers.isDisabled ? 'Disabled: -5 circumstance penalty on all skill checks' : 'Impaired: -2 circumstance penalty on all skill checks'"
+        >
+          {{ heroStore.conditionModifiers.isDisabled ? 'Disabled (-5)' : 'Impaired (-2)' }}
+        </span>
+        <div class="skills-budget-pill" :title="`Total points invested in skills: ${heroStore.totalSkillPP} PP (${totalRanksBought} Ranks at 2 Ranks per 1 PP)`">
+          <span class="budget-item ranks">
+            <strong class="budget-num">{{ totalRanksBought }}</strong>
+            <span class="budget-lbl">Rks</span>
+          </span>
+          <span class="budget-divider" aria-hidden="true"></span>
+          <span class="budget-item pp">
+            <strong class="budget-num">{{ heroStore.totalSkillPP }}</strong>
+            <span class="budget-lbl">PP</span>
+          </span>
         </div>
         <button 
           type="button" 
@@ -128,7 +142,7 @@
 
     <!-- Skills Toolbar: Category Pills & Compact Search -->
     <div class="sheet-skills-toolbar">
-      <div class="skills-cat-pills">
+      <div class="skills-cat-pills" v-drag-scroll>
         <button
           v-for="cat in categories"
           :key="cat"
@@ -560,7 +574,8 @@ function getAdvantageBonusForSkill(skillName) {
 function calculateTotalBonus(abilityKey, ranks, enhRanks = 0, skillName = '') {
   const abilMod = Number(heroStore.effectiveAbilities?.[abilityKey]) || 0;
   const advBonus = getAdvantageBonusForSkill(skillName);
-  return abilMod + (Number(ranks) || 0) + (Number(enhRanks) || 0) + advBonus;
+  const circ = Number(heroStore.circumstancePenalty) || 0;
+  return abilMod + (Number(ranks) || 0) + (Number(enhRanks) || 0) + advBonus + circ;
 }
 
 function formatMod(val) {
@@ -583,9 +598,13 @@ function deleteSpecialization(inst) {
   const skills = heroStore.character?.skills || [];
   const idx = skills.findIndex(s => s === inst || (s.name === inst.name && (s.subtype || '') === (inst.subtype || '')));
   if (idx !== -1) {
-    heroStore.removeSkill(idx);
-    uiStore.showToast(`Removed ${inst.name} (${inst.subtype})`, 'info');
+    skills.splice(idx, 1);
+    heroStore.pushHistory();
   }
+}
+
+function isSpecializationTrained(inst) {
+  return (Number(inst.ranks ?? inst.rank) || 0) > 0;
 }
 
 function openAddSpecializationModal() {
@@ -632,7 +651,12 @@ function isSignatureSkill(bonus, ranks) {
 }
 
 function rollSkill(skillTitle, bonus) {
-  heroStore.rollCheck(skillTitle, bonus, null, 'Skill');
+  const circ = heroStore.circumstancePenalty || 0;
+  const extra = circ !== 0 ? {
+    conditionPenalty: circ,
+    conditionNote: heroStore.conditionModifiers.isDisabled ? 'Disabled (-5)' : 'Impaired (-2)'
+  } : {};
+  heroStore.rollCheck(skillTitle, bonus, null, 'Skill', extra);
 }
 </script>
 
@@ -641,48 +665,93 @@ function rollSkill(skillTitle, bonus) {
 .dndb-skills-header-right {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.45rem;
+}
+
+.skills-cond-debuff-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.45rem;
+  border-radius: var(--radius-xs, 4px);
+  text-transform: uppercase;
+}
+
+.skills-cond-debuff-badge.danger {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.skills-cond-debuff-badge.warn {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
 }
 
 .skills-budget-pill {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  background: rgba(255, 255, 255, 0.05);
+  height: 26px;
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 0.2rem 0.55rem;
-  border-radius: var(--radius-pill);
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-secondary);
-  font-variant-numeric: tabular-nums;
+  padding: 0 0.55rem;
+  border-radius: var(--radius-xs, 4px);
+  gap: 0.45rem;
+  box-sizing: border-box;
 }
 
-.budget-ranks {
-  color: #94a3b8;
+.budget-item {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.2rem;
+}
+
+.budget-num {
+  font-family: var(--font-mono, monospace);
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  line-height: 1;
+}
+
+.budget-lbl {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.budget-item.pp .budget-num {
+  color: #fca5a5;
+}
+
+.budget-item.pp .budget-lbl {
+  color: rgba(252, 165, 165, 0.75);
 }
 
 .budget-divider {
-  color: rgba(255, 255, 255, 0.2);
-}
-
-.budget-pp {
-  color: #ef4444;
-  font-weight: 800;
+  width: 1px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.16);
+  margin: 0 0.05rem;
 }
 
 .btn-spec-add {
-  background: linear-gradient(135deg, rgba(220, 38, 38, 0.2), rgba(185, 28, 28, 0.3));
-  border: 1px solid rgba(239, 68, 68, 0.4);
+  height: 26px;
+  background: rgba(220, 38, 38, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   color: #fca5a5;
   font-size: 0.72rem;
   font-weight: 700;
-  padding: 0.22rem 0.6rem;
-  border-radius: var(--radius-sm);
+  padding: 0 0.55rem;
+  border-radius: var(--radius-xs, 4px);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   cursor: pointer;
+  box-sizing: border-box;
   transition: all var(--trans-fast);
 }
 
@@ -690,7 +759,7 @@ function rollSkill(skillTitle, bonus) {
   background: #dc2626;
   border-color: #ef4444;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
+  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
 }
 
 .btn-spec-add:active {

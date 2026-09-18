@@ -38,16 +38,25 @@
         </div>
       </div>
 
-      <!-- 3. COMPLICATIONS CHECK -->
-      <div class="card audit-card" :class="isComplicationsValid ? 'card-success' : 'card-warning'">
+      <!-- 3. MOTIVATIONS & COMPLICATIONS CHECK -->
+      <div class="card audit-card" :class="heroStore.narrativeTraitsStatus.isValid ? 'card-success' : 'card-warning'">
         <div class="audit-icon">
-          <i :class="isComplicationsValid ? 'ri-heart-pulse-line' : 'ri-alert-line'"></i>
+          <i :class="heroStore.narrativeTraitsStatus.isValid ? 'ri-shield-check-line' : 'ri-compass-3-line'"></i>
         </div>
         <div>
-          <div class="audit-label">Complications Requirement</div>
-          <div class="audit-val tabular-nums">
-            {{ heroStore.character.complications?.length || 0 }} Complications Defined
-            <span v-if="!isComplicationsValid" style="color: #f59e0b; font-size: 0.8rem;">(Minimum 2 recommended)</span>
+          <div class="audit-label">Motivations & Complications</div>
+          <div class="audit-val">
+            <template v-if="heroStore.narrativeTraitsStatus.isValid">
+              <span style="color: #10b981; font-weight: 700;">Complete</span>
+              <span style="font-size: 0.8rem; color: var(--text-secondary); margin-left: 0.4rem;">
+                ({{ heroStore.motivations.length }} Mot, {{ heroStore.generalComplications.length }} Comp)
+              </span>
+            </template>
+            <template v-else>
+              <span style="color: #f59e0b; font-weight: 700; font-size: 0.85rem;">
+                {{ !heroStore.narrativeTraitsStatus.hasMotivation ? 'Needs 1 motivation' : 'Needs 1 complication' }}
+              </span>
+            </template>
           </div>
         </div>
       </div>
@@ -101,11 +110,8 @@
 
     <!-- ACTION CALLOUT -->
     <div class="card launch-ready-card" style="padding: 1.5rem; text-align: center; background: var(--bg-surface); border: 1px solid rgba(16, 185, 129, 0.3);">
-      <div class="launch-badge">
-        <i class="ri-checkbox-circle-fill"></i> Build Complete
-      </div>
-      <h4 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0.6rem 0 0.35rem;">
-        Hero Ready for Play
+      <h4 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0 0 0.35rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+        <i class="ri-checkbox-circle-fill text-emerald"></i> Hero Ready for Play
       </h4>
       <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 520px; margin: 0 auto 1.25rem; line-height: 1.5;">
         Your hero build is ready. You can switch to the character sheet anytime to view traits, roll dice, and manage attacks.
@@ -139,7 +145,7 @@ const isDefenseCapsValid = computed(() => {
 });
 
 const isComplicationsValid = computed(() => {
-  return (heroStore.character.complications || []).length >= 2;
+  return heroStore.narrativeTraitsStatus.isValid;
 });
 
 function finishWizard() {

@@ -188,7 +188,6 @@
           <div>
             <div style="display: flex; align-items: center; gap: 0.5rem;">
               <span style="font-weight: 800; color: #38bdf8; font-size: 1.05rem;">Toughness</span>
-              <span class="badge badge-secondary" style="font-size: 0.68rem;">DERIVED STAT</span>
             </div>
             <div class="tabular-nums" style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem;">
               Base STA: <strong style="color: #fff;">{{ heroStore.effectiveAbilities?.STA ?? 0 }}</strong> &bull;

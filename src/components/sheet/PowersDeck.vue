@@ -77,7 +77,7 @@
             </button>
 
             <h4 class="pow-name">{{ pow.name || 'Unnamed Power' }}</h4>
-            <span class="structure-badge" :class="`badge-${pow.type}`">
+            <span v-if="pow.type && pow.type !== 'standard'" class="structure-badge" :class="`badge-${pow.type}`">
               {{ pow.type.toUpperCase() }}
             </span>
             <span v-if="pow.activation && pow.activation !== 'none'" class="activation-flaw-badge">

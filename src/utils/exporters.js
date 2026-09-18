@@ -1,5 +1,6 @@
 import LZString from 'lz-string';
 import { calculatePowerTotalCost } from '../rules/powerEngine.js';
+import { isMotivation } from '../rules/complications.js';
 
 export function escapeHtml(str) {
   if (!str) return '';
@@ -205,14 +206,28 @@ export function buildMarkdownSheet(character, heroStore) {
     md += `${advList.join(', ')}\n\n`;
   }
 
-  // Complications
+  // Motivations & Complications
   const comps = character.complications || [];
   if (comps.length > 0) {
-    md += `### Complications\n`;
-    comps.forEach(c => {
-      md += `- **${c.name} (${c.type || 'Motivation'}):** ${c.desc || 'No description'}\n`;
-    });
-    md += `\n`;
+    const motivations = comps.filter(isMotivation);
+    const complications = comps.filter(c => !isMotivation(c));
+
+    if (motivations.length > 0) {
+      md += `### Motivations\n`;
+      motivations.forEach(m => {
+        md += `- **${m.name}:** ${m.desc || 'No description'}\n`;
+      });
+      md += `\n`;
+    }
+
+    if (complications.length > 0) {
+      md += `### Complications\n`;
+      complications.forEach(c => {
+        const typeLabel = c.type && c.type !== 'Complication' ? ` (${c.type})` : '';
+        md += `- **${c.name}${typeLabel}:** ${c.desc || 'No description'}\n`;
+      });
+      md += `\n`;
+    }
   }
 
   return md;
@@ -266,6 +281,26 @@ export function buildBBCodeSheet(character, heroStore) {
   if (advs.length > 0) {
     bb += `[b][color=#2563eb]--- ADVANTAGES (${heroStore.advantagesCost} PP) ---[/color][/b]\n`;
     bb += advs.map(a => `${a.name}${a.ranks > 1 ? ` ${a.ranks}` : ''}`).join(', ') + '\n\n';
+  }
+
+  // Motivations & Complications
+  const comps = character.complications || [];
+  if (comps.length > 0) {
+    const motivations = comps.filter(isMotivation);
+    const complications = comps.filter(c => !isMotivation(c));
+
+    bb += `[b][color=#2563eb]--- MOTIVATIONS & COMPLICATIONS ---[/color][/b]\n`;
+    if (motivations.length > 0) {
+      motivations.forEach(m => {
+        bb += `• [b]Motivation (${m.name}):[/b] ${m.desc || 'No description'}\n`;
+      });
+    }
+    if (complications.length > 0) {
+      complications.forEach(c => {
+        bb += `• [b]${c.type || 'Complication'} (${c.name}):[/b] ${c.desc || 'No description'}\n`;
+      });
+    }
+    bb += `\n`;
   }
 
   return bb;

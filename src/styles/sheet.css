@@ -4326,6 +4326,24 @@
   transform: scale(1.1);
 }
 
+.dndb-vital-box.speed-box.is-immobile {
+  background: rgba(239, 68, 68, 0.08);
+}
+
+.dndb-vital-box.speed-box.is-immobile .dndb-vital-label,
+.dndb-vital-box.speed-box.is-immobile .dndb-vital-val {
+  color: #f87171;
+}
+
+.dndb-vital-box.speed-box.is-hindered {
+  background: rgba(245, 158, 11, 0.08);
+}
+
+.dndb-vital-box.speed-box.is-hindered .dndb-vital-label,
+.dndb-vital-box.speed-box.is-hindered .dndb-vital-val {
+  color: #fbbf24;
+}
+
 /* Initiative Quick Box */
 .dndb-vital-box.init-box {
   cursor: pointer;
@@ -4945,17 +4963,68 @@
   box-sizing: border-box;
 }
 
-/* Tab Navigation Header */
+/* Tab navigation slider */
 .dndb-hub-nav {
   display: flex;
   align-items: center;
   background: rgba(15, 15, 20, 0.98);
   border-bottom: 2px solid rgba(255, 255, 255, 0.08);
   overflow-x: auto;
+  overflow-y: hidden !important;
   flex-shrink: 0;
   position: sticky;
   top: 0;
   z-index: 10;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.dndb-hub-nav::-webkit-scrollbar {
+  height: 4px;
+  width: 0;
+}
+
+.dndb-hub-nav::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.dndb-hub-nav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.dndb-hub-nav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.dndb-hub-nav.is-dragging {
+  cursor: grabbing !important;
+  scroll-behavior: auto !important;
+}
+
+.dndb-hub-nav.is-dragging .dndb-hub-tab-btn {
+  cursor: grabbing !important;
+  user-select: none !important;
+}
+
+.drag-scroll-container {
+  overflow-y: hidden !important;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.drag-scroll-container.is-dragging {
+  cursor: grabbing !important;
+  scroll-behavior: auto !important;
+}
+
+.drag-scroll-container.is-dragging * {
+  cursor: grabbing !important;
+  user-select: none !important;
 }
 
 .dndb-hub-tab-btn {

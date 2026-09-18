@@ -263,7 +263,7 @@
                   <label>Vehicle Size Category</label>
                   <select v-model="vehicleConfig.size" class="eq-select" @change="onVehicleSizeChange">
                     <option v-for="sz in VEHICLE_SIZES" :key="sz.size" :value="sz.size">
-                      {{ sz.size }} (Base STR {{ sz.strBase }}, Def {{ sz.defMod }}, Tough {{ sz.toughBase }}) — {{ sz.epCost }} EP
+                      {{ sz.size }} (Base STR {{ sz.strBase }}, Def {{ sz.defMod }}, Tough {{ sz.toughBase }}): {{ sz.epCost }} EP
                     </option>
                   </select>
                 </div>
@@ -357,7 +357,7 @@
                   <label>Headquarters Size Category</label>
                   <select v-model="hqConfig.size" class="eq-select" @change="onHQSizeChange">
                     <option v-for="sz in HQ_SIZES" :key="sz.size" :value="sz.size">
-                      {{ sz.size }} (Base Toughness {{ sz.toughBase }}) — {{ sz.epCost }} EP — {{ sz.desc }}
+                      {{ sz.size }} (Base Toughness {{ sz.toughBase }}): {{ sz.epCost }} EP, {{ sz.desc }}
                     </option>
                   </select>
                 </div>

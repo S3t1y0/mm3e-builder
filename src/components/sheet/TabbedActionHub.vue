@@ -1,7 +1,7 @@
 <template>
   <div class="dndb-tabbed-hub">
-    <!-- Tab Navigation Header -->
-    <nav class="dndb-hub-nav">
+    <!-- Tab navigation header -->
+    <nav class="dndb-hub-nav" v-drag-scroll>
       <button
         type="button"
         class="dndb-hub-tab-btn"
@@ -19,7 +19,7 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'powers' }"
         @click="activeTab = 'powers'"
-        title="Superhuman powers, dynamic arrays, and removable devices"
+        title="Powers, arrays, and devices"
       >
         <i class="ri-flashlight-line"></i>
         <span>Powers</span>
@@ -43,7 +43,7 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'equipment' }"
         @click="activeTab = 'equipment'"
-        title="Weapons, ballistic armor, utility gadgets, vehicles, and HQ"
+        title="Weapons, armor, utility gadgets, vehicles, and headquarters"
       >
         <i class="ri-archive-line"></i>
         <span>Equipment</span>
@@ -55,7 +55,7 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'conditions' }"
         @click="activeTab = 'conditions'"
-        title="Injuries, bruises, debuffs, and condition penalties"
+        title="Injuries, bruises, and condition penalties"
       >
         <i class="ri-heart-pulse-line"></i>
         <span>Conditions</span>
@@ -69,7 +69,7 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'complications' }"
         @click="activeTab = 'complications'"
-        title="Heroic motivations and dramatic complications for Hero Points"
+        title="Motivations and complications for Hero Points"
       >
         <i class="ri-alert-line"></i>
         <span>Complications</span>
@@ -113,6 +113,7 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
+import { vDragScroll } from '../../utils/dragScroll.js';
 import TargetedAttacksList from './TargetedAttacksList.vue';
 import PowersDeck from './PowersDeck.vue';
 import AdvantagesList from './AdvantagesList.vue';

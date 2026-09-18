@@ -7,9 +7,6 @@
         <span v-if="activeConditions.length > 0" class="badge badge-warning" style="font-size: 0.72rem;">
           {{ activeConditions.length }} Active
         </span>
-        <span v-else class="badge badge-success" style="font-size: 0.72rem;">
-          Normal / Unharmed
-        </span>
       </div>
       <button
         v-if="activeConditions.length > 0 || heroStore.character.injuries > 0"
@@ -33,10 +30,9 @@
           </div>
         </div>
 
-        <div class="injury-debuff-pill" :class="{ active: heroStore.character.injuries > 0 }">
-          <i :class="heroStore.character.injuries > 0 ? 'ri-arrow-down-line' : 'ri-shield-check-line'"></i>
-          <span v-if="heroStore.character.injuries > 0">-{{ heroStore.character.injuries }} Toughness Resistance</span>
-          <span v-else>Toughness at Max (0 Bruises)</span>
+        <div v-if="heroStore.character.injuries > 0" class="injury-debuff-pill active">
+          <i class="ri-arrow-down-line"></i>
+          <span>-{{ heroStore.character.injuries }} Toughness Resistance</span>
         </div>
       </div>
 
@@ -78,6 +74,25 @@
       </div>
     </div>
 
+    <!-- TACTICAL COMBAT STATUS / ACTIVE MODIFIERS -->
+    <div v-if="heroStore.conditionModifiers.hasMods" class="tactical-status-banner mb-3">
+      <div class="tactical-status-head">
+        <i class="ri-shield-flash-line"></i>
+        <span>Active Combat Effects &amp; Penalties</span>
+      </div>
+      <div class="tactical-tags-flex">
+        <span
+          v-for="(tag, idx) in heroStore.conditionModifiers.tags"
+          :key="idx"
+          class="tactical-tag"
+          :class="tag.type"
+          :title="tag.reason"
+        >
+          {{ tag.label }}
+        </span>
+      </div>
+    </div>
+
     <!-- BASIC CONDITIONS -->
     <div class="mb-3">
       <div class="cond-group-title">BASIC CONDITIONS</div>
@@ -86,8 +101,11 @@
           v-for="c in BASIC_CONDITIONS"
           :key="c.name"
           class="cond-chip"
-          :class="{ active: isConditionActive(c.name) }"
-          :title="c.desc"
+          :class="{
+            active: isDirectlyActive(c.name),
+            'active-inherited': isInheritedActive(c.name)
+          }"
+          :title="isInheritedActive(c.name) ? `${c.name} (Active via combined condition)` : c.desc"
           @click="heroStore.toggleCondition(c.name)"
         >
           <span class="chip-dot"></span>
@@ -104,7 +122,7 @@
           v-for="c in COMBINED_CONDITIONS"
           :key="c.name"
           class="cond-chip combined"
-          :class="{ active: isConditionActive(c.name) }"
+          :class="{ active: isDirectlyActive(c.name) }"
           :title="c.components ? c.components.join(' + ') + ': ' + c.desc : c.desc"
           @click="heroStore.toggleCondition(c.name)"
         >
@@ -125,8 +143,13 @@ const heroStore = useHeroStore();
 
 const activeConditions = computed(() => heroStore.character.activeConditions || []);
 
-function isConditionActive(name) {
+function isDirectlyActive(name) {
   return activeConditions.value.includes(name);
+}
+
+function isInheritedActive(name) {
+  if (isDirectlyActive(name)) return false;
+  return heroStore.activeConditionSet.has(name);
 }
 
 function clearAll() {
@@ -290,5 +313,62 @@ function clearAll() {
 
 .cond-chip.combined.active .chip-dot {
   background: #a855f7;
+}
+
+.cond-chip.active-inherited {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.35);
+  color: #fde68a;
+}
+
+.cond-chip.active-inherited .chip-dot {
+  background: #f59e0b;
+}
+
+.tactical-status-banner {
+  background: rgba(225, 29, 72, 0.08);
+  border: 1px solid rgba(225, 29, 72, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.85rem;
+}
+
+.tactical-status-head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #fda4af;
+  margin-bottom: 0.4rem;
+}
+
+.tactical-tags-flex {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.tactical-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border-radius: var(--radius-xs, 4px);
+  display: inline-flex;
+  align-items: center;
+}
+
+.tactical-tag.danger {
+  background: rgba(239, 68, 68, 0.18);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.tactical-tag.warning {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
 }
 </style>

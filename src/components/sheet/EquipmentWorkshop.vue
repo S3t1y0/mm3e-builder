@@ -60,7 +60,7 @@
 
     <!-- Category Filters -->
     <div class="res-categories-bar">
-      <div class="filter-pills-bar">
+      <div class="filter-pills-bar" v-drag-scroll>
         <button
           v-for="cat in categories"
           :key="cat.id"

@@ -33,6 +33,16 @@
       </div>
     </div>
 
+    <!-- Stunned / Dazed Tactical Notice -->
+    <div v-if="heroStore.conditionModifiers.isStunned" class="atk-action-warning stunned mb-3">
+      <i class="ri-forbid-line"></i>
+      <span>Hero is <strong>Stunned / Incapacitated</strong> — Cannot take combat actions.</span>
+    </div>
+    <div v-else-if="heroStore.conditionModifiers.isDazed" class="atk-action-warning dazed mb-3">
+      <i class="ri-time-line"></i>
+      <span>Hero is <strong>Dazed / Staggered</strong> — Limited to 1 standard action this turn.</span>
+    </div>
+
     <!-- Empty Attacks Hint -->
     <div v-if="filteredAttacks.length === 0" class="empty-attacks-notice">
       No attacks matching current filter.
@@ -61,11 +71,12 @@
                 {{ atk.range }} Attack
               </span>
               <span
+                v-if="atk.isPowerDisabled || atk.isStandby"
                 class="atk-status-pill"
-                :class="atk.isPowerDisabled ? 'status-disabled' : (atk.isActive ? 'status-active' : 'status-standby')"
+                :class="atk.isPowerDisabled ? 'status-disabled' : 'status-standby'"
               >
-                <i :class="atk.isPowerDisabled ? 'ri-shut-down-line' : (atk.isActive ? 'ri-checkbox-circle-fill' : 'ri-time-line')"></i>
-                <span>{{ atk.isPowerDisabled ? 'OFFLINE' : (atk.isActive ? 'ACTIVE' : 'STANDBY') }}</span>
+                <i :class="atk.isPowerDisabled ? 'ri-shut-down-line' : 'ri-time-line'"></i>
+                <span>{{ atk.isPowerDisabled ? 'OFFLINE' : 'STANDBY' }}</span>
               </span>
             </div>
           </div>
@@ -92,7 +103,7 @@
               @click="handleRollAttack(atk)"
             >
               <i class="ri-dice-line"></i>
-              <span>{{ atk.rollBonus !== null ? `Roll Attack (+${atk.rollBonus})` : 'Trigger Effect' }}</span>
+              <span>{{ atk.rollBonus !== null ? `Roll Attack (${getEffectiveAttackBonus(atk) >= 0 ? '+' : ''}${getEffectiveAttackBonus(atk)})` : 'Trigger Effect' }}</span>
             </button>
 
             <!-- If Standby (in Array/Device): 1-click Switch & Roll! -->
@@ -114,7 +125,16 @@
           <div class="spec-metric">
             <span class="spec-label">Attack Bonus</span>
             <div class="spec-bonus-wrap">
-              <span class="spec-val bonus">{{ atk.rollBonus !== null ? `+${atk.rollBonus}` : 'Auto / Area' }}</span>
+              <span class="spec-val bonus">
+                {{ atk.rollBonus !== null ? (getEffectiveAttackBonus(atk) >= 0 ? `+${getEffectiveAttackBonus(atk)}` : getEffectiveAttackBonus(atk)) : 'Auto / Area' }}
+              </span>
+              <span
+                v-if="getAttackPenaltyTag(atk) !== null"
+                class="atk-penalty-tag"
+                :title="atk.range === 'Close' && heroStore.conditionModifiers.isProne ? 'Penalty from conditions and prone (-5 close attack)' : 'Penalty from conditions'"
+              >
+                {{ getAttackPenaltyTag(atk) }} Cond
+              </span>
               <span
                 v-if="atk.rollBonus !== null && getAttackAdvBonus(atk) > 0"
                 class="atk-adv-tag"
@@ -177,9 +197,39 @@ function getAttackAdvBonus(atk) {
   return heroStore.getAdvantageRanks('Close Attack');
 }
 
+function getEffectiveAttackBonus(atk) {
+  if (atk.rollBonus === null || atk.rollBonus === undefined) return null;
+  let bonus = atk.rollBonus;
+  const cond = heroStore.conditionModifiers;
+  if (cond) {
+    if (atk.range === 'Close') {
+      bonus += cond.closeAttackPenalty;
+    } else {
+      bonus += cond.rangedAttackPenalty;
+    }
+  }
+  return bonus;
+}
+
+function getAttackPenaltyTag(atk) {
+  if (atk.rollBonus === null || atk.rollBonus === undefined) return null;
+  const cond = heroStore.conditionModifiers;
+  if (!cond) return null;
+  const pen = atk.range === 'Close' ? cond.closeAttackPenalty : cond.rangedAttackPenalty;
+  if (pen === 0) return null;
+  return pen;
+}
+
 function handleRollAttack(atk) {
-  const bonus = atk.rollBonus || 0;
-  heroStore.rollCheck(`${atk.name} Attack`, bonus, 10, 'Attack');
+  const bonus = getEffectiveAttackBonus(atk) ?? 0;
+  const extra = {};
+  if (heroStore.conditionModifiers.checkPenalty !== 0) {
+    extra.conditionPenalty = heroStore.conditionModifiers.checkPenalty;
+  }
+  if (atk.range === 'Close' && heroStore.conditionModifiers.isProne) {
+    extra.pronePenalty = -5;
+  }
+  heroStore.rollCheck(`${atk.name} Attack`, bonus, 10, 'Attack', extra);
 }
 
 function handleSwitchAndRoll(atk) {
@@ -572,5 +622,41 @@ function handleTurnOnAndRoll(atk) {
   padding: 0.05rem 0.32rem;
   border-radius: 3px;
   letter-spacing: 0.02em;
+}
+
+.atk-action-warning {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 0.55rem 0.85rem;
+  border-radius: var(--radius-sm);
+  margin-bottom: 0.75rem;
+}
+
+.atk-action-warning.stunned {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.atk-action-warning.dazed {
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  color: #fcd34d;
+}
+
+.atk-penalty-tag {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.32);
+  padding: 0.05rem 0.32rem;
+  border-radius: 3px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 </style>

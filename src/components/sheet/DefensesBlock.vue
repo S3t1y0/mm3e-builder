@@ -13,6 +13,9 @@
         <div class="def-header">
           <span class="def-name">Dodge</span>
           <div class="def-meta-row">
+            <span v-if="condMods.isDefenseless" class="def-cond-badge danger" title="Defenseless: Active defense is 0">Defenseless (0)</span>
+            <span v-else-if="condMods.isVulnerable" class="def-cond-badge warn" :title="`Vulnerable: Halved from base ${heroStore.defenseTotals.DODGE}`">Halved</span>
+            <span v-if="condMods.isProne" class="def-cond-badge bonus" title="Prone: +5 defense vs ranged attacks">+5 Ranged</span>
             <span v-if="enhDefenses.DODGE > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.DODGE}`">
               +{{ enhDefenses.DODGE }} Enh
             </span>
@@ -23,9 +26,9 @@
           </div>
         </div>
         <div class="def-body">
-          <button type="button" class="def-roll-btn" @click="rollDefense('Dodge', heroStore.defenseTotals.DODGE)" title="Click to Roll Dodge Check">
+          <button type="button" class="def-roll-btn" @click="rollDefense('Dodge', combatDefenses.DODGE)" title="Click to Roll Dodge Check">
             <i class="ri-dice-line"></i>
-            <span class="def-total">{{ heroStore.defenseTotals.DODGE >= 0 ? `+${heroStore.defenseTotals.DODGE}` : heroStore.defenseTotals.DODGE }}</span>
+            <span class="def-total">{{ combatDefenses.DODGE >= 0 ? `+${combatDefenses.DODGE}` : combatDefenses.DODGE }}</span>
             <span class="def-roll-label">ROLL</span>
           </button>
           <div class="def-stepper">
@@ -41,6 +44,9 @@
         <div class="def-header">
           <span class="def-name">Parry</span>
           <div class="def-meta-row">
+            <span v-if="condMods.isDefenseless" class="def-cond-badge danger" title="Defenseless: Active defense is 0">Defenseless (0)</span>
+            <span v-else-if="condMods.isVulnerable" class="def-cond-badge warn" :title="`Vulnerable: Halved from base ${heroStore.defenseTotals.PARRY}`">Halved</span>
+            <span v-if="condMods.isProne && !condMods.isDefenseless" class="def-cond-badge danger" title="Prone: -5 defense vs close attacks">-5 Close</span>
             <span v-if="enhDefenses.PARRY > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.PARRY}`">
               +{{ enhDefenses.PARRY }} Enh
             </span>
@@ -51,9 +57,9 @@
           </div>
         </div>
         <div class="def-body">
-          <button type="button" class="def-roll-btn" @click="rollDefense('Parry', heroStore.defenseTotals.PARRY)" title="Click to Roll Parry Check">
+          <button type="button" class="def-roll-btn" @click="rollDefense('Parry', combatDefenses.PARRY)" title="Click to Roll Parry Check">
             <i class="ri-dice-line"></i>
-            <span class="def-total">{{ heroStore.defenseTotals.PARRY >= 0 ? `+${heroStore.defenseTotals.PARRY}` : heroStore.defenseTotals.PARRY }}</span>
+            <span class="def-total">{{ combatDefenses.PARRY >= 0 ? `+${combatDefenses.PARRY}` : combatDefenses.PARRY }}</span>
             <span class="def-roll-label">ROLL</span>
           </button>
           <div class="def-stepper">
@@ -69,6 +75,9 @@
         <div class="def-header">
           <span class="def-name">Fortitude</span>
           <div class="def-meta-row">
+            <span v-if="condMods.checkPenalty !== 0" class="def-cond-badge danger" :title="condMods.isDisabled ? 'Disabled: -5 on resistance checks' : 'Impaired: -2 on resistance checks'">
+              {{ condMods.checkPenalty }} {{ condMods.isDisabled ? 'Disabled' : 'Impaired' }}
+            </span>
             <span v-if="enhDefenses.FORTITUDE > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.FORTITUDE}`">
               +{{ enhDefenses.FORTITUDE }} Enh
             </span>
@@ -76,9 +85,9 @@
           </div>
         </div>
         <div class="def-body">
-          <button type="button" class="def-roll-btn" @click="rollDefense('Fortitude', heroStore.defenseTotals.FORTITUDE)" title="Click to Roll Fortitude Check">
+          <button type="button" class="def-roll-btn" @click="rollDefense('Fortitude', combatDefenses.FORTITUDE)" title="Click to Roll Fortitude Check">
             <i class="ri-dice-line"></i>
-            <span class="def-total">{{ heroStore.defenseTotals.FORTITUDE >= 0 ? `+${heroStore.defenseTotals.FORTITUDE}` : heroStore.defenseTotals.FORTITUDE }}</span>
+            <span class="def-total">{{ combatDefenses.FORTITUDE >= 0 ? `+${combatDefenses.FORTITUDE}` : combatDefenses.FORTITUDE }}</span>
             <span class="def-roll-label">ROLL</span>
           </button>
           <div class="def-stepper">
@@ -94,6 +103,9 @@
         <div class="def-header">
           <span class="def-name">Will</span>
           <div class="def-meta-row">
+            <span v-if="condMods.checkPenalty !== 0" class="def-cond-badge danger" :title="condMods.isDisabled ? 'Disabled: -5 on resistance checks' : 'Impaired: -2 on resistance checks'">
+              {{ condMods.checkPenalty }} {{ condMods.isDisabled ? 'Disabled' : 'Impaired' }}
+            </span>
             <span v-if="enhDefenses.WILL > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.WILL}`">
               +{{ enhDefenses.WILL }} Enh
             </span>
@@ -101,9 +113,9 @@
           </div>
         </div>
         <div class="def-body">
-          <button type="button" class="def-roll-btn" @click="rollDefense('Will', heroStore.defenseTotals.WILL)" title="Click to Roll Will Check">
+          <button type="button" class="def-roll-btn" @click="rollDefense('Will', combatDefenses.WILL)" title="Click to Roll Will Check">
             <i class="ri-dice-line"></i>
-            <span class="def-total">{{ heroStore.defenseTotals.WILL >= 0 ? `+${heroStore.defenseTotals.WILL}` : heroStore.defenseTotals.WILL }}</span>
+            <span class="def-total">{{ combatDefenses.WILL >= 0 ? `+${combatDefenses.WILL}` : combatDefenses.WILL }}</span>
             <span class="def-roll-label">ROLL</span>
           </button>
           <div class="def-stepper">
@@ -119,6 +131,9 @@
         <div class="def-header">
           <span class="def-name">Toughness</span>
           <div class="def-meta-row">
+            <span v-if="condMods.defRollLost > 0" class="def-cond-badge danger" title="Defensive Roll advantage bonus lost while Vulnerable or Defenseless">
+              -{{ condMods.defRollLost }} Def Roll Lost
+            </span>
             <span v-if="enhDefenses.TOUGHNESS > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.TOUGHNESS}`">
               +{{ enhDefenses.TOUGHNESS }} Enh
             </span>
@@ -134,9 +149,9 @@
           </div>
         </div>
         <div class="def-body">
-          <button type="button" class="def-roll-btn" @click="rollDefense('Toughness', effectiveToughnessCheck)" title="Click to Roll Toughness Resistance">
+          <button type="button" class="def-roll-btn" @click="rollDefense('Toughness', combatDefenses.TOUGHNESS)" title="Click to Roll Toughness Resistance">
             <i class="ri-dice-line"></i>
-            <span class="def-total">{{ effectiveToughnessCheck >= 0 ? `+${effectiveToughnessCheck}` : effectiveToughnessCheck }}</span>
+            <span class="def-total">{{ combatDefenses.TOUGHNESS >= 0 ? `+${combatDefenses.TOUGHNESS}` : combatDefenses.TOUGHNESS }}</span>
             <span class="def-roll-label">ROLL</span>
           </button>
           <div class="def-stepper derived">
@@ -155,6 +170,9 @@ import { useUiStore } from '../../stores/uiStore.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
+
+const combatDefenses = computed(() => heroStore.effectiveCombatDefenses);
+const condMods = computed(() => heroStore.conditionModifiers);
 
 const enhDefenses = computed(() => {
   return heroStore.activeEnhancedTraits?.defenses || { DODGE: 0, PARRY: 0, FORTITUDE: 0, TOUGHNESS: 0, WILL: 0 };
@@ -187,14 +205,14 @@ const toughnessDerivedLabel = computed(() => {
   const parts = [];
   if (protectionBonus.value > 0) parts.push(`+${protectionBonus.value} Power`);
   if (equipmentArmorBonus.value > 0) parts.push(`+${equipmentArmorBonus.value} Armor`);
-  if (defensiveRollBonus.value > 0) parts.push(`+${defensiveRollBonus.value} Def Roll`);
+  if (defensiveRollBonus.value > 0) {
+    if (condMods.value.defRollLost > 0) {
+      parts.push(`0 Def Roll (Lost)`);
+    } else {
+      parts.push(`+${defensiveRollBonus.value} Def Roll`);
+    }
+  }
   return parts.length > 0 ? parts.join(' • ') : 'Via STA';
-});
-
-const effectiveToughnessCheck = computed(() => {
-  const baseToughness = heroStore.defenseTotals.TOUGHNESS;
-  const injuries = heroStore.character.injuries || 0;
-  return baseToughness - injuries;
 });
 
 function stepDefense(key, delta) {
@@ -203,7 +221,14 @@ function stepDefense(key, delta) {
 }
 
 function rollDefense(name, bonus) {
-  heroStore.rollCheck(`${name} Resistance`, bonus, null, 'Defense');
+  const extra = {};
+  if (condMods.value.checkPenalty !== 0 && (name === 'Fortitude' || name === 'Will')) {
+    extra.conditionPenalty = condMods.value.checkPenalty;
+  }
+  if (heroStore.character.injuries > 0 && name === 'Toughness') {
+    extra.injuryPenalty = -heroStore.character.injuries;
+  }
+  heroStore.rollCheck(`${name} Resistance`, bonus, null, 'Defense', extra);
 }
 </script>
 
@@ -268,5 +293,31 @@ function rollDefense(name, bonus) {
   background: #e11d48 !important;
   border-color: #f43f5e !important;
   box-shadow: 0 0 10px rgba(225, 29, 72, 0.4) !important;
+}
+
+.def-cond-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  padding: 0.08rem 0.35rem;
+  border-radius: var(--radius-xs);
+  text-transform: uppercase;
+}
+
+.def-cond-badge.danger {
+  color: #f87171;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+}
+
+.def-cond-badge.warn {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.def-cond-badge.bonus {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.35);
 }
 </style>

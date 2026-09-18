@@ -67,7 +67,7 @@ export const HQ_FEATURES = [
   { name: 'Holding Cells (Power Nullifying)', desc: 'Cells that suppress mutant/superhuman powers' },
   { name: 'Infirmary / Med-Bay', desc: 'Equipped medical bay (+2 to Treatment, stabilized care)' },
   { name: 'Isolated', desc: 'Located far from civilization (Arctic, ocean, mountain, desert)' },
-  { name: 'Laboratory', desc: 'Cutting-edge science & forensics analysis lab' },
+  { name: 'Laboratory', desc: 'Science and forensics analysis lab (+2 to Technology checks)' },
   { name: 'Library', desc: 'Extensive archives (+2 to Expertise research checks)' },
   { name: 'Living Space', desc: 'Comfortable bedrooms, kitchen, and living quarters' },
   { name: 'Power System (Backup)', desc: 'Self-sufficient nuclear or fusion generator' },

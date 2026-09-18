@@ -48,8 +48,8 @@
       >
         <div class="power-card-header">
           <div>
-            <span class="badge" :class="getTypeBadgeClass(power.type)" style="font-size: 0.68rem; margin-bottom: 0.25rem;">
-              {{ (power.type || 'standard').toUpperCase() }}
+            <span v-if="power.type && power.type !== 'standard'" class="badge" :class="getTypeBadgeClass(power.type)" style="font-size: 0.68rem; margin-bottom: 0.25rem;">
+              {{ power.type.toUpperCase() }}
             </span>
             <span v-if="power.activation && power.activation !== 'none'" class="badge" style="font-size: 0.68rem; margin-bottom: 0.25rem; margin-left: 0.35rem; background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3);">
               <i class="ri-timer-flash-line"></i> {{ power.activation === 'move' ? 'Move (-1 PP)' : 'Standard (-2 PP)' }}
