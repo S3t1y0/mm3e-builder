@@ -21,7 +21,7 @@
         @click="activeTab = 'powers'"
         title="Powers, arrays, and devices"
       >
-        <i class="ri-flashlight-line"></i>
+        <i class="ri-fire-line"></i>
         <span>Powers</span>
         <span class="hub-tab-badge">{{ powersCount }}</span>
       </button>

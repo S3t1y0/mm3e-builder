@@ -958,8 +958,8 @@ function calculateModSubtotal(mod, isFlaw = false) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: rgba(0, 111, 184, 0.1);
+  border: 1px solid rgba(0, 111, 184, 0.25);
   padding: 0.25rem 0.65rem;
   border-radius: var(--radius-xs);
 }
@@ -1034,7 +1034,7 @@ function calculateModSubtotal(mod, isFlaw = false) {
 .text-input:focus,
 .select-input:focus {
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 2px rgba(220, 38, 38, 0.2);
+  box-shadow: 0 0 0 2px rgba(0, 111, 184, 0.25);
 }
 
 .rank-stepper-row {
@@ -1115,7 +1115,7 @@ function calculateModSubtotal(mod, isFlaw = false) {
 }
 
 .param-value.highlight {
-  color: #38bdf8;
+  color: var(--text-primary);
 }
 
 .canvas-modifiers-section {
@@ -1201,8 +1201,10 @@ function calculateModSubtotal(mod, isFlaw = false) {
   gap: 0.35rem;
 }
 
-.extras-head { color: #34d399; }
-.flaws-head { color: #f87171; }
+.extras-head { color: var(--text-secondary); }
+.flaws-head { color: var(--text-secondary); }
+.extras-head i { color: #34d399; }
+.flaws-head i { color: #f87171; }
 
 .applied-cards-grid {
   display: grid;
@@ -1541,8 +1543,8 @@ function calculateModSubtotal(mod, isFlaw = false) {
    BASE EFFECT BANNER & CATALOG LAUNCHER
    ========================================================================== */
 .base-effect-card.split-layout {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.95));
-  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 1.15rem 1.25rem;
   display: grid;
@@ -1550,7 +1552,7 @@ function calculateModSubtotal(mod, isFlaw = false) {
   gap: 1.5rem;
   align-items: stretch;
   position: relative;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 @media (max-width: 900px) {
@@ -1577,8 +1579,8 @@ function calculateModSubtotal(mod, isFlaw = false) {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-xs);
-  background: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(220, 38, 38, 0.4);
+  background: rgba(0, 111, 184, 0.12);
+  border: 1px solid rgba(0, 111, 184, 0.3);
   color: var(--accent-primary);
   display: flex;
   align-items: center;
@@ -1611,10 +1613,10 @@ function calculateModSubtotal(mod, isFlaw = false) {
 
 .base-effect-cost-tag {
   font-size: 0.74rem;
-  font-weight: 800;
-  color: #fbbf24;
-  background: rgba(245, 158, 11, 0.12);
-  border: 1px solid rgba(245, 158, 11, 0.25);
+  font-weight: 700;
+  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
   padding: 0.12rem 0.45rem;
   border-radius: var(--radius-xs);
   font-variant-numeric: tabular-nums;
@@ -1633,27 +1635,27 @@ function calculateModSubtotal(mod, isFlaw = false) {
 }
 
 .btn-open-effects-catalog {
-  background: linear-gradient(135deg, var(--accent-primary), #b91c1c);
+  background: var(--accent-primary);
   color: #fff;
-  border: none;
+  border: 1px solid var(--accent-primary-hover);
   border-radius: var(--radius-xs);
   padding: 0.5rem 0.85rem;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.45rem;
-  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.35);
-  transition: filter var(--trans-fast), transform var(--trans-fast), box-shadow var(--trans-fast);
+  box-shadow: var(--shadow-sm);
+  transition: background-color var(--trans-fast), border-color var(--trans-fast), transform var(--trans-fast);
   width: 100%;
 }
 
 .btn-open-effects-catalog:hover {
-  filter: brightness(1.15);
+  background: var(--accent-primary-hover);
+  border-color: var(--accent-primary);
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.5);
 }
 
 .btn-open-effects-catalog:active {
@@ -1771,13 +1773,13 @@ function calculateModSubtotal(mod, isFlaw = false) {
 }
 
 .btn-add-linked {
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #34d399;
+  background: rgba(0, 111, 184, 0.12);
+  border: 1px solid rgba(0, 111, 184, 0.3);
+  color: #38bdf8;
   border-radius: var(--radius-xs);
   padding: 0.35rem 0.75rem;
   font-size: 0.76rem;
-  font-weight: 800;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -1786,8 +1788,9 @@ function calculateModSubtotal(mod, isFlaw = false) {
 }
 
 .btn-add-linked:hover {
-  background: rgba(16, 185, 129, 0.22);
-  border-color: #34d399;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary-hover);
+  color: #fff;
 }
 
 .btn-add-linked:active {
@@ -1825,8 +1828,7 @@ function calculateModSubtotal(mod, isFlaw = false) {
    ========================================================================== */
 .linked-studio-card {
   background: rgba(15, 23, 42, 0.75);
-  border: 1px solid rgba(6, 182, 212, 0.28);
-  border-left: 3.5px solid #06b6d4;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 1rem 1.15rem;
   display: flex;
@@ -1838,9 +1840,8 @@ function calculateModSubtotal(mod, isFlaw = false) {
 }
 
 .linked-studio-card:hover {
-  border-color: rgba(6, 182, 212, 0.45);
-  border-left-color: #22d3ee;
-  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.08);
+  border-color: var(--border-color-hover, rgba(255, 255, 255, 0.2));
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .linked-studio-card.is-collapsed {
@@ -2081,37 +2082,37 @@ function calculateModSubtotal(mod, isFlaw = false) {
 
 /* Linked Base Card Overrides */
 .base-effect-card.split-layout.linked-base-card {
-  background: linear-gradient(135deg, rgba(15, 23, 42, 0.92), rgba(8, 47, 73, 0.55));
-  border: 1px solid rgba(6, 182, 212, 0.3);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow-sm);
 }
 
 .linked-icon-box {
-  background: rgba(6, 182, 212, 0.15) !important;
-  border: 1px solid rgba(6, 182, 212, 0.4) !important;
-  color: #06b6d4 !important;
+  background: rgba(0, 111, 184, 0.12) !important;
+  border: 1px solid rgba(0, 111, 184, 0.3) !important;
+  color: var(--accent-primary) !important;
 }
 
 .linked-badge-accent {
-  background: rgba(6, 182, 212, 0.2) !important;
-  color: #67e8f9 !important;
-  border: 1px solid rgba(6, 182, 212, 0.4) !important;
+  background: rgba(0, 111, 184, 0.15) !important;
+  color: #38bdf8 !important;
+  border: 1px solid rgba(0, 111, 184, 0.3) !important;
 }
 
 .linked-cost-pill {
-  color: #38bdf8 !important;
-  background: rgba(56, 189, 248, 0.12) !important;
-  border: 1px solid rgba(56, 189, 248, 0.25) !important;
+  color: var(--text-secondary) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  border: 1px solid var(--border-color) !important;
 }
 
 .linked-catalog-btn {
-  background: linear-gradient(135deg, #0891b2, #0e7490) !important;
-  box-shadow: 0 2px 10px rgba(6, 182, 212, 0.3) !important;
+  background: var(--accent-primary) !important;
+  border: 1px solid var(--accent-primary-hover) !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 .linked-catalog-btn:hover {
-  filter: brightness(1.15);
-  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.45) !important;
+  background: var(--accent-primary-hover) !important;
 }
 
 /* Linked Rank & Parameters Row */
@@ -2166,7 +2167,11 @@ function calculateModSubtotal(mod, isFlaw = false) {
   background: var(--bg-surface);
   border: 1.5px dashed var(--border-subtle);
   border-radius: var(--radius-xs);
-  padding: 1.25rem;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   cursor: pointer;
   transition: border-color var(--trans-fast), background-color var(--trans-fast), transform var(--trans-fast);
@@ -2197,11 +2202,19 @@ function calculateModSubtotal(mod, isFlaw = false) {
   font-weight: 800;
   color: var(--text-secondary);
   margin-bottom: 0.15rem;
+  max-width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 
 .empty-linked-sub {
   font-size: 0.72rem;
   color: var(--text-muted);
   margin: 0;
+  max-width: 65ch;
+  margin-left: auto;
+  margin-right: auto;
+  text-align: center;
 }
 </style>

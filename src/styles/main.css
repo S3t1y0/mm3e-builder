@@ -2,27 +2,28 @@
    Adheres to Better UI, Better Typography, Better Layout, and Animation Vocabulary principles */
 
 :root {
-  /* Surface & Background Colors (Calibrated Zinc Neutral Base) */
-  --bg-app: #09090b;       /* Zinc-950 */
-  --bg-card: #121215;      /* Zinc-900 surface */
-  --bg-card-hover: #18181c;
-  --bg-elevated: #1e1e24;  /* Zinc-800 */
-  --bg-input: #101014;
+  /* Surface & Background Colors (Demiplane Deep Midnight Base) */
+  --bg-app: #080d1a;       /* Deep atmospheric midnight */
+  --bg-card: #0f172a;      /* Solid slate surface */
+  --bg-surface: #0f172a;   /* Solid surface baseline */
+  --bg-card-hover: #172033;
+  --bg-elevated: #1e293b;
+  --bg-input: #0b1122;
 
-  /* Structural Borders (Subtle hairline refraction) */
+  /* Structural Borders (Subtle hairline definition) */
   --border-color: rgba(255, 255, 255, 0.08);
   --border-subtle: rgba(255, 255, 255, 0.04);
-  --border-focus: #e11d48;
+  --border-focus: #2a8fd6;
 
-  /* Typography Colors */
-  --text-primary: #f4f4f5;   /* Zinc-100 */
-  --text-secondary: #a1a1aa; /* Zinc-400 */
-  --text-muted: #71717a;     /* Zinc-500 */
+  /* Typography Colors (Calibrated for WCAG AA >= 4.5:1 on dark base) */
+  --text-primary: #f8fafc;   /* White / Slate-50 */
+  --text-secondary: #94a3b8; /* Slate-400 */
+  --text-muted: #cbd5e1;     /* Slate-300 (Contrast > 11:1, exceeds WCAG AA) */
 
-  /* Singular High-Agency Brand Accent: Signal Crimson (Desaturated < 80%) */
-  --accent-primary: #e11d48;
-  --accent-primary-hover: #be123c;
-  --accent-secondary: #38bdf8;
+  /* Demiplane Brand Accents */
+  --accent-primary: #006fb8;
+  --accent-primary-hover: #005a96;
+  --accent-secondary: #2a8fd6;
   --accent-emerald: #10b981;
   --accent-amber: #f59e0b;
   --accent-danger: #ef4444;
@@ -35,12 +36,12 @@
   --radius-xl: 16px;
   --radius-pill: 9999px;
 
-  /* Multi-layered Transparent Shadows & Liquid Glass Refraction */
+  /* Multi-layered Transparent Shadows (Restrained Glass / Elevation) */
   --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
   --shadow-md: 0 4px 10px -2px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.25);
   --shadow-lg: 0 16px 36px -4px rgba(0, 0, 0, 0.65), 0 4px 8px -2px rgba(0, 0, 0, 0.3);
-  --shadow-glass: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 16px 36px -4px rgba(0, 0, 0, 0.65);
-  --shadow-glow: none; /* Banned neon outer glow replaced with crisp hairline border */
+  --shadow-glass: 0 16px 36px -4px rgba(0, 0, 0, 0.65);
+  --shadow-glow: none;
 
   /* Precise Transition Specificity */
   --trans-props: transform, opacity, background-color, border-color, box-shadow, color;
@@ -49,11 +50,13 @@
   --trans-smooth: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 
   /* Typography Metrics */
-  --font-sans: 'Geist', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-heading: 'Barlow', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-sans: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
   --font-mono: 'Geist Mono', 'JetBrains Mono', ui-monospace, monospace;
   --line-height-tight: 1.15;
   --line-height-body: 1.55;
-  --letter-spacing-tight: -0.03em;
+  --letter-spacing-tight: -0.02em;
+
   /* Systemic Layer Contexts (Z-Index Restraint) */
   --z-normal: 1;
   --z-dropdown: 20;
@@ -90,12 +93,12 @@ html {
 }
 
 :focus-visible {
-  outline: 2px solid var(--accent-primary);
+  outline: 2px solid var(--accent-secondary);
   outline-offset: 2px;
 }
 
 input::placeholder, textarea::placeholder {
-  color: #71717a;
+  color: var(--text-secondary);
   opacity: 1;
 }
 
@@ -117,11 +120,12 @@ body {
 
 /* TYPOGRAPHY STANDARDIZATION */
 h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
   color: var(--text-primary);
   line-height: var(--line-height-tight);
   letter-spacing: var(--letter-spacing-tight);
   text-wrap: balance;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 p {
@@ -203,6 +207,19 @@ button:active:not(:disabled),
 .res-status-pill:active,
 .dndb-hub-tab-btn:active {
   transform: scale(0.96) translateY(1px);
+}
+
+/* Form Controls: Accessible Select & Options */
+select {
+  background-color: var(--bg-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+select option,
+select optgroup {
+  background-color: #0f172a;
+  color: #f8fafc;
 }
 
 /* Custom Scrollbar */
@@ -1367,3 +1384,78 @@ i[class^="ri-"], i[class*=" ri-"] {
     padding: 0 !important;
   }
 }
+
+/* ACCESSIBILITY & MOBILE TOUCH TARGETS (R-03 & antislop-human) */
+.step-btn,
+.step-btn-xs,
+.step-btn-tiny,
+.btn-delete-row,
+.rank-step-btn,
+.def-roll-btn,
+.filter-pill-btn,
+.nav-tab-btn {
+  position: relative;
+}
+
+@media (pointer: coarse), (max-width: 768px) {
+  .step-btn::after,
+  .step-btn-xs::after,
+  .step-btn-tiny::after,
+  .btn-delete-row::after,
+  .rank-step-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    min-width: 44px;
+    min-height: 44px;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   MODAL SCROLL CONTAINMENT & BODY SCROLL LOCK
+   Strictly prevents background page scroll chaining when modal/dialog is open
+   ------------------------------------------------------------------------- */
+html.modal-open,
+body.modal-open {
+  overflow: hidden !important;
+  overscroll-behavior: none !important;
+}
+
+.modal-backdrop,
+.modal-overlay,
+.modal-card,
+.modal-dialog,
+.modal-content,
+.modal-body,
+.r20-modal-overlay,
+.r20-modal-card,
+.r20-modal-body,
+.spec-modal-backdrop,
+.spec-modal-card,
+.spec-modal-body,
+.preset-modal-backdrop,
+.preset-modal-box,
+.modal-tab-body,
+.comp-modal-backdrop,
+.narrative-modal-box,
+.narrative-mode-body,
+.comp-modal-dialog,
+.comp-modal-body,
+.eq-modal-backdrop,
+.eq-modal-body,
+.wizard-spec-modal-overlay,
+.wizard-spec-modal-card,
+.wizard-spec-modal-body,
+.power-studio-fullscreen-window,
+.dice-roll-hud-dock,
+.tactical-roll-card,
+[role="dialog"],
+[data-modal] {
+  overscroll-behavior: contain !important;
+}
+

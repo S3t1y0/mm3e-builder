@@ -14,6 +14,15 @@
             placeholder="Hero Name / Codename"
             @change="heroStore.pushHistory()"
           />
+          <span v-if="heroStore.isDead" class="hero-status-pill deceased" title="Hero has suffered 3 degrees of failure and is deceased">
+            <i class="ri-skull-line"></i> DECEASED
+          </span>
+          <span v-else-if="heroStore.isDying" class="hero-status-pill dying" title="Hero is near death. Fortitude DC 15 required each round">
+            <i class="ri-heart-pulse-fill"></i> DYING ({{ heroStore.character.dyingFailures || 0 }}/3)
+          </span>
+          <span v-else-if="heroStore.character.isDyingStable && !heroStore.isDying" class="hero-status-pill stable" title="Hero has been stabilized and remains incapacitated">
+            <i class="ri-heart-add-line"></i> STABILIZED
+          </span>
         </div>
         <div class="dndb-sub-identity-row">
           <input
@@ -190,3 +199,37 @@ function rollInitiative() {
   heroStore.rollInitiative();
 }
 </script>
+
+<style scoped>
+.hero-status-pill {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 800;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--radius-xs, 4px);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.hero-status-pill.deceased {
+  background: rgba(153, 27, 27, 0.45);
+  border: 1px solid #ef4444;
+  color: #ffffff;
+}
+
+.hero-status-pill.dying {
+  background: rgba(225, 29, 72, 0.2);
+  border: 1px solid rgba(225, 29, 72, 0.5);
+  color: #fca5a5;
+}
+
+.hero-status-pill.stable {
+  background: rgba(16, 185, 129, 0.15);
+  border: 1px solid rgba(16, 185, 129, 0.4);
+  color: #a7f3d0;
+}
+</style>
+

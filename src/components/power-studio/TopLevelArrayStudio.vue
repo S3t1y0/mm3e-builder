@@ -206,8 +206,8 @@ const capacityPercent = computed(() => {
    EMPTY ARRAY INVITATION BANNER
    ========================================================================== */
 .array-empty-invitation {
-  background: linear-gradient(135deg, rgba(30, 41, 59, 0.6), rgba(15, 23, 42, 0.85));
-  border: 1px dashed rgba(168, 85, 247, 0.35);
+  background: var(--bg-card);
+  border: 1px dashed var(--border-color);
   border-radius: var(--radius-sm);
   padding: 0.85rem 1.15rem;
   display: flex;
@@ -229,8 +229,8 @@ const capacityPercent = computed(() => {
   width: 32px;
   height: 32px;
   border-radius: var(--radius-xs);
-  background: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
+  background: rgba(0, 111, 184, 0.12);
+  color: var(--accent-primary);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -242,7 +242,7 @@ const capacityPercent = computed(() => {
   font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #c084fc;
+  color: var(--text-muted);
   letter-spacing: 0.06em;
 }
 
@@ -262,9 +262,9 @@ const capacityPercent = computed(() => {
 }
 
 .btn-enable-array {
-  background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.4);
-  color: #c084fc;
+  background: rgba(0, 111, 184, 0.12);
+  border: 1px solid rgba(0, 111, 184, 0.35);
+  color: #38bdf8;
   border-radius: var(--radius-xs);
   padding: 0.55rem 0.95rem;
   font-size: 0.78rem;
@@ -277,9 +277,9 @@ const capacityPercent = computed(() => {
 }
 
 .btn-enable-array:hover {
-  background: #a855f7;
+  background: var(--accent-primary);
   color: #fff;
-  box-shadow: 0 4px 12px rgba(168, 85, 247, 0.35);
+  box-shadow: 0 4px 12px rgba(0, 111, 184, 0.35);
 }
 
 .btn-enable-array:active {
@@ -316,7 +316,7 @@ const capacityPercent = computed(() => {
   gap: 0.35rem;
   font-size: 0.72rem;
   font-weight: 800;
-  color: #c084fc;
+  color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
@@ -473,7 +473,7 @@ const capacityPercent = computed(() => {
 }
 
 .dyn-icon {
-  color: #c084fc;
+  color: #38bdf8;
 }
 
 .tab-mode-name {
@@ -522,9 +522,9 @@ const capacityPercent = computed(() => {
 }
 
 .dyn-badge-btn.dyn {
-  color: #c084fc;
-  border-color: rgba(168, 85, 247, 0.4);
-  background: rgba(168, 85, 247, 0.18);
+  color: #38bdf8;
+  border-color: rgba(0, 111, 184, 0.4);
+  background: rgba(0, 111, 184, 0.18);
 }
 
 .dyn-badge-btn:hover {
@@ -558,8 +558,8 @@ const capacityPercent = computed(() => {
   align-items: center;
   gap: 0.3rem;
   background: var(--bg-surface);
-  border: 1px dashed rgba(168, 85, 247, 0.4);
-  color: #c084fc;
+  border: 1px dashed rgba(0, 111, 184, 0.4);
+  color: #38bdf8;
   padding: 0.4rem 0.75rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
@@ -570,9 +570,9 @@ const capacityPercent = computed(() => {
 }
 
 .btn-add-mode-pill:hover {
-  background: rgba(168, 85, 247, 0.12);
-  border-color: #a855f7;
-  color: #e9d5ff;
+  background: rgba(0, 111, 184, 0.15);
+  border-color: var(--accent-primary);
+  color: #fff;
 }
 
 .btn-add-mode-pill:active {

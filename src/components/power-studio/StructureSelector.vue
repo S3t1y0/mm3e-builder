@@ -198,16 +198,16 @@ const builderStore = usePowerBuilderStore();
 }
 
 .structure-pill-card.active {
-  background: rgba(220, 38, 38, 0.08);
+  background: rgba(0, 111, 184, 0.1);
   border-color: var(--accent-primary);
-  box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 0 0 1px rgba(0, 111, 184, 0.3);
 }
 
 .pill-icon {
   width: 32px;
   height: 32px;
   border-radius: var(--radius-xs);
-  background: rgba(220, 38, 38, 0.15);
+  background: rgba(0, 111, 184, 0.12);
   color: var(--accent-primary);
   display: flex;
   align-items: center;
@@ -217,13 +217,13 @@ const builderStore = usePowerBuilderStore();
 }
 
 .pill-icon.array {
-  background: rgba(168, 85, 247, 0.15);
-  color: #c084fc;
+  background: rgba(0, 111, 184, 0.15);
+  color: #38bdf8;
 }
 
 .pill-icon.device {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
+  background: rgba(0, 111, 184, 0.15);
+  color: #38bdf8;
 }
 
 .pill-text {
@@ -281,7 +281,7 @@ const builderStore = usePowerBuilderStore();
 }
 
 .activation-title i {
-  color: #f59e0b;
+  color: var(--accent-primary);
   font-size: 0.95rem;
 }
 
@@ -296,9 +296,9 @@ const builderStore = usePowerBuilderStore();
 }
 
 .activation-chip.has-discount {
-  background: rgba(245, 158, 11, 0.15);
-  border-color: rgba(245, 158, 11, 0.4);
-  color: #fbbf24;
+  background: rgba(0, 111, 184, 0.12);
+  border-color: rgba(0, 111, 184, 0.3);
+  color: #38bdf8;
 }
 
 .activation-help {
@@ -332,13 +332,13 @@ const builderStore = usePowerBuilderStore();
 }
 
 .activation-radio-card.active {
-  background: rgba(245, 158, 11, 0.08);
-  border-color: #f59e0b;
-  box-shadow: 0 0 0 1px rgba(245, 158, 11, 0.25);
+  background: rgba(0, 111, 184, 0.1);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 1px rgba(0, 111, 184, 0.3);
 }
 
 .activation-radio-card input[type="radio"] {
-  accent-color: #f59e0b;
+  accent-color: var(--accent-primary);
   cursor: pointer;
 }
 
@@ -376,8 +376,8 @@ const builderStore = usePowerBuilderStore();
 }
 
 .act-cost-badge.discount {
-  background: rgba(245, 158, 11, 0.2);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.35);
+  background: rgba(0, 111, 184, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(0, 111, 184, 0.3);
 }
 </style>

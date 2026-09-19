@@ -8,9 +8,8 @@
 
     <!-- 3-Column Tabletop Grid -->
     <div class="dndb-sheet-grid" ref="sheetGridRef">
-      <!-- COLUMN 1 (LEFT): INITIATIVE, DEFENSES & SENSES -->
+      <!-- COLUMN 1 (LEFT): DEFENSES & SENSES -->
       <div class="dndb-col dndb-col-left" ref="colLeftRef">
-        <CombatInitiativeCard />
         <DefensesBlock />
         <SensesCard />
       </div>
@@ -33,7 +32,6 @@ import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import HeroHeader from './HeroHeader.vue';
 import AbilitiesMatrix from './AbilitiesMatrix.vue';
 import DefensesBlock from './DefensesBlock.vue';
-import CombatInitiativeCard from './CombatInitiativeCard.vue';
 import SensesCard from './SensesCard.vue';
 import SkillsTable from './SkillsTable.vue';
 import TabbedActionHub from './TabbedActionHub.vue';

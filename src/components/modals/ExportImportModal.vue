@@ -9,7 +9,7 @@
           </div>
           <div>
             <h2 class="modal-title">Storage & Hero Backup</h2>
-            <p class="modal-sub">Kelola penyimpanan lokal browser, unduh cadangan JSON, atau impor hero</p>
+            <p class="modal-sub">Manage browser local storage, download JSON backups, or import characters</p>
           </div>
         </div>
         <button class="btn btn-ghost btn-sm" @click="uiStore.closeModal('exportImport')">
@@ -52,13 +52,13 @@
               <span class="status-pulse-dot" :class="{ 'saving-pulse': heroStore.isSaving }"></span>
               <div class="vault-status-title-group">
                 <div class="vault-status-title">
-                  Penyimpanan Otomatis Aktif
+                  Auto-Save Active
                   <span class="badge badge-success-subtle">
-                    <i class="ri-shield-check-line"></i> Terproteksi
+                    <i class="ri-shield-check-line"></i> Protected
                   </span>
                 </div>
                 <div class="vault-status-desc">
-                  Data hero tersimpan otomatis ke browser Anda setiap kali ada perubahan. Jika tab tertutup atau browser terhenti, karakter Anda tidak akan hilang.
+                  Hero data automatically saves to your browser with every change. Your character will not be lost if the tab closes or browser restarts.
                 </div>
               </div>
             </div>
@@ -67,35 +67,35 @@
                 class="btn btn-secondary btn-sm"
                 @click="handleForceSave"
                 :disabled="heroStore.isSaving"
-                title="Simpan paksa ke LocalStorage sekarang"
+                title="Force save to LocalStorage now"
               >
                 <i :class="heroStore.isSaving ? 'ri-loader-4-line spin' : 'ri-save-line'"></i>
-                <span>{{ heroStore.isSaving ? 'Menyimpan...' : 'Simpan Sekarang' }}</span>
+                <span>{{ heroStore.isSaving ? 'Saving...' : 'Save Now' }}</span>
               </button>
               <button
                 class="btn btn-primary btn-sm"
                 @click="handleSaveSnapshot"
-                title="Simpan slot backup permanen ke vault"
+                title="Save permanent backup slot to vault"
               >
                 <i class="ri-bookmark-3-line"></i>
-                <span>Simpan Snapshot ke Vault</span>
+                <span>Save Snapshot to Vault</span>
               </button>
             </div>
           </div>
 
           <div class="vault-meta-row mt-3">
             <div class="vault-meta-item">
-              <span class="meta-label">Hero Aktif:</span>
+              <span class="meta-label">Active Hero:</span>
               <strong class="meta-val">{{ heroStore.character.name || 'Hero Name' }} (PL {{ heroStore.character.powerLevel || 10 }})</strong>
             </div>
             <div class="vault-meta-item">
               <span class="meta-label">Status:</span>
               <span class="meta-val text-accent">
-                {{ heroStore.isSaving ? 'Menyimpan ke memori...' : 'Tersimpan aman' }}
+                {{ heroStore.isSaving ? 'Saving to memory...' : 'Safely Saved' }}
               </span>
             </div>
             <div class="vault-meta-item">
-              <span class="meta-label">Terakhir Disimpan:</span>
+              <span class="meta-label">Last Saved:</span>
               <span class="meta-val">{{ formattedLastSaved }}</span>
             </div>
           </div>
@@ -106,12 +106,12 @@
           <div class="roster-section-header">
             <div>
               <h3 class="roster-title">
-                <i class="ri-folder-user-line"></i> Daftar Slot Karakter di Vault
+                <i class="ri-folder-user-line"></i> Character Vault Slots
               </h3>
-              <p class="roster-subtitle">Simpan beberapa profil karakter atau checkpoint versi tanpa perlu mengunduh berkas.</p>
+              <p class="roster-subtitle">Store multiple character profiles or version checkpoints without downloading files.</p>
             </div>
             <div class="roster-badge-count">
-              {{ heroStore.savedRoster?.length || 0 }} Slot Tersimpan
+              {{ heroStore.savedRoster?.length || 0 }} Saved Slots
             </div>
           </div>
 
@@ -120,12 +120,12 @@
             <div class="empty-vault-icon">
               <i class="ri-inbox-archive-line"></i>
             </div>
-            <div class="empty-vault-title">Belum Ada Slot Karakter Tersimpan</div>
+            <div class="empty-vault-title">No Saved Character Slots</div>
             <div class="empty-vault-sub">
-              Karakter aktif saat ini sudah aman di penyimpanan otomatis (auto-save). Anda dapat membuat snapshot permanen untuk berganti karakter kapan saja.
+              Your active character is already secured by auto-save. Create a permanent snapshot to switch characters anytime.
             </div>
             <button class="btn btn-secondary btn-sm mt-3" @click="handleSaveSnapshot">
-              <i class="ri-bookmark-3-line"></i> Simpan Karakter Ini ke Slot Vault
+              <i class="ri-bookmark-3-line"></i> Save Active Hero to Vault
             </button>
           </div>
 
@@ -156,21 +156,21 @@
                 <button
                   class="btn btn-outline-primary btn-sm"
                   @click="handleLoadSlot(slot)"
-                  title="Muat karakter ini ke sheet aktif"
+                  title="Load this character into active sheet"
                 >
-                  <i class="ri-login-box-line"></i> Muat
+                  <i class="ri-login-box-line"></i> Load
                 </button>
                 <button
                   class="btn btn-secondary btn-sm"
                   @click="handleExportSlot(slot)"
-                  title="Unduh JSON file untuk karakter ini"
+                  title="Download JSON file for this character"
                 >
                   <i class="ri-download-2-line"></i>
                 </button>
                 <button
                   class="btn btn-ghost-danger btn-sm"
                   @click="handleDeleteSlot(slot)"
-                  title="Hapus slot ini dari vault"
+                  title="Delete this slot from vault"
                 >
                   <i class="ri-delete-bin-line"></i>
                 </button>
@@ -183,14 +183,14 @@
         <div class="vault-storage-footer mt-3">
           <div class="storage-usage-info">
             <i class="ri-database-2-line"></i>
-            <span>Pemakaian Browser Storage: <strong>~{{ totalStorageKb }} KB</strong> (HTML5 LocalStorage)</span>
+            <span>Browser Storage Usage: <strong>~{{ totalStorageKb }} KB</strong> (HTML5 LocalStorage)</span>
           </div>
           <button
             v-if="heroStore.savedRoster && heroStore.savedRoster.length > 0"
             class="btn btn-ghost-danger btn-xs"
             @click="handleClearAllVault"
           >
-            <i class="ri-delete-bin-2-line"></i> Bersihkan Semua Slot
+            <i class="ri-delete-bin-2-line"></i> Clear All Slots
           </button>
         </div>
       </div>
@@ -347,7 +347,7 @@ const exportSizeKb = computed(() => {
 });
 
 const formattedLastSaved = computed(() => {
-  if (!heroStore.lastSavedTimestamp) return 'Belum disimpan';
+  if (!heroStore.lastSavedTimestamp) return 'Never saved';
   const d = new Date(heroStore.lastSavedTimestamp);
   return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 });
@@ -378,28 +378,28 @@ function formatSlotDate(ts) {
 
 function handleForceSave() {
   heroStore.saveToStorage();
-  uiStore.showToast('Data karakter berhasil disimpan ke penyimpanan lokal!', 'success');
+  uiStore.showToast('Character data saved to local storage!', 'success');
 }
 
 function handleSaveSnapshot() {
   const heroName = heroStore.character.name?.trim() || 'Hero Name';
   const res = heroStore.saveCurrentToRoster(heroName);
   if (res) {
-    uiStore.showToast(`Snapshot "${heroName}" berhasil disimpan ke Vault!`, 'success');
+    uiStore.showToast(`Snapshot "${heroName}" saved to Vault!`, 'success');
   } else {
-    uiStore.showToast('Gagal menyimpan snapshot ke Vault.', 'error');
+    uiStore.showToast('Failed to save snapshot to Vault.', 'error');
   }
 }
 
 function handleLoadSlot(slot) {
   if (!slot || !slot.id) return;
-  if (confirm(`Muat hero "${slot.name || 'Hero'}" ke sheet aktif? Perubahan yang belum tersimpan akan tergantikan.`)) {
+  if (confirm(`Load hero "${slot.name || 'Hero'}" into active sheet? Any unsaved changes will be overwritten.`)) {
     const success = heroStore.loadFromRoster(slot.id);
     if (success) {
-      uiStore.showToast(`Hero "${slot.name || 'Hero'}" berhasil dimuat ke sheet!`, 'success');
+      uiStore.showToast(`Hero "${slot.name || 'Hero'}" loaded into sheet!`, 'success');
       uiStore.closeModal('exportImport');
     } else {
-      uiStore.showToast('Gagal memuat karakter dari slot ini.', 'error');
+      uiStore.showToast('Failed to load character from this slot.', 'error');
     }
   }
 }
@@ -407,21 +407,21 @@ function handleLoadSlot(slot) {
 function handleExportSlot(slot) {
   if (!slot?.character) return;
   downloadCharacterJson(slot.character);
-  uiStore.showToast(`File JSON "${slot.name || 'Hero'}" telah diunduh!`, 'success');
+  uiStore.showToast(`JSON file for "${slot.name || 'Hero'}" downloaded!`, 'success');
 }
 
 function handleDeleteSlot(slot) {
   if (!slot || !slot.id) return;
-  if (confirm(`Hapus slot "${slot.name || 'Hero'}" dari Vault lokal?`)) {
+  if (confirm(`Delete slot "${slot.name || 'Hero'}" from local Vault?`)) {
     heroStore.deleteFromRoster(slot.id);
-    uiStore.showToast(`Slot "${slot.name || 'Hero'}" berhasil dihapus.`, 'info');
+    uiStore.showToast(`Slot "${slot.name || 'Hero'}" deleted.`, 'info');
   }
 }
 
 function handleClearAllVault() {
-  if (confirm('PERINGATAN: Apakah Anda yakin ingin menghapus SEMUA slot hero di Vault lokal?')) {
+  if (confirm('WARNING: Are you sure you want to delete ALL hero slots in local Vault?')) {
     heroStore.clearAllRoster();
-    uiStore.showToast('Semua slot Vault berhasil dibersihkan.', 'info');
+    uiStore.showToast('All Vault slots cleared.', 'info');
   }
 }
 
@@ -527,6 +527,7 @@ watch(() => uiStore.modals.exportImport, (open) => {
   align-items: center;
   justify-content: center;
   padding: 1.5rem;
+  overscroll-behavior: contain;
 }
 
 .modal-card {
@@ -540,6 +541,7 @@ watch(() => uiStore.modals.exportImport, (open) => {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  overscroll-behavior: contain;
 }
 
 .modal-header {
@@ -622,6 +624,7 @@ watch(() => uiStore.modals.exportImport, (open) => {
   padding: 1.5rem;
   overflow-y: auto;
   flex: 1;
+  overscroll-behavior: contain;
 }
 
 /* VAULT STATUS CARD */

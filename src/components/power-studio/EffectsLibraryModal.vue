@@ -306,10 +306,10 @@ function selectEffect(effectName) {
 }
 
 .filter-chip.active {
-  background: #dc2626;
-  border-color: #ef4444;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary-hover);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 111, 184, 0.35);
 }
 
 .effects-library-dialog {
@@ -427,14 +427,14 @@ function selectEffect(effectName) {
 
 .effect-card:hover {
   background: rgba(25, 25, 35, 0.85);
-  border-color: rgba(220, 38, 38, 0.35);
+  border-color: rgba(0, 111, 184, 0.4);
   transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
 .effect-card.active {
-  border-color: #34d399;
-  background: rgba(16, 185, 129, 0.06);
+  border-color: var(--accent-primary);
+  background: rgba(0, 111, 184, 0.08);
 }
 
 .effect-card-header {
@@ -540,8 +540,8 @@ function selectEffect(effectName) {
 }
 
 .btn-select-effect {
-  background: #dc2626;
-  border: 1px solid #ef4444;
+  background: var(--accent-primary);
+  border: 1px solid var(--accent-primary-hover);
   color: #fff;
   font-size: 0.76rem;
   font-weight: 800;
@@ -556,18 +556,18 @@ function selectEffect(effectName) {
 }
 
 .btn-select-effect:hover {
-  background: #ef4444;
+  background: var(--accent-primary-hover);
 }
 
 .btn-select-effect.btn-selected {
-  background: rgba(16, 185, 129, 0.2);
-  border-color: #10b981;
-  color: #6ee7b7;
+  background: rgba(0, 111, 184, 0.2);
+  border-color: var(--accent-primary);
+  color: #38bdf8;
 }
 
 .btn-select-effect.btn-selected:hover {
-  background: #10b981;
-  color: #09090b;
+  background: var(--accent-primary);
+  color: #fff;
 }
 
 .modal-footer {

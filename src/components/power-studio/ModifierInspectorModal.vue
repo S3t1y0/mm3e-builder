@@ -545,18 +545,12 @@ const netEffectCost = computed(() => {
   transform: scale(0.96);
 }
 
-.cat-filter-btn.active.is-extra {
-  background: #059669;
-  border-color: #10b981;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.35);
-}
-
+.cat-filter-btn.active.is-extra,
 .cat-filter-btn.active.is-flaw {
-  background: #dc2626;
-  border-color: #ef4444;
+  background: var(--accent-primary);
+  border-color: var(--accent-primary-hover);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 111, 184, 0.35);
 }
 
 .cat-filter-count {
@@ -785,25 +779,16 @@ const netEffectCost = computed(() => {
   transform: scale(0.97);
 }
 
-.btn-add-modifier.btn-extra {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  color: #34d399;
-}
-
-.btn-add-modifier.btn-extra:hover {
-  background: #10b981;
-  color: #09090b;
-}
-
+.btn-add-modifier.btn-extra,
 .btn-add-modifier.btn-flaw {
-  background: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(220, 38, 38, 0.35);
-  color: #f87171;
+  background: var(--accent-primary);
+  border: 1px solid var(--accent-primary-hover);
+  color: #fff;
 }
 
+.btn-add-modifier.btn-extra:hover,
 .btn-add-modifier.btn-flaw:hover {
-  background: #ef4444;
+  background: var(--accent-primary-hover);
   color: #fff;
 }
 

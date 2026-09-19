@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { calculatePowerTotalCost, normalizePower, createEmptyPower, createEmptyEffect } from '../rules/powerEngine.js';
 import { compileTargetedAttacks, calculateDegrees } from '../rules/attacks.js';
 import { ARCHETYPES } from '../rules/archetypes.js';
-import { calculateConditionModifiers, resolveActiveConditionSet } from '../rules/conditions.js';
+import { calculateConditionModifiers, resolveActiveConditionSet, evaluateDyingFortitudeCheck, DYING_DC, DEATH_FAILURE_LIMIT } from '../rules/conditions.js';
 import { sendRollToVTT, syncActiveHero } from '../services/vttBridge.js';
 import { rollD20, isCryptoAvailable } from '../utils/diceRoller.js';
 
@@ -64,6 +64,8 @@ export function createDefaultCharacter() {
     powers: [],
     activeConditions: [],
     injuries: 0,
+    dyingFailures: 0,
+    isDyingStable: false,
     customAttacks: [],
     resources: [],
     complications: [],
@@ -425,6 +427,31 @@ export const useHeroStore = defineStore('hero', {
 
     speedTotal() {
       return this.conditionModifiers.effectiveSpeed;
+    },
+
+    isDying(state) {
+      return (state.character.activeConditions || []).includes('Dying');
+    },
+
+    isDead(state) {
+      return this.isDying && ((Number(state.character.dyingFailures) || 0) >= DEATH_FAILURE_LIMIT);
+    },
+
+    hasDiehard() {
+      return this.getAdvantageRanks('Diehard') > 0;
+    },
+
+    dyingTacticalState(state) {
+      const failures = Math.max(0, Math.min(DEATH_FAILURE_LIMIT, Number(state.character.dyingFailures) || 0));
+      return {
+        isDying: this.isDying,
+        isDead: this.isDead,
+        isStable: !!state.character.isDyingStable,
+        failures,
+        maxFailures: DEATH_FAILURE_LIMIT,
+        hasDiehard: this.hasDiehard,
+        fortitudeBonus: this.effectiveCombatDefenses.FORTITUDE || 0
+      };
     },
 
     totalEP(state) {
@@ -1078,14 +1105,93 @@ export const useHeroStore = defineStore('hero', {
       const idx = this.character.activeConditions.indexOf(name);
       if (idx !== -1) {
         this.character.activeConditions.splice(idx, 1);
+        if (name === 'Dying') {
+          this.character.dyingFailures = 0;
+          this.character.isDyingStable = false;
+        }
       } else {
         this.character.activeConditions.push(name);
+        if (name === 'Dying') {
+          this.character.dyingFailures = 0;
+          this.character.isDyingStable = false;
+        }
       }
       this.pushHistory();
     },
 
     clearConditions() {
       this.character.activeConditions = [];
+      this.character.dyingFailures = 0;
+      this.character.isDyingStable = false;
+      this.pushHistory();
+    },
+
+    rollDyingCheck() {
+      const bonus = Number(this.effectiveCombatDefenses.FORTITUDE) || 0;
+      const rollData = this.rollCheck('Dying Survival Check (Fortitude)', bonus, DYING_DC, 'Defense', {
+        isDyingCheck: true
+      });
+
+      const evalResult = evaluateDyingFortitudeCheck(rollData.total, DYING_DC);
+
+      if (evalResult.isStabilized) {
+        this.stabilizeHero('Natural Fortitude (2+ Degrees of Success)');
+      } else if (evalResult.failureDegreesAdded > 0) {
+        const currentFailures = Number(this.character.dyingFailures) || 0;
+        this.character.dyingFailures = Math.min(DEATH_FAILURE_LIMIT, currentFailures + evalResult.failureDegreesAdded);
+        this.character.isDyingStable = false;
+      }
+
+      this.pushHistory();
+      return { rollData, evalResult };
+    },
+
+    stabilizeHero(reason = 'Treatment') {
+      if (!Array.isArray(this.character.activeConditions)) {
+        this.character.activeConditions = [];
+      }
+      const dyingIdx = this.character.activeConditions.indexOf('Dying');
+      if (dyingIdx !== -1) {
+        this.character.activeConditions.splice(dyingIdx, 1);
+      }
+      // Per M&M 3e rules, stabilized dying character remains Incapacitated
+      if (!this.character.activeConditions.includes('Incapacitated')) {
+        this.character.activeConditions.push('Incapacitated');
+      }
+      this.character.dyingFailures = 0;
+      this.character.isDyingStable = true;
+
+      sendRollToVTT({
+        id: 'stab_' + Date.now(),
+        name: `Stabilized: ${reason}`,
+        category: 'Combat Event',
+        total: 'STABILIZED',
+        d20: null,
+        modifier: 0,
+        degrees: { isSuccess: true, text: `Hero stabilized via ${reason}. Remains Incapacitated.` },
+        timestamp: new Date().toLocaleTimeString()
+      }, this.character);
+
+      this.pushHistory();
+    },
+
+    spendHeroPointToStabilize() {
+      const hp = Number(this.character.heroPoints) || 0;
+      if (hp <= 0) return false;
+      this.character.heroPoints = hp - 1;
+      this.stabilizeHero('Hero Point (Escape Death)');
+      return true;
+    },
+
+    adjustDyingFailures(delta) {
+      const current = Number(this.character.dyingFailures) || 0;
+      this.character.dyingFailures = Math.max(0, Math.min(DEATH_FAILURE_LIMIT, current + delta));
+      this.pushHistory();
+    },
+
+    resetDyingTracker() {
+      this.character.dyingFailures = 0;
+      this.character.isDyingStable = false;
       this.pushHistory();
     },
 

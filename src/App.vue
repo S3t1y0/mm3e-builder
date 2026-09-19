@@ -5,7 +5,7 @@
       <div class="menubar-left">
         <div class="app-logo">
           <div class="logo-icon-box">
-            <i class="ri-flashlight-fill"></i>
+            <i class="ri-shield-flash-line"></i>
           </div>
           <div class="logo-text-wrap">
             <span class="app-title">M&M 3e Builder</span>
@@ -27,7 +27,7 @@
             :class="{ active: uiStore.activeTab === 'wizard' }"
             @click="uiStore.setActiveTab('wizard')"
           >
-            <i class="ri-sparkling-line"></i>
+            <i class="ri-compass-3-line"></i>
             <span>Character Wizard</span>
           </button>
           <a
@@ -35,7 +35,7 @@
             target="_blank"
             rel="noopener noreferrer"
             class="nav-tab-btn"
-            title="Buka Mutants & Masterminds 3E Rules Reference di tab baru"
+            title="Open Mutants & Masterminds 3E Rules Reference in a new tab"
           >
             <i class="ri-book-open-line"></i>
             <span>Rules Reference</span>
@@ -89,7 +89,7 @@
 
           <!-- Dropdown Menu Card -->
           <div v-if="isToolsOpen" class="nav-dropdown-menu">
-            <div class="dropdown-section-label">FILE & STORAGE</div>
+            <div class="dropdown-section-label">File & Storage</div>
             <button class="dropdown-item" @click="handleToolAction('storage')">
               <i class="ri-hard-drive-2-line icon-teal"></i>
               <div class="dropdown-item-text">
@@ -107,7 +107,7 @@
             </button>
 
             <button class="dropdown-item" @click="handleToolAction('roll20')">
-              <i class="ri-printer-line icon-crimson"></i>
+              <i class="ri-printer-line icon-sapphire"></i>
               <div class="dropdown-item-text">
                 <strong>Print / Roll20 Sheet</strong>
                 <span>Print sheet & Roll20 macros</span>
@@ -115,7 +115,7 @@
             </button>
 
             <div class="dropdown-divider"></div>
-            <div class="dropdown-section-label">PRESETS</div>
+            <div class="dropdown-section-label">Presets</div>
 
             <button class="dropdown-item" @click="handleToolAction('sample')">
               <i class="ri-user-shared-line icon-amber"></i>
@@ -126,7 +126,7 @@
             </button>
 
             <div class="dropdown-divider"></div>
-            <div class="dropdown-section-label danger">DANGER ZONE</div>
+            <div class="dropdown-section-label danger">Danger Zone</div>
 
             <button class="dropdown-item danger" @click="handleToolAction('reset')">
               <i class="ri-restart-line icon-red"></i>
@@ -142,6 +142,15 @@
 
     <!-- MAIN BODY / ACTIVE WORKSPACE -->
     <main class="main-content" style="padding: 1.25rem 1.5rem; max-width: 1560px; margin: 0 auto; width: 100%;">
+      <!-- RUNTIME ERROR BOUNDARY FALLBACK (R-27) -->
+      <div v-if="runtimeError" class="card mb-3" style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--accent-danger); border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
+        <i class="ri-alert-line" style="font-size: 1.75rem; color: var(--accent-danger); display: block; margin-bottom: 0.5rem;"></i>
+        <h3 style="color: #fff; margin-bottom: 0.35rem; font-size: 1.05rem;">Tactical Sheet Recovery State</h3>
+        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.85rem;">{{ runtimeError.message || 'An unexpected rendering error occurred.' }}</p>
+        <button class="btn btn-secondary btn-sm" @click="runtimeError = null">
+          <i class="ri-refresh-line"></i> Dismiss & Retry
+        </button>
+      </div>
       <!-- HERO COMMAND HUB BANNER (For Wizard & Rules Reference views) -->
       <div v-if="uiStore.activeTab !== 'sheet'" class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
@@ -212,7 +221,7 @@
 </template>
 
 <script setup>
-import { ref, watch, onMounted, onBeforeUnmount } from 'vue';
+import { ref, watch, onMounted, onBeforeUnmount, onErrorCaptured } from 'vue';
 import { useHeroStore } from './stores/heroStore.js';
 import { useUiStore } from './stores/uiStore.js';
 import { usePowerBuilderStore } from './stores/powerBuilderStore.js';
@@ -235,6 +244,13 @@ const builderStore = usePowerBuilderStore();
 
 const isToolsOpen = ref(false);
 const toolsDropdownRef = ref(null);
+const runtimeError = ref(null);
+
+onErrorCaptured((err) => {
+  runtimeError.value = err;
+  console.error('[MM3e Error Boundary]:', err);
+  return false;
+});
 
 // Automatic continuous saving to local storage
 let autosaveTimer = null;
@@ -249,6 +265,19 @@ watch(
   { deep: true }
 );
 
+// Synchronize body scroll lock when store modals open/close
+watch(
+  [() => uiStore.modals, () => builderStore.isOpen],
+  () => {
+    const isAnyModalOpen = Object.values(uiStore.modals).some(Boolean) || Boolean(builderStore.isOpen);
+    if (typeof document !== 'undefined') {
+      document.documentElement.classList.toggle('modal-open', isAnyModalOpen);
+      document.body.classList.toggle('modal-open', isAnyModalOpen);
+    }
+  },
+  { deep: true, immediate: true }
+);
+
 function flushSave() {
   heroStore.saveToStorage();
 }
@@ -256,6 +285,21 @@ function flushSave() {
 function handleClickOutside(event) {
   if (isToolsOpen.value && toolsDropdownRef.value && !toolsDropdownRef.value.contains(event.target)) {
     isToolsOpen.value = false;
+  }
+}
+
+function handleKeyDown(event) {
+  if (event.key === 'Escape' || event.code === 'Escape') {
+    isToolsOpen.value = false;
+    if (builderStore.isOpen) {
+      builderStore.closeStudio();
+      return;
+    }
+    const hasOpenModal = Object.values(uiStore.modals).some(Boolean);
+    if (hasOpenModal) {
+      uiStore.closeAllModals();
+      return;
+    }
   }
 }
 
@@ -314,6 +358,7 @@ onMounted(() => {
   if (typeof window !== 'undefined') {
     window.addEventListener('hashchange', loadFromHash);
     document.addEventListener('click', handleClickOutside);
+    window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('beforeunload', flushSave);
     window.addEventListener('pagehide', flushSave);
   }
@@ -323,6 +368,7 @@ onBeforeUnmount(() => {
   if (typeof window !== 'undefined') {
     window.removeEventListener('hashchange', loadFromHash);
     document.removeEventListener('click', handleClickOutside);
+    window.removeEventListener('keydown', handleKeyDown);
     window.removeEventListener('beforeunload', flushSave);
     window.removeEventListener('pagehide', flushSave);
   }
@@ -371,6 +417,12 @@ function loadSampleHero() {
   p1.mainEffect = createEmptyEffect('Damage');
   p1.mainEffect.ranks = 8;
   p1.mainEffect.range = 'Ranged';
+
+  const p1Linked = createEmptyEffect('Affliction');
+  p1Linked.name = 'Secondary Thermal Flash';
+  p1Linked.ranks = 6;
+  p1Linked.range = 'Ranged';
+  p1.linkedEffects = [p1Linked];
 
   const p2 = createEmptyPower();
   p2.name = 'Apex Battlesuit';
@@ -457,10 +509,8 @@ function loadSampleHero() {
   align-items: center;
   justify-content: space-between;
   padding: 0.65rem 1.5rem;
-  background: rgba(15, 23, 42, 0.92);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(11, 16, 32, 0.98);
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: var(--z-sticky);
@@ -485,20 +535,20 @@ function loadSampleHero() {
   width: 28px;
   height: 28px;
   border-radius: 6px;
-  background: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: rgba(0, 111, 184, 0.15);
+  border: 1px solid rgba(0, 111, 184, 0.4);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #f87171;
+  color: #38bdf8;
   font-size: 1.1rem;
-  box-shadow: 0 0 10px rgba(220, 38, 38, 0.25);
+  box-shadow: 0 0 10px rgba(0, 111, 184, 0.25);
   transition: transform var(--trans-fast), box-shadow var(--trans-fast);
 }
 
 .logo-icon-box:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 14px rgba(220, 38, 38, 0.45);
+  box-shadow: 0 0 14px rgba(0, 111, 184, 0.45);
 }
 
 .logo-text-wrap {
@@ -517,9 +567,9 @@ function loadSampleHero() {
 .logo-badge {
   font-size: 0.62rem;
   font-weight: 800;
-  color: #fca5a5;
-  background: rgba(220, 38, 38, 0.2);
-  border: 1px solid rgba(220, 38, 38, 0.35);
+  color: #60a5fa;
+  background: rgba(0, 111, 184, 0.15);
+  border: 1px solid rgba(0, 111, 184, 0.35);
   padding: 0.1rem 0.35rem;
   border-radius: 4px;
   letter-spacing: 0.04em;
@@ -580,13 +630,13 @@ function loadSampleHero() {
 
 .nav-tab-btn.active {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.12);
+  background: rgba(0, 111, 184, 0.12);
+  border-color: rgba(0, 111, 184, 0.35);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .nav-tab-btn.active i {
-  color: #f87171;
+  color: #38bdf8;
 }
 
 .nav-tab-btn.active::after {
@@ -598,7 +648,7 @@ function loadSampleHero() {
   height: 2px;
   background: var(--accent-primary);
   border-radius: 2px;
-  box-shadow: 0 0 8px rgba(220, 38, 38, 0.7);
+  box-shadow: 0 0 8px rgba(0, 111, 184, 0.7);
 }
 
 .nav-tab-btn:active {
@@ -640,8 +690,9 @@ function loadSampleHero() {
 .hero-pill-pl {
   font-size: 0.66rem;
   font-weight: 800;
-  background: rgba(220, 38, 38, 0.2);
-  color: #fca5a5;
+  background: rgba(0, 111, 184, 0.18);
+  border: 1px solid rgba(0, 111, 184, 0.35);
+  color: #60a5fa;
   padding: 0.08rem 0.35rem;
   border-radius: 4px;
 }
@@ -708,22 +759,22 @@ function loadSampleHero() {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
-  border: 1px solid rgba(239, 68, 68, 0.5);
+  background: linear-gradient(135deg, #006fb8, #005a96);
+  border: 1px solid rgba(42, 143, 214, 0.5);
   color: #ffffff;
   font-size: 0.82rem;
   font-weight: 700;
   padding: 0.38rem 0.85rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  box-shadow: 0 1px 6px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 1px 6px rgba(0, 111, 184, 0.35);
   transition: transform var(--trans-fast), box-shadow var(--trans-fast), background-color var(--trans-fast);
   white-space: nowrap;
 }
 
 .nav-btn-share:hover {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.5);
+  background: linear-gradient(135deg, #2a8fd6, #006fb8);
+  box-shadow: 0 2px 10px rgba(0, 111, 184, 0.5);
 }
 
 .nav-btn-share:active {
@@ -752,8 +803,9 @@ function loadSampleHero() {
 
 .nav-btn-tools:hover,
 .nav-btn-tools.active {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.22);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(0, 111, 184, 0.45);
+  color: #ffffff;
 }
 
 .nav-btn-tools:active {
@@ -775,9 +827,7 @@ function loadSampleHero() {
   top: calc(100% + 8px);
   right: 0;
   width: 270px;
-  background: rgba(18, 24, 38, 0.97);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: #0f172a;
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
   box-shadow: 0 12px 36px rgba(0, 0, 0, 0.6), 0 0 1px rgba(255, 255, 255, 0.2);
@@ -842,7 +892,7 @@ function loadSampleHero() {
 }
 
 .icon-teal { color: #2dd4bf; }
-.icon-crimson { color: var(--accent-primary); }
+.icon-sapphire { color: #38bdf8; }
 .icon-blue { color: #38bdf8; }
 .icon-amber { color: #fbbf24; }
 .icon-red { color: #f87171; }

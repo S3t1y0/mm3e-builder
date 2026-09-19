@@ -317,9 +317,9 @@ function broadcastAdvantage(adv) {
 .adv-pp-badge {
   font-size: 0.72rem;
   font-weight: 800;
-  color: #fca5a5;
-  background: rgba(220, 38, 38, 0.14);
-  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: #60a5fa;
+  background: rgba(0, 111, 184, 0.14);
+  border: 1px solid rgba(0, 111, 184, 0.3);
   padding: 0.18rem 0.55rem;
   border-radius: var(--radius-xs);
   font-family: var(--font-mono, monospace);
@@ -333,9 +333,9 @@ function broadcastAdvantage(adv) {
 }
 
 .btn-add-advantage {
-  background: rgba(220, 38, 38, 0.14);
-  border: 1px solid rgba(220, 38, 38, 0.38);
-  color: #fca5a5;
+  background: rgba(0, 111, 184, 0.14);
+  border: 1px solid rgba(0, 111, 184, 0.38);
+  color: #38bdf8;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 0.3rem 0.7rem;
@@ -348,8 +348,8 @@ function broadcastAdvantage(adv) {
 }
 
 .btn-add-advantage:hover {
-  background: rgba(220, 38, 38, 0.28);
-  border-color: #ef4444;
+  background: var(--accent-primary);
+  border-color: var(--accent-secondary);
   color: #ffffff;
   transform: translateY(-1px);
 }
@@ -469,7 +469,7 @@ function broadcastAdvantage(adv) {
 
 .adv-empty-icon {
   font-size: 2rem;
-  color: rgba(220, 38, 38, 0.45);
+  color: rgba(0, 111, 184, 0.45);
 }
 
 .adv-empty-title {
@@ -489,9 +489,9 @@ function broadcastAdvantage(adv) {
 
 .btn-browse-empty-cta {
   margin-top: 0.35rem;
-  background: rgba(220, 38, 38, 0.18);
-  border: 1px solid rgba(220, 38, 38, 0.4);
-  color: #fca5a5;
+  background: rgba(0, 111, 184, 0.18);
+  border: 1px solid rgba(0, 111, 184, 0.4);
+  color: #38bdf8;
   font-size: 0.76rem;
   font-weight: 700;
   padding: 0.4rem 0.9rem;
@@ -504,7 +504,7 @@ function broadcastAdvantage(adv) {
 }
 
 .btn-browse-empty-cta:hover {
-  background: rgba(220, 38, 38, 0.3);
+  background: var(--accent-primary);
   color: #ffffff;
 }
 

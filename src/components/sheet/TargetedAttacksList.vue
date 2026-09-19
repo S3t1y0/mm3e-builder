@@ -36,11 +36,11 @@
     <!-- Stunned / Dazed Tactical Notice -->
     <div v-if="heroStore.conditionModifiers.isStunned" class="atk-action-warning stunned mb-3">
       <i class="ri-forbid-line"></i>
-      <span>Hero is <strong>Stunned / Incapacitated</strong> — Cannot take combat actions.</span>
+      <span>Hero is <strong>Stunned / Incapacitated</strong>: Cannot take combat actions.</span>
     </div>
     <div v-else-if="heroStore.conditionModifiers.isDazed" class="atk-action-warning dazed mb-3">
       <i class="ri-time-line"></i>
-      <span>Hero is <strong>Dazed / Staggered</strong> — Limited to 1 standard action this turn.</span>
+      <span>Hero is <strong>Dazed / Staggered</strong>: Limited to 1 standard action this turn.</span>
     </div>
 
     <!-- Empty Attacks Hint -->
@@ -301,9 +301,9 @@ function handleTurnOnAndRoll(atk) {
   font-weight: 700;
   padding: 0.15rem 0.55rem;
   border-radius: var(--radius-pill);
-  background: rgba(220, 38, 38, 0.15);
-  color: #fca5a5;
-  border: 1px solid rgba(220, 38, 38, 0.3);
+  background: rgba(0, 111, 184, 0.15);
+  color: #38bdf8;
+  border: 1px solid rgba(0, 111, 184, 0.3);
 }
 
 .header-actions-wrap {
@@ -392,16 +392,17 @@ function handleTurnOnAndRoll(atk) {
 }
 
 .attack-tactical-card.is-active {
-  border-left: 3px solid #10b981;
+  border-color: rgba(0, 111, 184, 0.4);
+  background: rgba(0, 111, 184, 0.04);
 }
 
 .attack-tactical-card.is-standby {
-  border-left: 3px solid #f59e0b;
-  opacity: 0.8;
+  border-color: rgba(245, 158, 11, 0.35);
+  opacity: 0.85;
 }
 
 .attack-tactical-card.is-disabled {
-  border-left: 3px solid #64748b;
+  border-color: rgba(100, 116, 139, 0.35);
   opacity: 0.65;
   border-style: dashed;
 }
@@ -505,9 +506,9 @@ function handleTurnOnAndRoll(atk) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: rgba(16, 185, 129, 0.2);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: #6ee7b7;
+  background: var(--accent-primary);
+  border: 1px solid var(--accent-secondary);
+  color: #ffffff;
   font-size: 0.8rem;
   font-weight: 800;
   padding: 0.45rem 0.85rem;
@@ -517,8 +518,9 @@ function handleTurnOnAndRoll(atk) {
 }
 
 .btn-attack-roll:hover {
-  background: #10b981;
+  background: var(--accent-hover);
   color: #fff;
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-switch-roll {
@@ -599,12 +601,12 @@ function handleTurnOnAndRoll(atk) {
 }
 
 .spec-val.dc {
-  color: #fbbf24;
+  color: var(--text-primary);
   font-weight: 800;
 }
 
 .spec-val.crit {
-  color: #ec4899;
+  color: #f87171;
 }
 
 .spec-bonus-wrap {

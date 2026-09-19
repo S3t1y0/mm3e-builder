@@ -127,8 +127,8 @@ function handleSave() {
 .header-icon-box {
   width: 40px;
   height: 40px;
-  background: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(220, 38, 38, 0.35);
+  background: rgba(0, 111, 184, 0.12);
+  border: 1px solid rgba(0, 111, 184, 0.35);
   color: var(--accent-primary);
   border-radius: var(--radius-sm);
   display: flex;

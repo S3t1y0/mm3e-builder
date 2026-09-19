@@ -1,12 +1,17 @@
 <template>
   <div class="dndb-card dndb-defenses-card">
     <div class="dndb-card-header">
-      <h3 class="dndb-card-title">DEFENSES</h3>
-      <span class="dndb-cost-indicator">1 PP / Rank</span>
+      <div style="display: flex; align-items: center; gap: 0.5rem;">
+        <i class="ri-shield-line" style="color: var(--accent-secondary); font-size: 1.15rem;"></i>
+        <h3 class="dndb-card-title" style="font-family: var(--font-heading); font-size: 1.05rem; font-weight: 700; margin: 0;">Defenses</h3>
+      </div>
+      <span class="dndb-cost-indicator" style="font-size: 0.72rem; color: var(--text-muted);">1 PP / Rank</span>
     </div>
-    <p class="dndb-card-sub">Resistance checks to withstand damage and hazardous effects.</p>
+    <p class="dndb-card-sub" style="font-size: 0.78rem; color: var(--text-secondary); margin-bottom: 1rem;">
+      Resistance checks to withstand attacks, damage, and hazardous conditions.
+    </p>
 
-    <!-- 6 Defenses & Initiative Grid -->
+    <!-- Defenses Structured Layout -->
     <div class="dndb-defenses-grid">
       <!-- 1. Dodge -->
       <div class="defense-card" title="Ability to avoid ranged attacks and area hazards.">
@@ -29,7 +34,7 @@
           <button type="button" class="def-roll-btn" @click="rollDefense('Dodge', combatDefenses.DODGE)" title="Click to Roll Dodge Check">
             <i class="ri-dice-line"></i>
             <span class="def-total">{{ combatDefenses.DODGE >= 0 ? `+${combatDefenses.DODGE}` : combatDefenses.DODGE }}</span>
-            <span class="def-roll-label">ROLL</span>
+            <span class="def-roll-label">Roll</span>
           </button>
           <div class="def-stepper">
             <button type="button" class="step-btn" @click="stepDefense('DODGE', -1)" title="Decrease Dodge">-</button>
@@ -60,7 +65,7 @@
           <button type="button" class="def-roll-btn" @click="rollDefense('Parry', combatDefenses.PARRY)" title="Click to Roll Parry Check">
             <i class="ri-dice-line"></i>
             <span class="def-total">{{ combatDefenses.PARRY >= 0 ? `+${combatDefenses.PARRY}` : combatDefenses.PARRY }}</span>
-            <span class="def-roll-label">ROLL</span>
+            <span class="def-roll-label">Roll</span>
           </button>
           <div class="def-stepper">
             <button type="button" class="step-btn" @click="stepDefense('PARRY', -1)" title="Decrease Parry">-</button>
@@ -71,10 +76,13 @@
       </div>
 
       <!-- 3. Fortitude -->
-      <div class="defense-card" title="Health, stamina, and biological/metabolic resistance.">
+      <div class="defense-card" :class="{ 'card-dying': heroStore.isDying }" title="Health, stamina, and biological/metabolic resistance.">
         <div class="def-header">
           <span class="def-name">Fortitude</span>
           <div class="def-meta-row">
+            <span v-if="heroStore.isDying" class="def-cond-badge danger" title="Dying: Fortitude DC 15 Survival Check Required each round">
+              Dying (DC 15)
+            </span>
             <span v-if="condMods.checkPenalty !== 0" class="def-cond-badge danger" :title="condMods.isDisabled ? 'Disabled: -5 on resistance checks' : 'Impaired: -2 on resistance checks'">
               {{ condMods.checkPenalty }} {{ condMods.isDisabled ? 'Disabled' : 'Impaired' }}
             </span>
@@ -88,7 +96,7 @@
           <button type="button" class="def-roll-btn" @click="rollDefense('Fortitude', combatDefenses.FORTITUDE)" title="Click to Roll Fortitude Check">
             <i class="ri-dice-line"></i>
             <span class="def-total">{{ combatDefenses.FORTITUDE >= 0 ? `+${combatDefenses.FORTITUDE}` : combatDefenses.FORTITUDE }}</span>
-            <span class="def-roll-label">ROLL</span>
+            <span class="def-roll-label">Roll</span>
           </button>
           <div class="def-stepper">
             <button type="button" class="step-btn" @click="stepDefense('FORTITUDE', -1)" title="Decrease Fortitude">-</button>
@@ -116,7 +124,7 @@
           <button type="button" class="def-roll-btn" @click="rollDefense('Will', combatDefenses.WILL)" title="Click to Roll Will Check">
             <i class="ri-dice-line"></i>
             <span class="def-total">{{ combatDefenses.WILL >= 0 ? `+${combatDefenses.WILL}` : combatDefenses.WILL }}</span>
-            <span class="def-roll-label">ROLL</span>
+            <span class="def-roll-label">Roll</span>
           </button>
           <div class="def-stepper">
             <button type="button" class="step-btn" @click="stepDefense('WILL', -1)" title="Decrease Will">-</button>
@@ -126,10 +134,10 @@
         </div>
       </div>
 
-      <!-- 5. Toughness (Spans full width on row 3) -->
+      <!-- 5. Toughness (Anchored flagship card) -->
       <div class="defense-card card-toughness" :class="{ 'card-injured': heroStore.character.injuries > 0 }" title="Resistance to direct damage (Derived from STA + Protection, reduced by bruises).">
         <div class="def-header">
-          <span class="def-name">Toughness</span>
+          <span class="def-name" style="color: var(--accent-secondary); font-size: 0.95rem;">Toughness</span>
           <div class="def-meta-row">
             <span v-if="condMods.defRollLost > 0" class="def-cond-badge danger" title="Defensive Roll advantage bonus lost while Vulnerable or Defenseless">
               -{{ condMods.defRollLost }} Def Roll Lost
@@ -152,7 +160,7 @@
           <button type="button" class="def-roll-btn" @click="rollDefense('Toughness', combatDefenses.TOUGHNESS)" title="Click to Roll Toughness Resistance">
             <i class="ri-dice-line"></i>
             <span class="def-total">{{ combatDefenses.TOUGHNESS >= 0 ? `+${combatDefenses.TOUGHNESS}` : combatDefenses.TOUGHNESS }}</span>
-            <span class="def-roll-label">ROLL</span>
+            <span class="def-roll-label">Roll</span>
           </button>
           <div class="def-stepper derived">
             <span class="def-derived-label">{{ toughnessDerivedLabel }}</span>
@@ -221,6 +229,10 @@ function stepDefense(key, delta) {
 }
 
 function rollDefense(name, bonus) {
+  if (name === 'Fortitude' && heroStore.isDying) {
+    heroStore.rollDyingCheck();
+    return;
+  }
   const extra = {};
   if (condMods.value.checkPenalty !== 0 && (name === 'Fortitude' || name === 'Will')) {
     extra.conditionPenalty = condMods.value.checkPenalty;
@@ -233,6 +245,11 @@ function rollDefense(name, bonus) {
 </script>
 
 <style scoped>
+.defense-card.card-dying {
+  border-color: rgba(244, 63, 94, 0.6);
+  background: rgba(244, 63, 94, 0.06);
+}
+
 .card-toughness {
   grid-column: 1 / -1;
 }
@@ -285,14 +302,16 @@ function rollDefense(name, bonus) {
 }
 
 .init-roll-btn {
-  background: rgba(225, 29, 72, 0.08) !important;
-  border-color: rgba(225, 29, 72, 0.35) !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: rgba(245, 158, 11, 0.35) !important;
+  color: #fbbf24 !important;
 }
 
 .init-roll-btn:hover {
-  background: #e11d48 !important;
-  border-color: #f43f5e !important;
-  box-shadow: 0 0 10px rgba(225, 29, 72, 0.4) !important;
+  background: #f59e0b !important;
+  border-color: #fbbf24 !important;
+  color: #0b1020 !important;
+  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4) !important;
 }
 
 .def-cond-badge {

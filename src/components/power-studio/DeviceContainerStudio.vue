@@ -420,7 +420,7 @@ function disableSubPowerArray() {
 }
 
 .sub-power-tab.active {
-  background: rgba(220, 38, 38, 0.15);
+  background: rgba(0, 111, 184, 0.15);
   border-color: var(--accent-primary);
   color: #fff;
 }
@@ -431,8 +431,8 @@ function disableSubPowerArray() {
 
 .tab-array-pill {
   font-size: 0.65rem;
-  background: rgba(168, 85, 247, 0.25);
-  color: #c084fc;
+  background: rgba(0, 111, 184, 0.18);
+  color: #38bdf8;
   padding: 0.1rem 0.4rem;
   border-radius: var(--radius-pill);
   font-weight: 800;

@@ -156,6 +156,8 @@ export function calculateConditionModifiers({
   else if (isDazed) tags.push({ label: '1 Action / Turn', type: 'warning', reason: 'Dazed' });
   if (isProne) tags.push({ label: 'Prone (-5 Melee Atk/+5 Ranged Def/-5 Parry)', type: 'warning', reason: 'Prone' });
   if (isUnaware) tags.push({ label: 'Unaware', type: 'warning', reason: 'Unaware' });
+  const isDying = condSet.has('Dying');
+  if (isDying) tags.push({ label: 'Dying (Fortitude DC 15)', type: 'danger', reason: 'Hero is near death. Fortitude check DC 15 required each round or suffer death.' });
 
   const hasMods = (
     isDefenseless ||
@@ -168,6 +170,7 @@ export function calculateConditionModifiers({
     isDazed ||
     isProne ||
     isUnaware ||
+    isDying ||
     defRollLost > 0
   );
 
@@ -182,6 +185,7 @@ export function calculateConditionModifiers({
     isDazed,
     isProne,
     isUnaware,
+    isDying,
     defRollLost,
     checkPenalty,
     closeAttackPenalty,
@@ -205,3 +209,51 @@ export function calculateConditionModifiers({
     }
   };
 }
+
+export const DYING_DC = 15;
+export const DEATH_FAILURE_LIMIT = 3;
+
+/**
+ * Evaluates a Fortitude resistance check for a dying character per M&M 3e rules.
+ * Target DC is 15.
+ * - Success (2+ degrees, total >= 20): Character stabilizes (removes Dying, remains Incapacitated).
+ * - Success (1 degree, total 15-19): Character survives round; remains Dying with no added failure.
+ * - Failure (1 degree, total 10-14): +1 degree of failure.
+ * - Failure (2 degrees, total 5-9): +2 degrees of failure.
+ * - Failure (3+ degrees, total <= 4): +3 degrees of failure.
+ * - Cumulative 3 degrees of failure = Death.
+ */
+export function evaluateDyingFortitudeCheck(checkTotal, dc = DYING_DC) {
+  const numDC = parseInt(dc, 10) || 15;
+  const total = parseInt(checkTotal, 10) || 0;
+  const diff = total - numDC;
+
+  if (diff >= 0) {
+    const degrees = Math.floor(diff / 5) + 1;
+    const isStabilized = degrees >= 2;
+    const degSuffix = degrees === 1 ? '1st' : degrees === 2 ? '2nd' : degrees === 3 ? '3rd' : `${degrees}th`;
+    return {
+      isSuccess: true,
+      degrees,
+      isStabilized,
+      failureDegreesAdded: 0,
+      diff,
+      text: isStabilized
+        ? `Success (${degSuffix} Degree): Character stabilizes!`
+        : `Success (${degSuffix} Degree): Character survives this round, remains dying.`
+    };
+  } else {
+    const margin = numDC - total;
+    const degrees = Math.floor((margin - 1) / 5) + 1;
+    const degSuffix = degrees === 1 ? '1st' : degrees === 2 ? '2nd' : degrees === 3 ? '3rd' : `${degrees}th`;
+    return {
+      isSuccess: false,
+      degrees,
+      isStabilized: false,
+      failureDegreesAdded: degrees,
+      margin,
+      text: `Failure (${degSuffix} Degree): +${degrees} failure degree(s).`
+    };
+  }
+}
+

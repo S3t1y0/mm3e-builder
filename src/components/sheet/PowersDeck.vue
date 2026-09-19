@@ -1949,9 +1949,9 @@ function getModifierInfo(modName, isFlaw = false) {
 .header-total-badge {
   font-size: 0.78rem;
   font-weight: 800;
-  color: #f43f5e;
-  background: rgba(225, 29, 72, 0.12);
-  border: 1px solid rgba(225, 29, 72, 0.3);
+  color: #60a5fa;
+  background: rgba(0, 111, 184, 0.12);
+  border: 1px solid rgba(0, 111, 184, 0.3);
   padding: 0.2rem 0.65rem;
   border-radius: var(--radius-pill);
   font-variant-numeric: tabular-nums;
@@ -2010,10 +2010,6 @@ function getModifierInfo(modName, isFlaw = false) {
   text-decoration: line-through;
   text-decoration-color: rgba(239, 68, 68, 0.6);
 }
-
-.power-item-card.type-device { border-left: 3px solid #f59e0b; }
-.power-item-card.type-array { border-left: 3px solid #8b5cf6; }
-.power-item-card.type-standard { border-left: 3px solid #3b82f6; }
 
 .pow-card-header {
   display: flex;
@@ -2215,8 +2211,8 @@ function getModifierInfo(modName, isFlaw = false) {
   font-size: 0.82rem;
   font-weight: 800;
   color: var(--accent-primary);
-  background: rgba(220, 38, 38, 0.12);
-  border: 1px solid rgba(220, 38, 38, 0.3);
+  background: rgba(0, 111, 184, 0.12);
+  border: 1px solid rgba(0, 111, 184, 0.3);
   padding: 0.15rem 0.55rem;
   border-radius: var(--radius-pill);
   font-variant-numeric: tabular-nums;
@@ -3165,8 +3161,7 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .linked-full-dossier-card {
   background: var(--bg-surface);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  border-left: 3px solid #06b6d4;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-xs);
   padding: 0.75rem 0.85rem;
   display: flex;
@@ -3176,7 +3171,7 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .linked-full-dossier-card:hover {
-  border-color: rgba(6, 182, 212, 0.45);
+  border-color: var(--border-color-hover, rgba(255, 255, 255, 0.2));
 }
 
 /* Master Header Card */
@@ -3334,7 +3329,7 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .linked-choice-card {
-  border-color: rgba(6, 182, 212, 0.2);
+  border-color: var(--border-color);
 }
 
 /* Applied Modifiers Section inside Linked Dossier */
@@ -3428,8 +3423,7 @@ function getModifierInfo(modName, isFlaw = false) {
 /* Device Sub-Power Dossier Cards */
 .dossier-sub-power-card {
   background: var(--bg-card);
-  border: 1px solid rgba(245, 158, 11, 0.25);
-  border-left: 4px solid #f59e0b;
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-xs);
   padding: 0.85rem 1rem;
   display: flex;
@@ -3524,9 +3518,9 @@ function getModifierInfo(modName, isFlaw = false) {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
-  background: rgba(225, 29, 72, 0.12);
-  border: 1px solid rgba(225, 29, 72, 0.3);
-  color: #ffe4e6;
+  background: rgba(0, 111, 184, 0.12);
+  border: 1px solid rgba(0, 111, 184, 0.3);
+  color: #38bdf8;
   font-size: 0.7rem;
   font-weight: 700;
   padding: 0.18rem 0.5rem;
@@ -3687,7 +3681,7 @@ function getModifierInfo(modName, isFlaw = false) {
 .sub-linked-block {
   background: transparent;
   border: none;
-  border-top: 1px solid rgba(6, 182, 212, 0.2);
+  border-top: 1px solid var(--border-color);
   padding-top: 0.85rem;
 }
 

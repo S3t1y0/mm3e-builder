@@ -24,6 +24,7 @@
             :value="currentPowerSelectValue"
             @change="handlePowerSelectChange($event.target.value)"
           >
+            <option value="custom" disabled hidden>— Select / Switch Power —</option>
             <option
               v-for="(pow, pIdx) in heroStore.character.powers"
               :key="pow.id || pIdx"
@@ -232,8 +233,8 @@ function handleSave() {
 .studio-logo-cube {
   width: 46px;
   height: 46px;
-  background: rgba(220, 38, 38, 0.15);
-  border: 1.5px solid rgba(220, 38, 38, 0.4);
+  background: rgba(0, 111, 184, 0.12);
+  border: 1.5px solid rgba(0, 111, 184, 0.35);
   color: var(--accent-primary);
   border-radius: var(--radius-sm);
   display: flex;
@@ -258,7 +259,7 @@ function handleSave() {
 }
 
 .power-selector-select {
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   border: 1px solid var(--border-color);
   color: var(--text-primary);
   font-size: 0.78rem;
@@ -268,6 +269,12 @@ function handleSave() {
   outline: none;
   cursor: pointer;
   max-width: 250px;
+}
+
+.power-selector-select option {
+  background-color: #0f172a;
+  color: #f8fafc;
+  padding: 0.4rem 0.6rem;
 }
 
 .power-selector-select:focus {
@@ -311,63 +318,40 @@ function handleSave() {
 
 .type-pill {
   font-size: 0.68rem;
-  font-weight: 800;
-  padding: 0.15rem 0.45rem;
+  font-weight: 700;
+  padding: 0.18rem 0.5rem;
   border-radius: var(--radius-xs);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
 }
 
 .type-pill.standard {
-  background: rgba(220, 38, 38, 0.15);
-  color: #f87171;
-  border: 1px solid rgba(220, 38, 38, 0.3);
+  background: rgba(0, 111, 184, 0.1);
+  color: #38bdf8;
+  border: 1px solid rgba(0, 111, 184, 0.25);
 }
 
 .type-pill.device {
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-}
-
-.array-indicator-pill {
-  font-size: 0.68rem;
-  font-weight: 800;
-  background: rgba(56, 189, 248, 0.15);
+  background: rgba(0, 111, 184, 0.1);
   color: #38bdf8;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  padding: 0.15rem 0.45rem;
-  border-radius: var(--radius-xs);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  letter-spacing: 0.06em;
+  border: 1px solid rgba(0, 111, 184, 0.25);
 }
 
-.linked-indicator-pill {
-  font-size: 0.68rem;
-  font-weight: 800;
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  padding: 0.15rem 0.45rem;
-  border-radius: var(--radius-xs);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  letter-spacing: 0.06em;
-}
-
+.array-indicator-pill,
+.linked-indicator-pill,
 .activation-indicator-pill {
   font-size: 0.68rem;
-  font-weight: 800;
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  padding: 0.15rem 0.45rem;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  padding: 0.18rem 0.5rem;
   border-radius: var(--radius-xs);
   display: inline-flex;
   align-items: center;

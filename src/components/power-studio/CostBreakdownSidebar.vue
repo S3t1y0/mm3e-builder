@@ -339,7 +339,7 @@ const combatProfile = computed(() => {
 }
 
 .c-val.dc-val {
-  color: #fbbf24;
+  color: var(--text-primary);
 }
 
 .pl-compliance-banner {
@@ -352,14 +352,18 @@ const combatProfile = computed(() => {
 }
 
 .pl-compliance-banner.compliant {
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-color);
+  color: var(--text-secondary);
+}
+
+.pl-compliance-banner.compliant i {
   color: #34d399;
 }
 
 .pl-compliance-banner.exceeded {
-  background: rgba(239, 68, 68, 0.12);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
   color: #f87171;
 }
 

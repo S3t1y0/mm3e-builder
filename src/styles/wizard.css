@@ -1,9 +1,7 @@
 /* css/wizard.css - Step-by-Step Guided Character Builder (M&M 3e "Charactermancer")
    Designed with Rich Aesthetics, Dynamic Lighting, and Mobile Touch Ergonomics */
 
-/* ==========================================================================
-   1. ROOT CONTAINER & WIZARD VIEWPORT
-   ========================================================================== */
+/* 1. ROOT CONTAINER & WIZARD VIEWPORT */
 .wizard-view-container {
   display: flex;
   flex-direction: column;
@@ -14,9 +12,7 @@
   padding-bottom: 5.5rem; /* space for persistent bottom dock */
 }
 
-/* ==========================================================================
-   2. STEPPER PROGRESS HEADER
-   ========================================================================== */
+/* 2. STEPPER PROGRESS HEADER */
 .wizard-stepper-wrapper {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -142,9 +138,7 @@
   background: rgba(16, 185, 129, 0.4);
 }
 
-/* ==========================================================================
-   3. TWO-COLUMN SPLIT WORKSPACE
-   ========================================================================== */
+/* 3. TWO-COLUMN SPLIT WORKSPACE */
 .wizard-layout {
   display: grid;
   grid-template-columns: minmax(0, 1.85fr) minmax(320px, 1fr);
@@ -167,9 +161,7 @@
   gap: 1.25rem;
 }
 
-/* ==========================================================================
-   4. STAGE CARDS & SECTIONS
-   ========================================================================== */
+/* 4. STAGE CARDS & SECTIONS */
 .wizard-stage-header {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -225,9 +217,7 @@
   white-space: nowrap;
 }
 
-/* ==========================================================================
-   5. STAGE 1: CONCEPT & IDENTITY
-   ========================================================================== */
+/* 5. STAGE 1: CONCEPT & IDENTITY */
 .archetypes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
@@ -350,9 +340,7 @@
   color: var(--accent-secondary);
 }
 
-/* ==========================================================================
-   6. STAGE 2: ABILITIES
-   ========================================================================== */
+/* 6. STAGE 2: ABILITIES */
 .wizard-abilities-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -435,9 +423,7 @@
   color: var(--text-secondary);
 }
 
-/* ==========================================================================
-   7. STAGE 3: DEFENSES & PL TRADE-OFF SLIDERS
-   ========================================================================== */
+/* 7. STAGE 3: DEFENSES & PL TRADE-OFF SLIDERS */
 .tradeoff-analyzer-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -508,9 +494,7 @@
   color: var(--text-muted);
 }
 
-/* ==========================================================================
-   8. STAGE 4: SKILLS
-   ========================================================================== */
+/* 8. STAGE 4: SKILLS */
 .wizard-skills-filter-tabs {
   display: flex;
   gap: 0.5rem;
@@ -835,9 +819,7 @@
   background: var(--bg-elevated);
 }
 
-/* ==========================================================================
-   9. STAGE 5: ADVANTAGES
-   ========================================================================== */
+/* 9. STAGE 5: ADVANTAGES */
 .wizard-advantages-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -879,9 +861,7 @@
   line-height: 1.35;
 }
 
-/* ==========================================================================
-   10. STAGE 6: POWERS
-   ========================================================================== */
+/* 10. STAGE 6: POWERS */
 .wizard-powers-container {
   display: flex;
   flex-direction: column;
@@ -925,9 +905,7 @@
   color: var(--text-secondary);
 }
 
-/* ==========================================================================
-   11. STAGE 7: RESOURCES & EP ALLOCATOR
-   ========================================================================== */
+/* 11. STAGE 7: RESOURCES & EP ALLOCATOR */
 .wizard-resources-summary {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -946,9 +924,7 @@
   flex: 1;
 }
 
-/* ==========================================================================
-   12. STAGE 8: REVIEW & FINALIZE
-   ========================================================================== */
+/* 12. STAGE 8: REVIEW & FINALIZE */
 .wizard-audit-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -993,9 +969,7 @@
   margin-top: 1rem;
 }
 
-/* ==========================================================================
-   13. ADVISOR SIDEBAR (LIVE INSPECTOR)
-   ========================================================================== */
+/* 13. ADVISOR SIDEBAR (LIVE INSPECTOR) */
 .advisor-card {
   background: var(--bg-card);
   border: 1px solid var(--border-color);
@@ -1069,9 +1043,7 @@
   border-left: 3px solid var(--accent-secondary);
 }
 
-/* ==========================================================================
-   14. PERSISTENT FLOATING WIZARD DOCK (BOTTOM BAR)
-   ========================================================================== */
+/* 14. PERSISTENT FLOATING WIZARD DOCK (BOTTOM BAR) */
 .wizard-dock-bar {
   position: fixed;
   bottom: 0;
@@ -1135,9 +1107,7 @@
   color: var(--accent-danger);
 }
 
-/* ==========================================================================
-   15. RESPONSIVE / MOBILE OPTIMIZATIONS (ANDROID ERGONOMICS)
-   ========================================================================== */
+/* 15. RESPONSIVE / MOBILE OPTIMIZATIONS (ANDROID ERGONOMICS) */
 @media (max-width: 900px) {
   .wizard-layout {
     grid-template-columns: 1fr;
@@ -1194,9 +1164,7 @@
   }
 }
 
-/* ==========================================================================
-   ENHANCEMENTS & UTILITIES (better-ui, better-layout, better-typography)
-   ========================================================================== */
+/* ENHANCEMENTS & UTILITIES (better-ui, better-layout, better-typography) */
 .form-control {
   width: 100%;
   background: var(--bg-app, #0b1120);

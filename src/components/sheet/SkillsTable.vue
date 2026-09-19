@@ -724,11 +724,11 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .budget-item.pp .budget-num {
-  color: #fca5a5;
+  color: #60a5fa;
 }
 
 .budget-item.pp .budget-lbl {
-  color: rgba(252, 165, 165, 0.75);
+  color: rgba(96, 165, 250, 0.8);
 }
 
 .budget-divider {
@@ -740,9 +740,9 @@ function rollSkill(skillTitle, bonus) {
 
 .btn-spec-add {
   height: 26px;
-  background: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.35);
-  color: #fca5a5;
+  background: rgba(0, 111, 184, 0.15);
+  border: 1px solid rgba(0, 111, 184, 0.4);
+  color: #38bdf8;
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0 0.55rem;
@@ -756,10 +756,10 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .btn-spec-add:hover {
-  background: #dc2626;
-  border-color: #ef4444;
+  background: var(--accent-primary);
+  border-color: var(--accent-secondary);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 111, 184, 0.35);
 }
 
 .btn-spec-add:active {
@@ -814,14 +814,14 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .skill-cat-pill.active {
-  background: rgba(220, 38, 38, 0.25);
-  border-color: #ef4444;
+  background: rgba(0, 111, 184, 0.25);
+  border-color: var(--accent-secondary);
   color: #fff;
-  box-shadow: 0 1px 6px rgba(220, 38, 38, 0.3);
+  box-shadow: 0 1px 6px rgba(0, 111, 184, 0.3);
 }
 
 .cat-pill-count {
-  background: #ef4444;
+  background: var(--accent-primary);
   color: #fff;
   font-size: 0.6rem;
   font-weight: 800;
@@ -842,8 +842,8 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .skills-search-wrap:focus-within {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.15);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(0, 111, 184, 0.2);
 }
 
 .search-icon {
@@ -923,7 +923,7 @@ function rollSkill(skillTitle, bonus) {
   will-change: scroll-position;
   padding-right: 2px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(220, 38, 38, 0.4) rgba(15, 15, 20, 0.45);
+  scrollbar-color: rgba(0, 111, 184, 0.4) rgba(15, 15, 20, 0.45);
 }
 
 /* Skill Rows (Zero Truncation Grid) */
@@ -951,7 +951,7 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .sheet-skill-row.is-signature {
-  background: rgba(220, 38, 38, 0.04);
+  background: rgba(0, 111, 184, 0.06);
   border-left-color: var(--accent-primary);
 }
 
@@ -1044,9 +1044,9 @@ function rollSkill(skillTitle, bonus) {
 .sig-badge {
   font-size: 0.54rem;
   font-weight: 800;
-  color: #fca5a5;
-  background: rgba(220, 38, 38, 0.2);
-  border: 1px solid rgba(220, 38, 38, 0.4);
+  color: #38bdf8;
+  background: rgba(0, 111, 184, 0.2);
+  border: 1px solid rgba(0, 111, 184, 0.4);
   padding: 0.04rem 0.25rem;
   border-radius: 2px;
   letter-spacing: 0.05em;
@@ -1245,15 +1245,15 @@ function rollSkill(skillTitle, bonus) {
 
 /* Signature Roll Button */
 .sheet-skill-roll-btn.btn-signature {
-  background: rgba(220, 38, 38, 0.15);
-  border-color: rgba(239, 68, 68, 0.45);
-  color: #fca5a5;
+  background: rgba(0, 111, 184, 0.15);
+  border-color: rgba(0, 111, 184, 0.45);
+  color: #38bdf8;
   font-weight: 800;
 }
 
 .sheet-skill-roll-btn.btn-signature:hover {
-  background: #dc2626;
-  border-color: #ef4444;
+  background: var(--accent-primary);
+  border-color: var(--accent-secondary);
   color: #fff;
   box-shadow: var(--shadow-sm);
 }
@@ -1430,7 +1430,7 @@ function rollSkill(skillTitle, bonus) {
 
 .spec-modal-card {
   background: #12121a;
-  border: 1px solid rgba(220, 38, 38, 0.35);
+  border: 1px solid rgba(0, 111, 184, 0.4);
   border-radius: var(--radius-lg);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
   width: 100%;
@@ -1457,8 +1457,8 @@ function rollSkill(skillTitle, bonus) {
   align-items: center;
   justify-content: space-between;
   padding: 0.9rem 1.25rem;
-  background: rgba(220, 38, 38, 0.08);
-  border-bottom: 1px solid rgba(220, 38, 38, 0.2);
+  background: rgba(0, 111, 184, 0.1);
+  border-bottom: 1px solid rgba(0, 111, 184, 0.25);
 }
 
 .spec-modal-header h4 {
@@ -1472,7 +1472,7 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .spec-modal-header h4 i {
-  color: #ef4444;
+  color: var(--accent-primary);
 }
 
 .spec-modal-close {
@@ -1518,7 +1518,7 @@ function rollSkill(skillTitle, bonus) {
 
 .spec-label-hint {
   font-size: 0.68rem;
-  color: #ef4444;
+  color: #38bdf8;
 }
 
 .spec-select, .spec-input {
@@ -1534,8 +1534,8 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .spec-select:focus, .spec-input:focus {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(0, 111, 184, 0.25);
 }
 
 .spec-chips-section {
@@ -1570,14 +1570,14 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .spec-chip-btn:hover {
-  background: rgba(220, 38, 38, 0.15);
-  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(0, 111, 184, 0.15);
+  border-color: rgba(0, 111, 184, 0.4);
   color: #fff;
 }
 
 .spec-chip-btn.active {
-  background: #dc2626;
-  border-color: #ef4444;
+  background: var(--accent-primary);
+  border-color: var(--accent-secondary);
   color: #fff;
 }
 
@@ -1603,8 +1603,8 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .spec-rank-input:focus {
-  border-color: #ef4444;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(0, 111, 184, 0.25);
 }
 
 .rank-step-btn {
@@ -1624,8 +1624,8 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .rank-step-btn:hover:not(:disabled) {
-  background: rgba(220, 38, 38, 0.2);
-  border-color: #ef4444;
+  background: rgba(0, 111, 184, 0.2);
+  border-color: var(--accent-secondary);
   color: #fff;
 }
 
@@ -1666,8 +1666,8 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .spec-btn-confirm {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
-  border: 1px solid #ef4444;
+  background: linear-gradient(135deg, #006fb8, #005a96);
+  border: 1px solid #2a8fd6;
   color: #fff;
   padding: 0.4rem 1rem;
   border-radius: var(--radius-sm);
@@ -1678,11 +1678,11 @@ function rollSkill(skillTitle, bonus) {
   gap: 0.35rem;
   cursor: pointer;
   transition: all var(--trans-fast);
-  box-shadow: 0 2px 10px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 2px 10px rgba(0, 111, 184, 0.35);
 }
 
 .spec-btn-confirm:hover {
-  background: #ef4444;
+  background: #005a96;
   box-shadow: var(--shadow-sm);
 }
 
