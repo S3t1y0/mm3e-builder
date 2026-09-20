@@ -111,8 +111,9 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
+import { useUiStore } from '../../stores/uiStore.js';
 import { vDragScroll } from '../../utils/dragScroll.js';
 import TargetedAttacksList from './TargetedAttacksList.vue';
 import PowersDeck from './PowersDeck.vue';
@@ -122,8 +123,12 @@ import ConditionsTracker from './ConditionsTracker.vue';
 import ComplicationsHub from './ComplicationsHub.vue';
 
 const heroStore = useHeroStore();
+const uiStore = useUiStore();
 
-const activeTab = ref('actions');
+const activeTab = computed({
+  get: () => uiStore.activeActionHubTab || 'actions',
+  set: (val) => { uiStore.setActiveActionHubTab(val); }
+});
 
 const attacksCount = computed(() => {
   return (heroStore.allTargetedAttacks || []).length;

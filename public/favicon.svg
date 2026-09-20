@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" fill="none">
-  <!-- Outer Shield Crest with Dark Zinc Body -->
-  <path d="M24 4L7 11V23C7 33.5 14.3 43.1 24 45.5C33.7 43.1 41 33.5 41 23V11L24 4Z" fill="#09090b" stroke="#e11d48" stroke-width="2" stroke-linejoin="round"/>
+  <!-- Outer Shield Crest with Dark Midnight Body -->
+  <path d="M24 4L7 11V23C7 33.5 14.3 43.1 24 45.5C33.7 43.1 41 33.5 41 23V11L24 4Z" fill="#080d1a" stroke="#006fb8" stroke-width="2" stroke-linejoin="round"/>
   <!-- D20 Geometric Diamond Facets -->
-  <path d="M24 10L36 18L24 38L12 18L24 10Z" fill="rgba(225, 29, 72, 0.15)" stroke="#f43f5e" stroke-width="1.5" stroke-linejoin="round"/>
+  <path d="M24 10L36 18L24 38L12 18L24 10Z" fill="rgba(0, 111, 184, 0.25)" stroke="#38bdf8" stroke-width="1.5" stroke-linejoin="round"/>
   <!-- Central Triangular Core -->
-  <path d="M24 18L32 23L24 32L16 23L24 18Z" fill="#e11d48" stroke="#ffffff" stroke-width="1" stroke-opacity="0.8"/>
+  <path d="M24 18L32 23L24 32L16 23L24 18Z" fill="#006fb8" stroke="#ffffff" stroke-width="1" stroke-opacity="0.9"/>
   <!-- Dynamic Energy Node -->
   <circle cx="24" cy="24" r="2" fill="#ffffff"/>
 </svg>

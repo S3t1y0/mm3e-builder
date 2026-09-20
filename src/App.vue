@@ -201,6 +201,7 @@
     <ShareModal />
     <Roll20PrintModal />
     <AdvantageLibraryModal />
+    <ConditionPickerModal />
 
     <!-- FLOATING TACTICAL DICE ROLL HUD -->
     <DiceRollHud />
@@ -236,6 +237,7 @@ import ExportImportModal from './components/modals/ExportImportModal.vue';
 import ShareModal from './components/modals/ShareModal.vue';
 import Roll20PrintModal from './components/modals/Roll20PrintModal.vue';
 import AdvantageLibraryModal from './components/modals/AdvantageLibraryModal.vue';
+import ConditionPickerModal from './components/modals/ConditionPickerModal.vue';
 import DiceRollHud from './components/sheet/DiceRollHud.vue';
 
 const heroStore = useHeroStore();

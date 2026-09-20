@@ -157,6 +157,7 @@
             <div class="mod-card-header">
               <div class="mod-card-identity">
                 <span class="mod-card-title">{{ extra.name }}</span>
+                <span v-if="extra.customText" class="mod-card-custom-preview">: {{ extra.customText }}</span>
               </div>
               <div class="mod-card-header-actions">
                 <span class="mod-card-cost extra-cost">
@@ -166,7 +167,7 @@
                   type="button"
                   class="mod-card-del-btn"
                   title="Remove Extra"
-                  @click="builderStore.removeModifierFromTarget(effect, false, idx)"
+                  @click="builderStore.removeModifierFromTarget(effect, false, extra.id || idx)"
                 >
                   <i class="ri-close-line"></i>
                 </button>
@@ -176,6 +177,24 @@
             <!-- Card Body: Description of Effect & Rules -->
             <div class="mod-card-body">
               <p class="mod-card-desc">{{ getModifierMeta(extra, false).desc }}</p>
+
+              <!-- Custom Player Specification Input -->
+              <div
+                v-if="getModifierMeta(extra, false).hasCustomText || extra.customText !== undefined"
+                class="mod-custom-text-wrapper"
+              >
+                <label class="mod-custom-text-label">
+                  <i class="ri-edit-line"></i>
+                  <span>{{ getModifierMeta(extra, false).customTextLabel || 'Specification / Detail:' }}</span>
+                </label>
+                <input
+                  v-model="extra.customText"
+                  type="text"
+                  class="form-control form-control-sm mod-custom-input"
+                  :placeholder="getModifierMeta(extra, false).customTextPlaceholder || 'Specify details...'"
+                  @input="onModifierCustomTextInput(extra)"
+                />
+              </div>
 
               <!-- Optional Variant Chips (if options exist) -->
               <div
@@ -256,6 +275,7 @@
             <div class="mod-card-header">
               <div class="mod-card-identity">
                 <span class="mod-card-title">{{ flaw.name }}</span>
+                <span v-if="flaw.customText" class="mod-card-custom-preview">: {{ flaw.customText }}</span>
               </div>
               <div class="mod-card-header-actions">
                 <span class="mod-card-cost flaw-cost">
@@ -265,7 +285,7 @@
                   type="button"
                   class="mod-card-del-btn"
                   title="Remove Flaw"
-                  @click="builderStore.removeModifierFromTarget(effect, true, idx)"
+                  @click="builderStore.removeModifierFromTarget(effect, true, flaw.id || idx)"
                 >
                   <i class="ri-close-line"></i>
                 </button>
@@ -275,6 +295,24 @@
             <!-- Card Body: Description of Effect & Rules -->
             <div class="mod-card-body">
               <p class="mod-card-desc">{{ getModifierMeta(flaw, true).desc }}</p>
+
+              <!-- Custom Player Specification Input -->
+              <div
+                v-if="getModifierMeta(flaw, true).hasCustomText || flaw.customText !== undefined"
+                class="mod-custom-text-wrapper"
+              >
+                <label class="mod-custom-text-label">
+                  <i class="ri-edit-line"></i>
+                  <span>{{ getModifierMeta(flaw, true).customTextLabel || 'Specification / Detail:' }}</span>
+                </label>
+                <input
+                  v-model="flaw.customText"
+                  type="text"
+                  class="form-control form-control-sm mod-custom-input"
+                  :placeholder="getModifierMeta(flaw, true).customTextPlaceholder || 'Specify details...'"
+                  @input="onModifierCustomTextInput(flaw)"
+                />
+              </div>
 
               <!-- Optional Variant Chips (if options exist) -->
               <div
@@ -574,6 +612,7 @@
                           {{ getModifierMeta(extra, false).category }}
                         </span>
                         <span class="mod-card-title">{{ extra.name }}</span>
+                        <span v-if="extra.customText" class="mod-card-custom-preview">: {{ extra.customText }}</span>
                       </div>
                       <div class="mod-card-header-actions">
                         <span class="mod-card-cost extra-cost">
@@ -583,7 +622,7 @@
                           type="button"
                           class="mod-card-del-btn"
                           title="Remove Extra"
-                          @click="builderStore.removeModifierFromTarget(linkedEff, false, xIdx)"
+                          @click="builderStore.removeModifierFromTarget(linkedEff, false, extra.id || xIdx)"
                         >
                           <i class="ri-close-line"></i>
                         </button>
@@ -593,6 +632,24 @@
                     <!-- Body: Rules Description & Variant Options -->
                     <div class="mod-card-body">
                       <p class="mod-card-desc">{{ getModifierMeta(extra, false).desc }}</p>
+
+                      <!-- Custom Player Specification Input -->
+                      <div
+                        v-if="getModifierMeta(extra, false).hasCustomText || extra.customText !== undefined"
+                        class="mod-custom-text-wrapper"
+                      >
+                        <label class="mod-custom-text-label">
+                          <i class="ri-edit-line"></i>
+                          <span>{{ getModifierMeta(extra, false).customTextLabel || 'Specification / Detail:' }}</span>
+                        </label>
+                        <input
+                          v-model="extra.customText"
+                          type="text"
+                          class="form-control form-control-sm mod-custom-input"
+                          :placeholder="getModifierMeta(extra, false).customTextPlaceholder || 'Specify details...'"
+                          @input="onModifierCustomTextInput(extra)"
+                        />
+                      </div>
 
                       <div
                         v-if="getModifierMeta(extra, false).options?.length > 0"
@@ -675,6 +732,7 @@
                           {{ getModifierMeta(flaw, true).category }}
                         </span>
                         <span class="mod-card-title">{{ flaw.name }}</span>
+                        <span v-if="flaw.customText" class="mod-card-custom-preview">: {{ flaw.customText }}</span>
                       </div>
                       <div class="mod-card-header-actions">
                         <span class="mod-card-cost flaw-cost">
@@ -684,7 +742,7 @@
                           type="button"
                           class="mod-card-del-btn"
                           title="Remove Flaw"
-                          @click="builderStore.removeModifierFromTarget(linkedEff, true, fIdx)"
+                          @click="builderStore.removeModifierFromTarget(linkedEff, true, flaw.id || fIdx)"
                         >
                           <i class="ri-close-line"></i>
                         </button>
@@ -694,6 +752,24 @@
                     <!-- Body: Rules Description & Variant Options -->
                     <div class="mod-card-body">
                       <p class="mod-card-desc">{{ getModifierMeta(flaw, true).desc }}</p>
+
+                      <!-- Custom Player Specification Input -->
+                      <div
+                        v-if="getModifierMeta(flaw, true).hasCustomText || flaw.customText !== undefined"
+                        class="mod-custom-text-wrapper"
+                      >
+                        <label class="mod-custom-text-label">
+                          <i class="ri-edit-line"></i>
+                          <span>{{ getModifierMeta(flaw, true).customTextLabel || 'Specification / Detail:' }}</span>
+                        </label>
+                        <input
+                          v-model="flaw.customText"
+                          type="text"
+                          class="form-control form-control-sm mod-custom-input"
+                          :placeholder="getModifierMeta(flaw, true).customTextPlaceholder || 'Specify details...'"
+                          @input="onModifierCustomTextInput(flaw)"
+                        />
+                      </div>
 
                       <div
                         v-if="getModifierMeta(flaw, true).options?.length > 0"
@@ -775,9 +851,13 @@
 <script setup>
 import { computed, ref } from 'vue';
 import { usePowerBuilderStore } from '../../stores/powerBuilderStore.js';
+import { useHeroStore } from '../../stores/heroStore.js';
 import { BASE_EFFECTS, EXTRAS, FLAWS, calculateEffectCost } from '../../rules/powerEngine.js';
 import EffectsLibraryModal from './EffectsLibraryModal.vue';
 import EffectConfigurator from './EffectConfigurator.vue';
+
+const heroStore = useHeroStore();
+const builderStore = usePowerBuilderStore();
 
 const props = defineProps({
   effect: {
@@ -789,8 +869,6 @@ const props = defineProps({
     default: 'Effect Editor'
   }
 });
-
-const builderStore = usePowerBuilderStore();
 
 const effectCategories = ['Attack', 'Defense', 'Movement', 'Sensory', 'Control & Utility'];
 
@@ -877,8 +955,19 @@ function getModifierMeta(mod, isFlaw = false) {
     options: match?.options || mod.options || [],
     hasConfig: match?.hasConfig || mod.hasConfig || false,
     hasRanks: mod.hasRanks ?? match?.hasRanks ?? false,
+    hasCustomText: mod.hasCustomText ?? match?.hasCustomText ?? false,
+    customTextLabel: mod.customTextLabel || match?.customTextLabel || 'Specification / Detail:',
+    customTextPlaceholder: mod.customTextPlaceholder || match?.customTextPlaceholder || 'Specify details...',
     costDisplay: match?.costDisplay || ''
   };
+}
+
+function onModifierCustomTextInput(mod) {
+  if (mod) {
+    if (!mod.config) mod.config = {};
+    mod.config.customText = mod.customText;
+    heroStore.pushHistory();
+  }
 }
 
 function getSelectedOptionId(mod) {
@@ -1344,6 +1433,60 @@ function calculateModSubtotal(mod, isFlaw = false) {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
+}
+
+.mod-card-custom-preview {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #60a5fa;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.mod-custom-text-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  background: rgba(0, 0, 0, 0.28);
+  padding: 0.45rem 0.6rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.mod-custom-text-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #93c5fd;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+.mod-custom-input {
+  width: 100%;
+  font-size: 0.78rem;
+  padding: 0.3rem 0.5rem;
+  background: rgba(11, 17, 34, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-xs);
+  color: var(--text-primary);
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.mod-custom-input:focus {
+  outline: none;
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 2px rgba(0, 111, 184, 0.3);
+}
+
+.mod-custom-input::placeholder {
+  color: #64748b;
+  font-style: italic;
 }
 
 .mod-card-desc {

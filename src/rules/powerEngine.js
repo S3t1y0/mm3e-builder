@@ -408,6 +408,19 @@ export const EXTRAS = [
     "desc": "Provides a +2 bonus to attack checks per rank when using this power.\n\nLike all attack bonuses, this modifier is subject to the series Power Level cap for total attack bonus plus effect rank."
   },
   {
+    "name": "Active",
+    "category": "Minions & Summon",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "Your summoned minions are active immediately upon summoning and do not suffer the Dazed condition, having a full set of actions each turn."
+  },
+  {
     "name": "Affects Corporeal",
     "category": "Combat",
     "type": "flat_per_rank",
@@ -548,6 +561,19 @@ export const EXTRAS = [
     ]
   },
   {
+    "name": "Aquatic",
+    "category": "Movement",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Flight"
+    ],
+    "desc": "Allows you to travel through water as easily as through the air, retaining your full flight speed underwater."
+  },
+  {
     "name": "Area",
     "category": "Range & Area",
     "type": "per_rank",
@@ -568,6 +594,19 @@ export const EXTRAS = [
     ]
   },
   {
+    "name": "Atomic",
+    "category": "Utility",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Shrinking"
+    ],
+    "desc": "At Shrinking 20, allows you to shrink to atomic and subatomic scale, entering microscopic realms."
+  },
+  {
     "name": "Attack",
     "category": "Combat",
     "type": "per_rank",
@@ -578,6 +617,46 @@ export const EXTRAS = [
     "desc": "Converts a personal-range effect (such as Teleport or Concealment) into an offensive close-range effect used against unwilling targets.\n\nRequires a standard action and an attack check. The target receives a resistance check (typically Dodge or Will) to negate the effect entirely."
   },
   {
+    "name": "Broad",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Weaken",
+      "Nullify"
+    ],
+    "desc": "Allows the effect to target any trait within a broad set (e.g. all Abilities, all Mental traits) or counter effects matching a broad descriptor (e.g. all Magic, all Mutant, all Tech)."
+  },
+  {
+    "name": "Change Direction",
+    "category": "Movement",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Teleport"
+    ],
+    "desc": "You can freely reorient your facing direction after teleporting, avoiding disorientation or landing facing the wrong way."
+  },
+  {
+    "name": "Change Velocity",
+    "category": "Movement",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Teleport"
+    ],
+    "desc": "You teleport \"at rest\" at your destination, shedding all kinetic momentum (e.g. teleporting out of a terminal velocity fall and landing safely)."
+  },
+  {
     "name": "Contagious",
     "category": "Combat",
     "type": "per_rank",
@@ -586,6 +665,60 @@ export const EXTRAS = [
     "hasRanks": false,
     "hasConfig": false,
     "desc": "Causes the effect to spread to anyone who comes into physical contact with the primary target while the effect is active.\n\nSecondary targets make the normal resistance check against the effect. The contagion continues until cured or its duration expires."
+  },
+  {
+    "name": "Controlled",
+    "category": "Minions & Summon",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "Summoned minions have the Controlled condition and obey your telepathic or spoken instructions without reservation."
+  },
+  {
+    "name": "Cumulative",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Affliction",
+      "Mind Reading"
+    ],
+    "desc": "Allows degrees of failure to accumulate across repeated attacks against the same target, advancing through higher condition degrees instead of only keeping the highest result."
+  },
+  {
+    "name": "Custom Extra",
+    "category": "Utility",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank / flat",
+    "hasRanks": true,
+    "hasConfig": true,
+    "hasCustomText": true,
+    "allowMultiple": true,
+    "customTextLabel": "Custom Extra Details",
+    "customTextPlaceholder": "Specify custom extra name and rules effect...",
+    "desc": "A custom Extra approved by the Gamemaster with customizable cost and mechanical or narrative effects."
+  },
+  {
+    "name": "Damaging",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Move Object"
+    ],
+    "desc": "Allows your telekinetic or magnetic Move Object effect to inflict Damage directly like physical Strength, resisting with Toughness DC 15 + rank."
   },
   {
     "name": "Dimensional",
@@ -621,6 +754,59 @@ export const EXTRAS = [
     ]
   },
   {
+    "name": "Easy",
+    "category": "Movement",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Teleport"
+    ],
+    "desc": "You do not suffer the Dazed and Vulnerable conditions after performing an Extended Teleport."
+  },
+  {
+    "name": "Effortless",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Nullify",
+      "Mind Reading"
+    ],
+    "desc": "Retrying this effect after two or more degrees of failure does not require spending Extra Effort; you may retry freely on your next turn."
+  },
+  {
+    "name": "Energizing",
+    "category": "Defense & Recovery",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing"
+    ],
+    "desc": "Your Healing effect can recover Fatigued and Exhausted conditions (DC 10 effect check removes one degree) in addition to physical damage."
+  },
+  {
+    "name": "Extended",
+    "category": "Movement",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Teleport"
+    ],
+    "desc": "Taking two move actions allows you to teleport an extraordinary distance equal to your effect rank + 8 on the Measurements Table (leaving you dazed and vulnerable for 1 round unless you have the Easy extra)."
+  },
+  {
     "name": "Extended Range",
     "category": "Range & Area",
     "type": "flat_per_rank",
@@ -631,6 +817,19 @@ export const EXTRAS = [
     "desc": "Doubles the short, medium, and maximum distance increments of a ranged effect for each rank applied.\n\nFor example, two ranks of Extended Range quadruple the effect's base range increments."
   },
   {
+    "name": "Extra Condition",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Affliction"
+    ],
+    "desc": "Your Affliction imposes an additional condition per degree of failure (e.g. both Dazed and Vulnerable on first degree, or Defenseless and Stunned on second degree)."
+  },
+  {
     "name": "Feature",
     "category": "Utility",
     "type": "flat_per_rank",
@@ -638,8 +837,25 @@ export const EXTRAS = [
     "costDisplay": "1 flat per rank",
     "hasRanks": true,
     "hasConfig": true,
+    "hasCustomText": true,
+    "allowMultiple": true,
+    "customTextLabel": "Feature Specification",
+    "customTextPlaceholder": "e.g. Internal Compass, Fur Coat, Integrated Flashlight...",
     "desc": "Adds a minor, situational utility or cosmetic benefit that does not duplicate an existing effect or advantage.\n\nEach rank costs 1 flat point and provides one distinct minor capability approved by the Gamemaster.",
     "configType": "text_note"
+  },
+  {
+    "name": "Heroic",
+    "category": "Minions & Summon",
+    "type": "per_rank",
+    "cost": 2,
+    "costDisplay": "+2 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "Summoned creatures are treated as full non-player characters rather than minions, exempt from routine attack takedowns and minion failure rules."
   },
   {
     "name": "Homing",
@@ -652,6 +868,19 @@ export const EXTRAS = [
     "desc": "Grants a ranged attack an additional attack check on subsequent rounds if it misses the target on the initial check.\n\nEach rank gives the attack one additional attempt on your turn until it hits, runs out of attempts, or is destroyed."
   },
   {
+    "name": "Horde",
+    "category": "Minions & Summon",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "Allows you to summon your maximum number of minions (with Multiple Minions) in a single standard action rather than one at a time."
+  },
+  {
     "name": "Impervious",
     "category": "Combat",
     "type": "per_rank",
@@ -660,6 +889,19 @@ export const EXTRAS = [
     "hasRanks": false,
     "hasConfig": false,
     "desc": "Causes you to automatically ignore and suffer no harm from damaging effects whose rank is equal to or less than half your Impervious rank.\n\nEffects with the Penetrating extra can bypass Impervious defense up to the Penetrating rank."
+  },
+  {
+    "name": "Improvised Weapon",
+    "category": "Combat",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "appliesTo": [
+      "Move Object"
+    ],
+    "desc": "Provides the benefit of the Throwing Mastery or Improvised Weapon advantage to objects thrown or wielded via Move Object, adding +1 damage per rank (up to the series PL cap)."
   },
   {
     "name": "Increased Duration",
@@ -818,6 +1060,45 @@ export const EXTRAS = [
     "desc": "Ties two or more effects together so they always trigger simultaneously as a single standard action.\n\nBoth effects must have the same range and use a single attack check, but targets make separate resistance checks for each effect."
   },
   {
+    "name": "Mental Link",
+    "category": "Minions & Summon",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "Telepathic two-way communication link with your summoned minions, allowing you to issue mental commands at any distance."
+  },
+  {
+    "name": "Metamorph",
+    "category": "Utility",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per form",
+    "hasRanks": true,
+    "hasConfig": false,
+    "appliesTo": [
+      "Morph"
+    ],
+    "desc": "Each rank gives you an entirely different alternate character sheet / form configuration (equal to the campaign PP budget) that you can switch into when morphing."
+  },
+  {
+    "name": "Movable",
+    "category": "Utility",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Create"
+    ],
+    "desc": "Created objects can be moved telekinetically around the battlefield with effective Strength equal to your Create rank."
+  },
+  {
     "name": "Multiattack",
     "category": "Combat",
     "type": "per_rank",
@@ -826,6 +1107,45 @@ export const EXTRAS = [
     "hasRanks": false,
     "hasConfig": false,
     "desc": "Allows you to hit multiple targets in an arc or concentrate rapid hits on a single target for extra damage bonus (+2 or +5 DC).\n\nCan also provide covering fire to grant an ally defense against attacks."
+  },
+  {
+    "name": "Multiple Minions",
+    "category": "Minions & Summon",
+    "type": "per_rank",
+    "cost": 2,
+    "costDisplay": "+2 per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "Each application doubles your summoned minion count: 1 rank = 2 minions, 2 ranks = 4 minions, 3 ranks = 8 minions, and so forth."
+  },
+  {
+    "name": "No Conduit",
+    "category": "Sensory & Mental",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Remote Sensing"
+    ],
+    "desc": "Sensory hazards or flashbang attacks at the displaced sensing location cannot travel back through the conduit to affect you."
+  },
+  {
+    "name": "Normal Strength",
+    "category": "Utility",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Shrinking"
+    ],
+    "desc": "You retain your full Strength, speed, and physical capacity even while shrunk to minuscule size."
   },
   {
     "name": "Penetrating",
@@ -838,6 +1158,33 @@ export const EXTRAS = [
     "desc": "Allows an attack to overcome Impervious resistance. The target must resist at least an effect rank equal to your Penetrating rank.\n\nPenetrating rank cannot exceed the base rank of the effect."
   },
   {
+    "name": "Persistent",
+    "category": "Defense & Recovery",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing",
+      "Regeneration"
+    ],
+    "desc": "Allows your Healing or Regeneration effect to treat and recover damage or conditions inflicted by attacks with the Incurable modifier."
+  },
+  {
+    "name": "Portal",
+    "category": "Movement",
+    "type": "per_rank",
+    "cost": 2,
+    "costDisplay": "+2 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Teleport"
+    ],
+    "desc": "Opens a five-foot dimensional gateway between two points as a free action. Anyone stepping through is transported; maintained via concentration."
+  },
+  {
     "name": "Precise",
     "category": "Utility",
     "type": "flat",
@@ -846,6 +1193,34 @@ export const EXTRAS = [
     "hasRanks": false,
     "hasConfig": false,
     "desc": "Grants fine motor control and delicate precision to the effect, such as carving initials, picking locks, or manipulating fine tools.\n\nCosts 1 flat point and eliminates clumsy side effects from high-rank power output."
+  },
+  {
+    "name": "Progressive",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 2,
+    "costDisplay": "+2 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Affliction",
+      "Weaken",
+      "Insubstantial"
+    ],
+    "desc": "Causes the effect to intensify incrementally on each of the target's turns until they successfully make a resistance check. A failed check advances to the next degree or further reduces traits."
+  },
+  {
+    "name": "Randomize",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Nullify"
+    ],
+    "desc": "Rather than being countered, targeted effects acquire the Uncontrolled flaw and activate erratically at the GM's discretion."
   },
   {
     "name": "Reach",
@@ -884,6 +1259,60 @@ export const EXTRAS = [
     ]
   },
   {
+    "name": "Redirect",
+    "category": "Defense & Recovery",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Deflect",
+      "Immunity"
+    ],
+    "desc": "Allows you to redirect an attack you successfully deflect toward any target within the attack's normal range as a free action."
+  },
+  {
+    "name": "Reflect",
+    "category": "Defense & Recovery",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Deflect",
+      "Immunity"
+    ],
+    "desc": "Allows you to reflect an attack back at the original attacker as a free reaction if your active defense check exceeds the attacker's attack roll."
+  },
+  {
+    "name": "Restorative",
+    "category": "Defense & Recovery",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing"
+    ],
+    "desc": "Restores power points removed by Weaken effects. An effect check removes points equal to the check result minus 10."
+  },
+  {
+    "name": "Resurrection",
+    "category": "Defense & Recovery",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing"
+    ],
+    "desc": "Restores life to deceased subjects who have been dead for fewer minutes than your Healing rank (DC 20 check; success stabilizes and revives the target)."
+  },
+  {
     "name": "Reversible",
     "category": "Utility",
     "type": "flat",
@@ -902,6 +1331,19 @@ export const EXTRAS = [
     "hasRanks": true,
     "hasConfig": false,
     "desc": "Allows a ranged attack to bounce off solid surfaces to bypass cover and reach hidden targets.\n\nEach rank allows one bounce before reaching the target, with no penalty on the attack check."
+  },
+  {
+    "name": "Sacrifice",
+    "category": "Minions & Summon",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "When hit by an effect requiring a resistance check, you can spend a Hero Point / Victory Point to shift the attack to a nearby minion instead."
   },
   {
     "name": "Secondary Effect",
@@ -924,6 +1366,34 @@ export const EXTRAS = [
     "desc": "Allows you to pick and choose which targets in an area effect are affected and which are completely spared.\n\nInvaluable for area attacks to prevent hitting allies, innocent bystanders, or critical equipment."
   },
   {
+    "name": "Sensory Link",
+    "category": "Sensory & Mental",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Mind Reading"
+    ],
+    "desc": "Taps into the target's senses, allowing you to see, hear, and feel what the target experiences."
+  },
+  {
+    "name": "Simultaneous",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Weaken",
+      "Nullify",
+      "Remote Sensing"
+    ],
+    "desc": "Affects all traits within a broad set simultaneously with a single check, counters all effects of a descriptor at once, or allows you to perceive both your physical body and remote sensor location at the same time."
+  },
+  {
     "name": "Sleep",
     "category": "Combat",
     "type": "per_rank",
@@ -942,6 +1412,45 @@ export const EXTRAS = [
     "hasRanks": true,
     "hasConfig": false,
     "desc": "Allows you to split the ranks of an effect between multiple targets with a single attack action.\n\nEach rank of Split allows you to target one additional creature, dividing your total rank among all targets (minimum 1 rank each)."
+  },
+  {
+    "name": "Stabilize",
+    "category": "Defense & Recovery",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing"
+    ],
+    "desc": "You automatically stabilize a dying character as a standard action without needing to roll an effect check."
+  },
+  {
+    "name": "Stationary",
+    "category": "Utility",
+    "type": "flat",
+    "cost": 0,
+    "costDisplay": "0 flat points",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Create"
+    ],
+    "desc": "Created objects can hang completely immobile in midair, defying gravity and resisting movement with effective Strength equal to their Toughness rank."
+  },
+  {
+    "name": "Strength-based",
+    "category": "Combat",
+    "type": "flat",
+    "cost": 0,
+    "costDisplay": "0 flat points",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Damage"
+    ],
+    "desc": "Adds your Strength damage rank to this Damage effect. Total damage rank equals your Strength rank plus the power rank, subject to campaign Power Level limits."
   },
   {
     "name": "Subtle",
@@ -980,14 +1489,44 @@ export const EXTRAS = [
     "desc": "Changes a permanent duration effect to sustained, allowing you to turn it on and off as a free action.\n\nYou can also modify the effect with extras and feats that cannot normally be applied to permanent traits."
   },
   {
+    "name": "Tether",
+    "category": "Utility",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Create"
+    ],
+    "desc": "You maintain a physical tether or connection to your created objects, allowing you to anchor or pull them using your own Strength."
+  },
+  {
     "name": "Triggered",
     "category": "Duration & Action",
     "type": "flat_per_rank",
     "cost": 1,
     "costDisplay": "1 flat per rank",
     "hasRanks": true,
-    "hasConfig": false,
+    "hasConfig": true,
+    "hasCustomText": true,
+    "allowMultiple": true,
+    "customTextLabel": "Trigger Condition",
+    "customTextPlaceholder": "e.g. Proximity within 10 ft, Pressure plate, Command word...",
     "desc": "Sets an effect to activate automatically when a specific trigger condition occurs (such as proximity, touch, or a timer).\n\nCosts 1 flat PP per trigger instance. You can reset a spent trigger as a standard action."
+  },
+  {
+    "name": "Turnabout",
+    "category": "Movement",
+    "type": "flat",
+    "cost": 1,
+    "costDisplay": "1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Teleport"
+    ],
+    "desc": "Allows you to teleport to a target, perform a standard action (e.g. an attack), and teleport back to your starting position in a single round, provided total distance is within range."
   },
   {
     "name": "Variable Descriptor",
@@ -997,6 +1536,9 @@ export const EXTRAS = [
     "costDisplay": "1-2 flat points",
     "hasRanks": false,
     "hasConfig": true,
+    "hasCustomText": true,
+    "customTextLabel": "Available Descriptors",
+    "customTextPlaceholder": "e.g. Fire, Cold, Electricity, Acid...",
     "desc": "Allows you to alter the power's descriptive theme and energy type on the fly.\n\nCosts 1 flat PP for a narrow group of descriptors (e.g., weather, elements) or 2 flat PP for a broad group (e.g., any energy, magic).",
     "options": [
       {
@@ -1012,6 +1554,35 @@ export const EXTRAS = [
         "cost": 2,
         "type": "flat",
         "desc": "2 flat points: Any broad group (e.g. all magic, all mental, or all technological)."
+      }
+    ]
+  },
+  {
+    "name": "Variable Type",
+    "category": "Minions & Summon",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1-2 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "Allows summoning different types of minions rather than identical copies.",
+    "options": [
+      {
+        "id": "general",
+        "label": "General Type (+1/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "+1 PP/Rank: Specific category (e.g. canines, zombies, robots)."
+      },
+      {
+        "id": "broad",
+        "label": "Broad Type (+2/Rank)",
+        "cost": 2,
+        "type": "per_rank",
+        "desc": "+2 PP/Rank: Broad category (e.g. all animals, all demons, all humanoids)."
       }
     ]
   }
@@ -1043,6 +1614,48 @@ export const FLAWS = [
         "desc": "Requires a Standard action to prepare/activate before power can be used (-2 PP flat)."
       }
     ]
+  },
+  {
+    "name": "Attitude",
+    "category": "Minions & Summon",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1-2 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "Summoned creatures are not inherently obedient.",
+    "options": [
+      {
+        "id": "indifferent",
+        "label": "Indifferent (-1/Rank)",
+        "cost": -1,
+        "type": "per_rank",
+        "desc": "-1 PP/Rank: Minions are indifferent; must persuade them to help."
+      },
+      {
+        "id": "unfriendly",
+        "label": "Unfriendly (-2/Rank)",
+        "cost": -2,
+        "type": "per_rank",
+        "desc": "-2 PP/Rank: Minions are hostile or unfriendly; dangerous to summon."
+      }
+    ]
+  },
+  {
+    "name": "Blending",
+    "category": "Sensory & Mental",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Concealment"
+    ],
+    "desc": "Your Concealment only works while stationary or moving at half speed or less, blending against backgrounds."
   },
   {
     "name": "Check Required",
@@ -1079,6 +1692,20 @@ export const FLAWS = [
     "desc": "Reduces the duration step of an effect (such as sustained to concentration). You must spend a standard action each round to maintain it.\n\nIf you take any other standard action or are stunned, the effect immediately ends."
   },
   {
+    "name": "Custom Flaw",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank / flat",
+    "hasRanks": true,
+    "hasConfig": true,
+    "hasCustomText": true,
+    "allowMultiple": true,
+    "customTextLabel": "Custom Flaw Drawback",
+    "customTextPlaceholder": "Specify custom drawback and mechanical limitation...",
+    "desc": "A custom Flaw approved by the Gamemaster with customizable cost reduction and mechanical drawback."
+  },
+  {
     "name": "Diminished Range",
     "category": "Range & Targeting",
     "type": "flat_per_rank",
@@ -1097,6 +1724,19 @@ export const FLAWS = [
     "hasRanks": false,
     "hasConfig": false,
     "desc": "Using this effect requires intense focus, leaving you vulnerable (halving your active defenses Dodge and Parry) until your next turn.\n\nThis flaw reduces the cost of the effect by -1 PP/Rank."
+  },
+  {
+    "name": "Empathic",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing"
+    ],
+    "desc": "When you heal damage or conditions from another subject, you suffer those same damage conditions yourself."
   },
   {
     "name": "Fades",
@@ -1119,6 +1759,32 @@ export const FLAWS = [
     "desc": "You suffer damage whenever the manifestations of your power (such as a projected illusion, duplicate, or sensory probe) are attacked.\n\nYou must make a Toughness resistance check against attacks directed at the manifested power."
   },
   {
+    "name": "Full Power",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Leaping"
+    ],
+    "desc": "You can only jump your maximum possible leap distance whenever you use this power."
+  },
+  {
+    "name": "Gliding",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Flight"
+    ],
+    "desc": "You fly by gliding on air currents, descending at least 1 rank of distance for every rank traveled forward."
+  },
+  {
     "name": "Grab-Based",
     "category": "Range & Targeting",
     "type": "per_rank",
@@ -1127,6 +1793,16 @@ export const FLAWS = [
     "hasRanks": false,
     "hasConfig": false,
     "desc": "The effect can only be used on a target you have successfully grabbed or restrained.\n\nIf the grab attempt fails or the target escapes, the effect cannot be applied."
+  },
+  {
+    "name": "Inaccurate",
+    "category": "Range & Targeting",
+    "type": "flat_per_rank",
+    "cost": -1,
+    "costDisplay": "-1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "desc": "Imposes a -2 penalty to attack checks per rank when using this power.\n\nEach rank of Inaccurate reduces the cost of the effect by -1 flat point."
   },
   {
     "name": "Increased Action",
@@ -1162,6 +1838,32 @@ export const FLAWS = [
     ]
   },
   {
+    "name": "Instant Recovery",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Affliction"
+    ],
+    "desc": "Target instantly recovers from all inflicted conditions as soon as the effect stops being applied or concentration breaks."
+  },
+  {
+    "name": "Levitation",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Flight"
+    ],
+    "desc": "You can only ascend or descend straight vertically; you cannot propel yourself horizontally using this flight power."
+  },
+  {
     "name": "Limited",
     "category": "Limitations",
     "type": "per_rank",
@@ -1169,8 +1871,130 @@ export const FLAWS = [
     "costDisplay": "-1 per rank",
     "hasRanks": false,
     "hasConfig": true,
+    "hasCustomText": true,
+    "allowMultiple": true,
+    "customTextLabel": "Limitation Condition",
+    "customTextPlaceholder": "e.g. Only against metals/machines, Only in direct sunlight...",
     "desc": "The effect only functions under specific, restricted circumstances or against a limited class of targets (e.g., only against metal, only in direct sunlight).\n\nThe limitation must remove about half of the effect's usual utility to qualify for this -1 PP/Rank flaw.",
     "configType": "text_note"
+  },
+  {
+    "name": "Limited by Language",
+    "category": "Sensory & Mental",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Mind Reading"
+    ],
+    "desc": "You can only understand thoughts, memories, or internal monologues if you share a common language with the subject."
+  },
+  {
+    "name": "Limited Degree",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Affliction"
+    ],
+    "desc": "The Affliction can inflict at most two degrees of failure; third-degree conditions (Incapacitated, Paralyzed) can never be achieved."
+  },
+  {
+    "name": "Limited Direction",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Move Object"
+    ],
+    "desc": "You can only move objects in a single fixed direction or vector (e.g. only pushing away, or only pulling toward yourself)."
+  },
+  {
+    "name": "Limited Material",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Move Object"
+    ],
+    "desc": "You can only manipulate a specific material or substance (e.g. only ferrous metals, only crystalline solids, only liquids)."
+  },
+  {
+    "name": "Limited to Emotions",
+    "category": "Sensory & Mental",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Mind Reading"
+    ],
+    "desc": "You can only perceive emotional states and visceral reactions, not coherent language, thoughts, or memories."
+  },
+  {
+    "name": "Limited to Extended",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Teleport"
+    ],
+    "desc": "Requires the Extended extra. You cannot perform short-range tactical teleports; you can only make two-action extended teleports."
+  },
+  {
+    "name": "Limited to Half Effect",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Immunity"
+    ],
+    "desc": "Grants half-effect resistance (+5 circumstance bonus or half damage taken) instead of complete immunity."
+  },
+  {
+    "name": "Limited to Surface Thoughts",
+    "category": "Sensory & Mental",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Mind Reading"
+    ],
+    "desc": "You can only detect immediate surface thoughts; you cannot probe deeper memories or subconscious secrets."
+  },
+  {
+    "name": "Medium",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Teleport",
+      "Remote Sensing"
+    ],
+    "desc": "You require a physical medium to travel or sense through (e.g. electrical cables, shadow conduits, mirror surfaces, water mains)."
   },
   {
     "name": "Noticeable",
@@ -1179,8 +2003,37 @@ export const FLAWS = [
     "cost": -1,
     "costDisplay": "-1 flat point",
     "hasRanks": false,
-    "hasConfig": false,
+    "hasConfig": true,
+    "hasCustomText": true,
+    "customTextLabel": "Tell / Manifestation",
+    "customTextPlaceholder": "e.g. Skin turns bright gold, Loud turbine roar...",
     "desc": "A continuous or permanent effect has an obvious, undeniable physical sign that gives it away (such as glowing skin, hum, or stony bulk).\n\nCosts -1 flat point and prevents the effect from ever being subtle or concealed."
+  },
+  {
+    "name": "Partial",
+    "category": "Sensory & Mental",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Concealment"
+    ],
+    "desc": "Provides partial concealment (+2 circumstance bonus to defense) rather than total concealment."
+  },
+  {
+    "name": "Passive",
+    "category": "Sensory & Mental",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Concealment"
+    ],
+    "desc": "Your Concealment shuts off immediately whenever you perform an attack or offensive action."
   },
   {
     "name": "Permanent",
@@ -1193,6 +2046,32 @@ export const FLAWS = [
     "desc": "The effect cannot be turned off voluntarily and is always active. You cannot use extra effort or stunt alternate effects from it.\n\nCosts -1 PP/Rank and is only applied to sustained personal effects like Protection or Enhanced Traits."
   },
   {
+    "name": "Platform",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Flight"
+    ],
+    "desc": "You ride an external platform, board, disk, or carpet that can be attacked, targeted, or knocked away from under your feet."
+  },
+  {
+    "name": "Proportional",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Create"
+    ],
+    "desc": "The combined volume rank plus Toughness rank of created objects cannot exceed your Create effect rank."
+  },
+  {
     "name": "Quirk",
     "category": "Limitations",
     "type": "flat_per_rank",
@@ -1200,6 +2079,10 @@ export const FLAWS = [
     "costDisplay": "-1 flat per rank",
     "hasRanks": true,
     "hasConfig": true,
+    "hasCustomText": true,
+    "allowMultiple": true,
+    "customTextLabel": "Quirk Drawback",
+    "customTextPlaceholder": "e.g. Only while screaming, Emits loud hum, Leaves glowing footprints...",
     "desc": "A minor nuisance, cosmetic flaw, or situational drawback that is slightly inconvenient but less severe than a Complication.\n\nEach Quirk reduces the effect's cost by -1 flat point.",
     "configType": "text_note"
   },
@@ -1262,7 +2145,10 @@ export const FLAWS = [
     "cost": -1,
     "costDisplay": "-1 per rank",
     "hasRanks": false,
-    "hasConfig": false,
+    "hasConfig": true,
+    "hasCustomText": true,
+    "customTextLabel": "Resistance Defense Check",
+    "customTextPlaceholder": "e.g. Will defense, Fortitude check...",
     "desc": "Adds an additional resistance check (or allows a check where none was previously allowed) to negate or halve the effect.\n\nFor example, a Teleport Attack might allow both a Dodge and Will check to escape."
   },
   {
@@ -1291,6 +2177,9 @@ export const FLAWS = [
     "costDisplay": "-1-2 per rank",
     "hasRanks": false,
     "hasConfig": true,
+    "hasCustomText": true,
+    "customTextLabel": "Side Effect Manifestation",
+    "customTextPlaceholder": "e.g. User suffers Dazed condition on miss, electrical shock...",
     "desc": "A catastrophic failure or complication occurs whenever you use the power or fail an attack check with it.\n\nCosts -1 PP/Rank if the side effect only occurs on a failure, or -2 PP/Rank if it happens every time the power is activated.",
     "options": [
       {
@@ -1308,6 +2197,45 @@ export const FLAWS = [
         "desc": "-2 PP/Rank: Problematic side effect triggers every time power is used regardless of success."
       }
     ]
+  },
+  {
+    "name": "Slow",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Variable"
+    ],
+    "desc": "You can only reconfigure your Variable pool outside of combat/action encounters, requiring minutes or hours of dedicated laboratory, ritual, or workshop access."
+  },
+  {
+    "name": "Source",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Regeneration"
+    ],
+    "desc": "You only regenerate when in direct physical contact with your designated source (e.g. natural sunlight, fresh blood, open electricity)."
+  },
+  {
+    "name": "Temporary",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing"
+    ],
+    "desc": "Damage conditions are only suppressed temporarily for 1 hour, returning in full once the duration expires."
   },
   {
     "name": "Tiring",
@@ -1356,14 +2284,17 @@ export const FLAWS = [
     ]
   },
   {
-    "name": "Inaccurate",
-    "category": "Range & Targeting",
-    "type": "flat_per_rank",
+    "name": "Wings",
+    "category": "Action & Activation",
+    "type": "per_rank",
     "cost": -1,
-    "costDisplay": "-1 flat per rank",
-    "hasRanks": true,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
     "hasConfig": false,
-    "desc": "Imposes a -2 penalty to attack checks per rank when using this power.\n\nEach rank of Inaccurate reduces the cost of the effect by -1 flat point."
+    "appliesTo": [
+      "Flight"
+    ],
+    "desc": "Flight relies on physical wings that require open clearance to spread and can be fouled, bound, or pinned."
   }
 ];
 
@@ -1747,10 +2678,30 @@ export function normalizeModifier(rawMod) {
     if (ref.costDisplay) mod.costDisplay = ref.costDisplay;
     if (ref.hasRanks !== undefined && mod.hasRanks === undefined) mod.hasRanks = ref.hasRanks;
     if (ref.hasConfig !== undefined && mod.hasConfig === undefined) mod.hasConfig = ref.hasConfig;
+    if (ref.hasCustomText !== undefined && mod.hasCustomText === undefined) mod.hasCustomText = ref.hasCustomText;
+    if (ref.allowMultiple !== undefined && mod.allowMultiple === undefined) mod.allowMultiple = ref.allowMultiple;
+    if (ref.customTextLabel && !mod.customTextLabel) mod.customTextLabel = ref.customTextLabel;
+    if (ref.customTextPlaceholder && !mod.customTextPlaceholder) mod.customTextPlaceholder = ref.customTextPlaceholder;
+    if (ref.appliesTo && !mod.appliesTo) mod.appliesTo = ref.appliesTo;
+  }
+
+  // Ensure unique ID for multiple instances identification
+  mod.id = mod.id || ('mod_' + Date.now() + Math.random().toString(36).substr(2, 5));
+
+  // Preserve customText from either direct property or config object
+  if (rawMod.customText !== undefined) {
+    mod.customText = rawMod.customText;
+  } else if (rawMod.config?.customText !== undefined) {
+    mod.customText = rawMod.config.customText;
+  } else if (mod.customText === undefined) {
+    mod.customText = '';
   }
 
   mod.ranks = Math.max(1, Number(mod.ranks) || 1);
   mod.config = mod.config || {};
+  if (mod.customText) {
+    mod.config.customText = mod.customText;
+  }
 
   // If modifier has options and an option is selected, sync cost and type from selected option
   if (ref && ref.options && ref.options.length > 0) {
@@ -1769,6 +2720,24 @@ export function normalizeModifier(rawMod) {
   mod.cost = Number(mod.cost);
   mod.type = mod.type || 'per_rank';
   return mod;
+}
+
+/**
+ * Checks if a modifier is compatible with a given effect name.
+ * A modifier is compatible if it is general (no appliesTo specified)
+ * or if its appliesTo array includes the effect name.
+ *
+ * @param {Object} mod - Modifier object from EXTRAS or FLAWS
+ * @param {string} effectName - Name of the effect (e.g. 'Damage', 'Summon')
+ * @returns {boolean}
+ */
+export function isModifierCompatible(mod, effectName) {
+  if (!effectName) return true;
+  if (!mod || !mod.appliesTo || !Array.isArray(mod.appliesTo) || mod.appliesTo.length === 0) {
+    return true;
+  }
+  const eff = effectName.toLowerCase().trim();
+  return mod.appliesTo.some(a => a.toLowerCase().trim() === eff);
 }
 
 export function normalizeAlternateSlot(rawSlot) {
@@ -2290,7 +3259,8 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
   const power = normalizePower(rawPower);
   const effect = power.mainEffect;
 
-  const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify'].includes(effect.baseEffect);
+  const isMoveObjectDamaging = effect.baseEffect === 'Move Object' && effect.extras.some(e => e.name === 'Damaging');
+  const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify'].includes(effect.baseEffect) || isMoveObjectDamaging;
   const isArea = effect.extras.some(e => e.name === 'Area');
   const isPerception = effect.range === 'Perception';
   const isClose = effect.range === 'Close';
@@ -2329,12 +3299,19 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
 
   const finalAttackBonus = (isArea || isPerception) ? null : (baseBonus + modAttackBonus);
 
+  // Strength-based modifier bonus
+  const isStrengthBased = effect.baseEffect === 'Damage' && effect.extras.some(e => e.name === 'Strength-based');
+  const strBonus = isStrengthBased ? (Number(abilities.STR) || 0) : 0;
+  const effectiveRank = effect.ranks + strBonus;
+
   // Difficulty Class (DC)
   let dc = 0;
   let dcDescription = '';
-  if (effect.baseEffect === 'Damage' || effect.baseEffect === 'Blast') {
-    dc = 15 + effect.ranks;
-    dcDescription = `DC ${dc} vs Toughness`;
+  if (effect.baseEffect === 'Damage' || effect.baseEffect === 'Blast' || isMoveObjectDamaging) {
+    dc = 15 + effectiveRank;
+    dcDescription = isStrengthBased
+      ? `DC ${dc} vs Toughness (STR ${strBonus >= 0 ? '+' : ''}${strBonus} + Rk ${effect.ranks})`
+      : `DC ${dc} vs Toughness`;
   } else if (effect.baseEffect === 'Affliction') {
     dc = 10 + effect.ranks;
     const resDefense = effect.config?.resistance || effect.resistance || 'Fortitude';
@@ -2383,7 +3360,7 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
       }
     } else {
       // Standard attack roll: Attack Bonus + Effect Rank <= 2 * PL
-      currentTotal = (finalAttackBonus || 0) + effect.ranks;
+      currentTotal = (finalAttackBonus || 0) + effectiveRank;
       maxAllowed = 2 * heroPL;
       if (currentTotal > maxAllowed) {
         isCompliant = false;

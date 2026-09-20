@@ -4,6 +4,7 @@ export const useUiStore = defineStore('ui', {
   state: () => ({
     activeNavTab: 'sheet', // 'wizard' | 'sheet' | 'rules'
     activeTab: 'sheet',
+    activeActionHubTab: 'actions',
     modals: {
       powerStudio: false,
       advantage: false,
@@ -19,6 +20,10 @@ export const useUiStore = defineStore('ui', {
   }),
 
   actions: {
+    setActiveActionHubTab(tab) {
+      this.activeActionHubTab = tab;
+    },
+
     setNavTab(tab) {
       if (tab === 'rules') {
         if (typeof window !== 'undefined') {

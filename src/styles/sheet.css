@@ -3997,11 +3997,11 @@
    Hero Identity & Combat Vitals Banner
    -------------------------------------------------------------------------- */
 .dndb-hero-banner {
-  background: linear-gradient(135deg, rgba(24, 24, 32, 0.96) 0%, rgba(16, 16, 22, 0.98) 100%);
+  background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-top: 3px solid var(--accent-primary);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-sm);
   padding: 1.15rem 1.5rem;
   display: flex;
   align-items: center;
@@ -4092,7 +4092,7 @@
 }
 
 .dndb-name-input:focus {
-  background: rgba(20, 20, 28, 0.9);
+  background: var(--bg-input);
   border-color: var(--accent-primary);
   outline: none;
   box-shadow: 0 0 0 3px rgba(0, 111, 184, 0.25);
@@ -4139,7 +4139,7 @@
 }
 
 .dndb-sub-input:focus {
-  background: rgba(20, 20, 28, 0.9);
+  background: var(--bg-input);
   border-color: var(--accent-primary);
   color: #fff;
   outline: none;
@@ -4150,11 +4150,195 @@
   user-select: none;
 }
 
+/* --------------------------------------------------------------------------
+   Integrated Combat Condition Strip (HeroHeader - Option 1)
+   -------------------------------------------------------------------------- */
+.dndb-conditions-row {
+  margin-top: 0.35rem;
+  display: flex;
+  align-items: center;
+  min-height: 28px;
+}
+
+.cond-healthy-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.cond-healthy-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #6ee7b7;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  padding: 0.18rem 0.55rem;
+  border-radius: var(--radius-xs);
+  user-select: none;
+}
+
+.cond-healthy-pill i {
+  color: #34d399;
+  font-size: 0.8rem;
+}
+
+.cond-active-chips-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.cond-strip-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #f87171;
+  letter-spacing: 0.05em;
+  user-select: none;
+}
+
+.cond-strip-label i {
+  font-size: 0.82rem;
+}
+
+.dndb-cond-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: #0b1122;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: var(--radius-xs);
+  padding: 0.15rem 0.3rem 0.15rem 0.55rem;
+  transition: all var(--trans-fast);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+}
+
+.dndb-cond-chip:hover {
+  border-color: #ef4444;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+}
+
+.dndb-cond-chip.is-severe {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.3);
+}
+
+.cond-chip-name {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: #ffffff;
+  letter-spacing: 0.02em;
+}
+
+.cond-chip-effect {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.22);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  padding: 0.08rem 0.38rem;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+
+.btn-cond-dismiss {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 3px;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  font-size: 0.85rem;
+  transition: all var(--trans-fast);
+}
+
+.btn-cond-dismiss:hover {
+  background: rgba(239, 68, 68, 0.3);
+  color: #ffffff;
+}
+
+.btn-cond-quick-add {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary);
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.18rem 0.5rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-cond-quick-add:hover {
+  background: rgba(0, 111, 184, 0.18);
+  border-color: var(--accent-primary);
+  color: #38bdf8;
+}
+
+.btn-cond-clear-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: transparent;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.16rem 0.45rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-cond-clear-all:hover {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: #ef4444;
+  color: #ffffff;
+}
+
+.btn-cond-view-tracker {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.16rem 0.45rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-cond-view-tracker:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
 /* Vitals Dock: Health & Combat Bar */
 .dndb-hero-vitals-dock {
   display: flex;
   align-items: stretch;
-  background: var(--bg-card);
+  background: var(--bg-input);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -4307,23 +4491,23 @@
 /* Initiative Quick Box */
 .dndb-vital-box.init-box {
   cursor: pointer;
-  background: rgba(245, 158, 11, 0.08);
+  background: rgba(0, 111, 184, 0.08);
 }
 
 .dndb-vital-box.init-box:hover {
-  background: rgba(245, 158, 11, 0.16);
+  background: rgba(0, 111, 184, 0.16);
 }
 
 .dndb-vital-box.init-box:active {
-  background: rgba(245, 158, 11, 0.24);
+  background: rgba(0, 111, 184, 0.24);
 }
 
 .dndb-vital-box.init-box .dndb-vital-val {
-  color: #fbbf24;
+  color: #38bdf8;
 }
 
 .dndb-vital-box.init-box .dndb-vital-sub {
-  color: #fde68a;
+  color: #60a5fa;
   display: flex;
   align-items: center;
   gap: 0.25rem;

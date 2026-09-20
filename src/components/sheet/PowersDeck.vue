@@ -205,7 +205,7 @@
               class="glance-mod-tag extra"
             >
               <i class="ri-add-circle-fill"></i>
-              <span>{{ extra.name }}{{ (extra.ranks || 1) > 1 ? ` R${extra.ranks}` : '' }}</span>
+              <span>{{ extra.name }}{{ extra.customText ? ` (${extra.customText})` : '' }}{{ (extra.ranks || 1) > 1 ? ` R${extra.ranks}` : '' }}</span>
             </span>
 
             <!-- Flaws Badges -->
@@ -215,7 +215,7 @@
               class="glance-mod-tag flaw"
             >
               <i class="ri-indeterminate-circle-fill"></i>
-              <span>{{ flaw.name }}{{ (flaw.ranks || 1) > 1 ? ` R${flaw.ranks}` : '' }}</span>
+              <span>{{ flaw.name }}{{ flaw.customText ? ` (${flaw.customText})` : '' }}{{ (flaw.ranks || 1) > 1 ? ` R${flaw.ranks}` : '' }}</span>
             </span>
 
             <!-- Linked Effects Badges -->
@@ -378,7 +378,7 @@
                 :key="'e_' + e.name"
                 class="glance-mod-tag extra"
               >
-                +{{ e.name }}
+                +{{ e.name }}{{ e.customText ? ` (${e.customText})` : '' }}
               </span>
 
               <!-- Flaws -->
@@ -387,7 +387,7 @@
                 :key="'f_' + f.name"
                 class="glance-mod-tag flaw"
               >
-                -{{ f.name }}
+                -{{ f.name }}{{ f.customText ? ` (${f.customText})` : '' }}
               </span>
             </div>
           </div>
@@ -490,7 +490,10 @@
                   class="dossier-mod-card extra-mod"
                 >
                   <div class="dossier-mod-top">
-                    <strong class="dossier-mod-name">{{ extra.name }}</strong>
+                    <strong class="dossier-mod-name">
+                      {{ extra.name }}
+                      <span v-if="extra.customText" class="dossier-mod-custom-text">: {{ extra.customText }}</span>
+                    </strong>
                     <span class="dossier-cost-tag extra">
                       {{ extra.cost >= 0 ? `+${extra.cost}` : extra.cost }} {{ extra.type === 'per_rank' ? 'PP/R' : 'Flat' }}
                     </span>
@@ -523,7 +526,10 @@
                   class="dossier-mod-card flaw-mod"
                 >
                   <div class="dossier-mod-top">
-                    <strong class="dossier-mod-name">{{ flaw.name }}</strong>
+                    <strong class="dossier-mod-name">
+                      {{ flaw.name }}
+                      <span v-if="flaw.customText" class="dossier-mod-custom-text">: {{ flaw.customText }}</span>
+                    </strong>
                     <span class="dossier-cost-tag flaw">
                       {{ flaw.cost }} {{ flaw.type === 'per_rank' ? 'PP/R' : 'Flat' }}
                     </span>
@@ -659,7 +665,7 @@
                       <span class="mod-row-label extra"><i class="ri-add-circle-line"></i> Extras:</span>
                       <div class="mod-row-tags">
                         <span v-for="e in linked.extras" :key="e.name" class="glance-mod-tag extra">
-                          +{{ e.name }}{{ (e.ranks || 1) > 1 ? ` x${e.ranks}` : '' }}
+                          +{{ e.name }}{{ e.customText ? ` (${e.customText})` : '' }}{{ (e.ranks || 1) > 1 ? ` x${e.ranks}` : '' }}
                         </span>
                       </div>
                     </div>
@@ -667,7 +673,7 @@
                       <span class="mod-row-label flaw"><i class="ri-indeterminate-circle-line"></i> Flaws:</span>
                       <div class="mod-row-tags">
                         <span v-for="f in linked.flaws" :key="f.name" class="glance-mod-tag flaw">
-                          -{{ f.name }}{{ (f.ranks || 1) > 1 ? ` x${f.ranks}` : '' }}
+                          -{{ f.name }}{{ f.customText ? ` (${f.customText})` : '' }}{{ (f.ranks || 1) > 1 ? ` x${f.ranks}` : '' }}
                         </span>
                       </div>
                     </div>
@@ -802,7 +808,7 @@
                       <span class="mod-row-label extra"><i class="ri-add-circle-line"></i> Extras:</span>
                       <div class="mod-row-tags">
                         <span v-for="e in getSubPowerActiveEffect(sub).extras" :key="e.name" class="glance-mod-tag extra">
-                          +{{ e.name }}{{ (e.ranks || 1) > 1 ? ` x${e.ranks}` : '' }}
+                          +{{ e.name }}{{ e.customText ? ` (${e.customText})` : '' }}{{ (e.ranks || 1) > 1 ? ` x${e.ranks}` : '' }}
                         </span>
                       </div>
                     </div>
@@ -810,7 +816,7 @@
                       <span class="mod-row-label flaw"><i class="ri-indeterminate-circle-line"></i> Flaws:</span>
                       <div class="mod-row-tags">
                         <span v-for="f in getSubPowerActiveEffect(sub).flaws" :key="f.name" class="glance-mod-tag flaw">
-                          -{{ f.name }}{{ (f.ranks || 1) > 1 ? ` x${f.ranks}` : '' }}
+                          -{{ f.name }}{{ f.customText ? ` (${f.customText})` : '' }}{{ (f.ranks || 1) > 1 ? ` x${f.ranks}` : '' }}
                         </span>
                       </div>
                     </div>
@@ -1043,7 +1049,10 @@
                     class="dossier-mod-card extra-mod"
                   >
                     <div class="dossier-mod-top">
-                      <strong class="dossier-mod-name">{{ extra.name }}</strong>
+                      <strong class="dossier-mod-name">
+                        {{ extra.name }}
+                        <span v-if="extra.customText" class="dossier-mod-custom-text">: {{ extra.customText }}</span>
+                      </strong>
                       <span class="dossier-cost-tag extra">
                         +{{ extra.cost }} {{ extra.type === 'per_rank' ? 'PP/R' : 'Flat' }}
                       </span>
@@ -1067,7 +1076,10 @@
                     class="dossier-mod-card flaw-mod"
                   >
                     <div class="dossier-mod-top">
-                      <strong class="dossier-mod-name">{{ flaw.name }}</strong>
+                      <strong class="dossier-mod-name">
+                        {{ flaw.name }}
+                        <span v-if="flaw.customText" class="dossier-mod-custom-text">: {{ flaw.customText }}</span>
+                      </strong>
                       <span class="dossier-cost-tag flaw">
                         {{ flaw.cost }} {{ flaw.type === 'per_rank' ? 'PP/R' : 'Flat' }}
                       </span>
@@ -1113,7 +1125,8 @@ function formatModifierList(mods, isFlaw = false) {
     const costSign = m.cost > 0 ? `+${m.cost}` : `${m.cost}`;
     const costPart = m.cost !== undefined ? ` (${costSign}${m.type === 'flat' ? ' flat' : '/r'})` : '';
     const rkPart = m.ranks && m.ranks > 1 ? ` x${m.ranks}` : '';
-    return `${m.name || 'Modifier'}${rkPart}${costPart}`;
+    const textPart = m.customText ? ` [${m.customText}]` : '';
+    return `${m.name || 'Modifier'}${textPart}${rkPart}${costPart}`;
   }).join(', ');
 }
 
@@ -1594,14 +1607,16 @@ function broadcastExtra(pow, extra, parentEffectName = null) {
   if (!extra || !extra.name) return;
   const modInfo = getModifierInfo(extra.name, false);
   const category = modInfo.category || 'Combat & Utility Extra';
-  const rules = extra.desc || modInfo.desc || '';
+  const rawRules = extra.desc || modInfo.desc || '';
+  const rules = extra.customText ? `Specification: ${extra.customText}\n\n${rawRules}` : rawRules;
   const costSign = extra.cost >= 0 ? `+${extra.cost}` : `${extra.cost}`;
   const costModifier = `${costSign} ${extra.type === 'per_rank' ? 'PP/r' : 'Flat'}`;
   const parentPowerName = pow ? (pow.name || 'Power') : '';
   const effName = parentEffectName || (pow ? getActiveEffect(pow)?.baseEffect : '');
+  const displayName = extra.customText ? `${extra.name}: ${extra.customText}` : extra.name;
 
   sendFeatureToVTT({
-    name: extra.name,
+    name: displayName,
     category: 'power_extra',
     parentPower: parentPowerName,
     effectName: effName,
@@ -1612,20 +1627,22 @@ function broadcastExtra(pow, extra, parentEffectName = null) {
     description: rules
   }, heroStore.character);
 
-  uiStore.showToast(`Broadcasted Extra "${extra.name}" to Roll20!`, 'info');
+  uiStore.showToast(`Broadcasted Extra "${displayName}" to Roll20!`, 'info');
 }
 
 function broadcastFlaw(pow, flaw, parentEffectName = null) {
   if (!flaw || !flaw.name) return;
   const modInfo = getModifierInfo(flaw.name, true);
   const category = modInfo.category || 'Limitation Flaw';
-  const rules = flaw.desc || modInfo.desc || '';
+  const rawRules = flaw.desc || modInfo.desc || '';
+  const rules = flaw.customText ? `Drawback: ${flaw.customText}\n\n${rawRules}` : rawRules;
   const costModifier = `${flaw.cost} ${flaw.type === 'per_rank' ? 'PP/r' : 'Flat'}`;
   const parentPowerName = pow ? (pow.name || 'Power') : '';
   const effName = parentEffectName || (pow ? getActiveEffect(pow)?.baseEffect : '');
+  const displayName = flaw.customText ? `${flaw.name}: ${flaw.customText}` : flaw.name;
 
   sendFeatureToVTT({
-    name: flaw.name,
+    name: displayName,
     category: 'power_flaw',
     parentPower: parentPowerName,
     effectName: effName,
@@ -1636,7 +1653,7 @@ function broadcastFlaw(pow, flaw, parentEffectName = null) {
     description: rules
   }, heroStore.character);
 
-  uiStore.showToast(`Broadcasted Flaw "${flaw.name}" to Roll20!`, 'info');
+  uiStore.showToast(`Broadcasted Flaw "${displayName}" to Roll20!`, 'info');
 }
 
 // Set tracking expanded cards
@@ -3115,6 +3132,12 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .dossier-mod-name {
   color: var(--text-primary);
+}
+
+.dossier-mod-custom-text {
+  font-weight: 600;
+  color: #93c5fd;
+  font-size: 0.85em;
 }
 
 .dossier-cost-tag {

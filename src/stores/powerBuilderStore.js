@@ -13,6 +13,7 @@ import {
   normalizeEffect,
   normalizeAlternateSlot,
   normalizeModifier,
+  isModifierCompatible,
   calculateEffectCost,
   calculatePowerTotalCost,
   calculatePowerDetailedBreakdown,
@@ -117,20 +118,26 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
     // Filtered extras for inspector
     filteredExtras(state) {
       const q = (state.modifierSearchQuery || '').trim().toLowerCase();
+      const target = state.targetEffectRef || state.currentEditingEffect;
+      const effName = target?.baseEffect || target?.name || '';
       return EXTRAS.filter(e => {
         const matchName = e.name.toLowerCase().includes(q) || (e.desc && e.desc.toLowerCase().includes(q));
         const matchCat = state.modifierCategory === 'all' || e.category === state.modifierCategory;
-        return matchName && matchCat;
+        const matchCompat = isModifierCompatible(e, effName);
+        return matchName && matchCat && matchCompat;
       });
     },
 
     // Filtered flaws for inspector
     filteredFlaws(state) {
       const q = (state.modifierSearchQuery || '').trim().toLowerCase();
+      const target = state.targetEffectRef || state.currentEditingEffect;
+      const effName = target?.baseEffect || target?.name || '';
       return FLAWS.filter(f => {
         const matchName = f.name.toLowerCase().includes(q) || (f.desc && f.desc.toLowerCase().includes(q));
         const matchCat = state.modifierCategory === 'all' || f.category === state.modifierCategory;
-        return matchName && matchCat;
+        const matchCompat = isModifierCompatible(f, effName);
+        return matchName && matchCat && matchCompat;
       });
     },
 
@@ -435,7 +442,12 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
         category: modDef.category,
         options: modDef.options,
         hasRanks: modDef.hasRanks,
-        hasConfig: modDef.hasConfig
+        hasConfig: modDef.hasConfig,
+        hasCustomText: modDef.hasCustomText,
+        allowMultiple: modDef.allowMultiple,
+        customTextLabel: modDef.customTextLabel,
+        customTextPlaceholder: modDef.customTextPlaceholder,
+        customText: modDef.customText || ''
       });
 
       if (isFlaw) {
@@ -447,10 +459,14 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
       }
     },
 
-    removeModifierFromTarget(targetEffect, isFlaw, index) {
+    removeModifierFromTarget(targetEffect, isFlaw, indexOrId) {
       const list = isFlaw ? targetEffect?.flaws : targetEffect?.extras;
-      if (Array.isArray(list) && list[index]) {
-        list.splice(index, 1);
+      if (!Array.isArray(list)) return;
+      if (typeof indexOrId === 'number' && list[indexOrId]) {
+        list.splice(indexOrId, 1);
+      } else if (typeof indexOrId === 'string') {
+        const idx = list.findIndex(m => m.id === indexOrId);
+        if (idx !== -1) list.splice(idx, 1);
       }
     },
 

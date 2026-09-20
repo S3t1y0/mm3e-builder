@@ -341,8 +341,28 @@ function deleteAdvantage(name) {
   align-items: center;
   gap: 0.35rem;
   overflow-x: auto;
-  padding-bottom: 0.25rem;
+  overflow-y: hidden;
+  padding: 0.35rem 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
   flex-shrink: 0;
+}
+
+.filter-pills-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.filter-pills-bar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-pills-bar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+}
+
+.filter-pills-bar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .filter-chip {

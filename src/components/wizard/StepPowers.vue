@@ -33,7 +33,7 @@
       <i class="ri-flashlight-line" style="font-size: 2.5rem; color: var(--text-muted); display: block; margin-bottom: 0.75rem;"></i>
       <h4 style="font-weight: 800; color: #fff; margin-bottom: 0.35rem;">No Powers Added Yet</h4>
       <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 450px; margin: 0 auto 1.25rem;">
-        Click above to craft powers using the Power Studio or load an archetype template in Step 1.
+        Click above to craft powers using the Power Studio.
       </p>
       <button class="btn btn-primary btn-sm" @click="builderStore.openNewPower('standard')">
         <i class="ri-add-line"></i> Create First Power

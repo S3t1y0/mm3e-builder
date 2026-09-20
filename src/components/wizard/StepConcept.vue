@@ -3,8 +3,8 @@
     <div class="step-banner">
       <div class="step-banner-icon"><i class="ri-user-star-line"></i></div>
       <div>
-        <h3 class="step-title">Hero Concept & Archetypes</h3>
-        <p class="step-subtitle">Define hero identity, Power Level, power origins, or select a ready-to-play archetype preset.</p>
+        <h3 class="step-title">Hero Concept</h3>
+        <p class="step-subtitle">Define hero identity, Power Level, and power origins.</p>
       </div>
     </div>
 
@@ -95,60 +95,12 @@
         </button>
       </div>
     </div>
-
-    <!-- ARCHETYPE TEMPLATES CATALOG -->
-    <div class="card" style="padding: 1.25rem;">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; gap: 0.5rem;">
-        <div>
-          <h4 class="section-title" style="margin-bottom: 0.2rem;">Standard Archetype Presets</h4>
-          <p style="font-size: 0.78rem; color: var(--text-secondary); margin: 0;">
-            Use official M&M 3e Hero's Handbook archetypes as instant templates with balanced point distributions.
-          </p>
-        </div>
-      </div>
-
-      <div class="archetype-grid">
-        <div
-          v-for="arch in ARCHETYPES"
-          :key="arch.id"
-          class="archetype-card"
-        >
-          <div class="archetype-header">
-            <div class="archetype-icon">
-              <i :class="arch.icon || 'ri-shield-flash-line'"></i>
-            </div>
-            <div>
-              <div class="archetype-name">{{ arch.name }}</div>
-              <div class="archetype-origin">{{ arch.origin }}</div>
-            </div>
-          </div>
-
-          <p class="archetype-desc">{{ arch.tagline }}</p>
-
-          <div class="archetype-budget">
-            <span class="budget-pill tabular-nums">Abil: {{ arch.budgetGuidelines.abilities }} PP</span>
-            <span class="budget-pill tabular-nums">Def: {{ arch.budgetGuidelines.defenses }} PP</span>
-            <span class="budget-pill tabular-nums">Skills: {{ arch.budgetGuidelines.skills }} PP</span>
-            <span class="budget-pill tabular-nums">Pow: {{ arch.budgetGuidelines.powers }} PP</span>
-          </div>
-
-          <button
-            class="btn btn-secondary btn-sm"
-            style="width: 100%; margin-top: 0.85rem; font-weight: 700;"
-            @click="applyArchetype(arch)"
-          >
-            <i class="ri-file-download-line"></i> Apply {{ arch.name }}
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
-import { ARCHETYPES } from '../../rules/archetypes.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -176,13 +128,6 @@ function toggleOrigin(origin) {
   }
   heroStore.character.notes = notes;
   heroStore.pushHistory();
-}
-
-function applyArchetype(arch) {
-  const success = heroStore.applyArchetype(arch.id);
-  if (success) {
-    uiStore.showToast(`Applied ${arch.name} archetype template!`, 'success');
-  }
 }
 </script>
 
@@ -271,85 +216,5 @@ function applyArchetype(arch) {
   border-color: #3b82f6;
   color: #60a5fa;
   font-weight: 700;
-}
-
-.archetype-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-
-.archetype-card {
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  transition-property: border-color, background-color, transform, box-shadow;
-  transition-duration: 0.2s;
-}
-
-.archetype-card:hover {
-  border-color: rgba(59, 130, 246, 0.45);
-  background: rgba(30, 41, 59, 0.5);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 16px -4px rgba(0, 0, 0, 0.4);
-}
-
-.archetype-header {
-  display: flex;
-  align-items: center;
-  gap: 0.65rem;
-  margin-bottom: 0.5rem;
-}
-
-.archetype-icon {
-  width: 36px;
-  height: 36px;
-  border-radius: var(--radius-sm);
-  background: rgba(220, 38, 38, 0.15);
-  border: 1px solid rgba(220, 38, 38, 0.3);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.15rem;
-  color: var(--accent-primary);
-}
-
-.archetype-name {
-  font-weight: 800;
-  color: #fff;
-  font-size: 0.95rem;
-}
-
-.archetype-origin {
-  font-size: 0.72rem;
-  color: var(--text-secondary);
-}
-
-.archetype-desc {
-  font-size: 0.78rem;
-  color: var(--text-secondary);
-  line-height: 1.35;
-  margin: 0.35rem 0 0.75rem;
-  flex: 1;
-}
-
-.archetype-budget {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
-}
-
-.budget-pill {
-  font-size: 0.68rem;
-  font-weight: 600;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  padding: 0.2rem 0.45rem;
-  border-radius: var(--radius-sm);
-  color: var(--text-secondary);
 }
 </style>

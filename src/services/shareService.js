@@ -15,6 +15,7 @@ export function pruneCharacterForShare(rawChar) {
     if (m.cost !== undefined) out.cost = m.cost;
     if (m.ranks && m.ranks !== 1) out.ranks = m.ranks;
     if (m.type && m.type !== 'per_rank') out.type = m.type;
+    if (m.customText) out.customText = m.customText;
     if (m.config && Object.keys(m.config).length > 0 && Object.values(m.config).some(v => v !== '' && v !== undefined)) {
       out.config = m.config;
     }

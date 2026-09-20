@@ -165,7 +165,7 @@ const uiStore = useUiStore();
 const currentStep = ref(1);
 
 const steps = [
-  { id: 1, title: 'Concept', component: StepConcept, tip: 'Start with a strong narrative concept or select one of the 10 official Archetypes for a balanced baseline point distribution.' },
+  { id: 1, title: 'Concept', component: StepConcept, tip: 'Define your hero identity, Power Level (PL), and power origins to establish a strong narrative foundation.' },
   { id: 2, title: 'Abilities', component: StepAbilities, tip: 'Focus points on 2-3 primary attributes. Combat abilities (Fighting and Dexterity) determine your attack checks.' },
   { id: 3, title: 'Defenses', component: StepDefenses, tip: 'Dodge+Toughness, Parry+Toughness, and Fortitude+Will sums cannot exceed twice your Power Level.' },
   { id: 4, title: 'Skills', component: StepSkills, tip: 'Skills cost 1 PP per 2 ranks. Add Close Combat or Ranged Combat skills to specialize with specific weapons or powers.' },

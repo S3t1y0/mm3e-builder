@@ -216,100 +216,7 @@
   border: 1px solid rgba(56, 189, 248, 0.3);
   white-space: nowrap;
 }
-
 /* 5. STAGE 1: CONCEPT & IDENTITY */
-.archetypes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 1rem;
-}
-
-.archetype-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 1rem;
-  cursor: pointer;
-  transition: var(--trans-props);
-  transition-duration: 0.2s;
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  position: relative;
-}
-
-.archetype-card:hover {
-  border-color: var(--accent-primary);
-  background: var(--bg-card-hover);
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-md);
-}
-
-.archetype-card.selected {
-  border-color: var(--accent-primary);
-  background: rgba(220, 38, 38, 0.1);
-  box-shadow: 0 0 16px rgba(220, 38, 38, 0.2);
-}
-
-.archetype-card.selected::after {
-  content: 'SELECTED';
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
-  font-size: 0.65rem;
-  font-weight: 800;
-  background: var(--accent-primary);
-  color: #fff;
-  padding: 0.2rem 0.5rem;
-  border-radius: var(--radius-pill);
-  letter-spacing: var(--letter-spacing-caps);
-}
-
-.archetype-card-head {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.archetype-card-icon {
-  width: 2.25rem;
-  height: 2.25rem;
-  border-radius: var(--radius-sm);
-  background: var(--bg-elevated);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.25rem;
-  color: var(--accent-secondary);
-}
-
-.archetype-card h4 {
-  font-size: 1rem;
-  font-weight: 700;
-  margin: 0;
-  color: var(--text-primary);
-}
-
-.archetype-card-tagline {
-  font-size: 0.75rem;
-  color: var(--text-secondary);
-  line-height: 1.35;
-  margin: 0;
-}
-
-.archetype-card-stats {
-  margin-top: auto;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--border-subtle);
-  font-size: 0.7rem;
-  color: var(--text-muted);
-}
-
-.archetype-apply-btn {
-  margin-top: 0.5rem;
-  width: 100%;
-}
-
 .origin-chips-group {
   display: flex;
   flex-wrap: wrap;
@@ -1199,8 +1106,7 @@
 .stepper-btn:active,
 .step-node:active,
 .badge-chip:active,
-.btn-icon:active,
-.archetype-card:active {
+.btn-icon:active {
   transform: scale(0.96) !important;
 }
 

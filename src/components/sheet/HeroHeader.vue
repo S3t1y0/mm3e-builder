@@ -49,6 +49,85 @@
             @change="heroStore.pushHistory()"
           />
         </div>
+
+        <!-- INTEGRATED COMBAT CONDITIONS STRIP (OPTION 1) -->
+        <div class="dndb-conditions-row" role="region" aria-label="Combat Conditions">
+          <!-- When healthy / no conditions active -->
+          <div v-if="activeConditionItems.length === 0" class="cond-healthy-wrap">
+            <span class="cond-healthy-pill" title="Hero is unhindered with no debilitating combat conditions">
+              <i class="ri-shield-check-fill"></i>
+              <span>Unhindered</span>
+            </span>
+            <button
+              type="button"
+              class="btn-cond-quick-add"
+              @click="uiStore.openModal('conditions')"
+              title="Apply a combat condition (Dazed, Vulnerable, Stunned, etc.)"
+            >
+              <i class="ri-add-line"></i>
+              <span>Condition</span>
+            </button>
+          </div>
+
+          <!-- When active conditions exist -->
+          <div v-else class="cond-active-chips-wrap">
+            <span class="cond-strip-label" title="Active combat conditions affecting this character">
+              <i class="ri-heart-pulse-fill"></i>
+              <span>CONDITIONS ({{ activeConditionItems.length }}):</span>
+            </span>
+
+            <div
+              v-for="item in activeConditionItems"
+              :key="item.name"
+              class="dndb-cond-chip"
+              :class="{ 'is-severe': item.isSevere }"
+              :title="item.desc ? `${item.name}: ${item.desc}` : item.name"
+            >
+              <span class="cond-chip-name">{{ item.name }}</span>
+              <span v-if="item.briefEffect" class="cond-chip-effect">{{ item.briefEffect }}</span>
+              <button
+                type="button"
+                class="btn-cond-dismiss"
+                @click.stop="heroStore.toggleCondition(item.name)"
+                :title="`Remove ${item.name} condition`"
+                :aria-label="`Remove ${item.name}`"
+              >
+                <i class="ri-close-line"></i>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              class="btn-cond-quick-add"
+              @click="uiStore.openModal('conditions')"
+              title="Add another combat condition"
+            >
+              <i class="ri-add-line"></i>
+              <span>Add</span>
+            </button>
+
+            <button
+              v-if="activeConditionItems.length > 1"
+              type="button"
+              class="btn-cond-clear-all"
+              @click="heroStore.clearConditions()"
+              title="Clear all active combat conditions"
+            >
+              <i class="ri-restart-line"></i>
+              <span>Clear All</span>
+            </button>
+
+            <button
+              type="button"
+              class="btn-cond-view-tracker"
+              @click="openTrackerTab"
+              title="Open full Conditions &amp; Injuries Tracker in Action Hub"
+            >
+              <i class="ri-external-link-line"></i>
+              <span>Tracker</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -178,11 +257,47 @@
 </template>
 
 <script setup>
+import { computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
+import {
+  BASIC_CONDITIONS,
+  COMBINED_CONDITIONS,
+  getConditionBriefEffect,
+  isConditionSevere
+} from '../../rules/conditions.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
+
+const conditionDescMap = computed(() => {
+  const map = {};
+  for (const c of BASIC_CONDITIONS) {
+    map[c.name] = c.desc;
+  }
+  for (const c of COMBINED_CONDITIONS) {
+    map[c.name] = c.desc;
+  }
+  return map;
+});
+
+const activeConditionItems = computed(() => {
+  const active = heroStore.character.activeConditions || [];
+  return active.map(name => ({
+    name,
+    briefEffect: getConditionBriefEffect(name),
+    isSevere: isConditionSevere(name),
+    desc: conditionDescMap.value[name] || ''
+  }));
+});
+
+function openTrackerTab() {
+  uiStore.setActiveActionHubTab('conditions');
+  const hubEl = document.querySelector('.dndb-tabbed-hub');
+  if (hubEl) {
+    hubEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
 
 function setPL(newPL) {
   heroStore.character.powerLevel = Math.max(1, Math.min(20, newPL));
@@ -215,14 +330,14 @@ function rollInitiative() {
 }
 
 .hero-status-pill.deceased {
-  background: rgba(153, 27, 27, 0.45);
+  background: rgba(239, 68, 68, 0.25);
   border: 1px solid #ef4444;
   color: #ffffff;
 }
 
 .hero-status-pill.dying {
-  background: rgba(225, 29, 72, 0.2);
-  border: 1px solid rgba(225, 29, 72, 0.5);
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.45);
   color: #fca5a5;
 }
 

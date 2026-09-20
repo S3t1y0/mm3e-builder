@@ -34,43 +34,59 @@
         <div class="modal-body modifier-modal-body">
           <!-- TOP CONTROLS: TABS & SEARCH -->
           <div class="mod-top-toolbar">
-            <!-- Tabs: Extras (+PP) vs Flaws (-PP) -->
-            <div class="mod-type-tabs">
+            <div class="mod-toolbar-left">
+              <!-- Tabs: Extras (+PP) vs Flaws (-PP) -->
+              <div class="mod-type-tabs">
+                <button
+                  type="button"
+                  class="mod-tab-btn extra"
+                  :class="{ active: activeTab === 'extras' }"
+                  @click="activeTab = 'extras'"
+                >
+                  <i class="ri-add-circle-line"></i>
+                  <span>Extras (+PP)</span>
+                  <span class="mod-tab-count">{{ filteredExtras.length }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="mod-tab-btn flaw"
+                  :class="{ active: activeTab === 'flaws' }"
+                  @click="activeTab = 'flaws'"
+                >
+                  <i class="ri-indeterminate-circle-line"></i>
+                  <span>Flaws (-PP)</span>
+                  <span class="mod-tab-count">{{ filteredFlaws.length }}</span>
+                </button>
+              </div>
+
+              <!-- Effect Compatibility Filter Toggle -->
               <button
                 type="button"
-                class="mod-tab-btn extra"
-                :class="{ active: activeTab === 'extras' }"
-                @click="activeTab = 'extras'"
+                class="mod-compat-toggle"
+                :class="{ active: filterCompatibleOnly }"
+                @click="toggleCompatibilityFilter"
+                :title="filterCompatibleOnly ? 'Showing only modifiers compatible with ' + (currentEffectName || 'Effect') + '. Click to show all modifiers.' : 'Showing all modifiers from all effects. Click to filter for ' + (currentEffectName || 'Effect') + '.'"
               >
-                <i class="ri-add-circle-line"></i>
-                <span>Extras (+PP)</span>
-                <span class="mod-tab-count">{{ filteredExtras.length }}</span>
-              </button>
-              <button
-                type="button"
-                class="mod-tab-btn flaw"
-                :class="{ active: activeTab === 'flaws' }"
-                @click="activeTab = 'flaws'"
-              >
-                <i class="ri-indeterminate-circle-line"></i>
-                <span>Flaws (-PP)</span>
-                <span class="mod-tab-count">{{ filteredFlaws.length }}</span>
+                <i :class="filterCompatibleOnly ? 'ri-shield-check-line' : 'ri-global-line'"></i>
+                <span>{{ filterCompatibleOnly ? (currentEffectName || 'Effect') + ' Only' : 'All Modifiers' }}</span>
+                <span class="mod-compat-count">{{ filterCompatibleOnly ? compatibleCount : totalCatalogCount }}</span>
               </button>
             </div>
 
             <!-- Search input -->
-            <div class="palette-search-box flex-1">
+            <div class="palette-search-box mod-search-box">
               <i class="ri-search-line search-icon"></i>
               <input
                 v-model="searchQuery"
                 type="text"
-                placeholder="Search modifiers (e.g., Multiattack, Area, Penetrating, Limited, Distracting)..."
+                placeholder="Search modifiers (e.g., Multiattack, Area, Limited)..."
               />
               <button
                 v-if="searchQuery"
                 type="button"
                 class="clear-search-btn"
                 @click="searchQuery = ''"
+                title="Clear search"
               >
                 <i class="ri-close-circle-line"></i>
               </button>
@@ -86,12 +102,12 @@
               class="cat-filter-btn"
               :class="[
                 { active: activeCategory === cat },
-                activeTab === 'extras' ? 'is-extra' : 'is-flaw'
+                cat === 'suggested' ? 'is-suggested' : (activeTab === 'extras' ? 'is-extra' : 'is-flaw')
               ]"
               @click="activeCategory = cat"
             >
               <i :class="getCategoryIcon(cat)"></i>
-              <span>{{ cat === 'all' ? 'All Categories' : cat }}</span>
+              <span>{{ cat === 'all' ? 'All Categories' : (cat === 'suggested' ? `Suggested (${currentEffectName})` : cat) }}</span>
               <span class="cat-filter-count">({{ getCategoryCount(cat) }})</span>
             </button>
           </div>
@@ -104,7 +120,18 @@
               style="grid-column: 1 / -1;"
             >
               <i class="ri-inbox-line" style="font-size: 2rem; color: var(--text-muted); display: block; margin-bottom: 0.5rem;"></i>
-              No modifiers found matching "{{ searchQuery }}".
+              <div style="margin-bottom: 0.6rem;">
+                No modifiers found matching "{{ searchQuery }}"{{ filterCompatibleOnly ? ' for ' + (currentEffectName || 'this effect') : '' }}.
+              </div>
+              <button
+                v-if="filterCompatibleOnly && searchMatchesInOtherEffects > 0"
+                type="button"
+                class="btn-compat-rescue"
+                @click="filterCompatibleOnly = false"
+              >
+                <i class="ri-search-eye-line"></i>
+                Show {{ searchMatchesInOtherEffects }} match{{ searchMatchesInOtherEffects > 1 ? 'es' : '' }} from other effects
+              </button>
             </div>
 
             <div
@@ -119,7 +146,23 @@
               <!-- Card Top Row -->
               <div class="card-top-row">
                 <div class="card-name-cat">
-                  <span class="mod-category-badge">{{ mod.category || 'General' }}</span>
+                  <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
+                    <span class="mod-category-badge">{{ mod.category || 'General' }}</span>
+                    <span
+                      v-if="mod.appliesTo && mod.appliesTo.length"
+                      class="mod-applies-badge"
+                      :title="'Designed specifically for: ' + mod.appliesTo.join(', ')"
+                    >
+                      {{ mod.appliesTo.join(', ') }}
+                    </span>
+                    <span
+                      v-if="!isModCompatible(mod)"
+                      class="mod-incompatible-badge"
+                      :title="'Effect-specific modifier designed for: ' + mod.appliesTo?.join(', ') + ' (not ' + (currentEffectName || 'current effect') + ')'"
+                    >
+                      <i class="ri-alert-line"></i> For: {{ mod.appliesTo?.join(', ') }}
+                    </span>
+                  </div>
                   <strong class="mod-name">{{ mod.name }}</strong>
                 </div>
                 <span class="mod-cost-tag" :class="activeTab === 'extras' ? 'tag-extra' : 'tag-flaw'">
@@ -129,6 +172,12 @@
 
               <!-- Rules Description -->
               <p class="mod-desc-text">{{ mod.desc }}</p>
+
+              <!-- Custom Text Capability Hint -->
+              <div v-if="mod.hasCustomText" class="mod-custom-badge-hint">
+                <i class="ri-edit-line"></i>
+                <span>{{ mod.customTextLabel || 'Custom Player Specification' }}</span>
+              </div>
 
               <!-- Configurable Options (e.g. Area types or specific options) -->
               <div v-if="mod.options && mod.options.length > 0" class="mod-options-box">
@@ -151,9 +200,22 @@
               <div class="card-bottom-actions">
                 <!-- If already applied: Applied badge, stepper if ranked, and remove button -->
                 <div v-if="isApplied(mod.name)" class="applied-controls-row">
-                  <span class="badge-applied">
-                    <i class="ri-checkbox-circle-fill"></i> Applied
-                  </span>
+                  <div class="applied-left-group">
+                    <span class="badge-applied">
+                      <i class="ri-checkbox-circle-fill"></i>
+                      Applied{{ getAppliedCount(mod.name) > 1 ? ` (${getAppliedCount(mod.name)}x)` : '' }}
+                    </span>
+
+                    <button
+                      v-if="mod.allowMultiple"
+                      type="button"
+                      class="btn-add-another-mod"
+                      :title="'Add another ' + mod.name + ' instance'"
+                      @click="handleAdd(mod)"
+                    >
+                      <i class="ri-add-line"></i> Another
+                    </button>
+                  </div>
 
                   <!-- Stepper if has ranks -->
                   <div v-if="mod.hasRanks || (getAppliedInstance(mod.name)?.ranks || 1) > 1" class="stepper-compact">
@@ -236,7 +298,7 @@
 import { ref, computed, watch, nextTick } from 'vue';
 import { usePowerBuilderStore } from '../../stores/powerBuilderStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
-import { EXTRAS, FLAWS, calculateEffectCost } from '../../rules/powerEngine.js';
+import { EXTRAS, FLAWS, calculateEffectCost, isModifierCompatible } from '../../rules/powerEngine.js';
 
 const builderStore = usePowerBuilderStore();
 const uiStore = useUiStore();
@@ -244,13 +306,62 @@ const uiStore = useUiStore();
 const activeTab = ref('extras');
 const searchQuery = ref('');
 const activeCategory = ref('all');
+const filterCompatibleOnly = ref(true);
 const gridRef = ref(null);
 
-// Dynamic categories based on whether Extras or Flaws is active
+const targetEffect = computed(() => {
+  return builderStore.targetEffectRef || builderStore.currentEditingEffect;
+});
+
+const currentEffectName = computed(() => {
+  const t = targetEffect.value;
+  return t?.baseEffect || t?.name || '';
+});
+
+function isModCompatible(mod) {
+  return isModifierCompatible(mod, currentEffectName.value);
+}
+
+function toggleCompatibilityFilter() {
+  filterCompatibleOnly.value = !filterCompatibleOnly.value;
+  nextTick(() => {
+    if (!categories.value.includes(activeCategory.value)) {
+      activeCategory.value = 'all';
+    }
+  });
+}
+
+const baseCatalog = computed(() => {
+  return activeTab.value === 'extras' ? EXTRAS : FLAWS;
+});
+
+const compatibleModifiers = computed(() => {
+  return baseCatalog.value.filter(m => isModCompatible(m));
+});
+
+const compatibleCount = computed(() => {
+  return compatibleModifiers.value.length;
+});
+
+const totalCatalogCount = computed(() => {
+  return baseCatalog.value.length;
+});
+
+const suggestedCount = computed(() => {
+  const eff = currentEffectName.value.toLowerCase().trim();
+  if (!eff) return 0;
+  return baseCatalog.value.filter(m => Array.isArray(m.appliesTo) && m.appliesTo.some(a => a.toLowerCase() === eff)).length;
+});
+
+// Dynamic categories based on active tab and whether compatible filter is active
 const categories = computed(() => {
-  const list = activeTab.value === 'extras' ? EXTRAS : FLAWS;
+  const list = filterCompatibleOnly.value ? compatibleModifiers.value : baseCatalog.value;
   const cats = Array.from(new Set(list.map(m => m.category).filter(Boolean))).sort();
-  return ['all', ...cats];
+  const res = ['all'];
+  if (suggestedCount.value > 0) {
+    res.push('suggested');
+  }
+  return [...res, ...cats];
 });
 
 // Reset category and scroll position when switching between Extras and Flaws
@@ -261,19 +372,21 @@ watch(activeTab, () => {
   });
 });
 
-// Reset category, search, and scroll when modal opens
+// Reset category, search, compatibility filter, and scroll when modal opens
 watch(() => builderStore.isModifierInspectorOpen, (isOpen) => {
   if (isOpen) {
     searchQuery.value = '';
-    activeCategory.value = 'all';
+    filterCompatibleOnly.value = true;
+    // Default to suggested category if relevant modifiers exist for this effect!
+    activeCategory.value = suggestedCount.value > 0 ? 'suggested' : 'all';
     nextTick(() => {
       if (gridRef.value) gridRef.value.scrollTop = 0;
     });
   }
 });
 
-// Reset scroll when filtering by category or typing search
-watch([activeCategory, searchQuery], () => {
+// Reset scroll when filtering by category, compatibility toggle, or typing search
+watch([activeCategory, searchQuery, filterCompatibleOnly], () => {
   nextTick(() => {
     if (gridRef.value) gridRef.value.scrollTop = 0;
   });
@@ -282,6 +395,7 @@ watch([activeCategory, searchQuery], () => {
 function getCategoryIcon(cat) {
   switch (cat) {
     case 'all': return 'ri-apps-line';
+    case 'suggested': return 'ri-magic-line';
     case 'Combat': return 'ri-sword-line';
     case 'Duration & Action': return 'ri-time-line';
     case 'Action & Activation': return 'ri-flashlight-line';
@@ -289,22 +403,35 @@ function getCategoryIcon(cat) {
     case 'Range & Targeting': return 'ri-focus-3-line';
     case 'Utility': return 'ri-tools-line';
     case 'Sensory': return 'ri-eye-line';
+    case 'Sensory & Mental': return 'ri-brain-line';
+    case 'Defense & Recovery': return 'ri-heart-pulse-line';
+    case 'Minions & Summon': return 'ri-team-line';
+    case 'Movement': return 'ri-flight-takeoff-line';
     case 'Limitations': return 'ri-indeterminate-circle-line';
     case 'Device': return 'ri-cpu-line';
     default: return 'ri-price-tag-3-line';
   }
 }
 
-const targetEffect = computed(() => {
-  return builderStore.targetEffectRef || builderStore.currentEditingEffect;
-});
-
 const filteredExtras = computed(() => {
   const q = searchQuery.value.toLowerCase().trim();
   const cat = activeCategory.value;
+  const eff = currentEffectName.value.toLowerCase().trim();
   return EXTRAS.filter(m => {
-    const matchQ = !q || m.name.toLowerCase().includes(q) || (m.desc && m.desc.toLowerCase().includes(q));
-    const matchCat = cat === 'all' || m.category === cat;
+    if (filterCompatibleOnly.value && !isModifierCompatible(m, eff)) {
+      return false;
+    }
+    const matchQ = !q || m.name.toLowerCase().includes(q) || 
+      (m.desc && m.desc.toLowerCase().includes(q)) ||
+      (Array.isArray(m.appliesTo) && m.appliesTo.some(a => a.toLowerCase().includes(q)));
+    let matchCat = false;
+    if (cat === 'all') {
+      matchCat = true;
+    } else if (cat === 'suggested') {
+      matchCat = Array.isArray(m.appliesTo) && m.appliesTo.some(a => a.toLowerCase() === eff);
+    } else {
+      matchCat = m.category === cat;
+    }
     return matchQ && matchCat;
   });
 });
@@ -312,9 +439,22 @@ const filteredExtras = computed(() => {
 const filteredFlaws = computed(() => {
   const q = searchQuery.value.toLowerCase().trim();
   const cat = activeCategory.value;
+  const eff = currentEffectName.value.toLowerCase().trim();
   return FLAWS.filter(m => {
-    const matchQ = !q || m.name.toLowerCase().includes(q) || (m.desc && m.desc.toLowerCase().includes(q));
-    const matchCat = cat === 'all' || m.category === cat;
+    if (filterCompatibleOnly.value && !isModifierCompatible(m, eff)) {
+      return false;
+    }
+    const matchQ = !q || m.name.toLowerCase().includes(q) || 
+      (m.desc && m.desc.toLowerCase().includes(q)) ||
+      (Array.isArray(m.appliesTo) && m.appliesTo.some(a => a.toLowerCase().includes(q)));
+    let matchCat = false;
+    if (cat === 'all') {
+      matchCat = true;
+    } else if (cat === 'suggested') {
+      matchCat = Array.isArray(m.appliesTo) && m.appliesTo.some(a => a.toLowerCase() === eff);
+    } else {
+      matchCat = m.category === cat;
+    }
     return matchQ && matchCat;
   });
 });
@@ -323,8 +463,20 @@ const currentList = computed(() => {
   return activeTab.value === 'extras' ? filteredExtras.value : filteredFlaws.value;
 });
 
+const searchMatchesInOtherEffects = computed(() => {
+  if (!searchQuery.value || !filterCompatibleOnly.value) return 0;
+  const q = searchQuery.value.toLowerCase().trim();
+  return baseCatalog.value.filter(m => {
+    if (isModCompatible(m)) return false;
+    return m.name.toLowerCase().includes(q) || 
+      (m.desc && m.desc.toLowerCase().includes(q)) ||
+      (Array.isArray(m.appliesTo) && m.appliesTo.some(a => a.toLowerCase().includes(q)));
+  }).length;
+});
+
 function getCategoryCount(cat) {
-  const list = activeTab.value === 'extras' ? EXTRAS : FLAWS;
+  if (cat === 'suggested') return suggestedCount.value;
+  const list = filterCompatibleOnly.value ? compatibleModifiers.value : baseCatalog.value;
   if (cat === 'all') return list.length;
   return list.filter(m => m.category === cat).length;
 }
@@ -342,6 +494,13 @@ function isApplied(name) {
   if (!t) return false;
   const list = activeTab.value === 'extras' ? t.extras : t.flaws;
   return Array.isArray(list) && list.some(m => (m.name || '').toLowerCase() === name.toLowerCase());
+}
+
+function getAppliedCount(name) {
+  const t = targetEffect.value;
+  if (!t) return 0;
+  const list = activeTab.value === 'extras' ? t.extras : t.flaws;
+  return (list || []).filter(m => (m.name || '').toLowerCase() === name.toLowerCase()).length;
 }
 
 function getAppliedInstance(name) {
@@ -444,8 +603,29 @@ const netEffectCost = computed(() => {
 .mod-top-toolbar {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  justify-content: space-between;
+  gap: 0.75rem;
   flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.mod-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.mod-search-box {
+  flex: 1 1 240px;
+  min-width: 0;
+  max-width: 380px;
+}
+
+.mod-search-box input {
+  width: 100%;
+  min-width: 0;
 }
 
 .mod-type-tabs {
@@ -497,6 +677,48 @@ const netEffectCost = computed(() => {
   font-variant-numeric: tabular-nums;
 }
 
+.mod-compat-toggle {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.45rem 0.85rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+  transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), transform var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.mod-compat-toggle:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.mod-compat-toggle:active {
+  transform: scale(0.96);
+}
+
+.mod-compat-toggle.active {
+  background: rgba(14, 165, 233, 0.15);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.2);
+}
+
+.mod-compat-count {
+  font-size: 0.68rem;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.1rem 0.42rem;
+  border-radius: var(--radius-pill);
+  font-variant-numeric: tabular-nums;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
 .clear-search-btn {
   background: transparent;
   border: none;
@@ -515,9 +737,10 @@ const netEffectCost = computed(() => {
 .mod-category-filters {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
-  overflow-x: auto;
-  padding-bottom: 0.2rem;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  padding: 0.2rem 0;
+  flex-shrink: 0;
 }
 
 .cat-filter-btn {
@@ -551,6 +774,25 @@ const netEffectCost = computed(() => {
   border-color: var(--accent-primary-hover);
   color: #fff;
   box-shadow: 0 2px 8px rgba(0, 111, 184, 0.35);
+}
+
+.cat-filter-btn.is-suggested {
+  background: rgba(147, 51, 234, 0.12);
+  border-color: rgba(168, 85, 247, 0.35);
+  color: #c084fc;
+}
+
+.cat-filter-btn.is-suggested:hover {
+  background: rgba(147, 51, 234, 0.22);
+  border-color: rgba(168, 85, 247, 0.55);
+  color: #ffffff;
+}
+
+.cat-filter-btn.active.is-suggested {
+  background: #9333ea;
+  border-color: #a855f7;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(147, 51, 234, 0.4);
 }
 
 .cat-filter-count {
@@ -640,6 +882,58 @@ const netEffectCost = computed(() => {
   text-transform: uppercase;
 }
 
+.mod-applies-badge {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.08rem 0.38rem;
+  border-radius: var(--radius-xs);
+  background: rgba(147, 51, 234, 0.16);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #d8b4fe;
+  letter-spacing: 0.02em;
+}
+
+.mod-incompatible-badge {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0.08rem 0.38rem;
+  border-radius: var(--radius-xs);
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.38);
+  color: #fbbf24;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.btn-compat-rescue {
+  background: rgba(14, 165, 233, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), transform var(--trans-fast);
+}
+
+.btn-compat-rescue:hover {
+  background: rgba(14, 165, 233, 0.25);
+  border-color: rgba(56, 189, 248, 0.6);
+  color: #ffffff;
+}
+
+.btn-compat-rescue:active {
+  transform: scale(0.97);
+}
+
 .mod-cost-tag {
   font-size: 0.72rem;
   font-weight: 800;
@@ -726,6 +1020,47 @@ const netEffectCost = computed(() => {
   align-items: center;
   justify-content: space-between;
   width: 100%;
+  gap: 0.5rem;
+}
+
+.applied-left-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-add-another-mod {
+  background: rgba(0, 111, 184, 0.15);
+  border: 1px solid rgba(42, 143, 214, 0.4);
+  color: #60a5fa;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  transition: background-color var(--trans-fast), color var(--trans-fast), border-color var(--trans-fast);
+}
+
+.btn-add-another-mod:hover {
+  background: var(--accent-primary);
+  color: #fff;
+  border-color: var(--accent-primary);
+}
+
+.mod-custom-badge-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.7rem;
+  color: #93c5fd;
+  background: rgba(59, 130, 246, 0.1);
+  border: 1px dashed rgba(59, 130, 246, 0.3);
+  padding: 0.25rem 0.5rem;
+  border-radius: var(--radius-xs);
 }
 
 .badge-applied {
@@ -822,4 +1157,39 @@ const netEffectCost = computed(() => {
 
 .text-emerald { color: #34d399; }
 .text-crimson { color: #f87171; }
+
+@media (max-width: 860px) {
+  .mod-top-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.6rem;
+  }
+  .mod-toolbar-left {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .mod-search-box {
+    max-width: 100%;
+    width: 100%;
+  }
+  .mod-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .mod-toolbar-left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .mod-type-tabs {
+    width: 100%;
+    justify-content: center;
+  }
+  .mod-compat-toggle {
+    width: 100%;
+    justify-content: center;
+  }
+}
 </style>
+

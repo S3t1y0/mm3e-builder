@@ -34,6 +34,50 @@ export const COMBINED_CONDITIONS = [
   { name: 'Surprised', components: ['Stunned', 'Vulnerable'], desc: 'Stunned and vulnerable until character gets a turn to react.' }
 ];
 
+export const CONDITION_BRIEF_EFFECTS = {
+  Compelled: 'Directed Actions',
+  Controlled: 'No Free Will',
+  Dazed: '1 Action Max',
+  Debilitated: 'Trait < -5',
+  Defenseless: 'Defenses: 0',
+  Disabled: '-5 Checks',
+  Fatigued: 'Half Speed',
+  Hindered: 'Half Speed',
+  Immobile: 'Speed: 0',
+  Impaired: '-2 Checks',
+  Stunned: 'No Actions',
+  Transformed: 'Traits Altered',
+  Unaware: 'No Perception',
+  Vulnerable: 'Defenses Halved',
+  Weakened: 'Trait Lowered',
+  Asleep: 'Defenseless • Stunned',
+  Blind: 'Vulnerable • Half Speed',
+  Bound: 'Defenseless • Speed 0',
+  Deaf: 'Unaware of Sound',
+  Dying: 'Fortitude DC 15',
+  Entranced: 'Fascinated',
+  Exhausted: '-2 Checks • Half Speed',
+  Incapacitated: 'Defenseless • Stunned',
+  Paralyzed: 'Defenseless • Speed 0',
+  Prone: '-5 Melee / +5 Ranged Def',
+  Restrained: 'Vulnerable • Half Speed',
+  Staggered: 'Dazed • Half Speed',
+  Surprised: 'Defenses Halved • Stunned'
+};
+
+export const SEVERE_CONDITIONS = new Set([
+  'Stunned', 'Defenseless', 'Immobile', 'Disabled', 'Incapacitated',
+  'Paralyzed', 'Asleep', 'Dying'
+]);
+
+export function getConditionBriefEffect(name) {
+  return CONDITION_BRIEF_EFFECTS[name] || '';
+}
+
+export function isConditionSevere(name) {
+  return SEVERE_CONDITIONS.has(name);
+}
+
 const COMBINED_MAP = Object.fromEntries(
   COMBINED_CONDITIONS.map(c => [c.name.toLowerCase(), c.components || []])
 );

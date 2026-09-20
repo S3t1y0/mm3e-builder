@@ -77,10 +77,11 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
   function processEffect(power, effect, opt = {}) {
     if (!effect) return null;
     const baseEffect = effect.baseEffect || effect.name || 'Damage';
-    const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify'].includes(baseEffect);
+    const isMoveObjectDamaging = baseEffect === 'Move Object' && (effect.extras || []).some(e => e.name === 'Damaging');
+    const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify'].includes(baseEffect) || isMoveObjectDamaging;
     if (!isOffensive) return null;
 
-    const isRanged = baseEffect === 'Blast' || effect.range === 'Ranged';
+    const isRanged = baseEffect === 'Blast' || effect.range === 'Ranged' || (isMoveObjectDamaging && effect.range !== 'Close');
     const isArea = (effect.extras || []).some(e => e.name === 'Area');
     const isPerception = effect.range === 'Perception';
 
@@ -106,8 +107,12 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       rollBonus += (Number(accurateMod.ranks) || 1) * 2;
     }
 
+    // Strength-based modifier
+    const isStrengthBased = (baseEffect === 'Damage' || isMoveObjectDamaging) && (effect.extras || []).some(e => e.name === 'Strength-based');
+    const strBonus = isStrengthBased ? (Number(str) || 0) : 0;
+
     // Throwing Mastery effect boost
-    let effectRank = Number(effect.ranks) || 1;
+    let effectRank = (Number(effect.ranks) || 1) + strBonus;
     const isThrown = /thrown/i.test(power.name || '') || /thrown/i.test(effect.name || '') || /thrown/i.test(opt.slotName || '');
     if (isThrown && throwingMasteryBonus > 0) {
       effectRank += throwingMasteryBonus;
@@ -116,10 +121,17 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     // DC calculation
     let dc = 10 + effectRank;
     let res = effect.resistance || 'Toughness';
-    if (baseEffect === 'Damage' || baseEffect === 'Blast') {
+    if (baseEffect === 'Damage' || baseEffect === 'Blast' || isMoveObjectDamaging) {
       dc = 15 + effectRank;
       res = 'Toughness';
     }
+
+    const tags = [baseEffect, effect.range || (isRanged ? 'Ranged' : 'Close')];
+    if (isStrengthBased) tags.push('Strength-based');
+    if ((effect.extras || []).some(e => e.name === 'Multiattack')) tags.push('Multiattack');
+    if ((effect.extras || []).some(e => e.name === 'Penetrating')) tags.push('Penetrating');
+    if ((effect.extras || []).some(e => e.name === 'Cumulative')) tags.push('Cumulative');
+    if ((effect.extras || []).some(e => e.name === 'Progressive')) tags.push('Progressive');
 
     return {
       id: opt.id || ('atk_' + power.id + '_' + (opt.slotId || 'main')),
@@ -131,10 +143,12 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       rollBonus: (isArea || isPerception) ? null : rollBonus,
       range: effect.range || (isRanged ? 'Ranged' : 'Close'),
       action: effect.action || 'Standard',
-      effectName: baseEffect,
+      effectName: isMoveObjectDamaging ? 'Damage (TK)' : baseEffect,
       effectRank,
       dc,
-      dcDescription: `DC ${dc} vs ${res}`,
+      dcDescription: isStrengthBased
+        ? `DC ${dc} vs ${res} (STR ${strBonus >= 0 ? '+' : ''}${strBonus} + Rk ${effect.ranks})`
+        : `DC ${dc} vs ${res}`,
       resistance: res,
       crit: defaultCrit,
       isArea,
@@ -145,7 +159,7 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       slotId: opt.slotId || 'main',
       isSubPower: Boolean(opt.isSubPower),
       devSubIdx: opt.devSubIdx,
-      tags: [baseEffect, effect.range || 'Close']
+      tags
     };
   }
 
