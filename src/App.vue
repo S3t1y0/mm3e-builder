@@ -1,7 +1,7 @@
 <template>
-  <div class="app-container">
+  <div class="app-container" :class="{ 'is-embed-mode': isEmbed }">
     <!-- Top Navigation Bar -->
-    <header class="top-menubar">
+    <header v-if="!isEmbed" class="top-menubar">
       <div class="menubar-left">
         <div class="app-logo">
           <div class="logo-icon-box">
@@ -141,7 +141,10 @@
     </header>
 
     <!-- MAIN BODY / ACTIVE WORKSPACE -->
-    <main class="main-content" style="padding: 1.25rem 1.5rem; max-width: 1560px; margin: 0 auto; width: 100%;">
+    <main
+      class="main-content"
+      :style="isEmbed ? 'padding: 0.5rem 0.75rem 2rem; max-width: 100%; margin: 0 auto; width: 100%;' : 'padding: 1.25rem 1.5rem; max-width: 1560px; margin: 0 auto; width: 100%;'"
+    >
       <!-- RUNTIME ERROR BOUNDARY FALLBACK (R-27) -->
       <div v-if="runtimeError" class="card mb-3" style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--accent-danger); border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
         <i class="ri-alert-line" style="font-size: 1.75rem; color: var(--accent-danger); display: block; margin-bottom: 0.5rem;"></i>
@@ -152,7 +155,7 @@
         </button>
       </div>
       <!-- HERO COMMAND HUB BANNER (For Wizard & Rules Reference views) -->
-      <div v-if="uiStore.activeTab !== 'sheet'" class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem 1.25rem;">
+      <div v-if="!isEmbed && uiStore.activeTab !== 'sheet'" class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem 1.25rem;">
         <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
           <div style="display: flex; align-items: center; gap: 0.85rem;">
             <div style="width: 40px; height: 40px; border-radius: var(--radius-sm); background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--accent-primary);">
@@ -228,6 +231,7 @@ import { useUiStore } from './stores/uiStore.js';
 import { usePowerBuilderStore } from './stores/powerBuilderStore.js';
 import { createEmptyPower, createEmptyEffect } from './rules/powerEngine.js';
 import { parseSharedCharacterFromHash } from './services/shareService.js';
+import { isEmbedMode, initEmbedBridge } from './services/embedBridge.js';
 
 import TacticalCharacterSheet from './components/sheet/TacticalCharacterSheet.vue';
 import CharacterWizard from './components/wizard/CharacterWizard.vue';
@@ -244,6 +248,7 @@ const heroStore = useHeroStore();
 const uiStore = useUiStore();
 const builderStore = usePowerBuilderStore();
 
+const isEmbed = ref(isEmbedMode());
 const isToolsOpen = ref(false);
 const toolsDropdownRef = ref(null);
 const runtimeError = ref(null);
@@ -356,23 +361,39 @@ async function loadFromHash() {
 }
 
 onMounted(() => {
-  loadFromHash();
+  if (isEmbed.value) {
+    uiStore.setActiveTab('sheet');
+    initEmbedBridge({
+      onLoadCharacter: (charData) => {
+        if (charData) {
+          heroStore.loadCharacter(charData);
+        }
+      }
+    });
+  } else {
+    loadFromHash();
+  }
+
   if (typeof window !== 'undefined') {
-    window.addEventListener('hashchange', loadFromHash);
+    if (!isEmbed.value) {
+      window.addEventListener('hashchange', loadFromHash);
+      window.addEventListener('beforeunload', flushSave);
+      window.addEventListener('pagehide', flushSave);
+    }
     document.addEventListener('click', handleClickOutside);
     window.addEventListener('keydown', handleKeyDown);
-    window.addEventListener('beforeunload', flushSave);
-    window.addEventListener('pagehide', flushSave);
   }
 });
 
 onBeforeUnmount(() => {
   if (typeof window !== 'undefined') {
-    window.removeEventListener('hashchange', loadFromHash);
+    if (!isEmbed.value) {
+      window.removeEventListener('hashchange', loadFromHash);
+      window.removeEventListener('beforeunload', flushSave);
+      window.removeEventListener('pagehide', flushSave);
+    }
     document.removeEventListener('click', handleClickOutside);
     window.removeEventListener('keydown', handleKeyDown);
-    window.removeEventListener('beforeunload', flushSave);
-    window.removeEventListener('pagehide', flushSave);
   }
 });
 
@@ -504,6 +525,11 @@ function loadSampleHero() {
   background-color: var(--bg-app);
   color: var(--text-primary);
   font-family: var(--font-sans);
+}
+
+.app-container.is-embed-mode {
+  min-height: auto;
+  background-color: transparent;
 }
 
 .top-menubar {

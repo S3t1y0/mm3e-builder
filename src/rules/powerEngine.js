@@ -2477,27 +2477,35 @@ export function normalizePower(rawPower) {
     : [];
 
   // Device Container normalization
-  if (power.type === 'device') {
+  const isContainerPower = power.type === 'device' || power.type === 'container';
+  if (isContainerPower) {
     if (!Array.isArray(power.devicePowers) || power.devicePowers.length === 0) {
       power.devicePowers = [{
         id: 'dev_sub_' + Date.now(),
         name: power.mainEffect?.name || 'Primary System',
         effect: power.mainEffect ? normalizeEffect(power.mainEffect) : createEmptyEffect('Damage'),
+        mainEffect: power.mainEffect ? normalizeEffect(power.mainEffect) : createEmptyEffect('Damage'),
         activeSlotId: 'main',
         active: true,
         linkedEffects: Array.isArray(power.linkedEffects) ? power.linkedEffects.map(normalizeEffect) : [],
         alternateEffects: Array.isArray(power.alternateEffects) ? power.alternateEffects.map(normalizeAlternateSlot) : []
       }];
     } else {
-      power.devicePowers = power.devicePowers.map((sp, idx) => ({
-        id: sp.id || ('dev_sub_' + Date.now() + '_' + idx),
-        name: sp.name || sp.effect?.name || `Sub-Power #${idx + 1}`,
-        effect: normalizeEffect(sp.effect || sp),
-        activeSlotId: sp.activeSlotId || 'main',
-        active: sp.active !== undefined ? Boolean(sp.active) : true,
-        linkedEffects: Array.isArray(sp.linkedEffects) ? sp.linkedEffects.map(normalizeEffect) : [],
-        alternateEffects: Array.isArray(sp.alternateEffects) ? sp.alternateEffects.map(normalizeAlternateSlot) : []
-      }));
+      power.devicePowers = power.devicePowers.map((sp, idx) => {
+        const subEff = sp.effect || sp.mainEffect || sp;
+        const normEff = normalizeEffect(subEff);
+        return {
+          ...sp,
+          id: sp.id || ('dev_sub_' + Date.now() + '_' + idx),
+          name: sp.name || normEff.name || `Sub-Power #${idx + 1}`,
+          effect: normEff,
+          mainEffect: normEff,
+          activeSlotId: sp.activeSlotId || 'main',
+          active: sp.active !== undefined ? Boolean(sp.active) : true,
+          linkedEffects: Array.isArray(sp.linkedEffects) ? sp.linkedEffects.map(normalizeEffect) : [],
+          alternateEffects: Array.isArray(sp.alternateEffects) ? sp.alternateEffects.map(normalizeAlternateSlot) : []
+        };
+      });
     }
 
     if (!power.deviceConfig || power.deviceConfig.type === 'none') {
@@ -2510,7 +2518,7 @@ export function normalizePower(rawPower) {
 
     // Synchronize primary sub-power into mainEffect for cross-compatibility
     if (power.devicePowers.length > 0) {
-      power.mainEffect = power.devicePowers[0].effect;
+      power.mainEffect = power.devicePowers[0].effect || power.devicePowers[0].mainEffect;
     }
     // Device containers group sub-powers; top-level linked and alternate effects must be empty
     power.linkedEffects = [];
@@ -2518,6 +2526,9 @@ export function normalizePower(rawPower) {
   }
 
   // Keep root legacy aliases in sync so legacy components, print templates, and targeted effects work
+  if (!power.mainEffect) {
+    power.mainEffect = createEmptyEffect('Damage');
+  }
   power.baseEffect = power.mainEffect.baseEffect;
   power.effectType = power.mainEffect.baseEffect;
   power.ranks = power.mainEffect.ranks;
@@ -2539,7 +2550,32 @@ export function normalizeEffect(rawEffect) {
   if (!rawEffect) return createEmptyEffect();
   const eff = { ...rawEffect };
   eff.id = eff.id || ('eff_' + Date.now() + Math.random().toString(36).substr(2, 4));
-  eff.baseEffect = eff.baseEffect || eff.name || 'Damage';
+
+  // Determine actual baseEffect without blindly falling back to 'Damage'
+  let determinedBase = eff.baseEffect || eff.effectType || eff.type;
+  if (!determinedBase || !BASE_EFFECTS.some(b => b.name === determinedBase)) {
+    if (eff.name && BASE_EFFECTS.some(b => b.name === eff.name)) {
+      determinedBase = eff.name;
+    } else {
+      const aliasMap = {
+        'force field': 'Protection',
+        'blast': 'Damage',
+        'impervious': 'Protection',
+        'armor plating': 'Protection',
+        'snare': 'Affliction',
+        'web snare': 'Affliction',
+        'stun': 'Affliction',
+        'telekinesis': 'Move Object'
+      };
+      if (eff.name && aliasMap[eff.name.toLowerCase()]) {
+        determinedBase = aliasMap[eff.name.toLowerCase()];
+      } else if (determinedBase && aliasMap[determinedBase.toLowerCase()]) {
+        determinedBase = aliasMap[determinedBase.toLowerCase()];
+      }
+    }
+  }
+
+  eff.baseEffect = determinedBase || eff.name || 'Damage';
   eff.name = eff.name || eff.baseEffect;
 
   // Heal stale auto-generated default linked names where baseEffect was switched but name was not updated

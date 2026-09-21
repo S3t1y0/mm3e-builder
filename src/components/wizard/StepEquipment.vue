@@ -626,7 +626,7 @@ function getArmorProtection(r) {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 111, 184, 0.35);
 }
 
 

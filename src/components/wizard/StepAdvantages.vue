@@ -712,8 +712,8 @@ function removeAdvantage(name) {
 }
 
 .btn-quick-rec:hover {
-  background: rgba(220, 38, 38, 0.15);
-  border-color: rgba(220, 38, 38, 0.4);
+  background: rgba(0, 111, 184, 0.15);
+  border-color: rgba(0, 111, 184, 0.4);
   color: #fff;
   transform: translateY(-1px);
 }
@@ -971,8 +971,8 @@ function removeAdvantage(name) {
 
 .catalog-search-input:focus {
   outline: none;
-  border-color: #dc2626;
-  box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.2);
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 3px rgba(0, 111, 184, 0.25);
 }
 
 .clear-search-btn {
@@ -1031,10 +1031,10 @@ function removeAdvantage(name) {
 }
 
 .cat-chip-btn.active {
-  background: #dc2626;
-  border-color: #ef4444;
+  background: var(--accent-primary);
+  border-color: var(--accent-secondary);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 111, 184, 0.35);
 }
 
 .cat-chip-count {
@@ -1213,10 +1213,10 @@ function removeAdvantage(name) {
 }
 
 .btn-add-feat:hover {
-  background: #dc2626;
-  border-color: #ef4444;
+  background: var(--accent-primary);
+  border-color: var(--accent-secondary);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  box-shadow: 0 2px 8px rgba(0, 111, 184, 0.35);
 }
 
 .btn-add-feat:active {

@@ -48,7 +48,68 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
 
   const defaultCrit = improvedCritBonus > 0 ? `${Math.max(1, 20 - improvedCritBonus)}-20` : '20';
 
-  // 1. Basic Unarmed
+  // PRIORITY 1: If character explicitly defines an `attacks` array (e.g. from Heros.json or JSON standard)
+  if (Array.isArray(character.attacks) && character.attacks.length > 0) {
+    character.attacks.forEach((atk, idx) => {
+      let dcNum = 15;
+      let res = atk.resistance || 'Toughness';
+      if (typeof atk.dc === 'number') {
+        dcNum = atk.dc;
+      } else if (typeof atk.dc === 'string') {
+        const m = atk.dc.match(/(\d+)/);
+        if (m) dcNum = parseInt(m[1], 10);
+        if (/will/i.test(atk.dc)) res = 'Will';
+        else if (/fortitude/i.test(atk.dc)) res = 'Fortitude';
+        else if (/dodge/i.test(atk.dc)) res = 'Dodge';
+      }
+
+      const rollBonus = atk.bonus !== undefined ? Number(atk.bonus) : (atk.rollBonus !== undefined ? Number(atk.rollBonus) : null);
+      const isArea = Boolean(atk.isArea || rollBonus === 0 || /area/i.test(atk.name || '') || (atk.descriptors || []).some(d => /area/i.test(d)));
+      const isPerception = atk.range === 'Perception';
+
+      const effectType = atk.effectType || (res === 'Toughness' ? 'Damage' : 'Affliction');
+      const effectRank = atk.ranks || (dcNum > 15 && effectType === 'Damage' ? dcNum - 15 : dcNum - 10);
+
+      attacks.push({
+        id: atk.id || `atk_explicit_${idx}`,
+        type: 'explicit',
+        name: atk.name || 'Attack',
+        source: atk.source || 'Standard Attack',
+        rollBonus: (isArea || isPerception) ? null : rollBonus,
+        range: atk.range || (atk.targetDefense === 'Dodge' ? 'Ranged' : 'Close'),
+        action: atk.action || 'Standard',
+        effectName: effectType,
+        effectRank,
+        dc: dcNum,
+        dcDescription: typeof atk.dc === 'string' ? atk.dc : `DC ${dcNum} vs ${res}`,
+        resistance: res,
+        crit: atk.crit || (isArea ? '-' : defaultCrit),
+        isArea,
+        isPerception,
+        isStandby: false,
+        isPowerDisabled: false,
+        isActive: true,
+        slotId: 'main',
+        degrees: Array.isArray(atk.degrees) ? atk.degrees : (
+          res === 'Toughness' ? [
+            { degree: '1st', label: 'Bruise (-1 Toughness penalty)' },
+            { degree: '2nd', label: 'Dazed + Bruise' },
+            { degree: '3rd', label: 'Staggered + Bruise' },
+            { degree: '4th', label: 'Incapacitated' }
+          ] : [
+            { degree: '1st', label: 'Hindered / Dazed' },
+            { degree: '2nd', label: 'Immobilized / Stunned' },
+            { degree: '3rd', label: 'Incapacitated' }
+          ]
+        ),
+        tags: Array.isArray(atk.descriptors) ? atk.descriptors : []
+      });
+    });
+
+    return attacks;
+  }
+
+  // 1. Basic Unarmed (fallback when no explicit attacks are provided)
   const unarmedSkill = (character.skills || []).find(
     s => s.name === 'Close Combat' && /unarmed/i.test(s.subtype || '')
   );
@@ -78,10 +139,10 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     if (!effect) return null;
     const baseEffect = effect.baseEffect || effect.name || 'Damage';
     const isMoveObjectDamaging = baseEffect === 'Move Object' && (effect.extras || []).some(e => e.name === 'Damaging');
-    const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify'].includes(baseEffect) || isMoveObjectDamaging;
+    const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify', 'Move Object'].includes(baseEffect) || isMoveObjectDamaging;
     if (!isOffensive) return null;
 
-    const isRanged = baseEffect === 'Blast' || effect.range === 'Ranged' || (isMoveObjectDamaging && effect.range !== 'Close');
+    const isRanged = baseEffect === 'Blast' || effect.range === 'Ranged' || (isMoveObjectDamaging && effect.range !== 'Close') || (baseEffect === 'Move Object' && effect.range !== 'Close');
     const isArea = (effect.extras || []).some(e => e.name === 'Area');
     const isPerception = effect.range === 'Perception';
 
@@ -118,12 +179,20 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       effectRank += throwingMasteryBonus;
     }
 
-    // DC calculation
+    // DC and resistance calculation
     let dc = 10 + effectRank;
-    let res = effect.resistance || 'Toughness';
+    let res = effect.resistance || 'Fortitude';
     if (baseEffect === 'Damage' || baseEffect === 'Blast' || isMoveObjectDamaging) {
       dc = 15 + effectRank;
       res = 'Toughness';
+    } else if (baseEffect === 'Affliction') {
+      res = effect.resistance || (/snare/i.test(opt.slotName || power.name || '') ? 'Dodge' : 'Fortitude');
+    } else if (baseEffect === 'Move Object') {
+      res = effect.resistance || 'Dodge';
+    } else if (baseEffect === 'Weaken') {
+      res = effect.resistance || 'Fortitude';
+    } else if (baseEffect === 'Nullify') {
+      res = effect.resistance || 'Will';
     }
 
     const tags = [baseEffect, effect.range || (isRanged ? 'Ranged' : 'Close')];
@@ -166,16 +235,18 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
   // 2. Iterate Powers
   for (const p of (character.powers || [])) {
     const isPowerDisabled = p.active === false;
+    const isContainer = p.type === 'device' || p.type === 'container';
 
-    if (p.type === 'device' && Array.isArray(p.devicePowers)) {
+    if (isContainer && Array.isArray(p.devicePowers)) {
       p.devicePowers.forEach((sub, sIdx) => {
         const isSubDisabled = isPowerDisabled || sub.active === false;
+        const subEff = sub.mainEffect || sub.effect || sub;
         const hasAlts = Array.isArray(sub.alternateEffects) && sub.alternateEffects.length > 0;
         const activeSubSlot = sub.activeSlotId || 'main';
 
         // Primary effect of sub-power
         const isPrimaryActive = !hasAlts || activeSubSlot === 'main';
-        const subAtk = processEffect(p, sub.effect, {
+        const subAtk = processEffect(p, subEff, {
           id: `atk_${p.id}_sub_${sIdx}_main`,
           slotId: 'main',
           slotName: sub.name,
@@ -191,7 +262,8 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
         if (hasAlts) {
           sub.alternateEffects.forEach((alt, aIdx) => {
             const isSlotActive = activeSubSlot === alt.id;
-            const altAtk = processEffect(p, alt.effect, {
+            const altEff = alt.effect || alt.mainEffect || alt;
+            const altAtk = processEffect(p, altEff, {
               id: `atk_${p.id}_sub_${sIdx}_slot_${aIdx}`,
               slotId: alt.id,
               slotName: alt.name,
@@ -221,7 +293,8 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
 
       (p.alternateEffects || []).forEach((alt, aIdx) => {
         const isSlotActive = activeSlot === alt.id;
-        const altAtk = processEffect(p, alt.effect, {
+        const altEff = alt.effect || alt.mainEffect || alt;
+        const altAtk = processEffect(p, altEff, {
           id: `atk_${p.id}_slot_${aIdx}`,
           slotId: alt.id,
           slotName: alt.name,
@@ -231,8 +304,8 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
         });
         if (altAtk) attacks.push(altAtk);
       });
-    } else {
-      // Standard power
+    } else if (!isContainer) {
+      // Standard power (skip outer container shell if it has no direct mainEffect)
       const atk = processEffect(p, p.mainEffect, {
         id: `atk_${p.id}_main`,
         slotId: 'main',

@@ -4,6 +4,7 @@ import { compileTargetedAttacks, calculateDegrees } from '../rules/attacks.js';
 import { ARCHETYPES } from '../rules/archetypes.js';
 import { calculateConditionModifiers, resolveActiveConditionSet, evaluateDyingFortitudeCheck, DYING_DC, DEATH_FAILURE_LIMIT } from '../rules/conditions.js';
 import { sendRollToVTT, syncActiveHero } from '../services/vttBridge.js';
+import { isEmbedMode, sendCharacterUpdate, sendDiceRoll } from '../services/embedBridge.js';
 import { rollD20, isCryptoAvailable } from '../utils/diceRoller.js';
 
 const STORAGE_KEY = 'mm3e_builder_character_data';
@@ -630,6 +631,10 @@ export const useHeroStore = defineStore('hero', {
     },
 
     saveToStorage() {
+      if (isEmbedMode()) {
+        sendCharacterUpdate(this.character);
+        return;
+      }
       if (typeof localStorage === 'undefined') return;
       try {
         this.isSaving = true;
@@ -729,6 +734,9 @@ export const useHeroStore = defineStore('hero', {
       }
       this.saveToStorage();
       syncActiveHero(this.character, this.totalSpentPP, this.totalBudgetPP);
+      if (isEmbedMode()) {
+        sendCharacterUpdate(this.character);
+      }
     },
 
     undo() {
@@ -1010,6 +1018,7 @@ export const useHeroStore = defineStore('hero', {
       if (this.rollHistory.length > 20) this.rollHistory.pop();
 
       sendRollToVTT(rollData, this.character);
+      sendDiceRoll(rollData, this.character);
 
       return rollData;
     },
@@ -1077,6 +1086,7 @@ export const useHeroStore = defineStore('hero', {
 
       // Dispatch to MM3e Vue Chrome Extension VTT Bridge
       sendRollToVTT(rollData, this.character);
+      sendDiceRoll(rollData, this.character);
 
       return rollData;
     },
@@ -1161,7 +1171,7 @@ export const useHeroStore = defineStore('hero', {
       this.character.dyingFailures = 0;
       this.character.isDyingStable = true;
 
-      sendRollToVTT({
+      const stabData = {
         id: 'stab_' + Date.now(),
         name: `Stabilized: ${reason}`,
         category: 'Combat Event',
@@ -1170,7 +1180,9 @@ export const useHeroStore = defineStore('hero', {
         modifier: 0,
         degrees: { isSuccess: true, text: `Hero stabilized via ${reason}. Remains Incapacitated.` },
         timestamp: new Date().toLocaleTimeString()
-      }, this.character);
+      };
+      sendRollToVTT(stabData, this.character);
+      sendDiceRoll(stabData, this.character);
 
       this.pushHistory();
     },

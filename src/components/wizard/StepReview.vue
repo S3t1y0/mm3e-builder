@@ -313,8 +313,15 @@ function finishWizard() {
 }
 
 .breakdown-item.highlight {
-  border-color: var(--accent-primary);
-  background: rgba(220, 38, 38, 0.08);
+  border-color: rgba(0, 111, 184, 0.5);
+  background: rgba(0, 111, 184, 0.12);
+  box-shadow: 0 0 16px rgba(0, 111, 184, 0.15);
+}
+
+.breakdown-item.highlight:hover {
+  border-color: var(--accent-secondary);
+  background: rgba(0, 111, 184, 0.2);
+  box-shadow: 0 0 20px rgba(42, 143, 214, 0.25);
 }
 
 .breakdown-label {

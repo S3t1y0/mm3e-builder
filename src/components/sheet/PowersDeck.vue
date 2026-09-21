@@ -56,8 +56,8 @@
         class="power-item-card"
         :class="{
           'type-device': pow.type === 'device',
-          'type-array': pow.type === 'array',
-          'type-standard': pow.type === 'standard',
+          'type-array': pow.type === 'array' || (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0),
+          'type-standard': pow.type === 'standard' && (!Array.isArray(pow.alternateEffects) || pow.alternateEffects.length === 0),
           'is-deactivated': pow.active === false
         }"
       >
@@ -79,6 +79,9 @@
             <h4 class="pow-name">{{ pow.name || 'Unnamed Power' }}</h4>
             <span v-if="pow.type && pow.type !== 'standard'" class="structure-badge" :class="`badge-${pow.type}`">
               {{ pow.type.toUpperCase() }}
+            </span>
+            <span v-else-if="Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0" class="structure-badge badge-array">
+              ARRAY
             </span>
             <span v-if="pow.activation && pow.activation !== 'none'" class="activation-flaw-badge">
               <i class="ri-timer-flash-line"></i>
@@ -141,8 +144,12 @@
         <!-- GLANCE SUMMARY (Always visible on card) -->
         <!-- ================================================================= -->
         
-        <!-- Case 1: Standard or Array Power Glance (Collapsed Only) -->
-        <div v-if="pow.type !== 'device' && !isExpanded(pow.id || idx)" class="pow-glance-summary">
+        <!-- Case 1: Standard or Array Power Glance (Collapsed or Array Mode Strip) -->
+        <div
+          v-if="pow.type !== 'device' && (!isExpanded(pow.id || idx) || pow.type === 'array' || (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0))"
+          class="pow-glance-summary"
+          :class="{ 'is-expanded-mode-strip': isExpanded(pow.id || idx) }"
+        >
           <!-- Array Slot Switcher Bar (if Array or has Alternate Effects) -->
           <div v-if="pow.type === 'array' || pow.alternateEffects?.length > 0" class="array-glance-switcher">
             <span class="glance-label"><i class="ri-shuffle-line"></i> Mode:</span>
@@ -168,8 +175,8 @@
             </div>
           </div>
 
-          <!-- Active Effect Quick Parameters Strip -->
-          <div class="glance-params-row">
+          <!-- Active Effect Quick Parameters Strip (Collapsed Only) -->
+          <div v-if="!isExpanded(pow.id || idx)" class="glance-params-row">
             <div class="glance-param-pill base">
               <span class="param-k">Effect</span>
               <span class="param-v">
@@ -193,9 +200,9 @@
             </div>
           </div>
 
-          <!-- Glance Modifier Chips (Extras, Flaws, Linked) -->
+          <!-- Glance Modifier Chips (Extras, Flaws, Linked) (Collapsed Only) -->
           <div
-            v-if="(getActiveEffect(pow).extras?.length || 0) + (getActiveEffect(pow).flaws?.length || 0) + (getActiveLinkedEffects(pow)?.length || 0) > 0"
+            v-if="!isExpanded(pow.id || idx) && ((getActiveEffect(pow).extras?.length || 0) + (getActiveEffect(pow).flaws?.length || 0) + (getActiveLinkedEffects(pow)?.length || 0) > 0)"
             class="glance-modifiers-row"
           >
             <!-- Extras Badges -->
@@ -231,7 +238,7 @@
         </div>
 
         <!-- Case 2: Device Container Glance -->
-        <div v-else class="pow-glance-summary device">
+        <div v-else-if="pow.type === 'device'" class="pow-glance-summary device">
           <div class="device-glance-meta">
             <div class="dev-meta-left">
               <span class="dev-desc-tag"><i class="ri-shield-keyhole-line"></i> {{ pow.deviceConfig?.descriptor || 'High-Tech Device' }}</span>
@@ -404,6 +411,7 @@
               <div class="dossier-block-head">
                 <div class="dossier-head-left">
                   <i class="ri-flashlight-line"></i>
+                  <span v-if="getActiveSlotTitle(pow)" class="active-stunt-mode-title">{{ getActiveSlotTitle(pow) }}:</span>
                   <span>Base Effect: {{ getActiveEffect(pow).baseEffect }} (Rank {{ getActiveEffect(pow).ranks }})</span>
                 </div>
                 <button
@@ -677,46 +685,6 @@
                         </span>
                       </div>
                     </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 5. Array Stunts Explorer (if Array or has Alternate Effects) -->
-            <div v-if="pow.alternateEffects?.length > 0" class="dossier-block array-stunts-block">
-              <div class="dossier-block-head array-head">
-                <i class="ri-shuffle-line"></i>
-                <span>Alternate Array Stunt Modes ({{ pow.alternateEffects.length + 1 }} Total)</span>
-              </div>
-              <div class="array-stunts-table">
-                <div
-                  class="stunt-row"
-                  :class="{ active: (pow.activeSlotId || 'main') === 'main' }"
-                  @click="heroStore.setActivePowerSlot(pow.id, 'main')"
-                >
-                  <div class="stunt-status">
-                    <span v-if="(pow.activeSlotId || 'main') === 'main'" class="active-dot">• ACTIVE</span>
-                    <span v-else class="inactive-dot">Anchor</span>
-                  </div>
-                  <div class="stunt-info">
-                    <strong>★ {{ pow.mainEffect?.name || 'Primary' }}</strong>
-                    <span>{{ pow.mainEffect?.baseEffect }} {{ pow.mainEffect?.ranks }}R ({{ pow.mainEffect?.range || 'Close' }}, {{ calculateDC(pow.mainEffect) }})</span>
-                  </div>
-                </div>
-                <div
-                  v-for="alt in pow.alternateEffects"
-                  :key="'alt_row_' + alt.id"
-                  class="stunt-row"
-                  :class="{ active: pow.activeSlotId === alt.id }"
-                  @click="heroStore.setActivePowerSlot(pow.id, alt.id)"
-                >
-                  <div class="stunt-status">
-                    <span v-if="pow.activeSlotId === alt.id" class="active-dot">• ACTIVE</span>
-                    <span v-else class="inactive-dot">Alternate</span>
-                  </div>
-                  <div class="stunt-info">
-                    <strong>{{ alt.name }}</strong>
-                    <span>{{ alt.effect?.baseEffect }} {{ alt.effect?.ranks }}R ({{ alt.effect?.range || 'Close' }}, {{ calculateDC(alt.effect) }})</span>
                   </div>
                 </div>
               </div>
@@ -1456,7 +1424,8 @@ function broadcastPower(pow) {
   // Array context
   let activeStuntName = '';
   let alternateStunts = '';
-  if (pow.type === 'array') {
+  const isArray = pow.type === 'array' || (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0);
+  if (isArray) {
     if (pow.activeSlotId && pow.activeSlotId !== 'main') {
       const activeAlt = (pow.alternateEffects || []).find(a => a.id === pow.activeSlotId);
       activeStuntName = activeAlt?.name || 'Alternate Stunt';
@@ -1503,7 +1472,7 @@ function broadcastPower(pow) {
     activation,
     deviceType,
     deviceSystems,
-    arrayContext: pow.type === 'array',
+    arrayContext: isArray,
     activeStuntName,
     alternateStunts,
     baseEffect: eff?.baseEffect || '',
@@ -1582,7 +1551,10 @@ function broadcastEffect(pow, effect, isLinked = false) {
   const cfgDetails = getEffectConfigDetails(effect);
   const configuredChoices = cfgDetails?.quickText || '';
   const configuredTitle = cfgDetails?.title || 'Selections';
-  const displayName = isLinked ? getLinkedDisplayName(effect) : (effect.baseEffect || 'Effect');
+  const activeTitle = getActiveSlotTitle(pow);
+  const displayName = isLinked
+    ? getLinkedDisplayName(effect)
+    : (activeTitle ? `${activeTitle} (${effect.baseEffect || 'Effect'})` : (effect.baseEffect || 'Effect'));
 
   sendFeatureToVTT({
     name: displayName,
@@ -1761,19 +1733,36 @@ function handleEditPower(idx, pow) {
 }
 
 function getActiveEffect(pow) {
-  if (pow.type === 'array' && pow.activeSlotId && pow.activeSlotId !== 'main') {
-    const alt = (pow.alternateEffects || []).find(a => a.id === pow.activeSlotId);
+  if (!pow) return {};
+  const hasAlts = Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0;
+  if ((pow.type === 'array' || hasAlts) && pow.activeSlotId && pow.activeSlotId !== 'main') {
+    const alt = pow.alternateEffects.find(a => a.id === pow.activeSlotId);
     if (alt && alt.effect) return alt.effect;
   }
   return pow.mainEffect || {};
 }
 
 function getActiveLinkedEffects(pow) {
-  if (pow.type === 'array' && pow.activeSlotId && pow.activeSlotId !== 'main') {
-    const alt = (pow.alternateEffects || []).find(a => a.id === pow.activeSlotId);
-    if (alt && alt.linkedEffects) return alt.linkedEffects;
+  if (!pow) return [];
+  const hasAlts = Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0;
+  if ((pow.type === 'array' || hasAlts) && pow.activeSlotId && pow.activeSlotId !== 'main') {
+    const alt = pow.alternateEffects.find(a => a.id === pow.activeSlotId);
+    if (alt) {
+      if (Array.isArray(alt.linkedEffects)) return alt.linkedEffects;
+      if (alt.effect && Array.isArray(alt.effect.linkedEffects)) return alt.effect.linkedEffects;
+    }
   }
   return pow.linkedEffects || [];
+}
+
+function getActiveSlotTitle(pow) {
+  if (!pow) return '';
+  const hasAlts = Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0;
+  if ((pow.type === 'array' || hasAlts) && pow.activeSlotId && pow.activeSlotId !== 'main') {
+    const alt = pow.alternateEffects.find(a => a.id === pow.activeSlotId);
+    return alt?.name || '';
+  }
+  return '';
 }
 
 function getSubPowerActiveEffect(sub) {
@@ -2317,6 +2306,16 @@ function getModifierInfo(modName, isFlaw = false) {
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
   padding: 0.55rem 0.75rem;
+}
+
+.pow-glance-summary.is-expanded-mode-strip {
+  padding: 0.45rem 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.pow-glance-summary.is-expanded-mode-strip .array-glance-switcher {
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .array-glance-switcher {
@@ -3563,6 +3562,14 @@ function getModifierInfo(modName, isFlaw = false) {
   display: flex;
   align-items: center;
   gap: 0.45rem;
+}
+
+.active-stunt-mode-title {
+  color: #a78bfa;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .sub-dossier-label-flex {
