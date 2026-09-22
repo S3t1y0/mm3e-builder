@@ -393,6 +393,9 @@ onMounted(() => {
       onInitWizard: (wizardConfig) => {
         uiStore.setActiveTab('wizard');
         if (wizardConfig) {
+          if (wizardConfig.character) {
+            heroStore.loadCharacter(wizardConfig.character);
+          }
           if (wizardConfig.faction) heroStore.character.faction = wizardConfig.faction;
           if (wizardConfig.role) heroStore.character.role = wizardConfig.role;
           if (wizardConfig.pl) {
