@@ -231,7 +231,7 @@ import { useUiStore } from './stores/uiStore.js';
 import { usePowerBuilderStore } from './stores/powerBuilderStore.js';
 import { createEmptyPower, createEmptyEffect } from './rules/powerEngine.js';
 import { parseSharedCharacterFromHash } from './services/shareService.js';
-import { isEmbedMode, initEmbedBridge } from './services/embedBridge.js';
+import { isEmbedMode, getEmbedType, initEmbedBridge } from './services/embedBridge.js';
 
 import TacticalCharacterSheet from './components/sheet/TacticalCharacterSheet.vue';
 import CharacterWizard from './components/wizard/CharacterWizard.vue';
@@ -362,11 +362,44 @@ async function loadFromHash() {
 
 onMounted(() => {
   if (isEmbed.value) {
-    uiStore.setActiveTab('sheet');
+    const embedType = getEmbedType();
+    if (embedType === 'wizard') {
+      uiStore.setActiveTab('wizard');
+      // Initialize with query params if provided
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const faction = params.get('faction');
+        const role = params.get('role');
+        const pl = params.get('pl');
+        const name = params.get('name');
+        if (faction) heroStore.character.faction = faction;
+        if (role) heroStore.character.role = role;
+        if (pl && !isNaN(Number(pl))) {
+          heroStore.character.powerLevel = Number(pl);
+          heroStore.character.powerPoints = Number(pl) * 15;
+        }
+        if (name) heroStore.character.name = name;
+      }
+    } else {
+      uiStore.setActiveTab('sheet');
+    }
+
     initEmbedBridge({
       onLoadCharacter: (charData) => {
         if (charData) {
           heroStore.loadCharacter(charData);
+        }
+      },
+      onInitWizard: (wizardConfig) => {
+        uiStore.setActiveTab('wizard');
+        if (wizardConfig) {
+          if (wizardConfig.faction) heroStore.character.faction = wizardConfig.faction;
+          if (wizardConfig.role) heroStore.character.role = wizardConfig.role;
+          if (wizardConfig.pl) {
+            heroStore.character.powerLevel = Number(wizardConfig.pl);
+            heroStore.character.powerPoints = Number(wizardConfig.pl) * 15;
+          }
+          if (wizardConfig.name) heroStore.character.name = wizardConfig.name;
         }
       }
     });

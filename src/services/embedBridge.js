@@ -16,7 +16,7 @@ export function isEmbedMode() {
   try {
     const params = new URLSearchParams(window.location.search);
     const embedParam = params.get('embed');
-    const isParamEmbed = embedParam === 'sheet' || embedParam === 'true' || embedParam === '1';
+    const isParamEmbed = embedParam === 'sheet' || embedParam === 'wizard' || embedParam === 'true' || embedParam === '1';
     const isFramed = window.self !== window.top;
     return isParamEmbed || isFramed;
   } catch (e) {
@@ -25,9 +25,28 @@ export function isEmbedMode() {
 }
 
 /**
+ * Returns the specific embed type: 'sheet' | 'wizard' | null.
+ * @returns {'sheet'|'wizard'|null}
+ */
+export function getEmbedType() {
+  if (typeof window === 'undefined') return null;
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const embedParam = params.get('embed');
+    if (embedParam === 'wizard') return 'wizard';
+    if (embedParam === 'sheet') return 'sheet';
+    if (isEmbedMode()) return 'sheet';
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
+/**
  * Initializes the message listener and performs the handshake with the parent window.
  * @param {Object} callbacks - Handler callbacks for parent messages
- * @param {Function} callbacks.onLoadCharacter - Called when parent sends MM3E_LOAD_CHARACTER
+ * @param {Function} [callbacks.onLoadCharacter] - Called when parent sends MM3E_LOAD_CHARACTER
+ * @param {Function} [callbacks.onInitWizard] - Called when parent sends MM3E_INIT_WIZARD
  * @param {Function} [callbacks.onUpdateField] - Optional field-level update handler
  */
 export function initEmbedBridge(callbacks = {}) {
@@ -54,6 +73,12 @@ export function initEmbedBridge(callbacks = {}) {
             characterId: data.payload?.character?.id,
             characterName: data.payload?.character?.name
           });
+        }
+        break;
+
+      case 'MM3E_INIT_WIZARD':
+        if (typeof callbacks.onInitWizard === 'function') {
+          callbacks.onInitWizard(data.payload);
         }
         break;
 
@@ -136,3 +161,22 @@ export function sendDiceRoll(rollData, character = null) {
     characterName: character?.name || 'Character'
   });
 }
+
+/**
+ * Sends a notification to the parent DM screen that the wizard has completed.
+ * @param {Object} character - Created character object
+ * @param {Object} [meta] - Metadata such as target faction, role, etc.
+ */
+export function sendWizardCompleted(character, meta = {}) {
+  if (!isEmbedMode()) return;
+  try {
+    const cloned = character ? JSON.parse(JSON.stringify(character)) : null;
+    postToParent('MM3E_WIZARD_COMPLETED', {
+      character: cloned,
+      ...meta
+    });
+  } catch (e) {
+    console.warn('[EmbedBridge] Failed to send wizard completed:', e);
+  }
+}
+

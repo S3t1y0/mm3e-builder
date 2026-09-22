@@ -745,6 +745,34 @@
                   </div>
                 </div>
 
+                <!-- Sub-Power Array Mode Switcher (Horizontal Menu like regular array powers) -->
+                <div
+                  v-if="sub.alternateEffects?.length > 0"
+                  class="array-glance-switcher sub-array-switcher"
+                >
+                  <span class="glance-label"><i class="ri-shuffle-line"></i> Mode:</span>
+                  <div class="slot-buttons-group">
+                    <button
+                      type="button"
+                      class="slot-btn"
+                      :class="{ active: (sub.activeSlotId || 'main') === 'main' }"
+                      @click="heroStore.setActiveDeviceSubSlot(pow.id, sIdx, 'main')"
+                    >
+                      ★ {{ sub.effect?.name || 'Primary' }}
+                    </button>
+                    <button
+                      v-for="alt in sub.alternateEffects"
+                      :key="'sub_alt_slot_' + alt.id"
+                      type="button"
+                      class="slot-btn"
+                      :class="{ active: sub.activeSlotId === alt.id }"
+                      @click="heroStore.setActiveDeviceSubSlot(pow.id, sIdx, alt.id)"
+                    >
+                      {{ alt.name }}
+                    </button>
+                  </div>
+                </div>
+
                 <!-- Sub Base Effect Rules & Mechanics -->
                 <div class="sub-dossier-block sub-rules-block">
                   <!-- Combat Specs Matrix Grid (Placed First for instant battle reference) -->
@@ -824,46 +852,6 @@
                       <span v-else-if="item.ranks" class="choice-pts">Rank {{ item.ranks }}</span>
                     </div>
                     <p v-if="item.desc" class="choice-desc">{{ item.desc }}</p>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Array Stunt Matrix (if sub-power has Alternate Effects) -->
-              <div v-if="sub.alternateEffects?.length > 0" class="sub-dossier-block sub-array-block">
-                <div class="sub-dossier-label array-accent">
-                  <i class="ri-shuffle-line"></i>
-                  <span>Sub-System Array Stunts ({{ sub.alternateEffects.length + 1 }} Modes Available)</span>
-                </div>
-                <div class="array-stunts-table">
-                  <div
-                    class="stunt-row"
-                    :class="{ active: (sub.activeSlotId || 'main') === 'main' }"
-                    @click="heroStore.setActiveDeviceSubSlot(pow.id, sIdx, 'main')"
-                  >
-                    <div class="stunt-status">
-                      <span v-if="(sub.activeSlotId || 'main') === 'main'" class="active-dot">• ACTIVE</span>
-                      <span v-else class="inactive-dot">Anchor</span>
-                    </div>
-                    <div class="stunt-info">
-                      <strong>★ {{ sub.effect?.name || 'Primary Mode' }}</strong>
-                      <span>{{ sub.effect?.baseEffect }} {{ sub.effect?.ranks }}R ({{ sub.effect?.range || 'Close' }}, {{ calculateDC(sub.effect) }})</span>
-                    </div>
-                  </div>
-                  <div
-                    v-for="alt in sub.alternateEffects"
-                    :key="'sub_alt_row_' + alt.id"
-                    class="stunt-row"
-                    :class="{ active: sub.activeSlotId === alt.id }"
-                    @click="heroStore.setActiveDeviceSubSlot(pow.id, sIdx, alt.id)"
-                  >
-                    <div class="stunt-status">
-                      <span v-if="sub.activeSlotId === alt.id" class="active-dot">• ACTIVE</span>
-                      <span v-else class="inactive-dot">Alternate</span>
-                    </div>
-                    <div class="stunt-info">
-                      <strong>{{ alt.name }}</strong>
-                      <span>{{ alt.effect?.baseEffect }} {{ alt.effect?.ranks }}R ({{ alt.effect?.range || 'Close' }}, {{ calculateDC(alt.effect) }})</span>
-                    </div>
                   </div>
                 </div>
               </div>
@@ -2325,6 +2313,14 @@ function getModifierInfo(modName, isFlaw = false) {
   flex-wrap: wrap;
   padding-bottom: 0.35rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.sub-array-switcher {
+  margin: 0.5rem 0 0.85rem 0;
+  padding: 0.45rem 0.75rem;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .glance-label {

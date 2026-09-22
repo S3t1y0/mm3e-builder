@@ -127,6 +127,7 @@
 import { computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
+import { isEmbedMode, sendWizardCompleted } from '../../services/embedBridge.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -149,8 +150,16 @@ const isComplicationsValid = computed(() => {
 });
 
 function finishWizard() {
-  uiStore.setActiveTab('sheet');
-  uiStore.showToast(`Hero ${heroStore.character.name || 'Hero'} is ready!`, 'success');
+  if (isEmbedMode()) {
+    sendWizardCompleted(heroStore.character, {
+      faction: heroStore.character.faction || 'villains',
+      role: heroStore.character.role || 'Boss'
+    });
+    uiStore.showToast(`${heroStore.character.name || 'Character'} sent to DM Screen!`, 'success');
+  } else {
+    uiStore.setActiveTab('sheet');
+    uiStore.showToast(`Hero ${heroStore.character.name || 'Hero'} is ready!`, 'success');
+  }
 }
 </script>
 
