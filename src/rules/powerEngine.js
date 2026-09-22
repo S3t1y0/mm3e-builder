@@ -2479,6 +2479,16 @@ export function normalizePower(rawPower) {
   // Device Container normalization
   const isContainerPower = power.type === 'device' || power.type === 'container';
   if (isContainerPower) {
+    const topLevelLinked = Array.isArray(power.linkedEffects) && power.linkedEffects.length > 0
+      ? power.linkedEffects
+      : (Array.isArray(power.mainEffect?.linkedEffects) && power.mainEffect.linkedEffects.length > 0
+        ? power.mainEffect.linkedEffects
+        : []);
+
+    const topLevelAlts = Array.isArray(power.alternateEffects) && power.alternateEffects.length > 0
+      ? power.alternateEffects
+      : [];
+
     if (!Array.isArray(power.devicePowers) || power.devicePowers.length === 0) {
       power.devicePowers = [{
         id: 'dev_sub_' + Date.now(),
@@ -2487,13 +2497,40 @@ export function normalizePower(rawPower) {
         mainEffect: power.mainEffect ? normalizeEffect(power.mainEffect) : createEmptyEffect('Damage'),
         activeSlotId: 'main',
         active: true,
-        linkedEffects: Array.isArray(power.linkedEffects) ? power.linkedEffects.map(normalizeEffect) : [],
-        alternateEffects: Array.isArray(power.alternateEffects) ? power.alternateEffects.map(normalizeAlternateSlot) : []
+        linkedEffects: topLevelLinked.map(normalizeEffect),
+        alternateEffects: topLevelAlts.map(normalizeAlternateSlot)
       }];
     } else {
       power.devicePowers = power.devicePowers.map((sp, idx) => {
         const subEff = sp.effect || sp.mainEffect || sp;
         const normEff = normalizeEffect(subEff);
+
+        let rawLinked = [];
+        if (Array.isArray(sp.linkedEffects) && sp.linkedEffects.length > 0) {
+          rawLinked = sp.linkedEffects;
+        } else if (Array.isArray(subEff?.linkedEffects) && subEff.linkedEffects.length > 0) {
+          rawLinked = subEff.linkedEffects;
+        } else if (Array.isArray(sp.effect?.linkedEffects) && sp.effect.linkedEffects.length > 0) {
+          rawLinked = sp.effect.linkedEffects;
+        } else if (Array.isArray(sp.mainEffect?.linkedEffects) && sp.mainEffect.linkedEffects.length > 0) {
+          rawLinked = sp.mainEffect.linkedEffects;
+        } else if (idx === 0 && topLevelLinked.length > 0) {
+          rawLinked = topLevelLinked;
+        }
+
+        let rawAlts = [];
+        if (Array.isArray(sp.alternateEffects) && sp.alternateEffects.length > 0) {
+          rawAlts = sp.alternateEffects;
+        } else if (Array.isArray(subEff?.alternateEffects) && subEff.alternateEffects.length > 0) {
+          rawAlts = subEff.alternateEffects;
+        } else if (Array.isArray(sp.effect?.alternateEffects) && sp.effect.alternateEffects.length > 0) {
+          rawAlts = sp.effect.alternateEffects;
+        } else if (Array.isArray(sp.mainEffect?.alternateEffects) && sp.mainEffect.alternateEffects.length > 0) {
+          rawAlts = sp.mainEffect.alternateEffects;
+        } else if (idx === 0 && topLevelAlts.length > 0) {
+          rawAlts = topLevelAlts;
+        }
+
         return {
           ...sp,
           id: sp.id || ('dev_sub_' + Date.now() + '_' + idx),
@@ -2502,8 +2539,8 @@ export function normalizePower(rawPower) {
           mainEffect: normEff,
           activeSlotId: sp.activeSlotId || 'main',
           active: sp.active !== undefined ? Boolean(sp.active) : true,
-          linkedEffects: Array.isArray(sp.linkedEffects) ? sp.linkedEffects.map(normalizeEffect) : [],
-          alternateEffects: Array.isArray(sp.alternateEffects) ? sp.alternateEffects.map(normalizeAlternateSlot) : []
+          linkedEffects: rawLinked.map(normalizeEffect),
+          alternateEffects: rawAlts.map(normalizeAlternateSlot)
         };
       });
     }
@@ -2798,9 +2835,10 @@ export function normalizeAlternateSlot(rawSlot) {
   }
 
   // Normalize linked effects for alternate slot
-  slot.linkedEffects = Array.isArray(slot.linkedEffects)
-    ? slot.linkedEffects.map(normalizeEffect)
-    : [];
+  const rawLinked = (Array.isArray(slot.linkedEffects) && slot.linkedEffects.length > 0)
+    ? slot.linkedEffects
+    : (Array.isArray(slot.effect?.linkedEffects) ? slot.effect.linkedEffects : []);
+  slot.linkedEffects = rawLinked.map(normalizeEffect);
 
   return slot;
 }

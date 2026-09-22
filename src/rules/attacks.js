@@ -258,6 +258,23 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
         });
         if (subAtk) attacks.push(subAtk);
 
+        // Linked effects of sub-power primary effect
+        if (Array.isArray(sub.linkedEffects)) {
+          sub.linkedEffects.forEach((link, lIdx) => {
+            const linkAtk = processEffect(p, link, {
+              id: `atk_${p.id}_sub_${sIdx}_link_${lIdx}`,
+              slotId: `link_${lIdx}`,
+              slotName: link.name || `${sub.name} (Linked)`,
+              sourceTitle: `${p.name} (${sub.name}) [Linked]`,
+              isStandby: !isPrimaryActive,
+              isPowerDisabled: isSubDisabled,
+              isSubPower: true,
+              devSubIdx: sIdx
+            });
+            if (linkAtk) attacks.push(linkAtk);
+          });
+        }
+
         // Alternate slots of sub-power
         if (hasAlts) {
           sub.alternateEffects.forEach((alt, aIdx) => {
@@ -274,6 +291,23 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
               devSubIdx: sIdx
             });
             if (altAtk) attacks.push(altAtk);
+
+            // Linked effects of sub-power alternate slot
+            if (Array.isArray(alt.linkedEffects)) {
+              alt.linkedEffects.forEach((link, lIdx) => {
+                const linkAtk = processEffect(p, link, {
+                  id: `atk_${p.id}_sub_${sIdx}_alt_${aIdx}_link_${lIdx}`,
+                  slotId: alt.id,
+                  slotName: link.name || `${alt.name} (Linked)`,
+                  sourceTitle: `${p.name} [${alt.name}] (Linked)`,
+                  isStandby: !isSlotActive,
+                  isPowerDisabled: isSubDisabled,
+                  isSubPower: true,
+                  devSubIdx: sIdx
+                });
+                if (linkAtk) attacks.push(linkAtk);
+              });
+            }
           });
         }
       });
@@ -291,6 +325,20 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       });
       if (mainAtk) attacks.push(mainAtk);
 
+      if (Array.isArray(p.linkedEffects)) {
+        p.linkedEffects.forEach((link, lIdx) => {
+          const linkAtk = processEffect(p, link, {
+            id: `atk_${p.id}_link_${lIdx}`,
+            slotId: `link_${lIdx}`,
+            slotName: link.name || `${p.name} (Linked)`,
+            sourceTitle: `${p.name} [Linked]`,
+            isStandby: !isMainActive,
+            isPowerDisabled
+          });
+          if (linkAtk) attacks.push(linkAtk);
+        });
+      }
+
       (p.alternateEffects || []).forEach((alt, aIdx) => {
         const isSlotActive = activeSlot === alt.id;
         const altEff = alt.effect || alt.mainEffect || alt;
@@ -303,6 +351,20 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
           isPowerDisabled
         });
         if (altAtk) attacks.push(altAtk);
+
+        if (Array.isArray(alt.linkedEffects)) {
+          alt.linkedEffects.forEach((link, lIdx) => {
+            const linkAtk = processEffect(p, link, {
+              id: `atk_${p.id}_slot_${aIdx}_link_${lIdx}`,
+              slotId: alt.id,
+              slotName: link.name || `${alt.name} (Linked)`,
+              sourceTitle: `${p.name} [${alt.name}] (Linked)`,
+              isStandby: !isSlotActive,
+              isPowerDisabled
+            });
+            if (linkAtk) attacks.push(linkAtk);
+          });
+        }
       });
     } else if (!isContainer) {
       // Standard power (skip outer container shell if it has no direct mainEffect)
@@ -315,6 +377,20 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
         isPowerDisabled
       });
       if (atk) attacks.push(atk);
+
+      if (Array.isArray(p.linkedEffects)) {
+        p.linkedEffects.forEach((link, lIdx) => {
+          const linkAtk = processEffect(p, link, {
+            id: `atk_${p.id}_link_${lIdx}`,
+            slotId: `link_${lIdx}`,
+            slotName: link.name || `${p.name} (Linked)`,
+            sourceTitle: `${p.name} [Linked]`,
+            isStandby: false,
+            isPowerDisabled
+          });
+          if (linkAtk) attacks.push(linkAtk);
+        });
+      }
     }
   }
 

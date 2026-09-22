@@ -59,22 +59,62 @@ export function pruneCharacterForShare(rawChar) {
       out.linkedEffects = p.linkedEffects.map(pruneEffect);
     }
     if (Array.isArray(p.alternateEffects) && p.alternateEffects.length > 0) {
-      out.alternateEffects = p.alternateEffects.map(ae => ({
-        id: ae.id,
-        name: ae.name,
-        isDynamic: Boolean(ae.isDynamic),
-        effect: pruneEffect(ae.effect || ae)
-      }));
+      out.alternateEffects = p.alternateEffects.map(ae => {
+        const altOut = {
+          id: ae.id,
+          name: ae.name,
+          isDynamic: Boolean(ae.isDynamic),
+          effect: pruneEffect(ae.effect || ae.mainEffect || ae)
+        };
+        const rawAltLinked = (Array.isArray(ae.linkedEffects) && ae.linkedEffects.length > 0)
+          ? ae.linkedEffects
+          : (Array.isArray(ae.effect?.linkedEffects) ? ae.effect.linkedEffects : []);
+        if (rawAltLinked.length > 0) {
+          altOut.linkedEffects = rawAltLinked.map(pruneEffect);
+        }
+        return altOut;
+      });
     }
     if (p.deviceConfig && p.deviceConfig.type && p.deviceConfig.type !== 'none') {
       out.deviceConfig = p.deviceConfig;
     }
     if (Array.isArray(p.devicePowers) && p.devicePowers.length > 0) {
-      out.devicePowers = p.devicePowers.map(dp => ({
-        id: dp.id,
-        name: dp.name,
-        effect: pruneEffect(dp.effect || dp)
-      }));
+      out.devicePowers = p.devicePowers.map(dp => {
+        const subOut = {
+          id: dp.id,
+          name: dp.name,
+          effect: pruneEffect(dp.effect || dp.mainEffect || dp)
+        };
+        const rawSubLinked = (Array.isArray(dp.linkedEffects) && dp.linkedEffects.length > 0)
+          ? dp.linkedEffects
+          : (Array.isArray(dp.effect?.linkedEffects) && dp.effect.linkedEffects.length > 0
+            ? dp.effect.linkedEffects
+            : (Array.isArray(dp.mainEffect?.linkedEffects) ? dp.mainEffect.linkedEffects : []));
+        if (rawSubLinked.length > 0) {
+          subOut.linkedEffects = rawSubLinked.map(pruneEffect);
+        }
+        if (Array.isArray(dp.alternateEffects) && dp.alternateEffects.length > 0) {
+          subOut.alternateEffects = dp.alternateEffects.map(ae => {
+            const altOut = {
+              id: ae.id,
+              name: ae.name,
+              isDynamic: Boolean(ae.isDynamic),
+              effect: pruneEffect(ae.effect || ae.mainEffect || ae)
+            };
+            const rawAltLinked = (Array.isArray(ae.linkedEffects) && ae.linkedEffects.length > 0)
+              ? ae.linkedEffects
+              : (Array.isArray(ae.effect?.linkedEffects) ? ae.effect.linkedEffects : []);
+            if (rawAltLinked.length > 0) {
+              altOut.linkedEffects = rawAltLinked.map(pruneEffect);
+            }
+            return altOut;
+          });
+        }
+        if (dp.activeSlotId && dp.activeSlotId !== 'main') subOut.activeSlotId = dp.activeSlotId;
+        if (dp.active !== undefined && dp.active !== true) subOut.active = dp.active;
+        if (Array.isArray(dp.descriptors) && dp.descriptors.length > 0) subOut.descriptors = dp.descriptors;
+        return subOut;
+      });
     }
     if (Array.isArray(p.descriptors) && p.descriptors.length > 0) {
       out.descriptors = p.descriptors;

@@ -171,7 +171,17 @@ export function buildMarkdownSheet(character, heroStore) {
       const cost = calculatePowerTotalCost(p);
       md += `- **${p.name || p.baseEffect}** (${cost} PP): `;
       if (p.type === 'device') {
-        md += `*Device (${p.deviceConfig?.type || 'removable'})* - ${(p.devicePowers || []).map(sp => `${sp.name} [${sp.effect?.baseEffect || 'Effect'} ${sp.effect?.ranks || 1}]`).join(', ')}`;
+        md += `*Device (${p.deviceConfig?.type || 'removable'})* - ${(p.devicePowers || []).map(sp => {
+          let spDesc = `${sp.name} [${sp.effect?.baseEffect || 'Effect'} ${sp.effect?.ranks || 1}`;
+          if (Array.isArray(sp.linkedEffects) && sp.linkedEffects.length > 0) {
+            spDesc += sp.linkedEffects.map(le => ` + Linked ${le.name || le.baseEffect} ${le.ranks || 1}`).join('');
+          }
+          spDesc += ']';
+          if (Array.isArray(sp.alternateEffects) && sp.alternateEffects.length > 0) {
+            spDesc += ` (Array with ${sp.alternateEffects.length} alternate slots)`;
+          }
+          return spDesc;
+        }).join(', ')}`;
       } else {
         const eff = p.mainEffect || p;
         md += `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`;
