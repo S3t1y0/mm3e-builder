@@ -578,7 +578,7 @@
             :key="resOpt"
             type="button"
             class="res-btn"
-            :class="{ active: (effect.config?.resistance || effect.resistance) === resOpt }"
+            :class="['res-' + resOpt.toLowerCase(), { active: (effect.config?.resistance || effect.resistance) === resOpt }]"
             @click="selectAfflictionResistance(resOpt)"
           >
             <i :class="getDefenseIcon(resOpt)"></i>
@@ -2575,19 +2575,29 @@ function selectVariableTheme(theme) {
 }
 
 .chip-step-controls .step-btn {
+  min-width: 32px;
+  min-height: 32px;
   padding: 0.2rem 0.4rem;
   background: transparent;
   border: none;
   color: #cbd5e1;
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   font-weight: 800;
   cursor: pointer;
-  transition: background 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
 }
 
 .chip-step-controls .step-btn:hover:not(:disabled) {
   background: rgba(255, 255, 255, 0.15);
   color: #ffffff;
+}
+
+.chip-step-controls .step-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: -2px;
 }
 
 .chip-step-controls .step-btn:disabled {
@@ -2908,7 +2918,8 @@ function selectVariableTheme(theme) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.75rem;
+  padding: 0.4rem 0.8rem;
+  min-height: 36px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -2924,17 +2935,82 @@ function selectVariableTheme(theme) {
   color: #ffffff;
 }
 
+.res-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+/* DESIGN.md Canonical 5 Combat Defense Accents */
+.res-btn.res-fortitude.active {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: #10b981;
+  color: #6ee7b7;
+  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.res-btn.res-will.active {
+  background: rgba(192, 132, 252, 0.2);
+  border-color: #c084fc;
+  color: #e9d5ff;
+  box-shadow: 0 0 10px rgba(192, 132, 252, 0.3);
+}
+
+.res-btn.res-dodge.active {
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
+  color: #bae6fd;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
+}
+
+.res-btn.res-parry.active {
+  background: rgba(129, 140, 248, 0.2);
+  border-color: #818cf8;
+  color: #c7d2fe;
+  box-shadow: 0 0 10px rgba(129, 140, 248, 0.3);
+}
+
+.res-btn.res-toughness.active {
+  background: rgba(52, 211, 153, 0.2);
+  border-color: #34d399;
+  color: #a7f3d0;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
+}
+
 .res-btn.active {
-  background: rgba(168, 85, 247, 0.2);
-  border-color: #a855f7;
+  background: rgba(56, 189, 248, 0.2);
+  border-color: #38bdf8;
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
 }
 
 .res-help-text {
   font-size: 0.75rem;
-  color: #64748b;
+  color: #94a3b8;
   margin-left: auto;
+}
+
+.res-help-text strong {
+  color: #f8fafc;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-variant-numeric: tabular-nums;
+}
+
+@media (pointer: coarse) {
+  .mod-toggle-chip {
+    min-height: 44px;
+    padding: 0.45rem 0.85rem;
+  }
+  .chip-step-controls .step-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .res-btn {
+    min-height: 44px;
+    padding: 0.5rem 1rem;
+  }
+  .preset-chip-btn {
+    min-height: 44px;
+  }
 }
 
 /* Mechanic Callout */
