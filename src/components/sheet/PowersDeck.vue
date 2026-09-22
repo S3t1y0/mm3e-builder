@@ -1279,21 +1279,44 @@ function getEffectConfigDetails(eff) {
   }
 
   if (base === 'Affliction') {
-    const first = c.firstDegree || 'Dazed';
-    const second = c.secondDegree || 'Stunned';
-    const third = c.thirdDegree || 'Paralyzed';
+    const limDegree = (eff.flaws || []).find(f => f.name === 'Limited Degree');
+    const limRanks = limDegree ? (Number(limDegree.ranks) || 1) : 0;
+
+    const first = Array.isArray(c.firstConditions) && c.firstConditions.length > 0
+      ? c.firstConditions.join(' & ')
+      : (c.firstDegree || 'Dazed');
+    const second = Array.isArray(c.secondConditions) && c.secondConditions.length > 0
+      ? c.secondConditions.join(' & ')
+      : (c.secondDegree || 'Stunned');
+    const third = Array.isArray(c.thirdConditions) && c.thirdConditions.length > 0
+      ? c.thirdConditions.join(' & ')
+      : (c.thirdDegree || 'Paralyzed');
     const res = c.resistance || eff.resistance || 'Fortitude';
+
+    const isProg = (eff.extras || []).some(e => e.name === 'Progressive');
+    const isCum = (eff.extras || []).some(e => e.name === 'Cumulative');
+    let modeBadge = '';
+    if (isProg) modeBadge = ' • Progressive';
+    else if (isCum) modeBadge = ' • Cumulative';
+
+    const items = [
+      { name: '1st Degree', desc: `Target suffers: ${first}`, icon: 'ri-error-warning-line' }
+    ];
+    if (limRanks < 2) {
+      items.push({ name: '2nd Degree', desc: `Target suffers: ${second}`, icon: 'ri-alert-line' });
+    }
+    if (limRanks < 1) {
+      items.push({ name: '3rd Degree', desc: `Target suffers: ${third}`, icon: 'ri-skull-line' });
+    }
+
+    const quickParts = items.map(i => i.desc.replace('Target suffers: ', ''));
 
     return {
       type: 'affliction',
       title: 'Conditions & Degrees of Failure',
-      badge: `Resisted by ${res}`,
-      quickText: `${first} / ${second} / ${third}`,
-      items: [
-        { name: '1st Degree', desc: `Target suffers: ${first}`, icon: 'ri-error-warning-line' },
-        { name: '2nd Degree', desc: `Target suffers: ${second}`, icon: 'ri-alert-line' },
-        { name: '3rd Degree', desc: `Target suffers: ${third}`, icon: 'ri-skull-line' }
-      ]
+      badge: `Resisted by ${res}${modeBadge}`,
+      quickText: quickParts.join(' / '),
+      items
     };
   }
 

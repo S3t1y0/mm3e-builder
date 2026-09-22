@@ -822,12 +822,13 @@ export const EXTRAS = [
     "type": "per_rank",
     "cost": 1,
     "costDisplay": "+1 per rank",
-    "hasRanks": false,
+    "hasRanks": true,
+    "maxRanks": 2,
     "hasConfig": false,
     "appliesTo": [
       "Affliction"
     ],
-    "desc": "Your Affliction imposes an additional condition per degree of failure (e.g. both Dazed and Vulnerable on first degree, or Defenseless and Stunned on second degree)."
+    "desc": "Your Affliction imposes an additional condition per degree of failure (Rank 1: two conditions per degree; Rank 2: three conditions per degree)."
   },
   {
     "name": "Feature",
@@ -1897,12 +1898,13 @@ export const FLAWS = [
     "type": "per_rank",
     "cost": -1,
     "costDisplay": "-1 per rank",
-    "hasRanks": false,
+    "hasRanks": true,
+    "maxRanks": 2,
     "hasConfig": false,
     "appliesTo": [
       "Affliction"
     ],
-    "desc": "The Affliction can inflict at most two degrees of failure; third-degree conditions (Incapacitated, Paralyzed) can never be achieved."
+    "desc": "The Affliction can inflict fewer degrees of failure. Rank 1 limits to at most two degrees of failure (third degree eliminated); Rank 2 limits to only one degree of failure (second and third degrees eliminated)."
   },
   {
     "name": "Limited Direction",
@@ -2658,9 +2660,22 @@ export function normalizeEffect(rawEffect) {
     } else if (cfg.type === 'affliction_builder') {
       eff.config.resistance = eff.config.resistance || cfg.defaultResistance || 'Fortitude';
       eff.config.preset = eff.config.preset || 'stun';
-      eff.config.firstDegree = eff.config.firstDegree || 'Dazed';
-      eff.config.secondDegree = eff.config.secondDegree || 'Stunned';
-      eff.config.thirdDegree = eff.config.thirdDegree || 'Paralyzed';
+      
+      const parseConditions = (degVal, defVal) => {
+        if (Array.isArray(degVal) && degVal.length > 0) return degVal.filter(Boolean);
+        if (typeof degVal === 'string' && degVal.trim()) {
+          return degVal.split(/\s*(?:&|,)\s*/).filter(Boolean);
+        }
+        return [defVal];
+      };
+
+      eff.config.firstConditions = parseConditions(eff.config.firstConditions || eff.config.firstDegree, 'Dazed');
+      eff.config.secondConditions = parseConditions(eff.config.secondConditions || eff.config.secondDegree, 'Stunned');
+      eff.config.thirdConditions = parseConditions(eff.config.thirdConditions || eff.config.thirdDegree, 'Paralyzed');
+
+      eff.config.firstDegree = eff.config.firstConditions.join(' & ');
+      eff.config.secondDegree = eff.config.secondConditions.join(' & ');
+      eff.config.thirdDegree = eff.config.thirdConditions.join(' & ');
       eff.resistance = eff.config.resistance;
     } else if (cfg.type === 'movement_multiselect_library' || cfg.type === 'movement_picker') {
       if (eff.config.mode && !eff.config.selectedModes) {
@@ -2862,7 +2877,7 @@ export function calculateEffectCost(effect, activationCost = 0) {
   for (const extra of norm.extras) {
     const extraRanks = extra.ranks || 1;
     if (extra.type === 'per_rank') {
-      perRankModifier += extra.cost;
+      perRankModifier += extra.cost * (extra.hasRanks ? extraRanks : 1);
     } else if (extra.type === 'flat_per_rank') {
       flatTotal += extra.cost * extraRanks;
     } else if (extra.type === 'flat') {
@@ -2874,7 +2889,7 @@ export function calculateEffectCost(effect, activationCost = 0) {
   for (const flaw of norm.flaws) {
     const flawRanks = flaw.ranks || 1;
     if (flaw.type === 'per_rank') {
-      perRankModifier += flaw.cost; // flaw.cost is negative
+      perRankModifier += flaw.cost * (flaw.hasRanks ? flawRanks : 1); // flaw.cost is negative
     } else if (flaw.type === 'flat_per_rank') {
       flatTotal += flaw.cost * flawRanks;
     } else if (flaw.type === 'flat') {

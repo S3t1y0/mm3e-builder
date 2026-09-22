@@ -202,6 +202,147 @@
 
     <!-- SUB-EDITOR: AFFLICTION (affliction_builder) -->
     <div v-else-if="cfg.type === 'affliction_builder'" class="config-body config-affliction">
+      <!-- Quick Affliction Modifiers Strip (Interactive Fast Toggles) -->
+      <div class="affliction-modifiers-strip">
+        <span class="strip-label">
+          <i class="ri-equalizer-line"></i> Affliction Modifiers & Mechanics:
+        </span>
+        <div class="strip-chips-row">
+          <!-- Extra Condition Toggle -->
+          <div class="mod-chip-group">
+            <button
+              type="button"
+              class="mod-toggle-chip"
+              :class="{ active: extraConditionRanks > 0 }"
+              @click="toggleAfflictionModifier('Extra Condition', false)"
+              title="Add extra condition per degree (+1 PP/rank per rank)"
+            >
+              <i class="ri-add-circle-line"></i>
+              <span>Extra Condition</span>
+              <span v-if="extraConditionRanks > 0" class="chip-rank-badge">Rk {{ extraConditionRanks }}</span>
+            </button>
+            <div v-if="extraConditionRanks > 0" class="chip-step-controls">
+              <button
+                type="button"
+                class="step-btn"
+                :disabled="extraConditionRanks <= 1"
+                @click.stop="stepModifierRanks('Extra Condition', false, -1)"
+              >-</button>
+              <button
+                type="button"
+                class="step-btn"
+                :disabled="extraConditionRanks >= 2"
+                @click.stop="stepModifierRanks('Extra Condition', false, 1)"
+              >+</button>
+            </div>
+          </div>
+
+          <!-- Limited Degree Toggle -->
+          <div class="mod-chip-group">
+            <button
+              type="button"
+              class="mod-toggle-chip flaw"
+              :class="{ active: limitedDegreeRanks > 0 }"
+              @click="toggleAfflictionModifier('Limited Degree', true)"
+              title="Limit max degrees of failure (-1 PP/rank per rank)"
+            >
+              <i class="ri-indeterminate-circle-line"></i>
+              <span>Limited Degree</span>
+              <span v-if="limitedDegreeRanks > 0" class="chip-rank-badge flaw">Rk {{ limitedDegreeRanks }}</span>
+            </button>
+            <div v-if="limitedDegreeRanks > 0" class="chip-step-controls">
+              <button
+                type="button"
+                class="step-btn"
+                :disabled="limitedDegreeRanks <= 1"
+                @click.stop="stepModifierRanks('Limited Degree', true, -1)"
+              >-</button>
+              <button
+                type="button"
+                class="step-btn"
+                :disabled="limitedDegreeRanks >= 2"
+                @click.stop="stepModifierRanks('Limited Degree', true, 1)"
+              >+</button>
+            </div>
+          </div>
+
+          <!-- Cumulative Toggle -->
+          <button
+            type="button"
+            class="mod-toggle-chip"
+            :class="{ active: isCumulative }"
+            @click="toggleAfflictionModifier('Cumulative', false)"
+            title="Degrees accumulate over successive failed checks (+1 PP/rank)"
+          >
+            <i class="ri-stack-line"></i>
+            <span>Cumulative</span>
+          </button>
+
+          <!-- Progressive Toggle -->
+          <button
+            type="button"
+            class="mod-toggle-chip"
+            :class="{ active: isProgressive }"
+            @click="toggleAfflictionModifier('Progressive', false)"
+            title="Condition escalates round-by-round until resisted (+2 PP/rank)"
+          >
+            <i class="ri-flashlight-fill"></i>
+            <span>Progressive</span>
+          </button>
+
+          <!-- Alternate Resistance Toggle -->
+          <button
+            type="button"
+            class="mod-toggle-chip"
+            :class="{ active: Boolean(altResistanceMod) }"
+            @click="toggleAfflictionModifier('Alternate Resistance', false)"
+            title="Resisted by Dodge, Parry, Toughness, or Will (+0 or +1 PP/rank)"
+          >
+            <i class="ri-shield-flash-line"></i>
+            <span>Alternate Res.</span>
+          </button>
+
+          <!-- Instant Recovery Toggle -->
+          <button
+            type="button"
+            class="mod-toggle-chip flaw"
+            :class="{ active: hasInstantRecovery }"
+            @click="toggleAfflictionModifier('Instant Recovery', true)"
+            title="Target instantly recovers when effect ceases (-1 PP/rank)"
+          >
+            <i class="ri-speed-line"></i>
+            <span>Instant Recovery</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Progression Track Ribbon (if Cumulative or Progressive) -->
+      <div v-if="progressionBadge" class="affliction-progression-ribbon" :class="progressionBadge.type">
+        <div class="progression-ribbon-left">
+          <i :class="progressionBadge.icon"></i>
+          <div class="progression-text-col">
+            <span class="progression-title">{{ progressionBadge.label }}</span>
+            <span class="progression-desc">{{ progressionBadge.desc }}</span>
+          </div>
+        </div>
+        <div class="progression-track-stepper">
+          <div class="step-pill" :class="{ disabled: !isDegree1Active }">
+            <span class="pill-deg">1st</span>
+            <span class="pill-name">{{ getDegreeSummary(1) }}</span>
+          </div>
+          <i class="ri-arrow-right-line step-arrow"></i>
+          <div class="step-pill" :class="{ disabled: !isDegree2Active }">
+            <span class="pill-deg">2nd</span>
+            <span class="pill-name">{{ isDegree2Active ? getDegreeSummary(2) : 'Eliminated' }}</span>
+          </div>
+          <i class="ri-arrow-right-line step-arrow"></i>
+          <div class="step-pill" :class="{ disabled: !isDegree3Active }">
+            <span class="pill-deg">3rd</span>
+            <span class="pill-name">{{ isDegree3Active ? getDegreeSummary(3) : 'Eliminated' }}</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Quick Presets Carousel / Row -->
       <div class="affliction-presets-section">
         <span class="section-label">
@@ -223,89 +364,239 @@
       </div>
 
       <!-- Degrees of Failure Grid -->
-      <div class="degrees-grid">
+      <div class="degrees-grid" :class="{ 'has-multi-conditions': conditionsPerDegree > 1 }">
         <!-- 1st Degree -->
-        <div class="degree-box">
+        <div class="degree-box deg-box-1" :class="{ 'eliminated-box': !isDegree1Active }">
           <div class="degree-header deg-1">
-            <span class="degree-num">1st Degree</span>
-            <span class="degree-sub">Failure by 1-5</span>
+            <div class="deg-title-group">
+              <span class="degree-num">1st Degree</span>
+              <span class="degree-sub">Failure by 1-5</span>
+            </div>
+            <span v-if="conditionsPerDegree > 1" class="multi-cond-badge">
+              {{ conditionsPerDegree }} Conditions
+            </span>
           </div>
-          <div class="degree-select-wrapper">
-            <select
-              v-model="effect.config.firstDegree"
-              class="degree-select select-input"
-              @change="updateConfig"
-            >
-              <option v-for="cond in cfg.firstDegree" :key="cond" :value="cond">
-                {{ cond }}
-              </option>
-            </select>
+
+          <div class="degree-conditions-container">
+            <!-- Slot 1 (Primary Condition) -->
+            <div class="condition-slot">
+              <label v-if="conditionsPerDegree > 1" class="cond-slot-label">Condition 1:</label>
+              <select
+                :value="getDegreeCondition('first', 0)"
+                class="degree-select select-input"
+                @change="onConditionSelect('first', 0, $event.target.value)"
+              >
+                <option v-for="cond in cfg.firstDegree" :key="cond" :value="cond">
+                  {{ cond }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Slot 2 (Secondary Condition if Extra Condition Rk >= 1) -->
+            <div v-if="conditionsPerDegree >= 2" class="condition-slot">
+              <label class="cond-slot-label">Condition 2 (+Extra):</label>
+              <select
+                :value="getDegreeCondition('first', 1)"
+                class="degree-select select-input slot-secondary"
+                @change="onConditionSelect('first', 1, $event.target.value)"
+              >
+                <option v-for="cond in cfg.firstDegree" :key="cond" :value="cond">
+                  {{ cond }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Slot 3 (Tertiary Condition if Extra Condition Rk >= 2) -->
+            <div v-if="conditionsPerDegree >= 3" class="condition-slot">
+              <label class="cond-slot-label">Condition 3 (+Extra Rk 2):</label>
+              <select
+                :value="getDegreeCondition('first', 2)"
+                class="degree-select select-input slot-tertiary"
+                @change="onConditionSelect('first', 2, $event.target.value)"
+              >
+                <option v-for="cond in cfg.firstDegree" :key="cond" :value="cond">
+                  {{ cond }}
+                </option>
+              </select>
+            </div>
           </div>
           <span class="degree-note">Mild impairing condition</span>
         </div>
 
         <!-- 2nd Degree -->
-        <div class="degree-box">
+        <div class="degree-box deg-box-2" :class="{ 'eliminated-box': !isDegree2Active }">
           <div class="degree-header deg-2">
-            <span class="degree-num">2nd Degree</span>
-            <span class="degree-sub">Failure by 6-10</span>
+            <div class="deg-title-group">
+              <span class="degree-num">2nd Degree</span>
+              <span class="degree-sub">Failure by 6-10</span>
+            </div>
+            <span v-if="!isDegree2Active" class="eliminated-badge">
+              <i class="ri-lock-line"></i> Eliminated
+            </span>
+            <span v-else-if="conditionsPerDegree > 1" class="multi-cond-badge">
+              {{ conditionsPerDegree }} Conditions
+            </span>
           </div>
-          <div class="degree-select-wrapper">
-            <select
-              v-model="effect.config.secondDegree"
-              class="degree-select select-input"
-              @change="updateConfig"
-            >
-              <option v-for="cond in cfg.secondDegree" :key="cond" :value="cond">
-                {{ cond }}
-              </option>
-            </select>
+
+          <!-- Active State -->
+          <div v-if="isDegree2Active" class="degree-conditions-container">
+            <!-- Slot 1 -->
+            <div class="condition-slot">
+              <label v-if="conditionsPerDegree > 1" class="cond-slot-label">Condition 1:</label>
+              <select
+                :value="getDegreeCondition('second', 0)"
+                class="degree-select select-input"
+                @change="onConditionSelect('second', 0, $event.target.value)"
+              >
+                <option v-for="cond in cfg.secondDegree" :key="cond" :value="cond">
+                  {{ cond }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Slot 2 -->
+            <div v-if="conditionsPerDegree >= 2" class="condition-slot">
+              <label class="cond-slot-label">Condition 2 (+Extra):</label>
+              <select
+                :value="getDegreeCondition('second', 1)"
+                class="degree-select select-input slot-secondary"
+                @change="onConditionSelect('second', 1, $event.target.value)"
+              >
+                <option v-for="cond in cfg.secondDegree" :key="cond" :value="cond">
+                  {{ cond }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Slot 3 -->
+            <div v-if="conditionsPerDegree >= 3" class="condition-slot">
+              <label class="cond-slot-label">Condition 3 (+Extra Rk 2):</label>
+              <select
+                :value="getDegreeCondition('second', 2)"
+                class="degree-select select-input slot-tertiary"
+                @change="onConditionSelect('second', 2, $event.target.value)"
+              >
+                <option v-for="cond in cfg.secondDegree" :key="cond" :value="cond">
+                  {{ cond }}
+                </option>
+              </select>
+            </div>
+            <span class="degree-note">Significant debilitating condition</span>
           </div>
-          <span class="degree-note">Significant debilitating condition</span>
+
+          <!-- Locked / Eliminated State -->
+          <div v-else class="eliminated-lock-card">
+            <i class="ri-forbid-2-line lock-icon"></i>
+            <span class="eliminated-title">Eliminated by Limited Degree (Rank 2)</span>
+            <p class="eliminated-desc">Target only suffers first-degree conditions; second and third degrees cannot be achieved.</p>
+          </div>
         </div>
 
         <!-- 3rd Degree -->
-        <div class="degree-box">
+        <div class="degree-box deg-box-3" :class="{ 'eliminated-box': !isDegree3Active }">
           <div class="degree-header deg-3">
-            <span class="degree-num">3rd Degree</span>
-            <span class="degree-sub">Failure by 11+</span>
+            <div class="deg-title-group">
+              <span class="degree-num">3rd Degree</span>
+              <span class="degree-sub">Failure by 11+</span>
+            </div>
+            <span v-if="!isDegree3Active" class="eliminated-badge">
+              <i class="ri-lock-line"></i> Eliminated
+            </span>
+            <span v-else-if="conditionsPerDegree > 1" class="multi-cond-badge">
+              {{ conditionsPerDegree }} Conditions
+            </span>
           </div>
-          <div class="degree-select-wrapper">
-            <select
-              v-model="effect.config.thirdDegree"
-              class="degree-select select-input"
-              @change="updateConfig"
-            >
-              <option v-for="cond in cfg.thirdDegree" :key="cond" :value="cond">
-                {{ cond }}
-              </option>
-            </select>
+
+          <!-- Active State -->
+          <div v-if="isDegree3Active" class="degree-conditions-container">
+            <!-- Slot 1 -->
+            <div class="condition-slot">
+              <label v-if="conditionsPerDegree > 1" class="cond-slot-label">Condition 1:</label>
+              <select
+                :value="getDegreeCondition('third', 0)"
+                class="degree-select select-input"
+                @change="onConditionSelect('third', 0, $event.target.value)"
+              >
+                <option v-for="cond in cfg.thirdDegree" :key="cond" :value="cond">
+                  {{ cond }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Slot 2 -->
+            <div v-if="conditionsPerDegree >= 2" class="condition-slot">
+              <label class="cond-slot-label">Condition 2 (+Extra):</label>
+              <select
+                :value="getDegreeCondition('third', 1)"
+                class="degree-select select-input slot-secondary"
+                @change="onConditionSelect('third', 1, $event.target.value)"
+              >
+                <option v-for="cond in cfg.thirdDegree" :key="cond" :value="cond">
+                  {{ cond }}
+                </option>
+              </select>
+            </div>
+
+            <!-- Slot 3 -->
+            <div v-if="conditionsPerDegree >= 3" class="condition-slot">
+              <label class="cond-slot-label">Condition 3 (+Extra Rk 2):</label>
+              <select
+                :value="getDegreeCondition('third', 2)"
+                class="degree-select select-input slot-tertiary"
+                @change="onConditionSelect('third', 2, $event.target.value)"
+              >
+                <option v-for="cond in cfg.thirdDegree" :key="cond" :value="cond">
+                  {{ cond }}
+                </option>
+              </select>
+            </div>
+            <span class="degree-note">Total incapacitating condition</span>
           </div>
-          <span class="degree-note">Total incapacitating condition</span>
+
+          <!-- Locked / Eliminated State -->
+          <div v-else class="eliminated-lock-card">
+            <i class="ri-forbid-2-line lock-icon"></i>
+            <span class="eliminated-title">Eliminated by Limited Degree (Rank {{ limitedDegreeRanks }})</span>
+            <p class="eliminated-desc">Third-degree conditions (Incapacitated, Paralyzed, etc.) can never be achieved.</p>
+          </div>
         </div>
       </div>
 
       <!-- Resistance Check Defense Toggle -->
       <div class="resistance-defense-row">
-        <label class="res-label">
-          <i class="ri-shield-line"></i> Resistance Defense Check:
-        </label>
+        <div class="res-label-wrap">
+          <label class="res-label">
+            <i class="ri-shield-line"></i> Resistance Defense Check:
+          </label>
+          <span v-if="altResistanceMod" class="alt-res-badge">
+            <i class="ri-magic-line"></i> Alternate Resistance Active
+          </span>
+        </div>
         <div class="res-toggle-group">
           <button
-            v-for="resOpt in cfg.resistanceOptions"
+            v-for="resOpt in afflictionResistanceOptions"
             :key="resOpt"
             type="button"
             class="res-btn"
             :class="{ active: (effect.config?.resistance || effect.resistance) === resOpt }"
             @click="selectAfflictionResistance(resOpt)"
           >
-            <i :class="resOpt === 'Fortitude' ? 'ri-shield-cross-line' : 'ri-mental-health-line'"></i>
+            <i :class="getDefenseIcon(resOpt)"></i>
             <span>{{ resOpt }}</span>
           </button>
         </div>
         <span class="res-help-text">
-          Target makes a {{ effect.config?.resistance || 'Fortitude' }} check vs DC 10 + Effect Rank.
+          Target makes a <strong>{{ effect.config?.resistance || effect.resistance || 'Fortitude' }}</strong> resistance check vs <strong>DC {{ 10 + (Number(effect.ranks) || 1) }}</strong> (DC 10 + Effect Rank).
         </span>
+      </div>
+
+      <!-- Special Mechanics Callout (Instant Recovery & Sense-Dependent) -->
+      <div v-if="hasInstantRecovery" class="mechanic-callout-box instant-recovery-callout">
+        <i class="ri-speed-line callout-icon"></i>
+        <div class="callout-content">
+          <span class="callout-title">Instant Recovery Flaw Active</span>
+          <span class="callout-desc">Target recovers immediately from all conditions the moment the effect stops being applied (no lingering recovery checks needed).</span>
+        </div>
       </div>
     </div>
 
@@ -656,7 +947,7 @@
 
 <script setup>
 import { computed, ref, watch, onMounted } from 'vue';
-import { CONFIGURABLE_EFFECTS, normalizeEffect } from '../../rules/powerEngine.js';
+import { CONFIGURABLE_EFFECTS, EXTRAS, FLAWS, normalizeEffect, normalizeModifier } from '../../rules/powerEngine.js';
 
 const props = defineProps({
   effect: {
@@ -736,7 +1027,20 @@ const getConfigSummaryText = computed(() => {
       return `${count} sensory faculties selected • ${props.effect.ranks} Ranks`;
     }
     case 'Affliction': {
-      return `1st: ${c.firstDegree || 'Dazed'} | 2nd: ${c.secondDegree || 'Stunned'} | 3rd: ${c.thirdDegree || 'Paralyzed'} (Resisted by ${c.resistance || 'Fortitude'})`;
+      let degs = [];
+      degs.push(`1st: ${c.firstDegree || 'Dazed'}`);
+      if (limitedDegreeRanks.value < 2) {
+        degs.push(`2nd: ${c.secondDegree || 'Stunned'}`);
+      }
+      if (limitedDegreeRanks.value < 1) {
+        degs.push(`3rd: ${c.thirdDegree || 'Paralyzed'}`);
+      }
+      let summary = `${degs.join(' | ')} (Resisted by ${c.resistance || props.effect.resistance || 'Fortitude'})`;
+      if (isProgressive.value) summary += ' • Progressive';
+      else if (isCumulative.value) summary += ' • Cumulative';
+      if (extraConditionRanks.value > 0) summary += ` • Extra Cond (Rk ${extraConditionRanks.value})`;
+      if (limitedDegreeRanks.value > 0) summary += ` • Limited Deg (Rk ${limitedDegreeRanks.value})`;
+      return summary;
     }
     case 'Illusion': {
       const count = (c.senses || []).length;
@@ -917,23 +1221,176 @@ function toggleFaculty(facId) {
 }
 
 /* =========================================================================
-   3. AFFLICTION
+   3. AFFLICTION (Dynamic Extras & Flaws Morphing)
    ========================================================================= */
+const extraConditionMod = computed(() =>
+  (props.effect?.extras || []).find(e => e.name === 'Extra Condition')
+);
+const extraConditionRanks = computed(() =>
+  extraConditionMod.value ? (Number(extraConditionMod.value.ranks) || 1) : 0
+);
+const conditionsPerDegree = computed(() => 1 + extraConditionRanks.value);
+
+const limitedDegreeMod = computed(() =>
+  (props.effect?.flaws || []).find(f => f.name === 'Limited Degree')
+);
+const limitedDegreeRanks = computed(() =>
+  limitedDegreeMod.value ? (Number(limitedDegreeMod.value.ranks) || 1) : 0
+);
+
+const isDegree1Active = computed(() => true);
+const isDegree2Active = computed(() => limitedDegreeRanks.value < 2);
+const isDegree3Active = computed(() => limitedDegreeRanks.value < 1);
+
+const altResistanceMod = computed(() =>
+  (props.effect?.extras || []).find(e => e.name === 'Alternate Resistance') ||
+  (props.effect?.flaws || []).find(f => f.name === 'Alternate Resistance')
+);
+const afflictionResistanceOptions = computed(() => {
+  if (altResistanceMod.value) {
+    return ['Fortitude', 'Will', 'Dodge', 'Parry', 'Toughness'];
+  }
+  return cfg.value?.resistanceOptions || ['Fortitude', 'Will'];
+});
+
+const isProgressive = computed(() =>
+  (props.effect?.extras || []).some(e => e.name === 'Progressive')
+);
+const isCumulative = computed(() =>
+  (props.effect?.extras || []).some(e => e.name === 'Cumulative')
+);
+const progressionBadge = computed(() => {
+  if (isProgressive.value) {
+    return {
+      label: 'Progressive Auto-Escalation Track',
+      desc: 'Target must make a recurring resistance check each round; failure advances condition to the next degree.',
+      icon: 'ri-flashlight-fill',
+      type: 'progressive'
+    };
+  }
+  if (isCumulative.value) {
+    return {
+      label: 'Cumulative Stacking Track',
+      desc: 'Subsequent failed checks accumulate degrees of failure towards higher degree conditions.',
+      icon: 'ri-stack-line',
+      type: 'cumulative'
+    };
+  }
+  return null;
+});
+
+const hasInstantRecovery = computed(() =>
+  (props.effect?.flaws || []).some(f => f.name === 'Instant Recovery')
+);
+
+function getDefenseIcon(resOpt) {
+  switch (resOpt) {
+    case 'Fortitude': return 'ri-shield-cross-line';
+    case 'Will': return 'ri-mental-health-line';
+    case 'Dodge': return 'ri-run-line';
+    case 'Parry': return 'ri-sword-line';
+    case 'Toughness': return 'ri-shield-flash-line';
+    default: return 'ri-shield-line';
+  }
+}
+
+function getDegreeCondition(degreeKey, slotIndex) {
+  const c = props.effect?.config;
+  if (!c) return '';
+  const keyArr = `${degreeKey}Conditions`;
+  if (Array.isArray(c[keyArr]) && c[keyArr][slotIndex]) {
+    return c[keyArr][slotIndex];
+  }
+  if (degreeKey === 'first') {
+    const defs = ['Dazed', 'Vulnerable', 'Hindered'];
+    return defs[slotIndex] || 'Dazed';
+  }
+  if (degreeKey === 'second') {
+    const defs = ['Stunned', 'Defenseless', 'Immobile'];
+    return defs[slotIndex] || 'Stunned';
+  }
+  if (degreeKey === 'third') {
+    const defs = ['Paralyzed', 'Incapacitated', 'Controlled'];
+    return defs[slotIndex] || 'Paralyzed';
+  }
+  return '';
+}
+
+function onConditionSelect(degreeKey, slotIndex, val) {
+  props.effect.config = props.effect.config || {};
+  const keyArr = `${degreeKey}Conditions`;
+  const keyStr = `${degreeKey}Degree`;
+  
+  let currentArr = Array.isArray(props.effect.config[keyArr])
+    ? [...props.effect.config[keyArr]]
+    : [getDegreeCondition(degreeKey, 0), getDegreeCondition(degreeKey, 1), getDegreeCondition(degreeKey, 2)];
+
+  currentArr[slotIndex] = val;
+  props.effect.config[keyArr] = currentArr;
+  props.effect.config[keyStr] = currentArr.slice(0, conditionsPerDegree.value).filter(Boolean).join(' & ');
+  updateConfig();
+}
+
+function getDegreeSummary(degreeNum) {
+  const c = props.effect?.config;
+  if (!c) return '';
+  if (degreeNum === 1) return c.firstDegree || 'Dazed';
+  if (degreeNum === 2) return c.secondDegree || 'Stunned';
+  if (degreeNum === 3) return c.thirdDegree || 'Paralyzed';
+  return '';
+}
+
 function isPresetActive(preset) {
   const c = props.effect?.config;
   if (!c) return false;
-  return c.firstDegree === preset.first &&
-    c.secondDegree === preset.second &&
-    c.thirdDegree === preset.third &&
+  return getDegreeCondition('first', 0) === preset.first &&
+    getDegreeCondition('second', 0) === preset.second &&
+    getDegreeCondition('third', 0) === preset.third &&
     (c.resistance || props.effect.resistance) === preset.res;
 }
 
 function applyAfflictionPreset(preset) {
   props.effect.config = props.effect.config || {};
   props.effect.config.preset = preset.id;
-  props.effect.config.firstDegree = preset.first;
-  props.effect.config.secondDegree = preset.second;
-  props.effect.config.thirdDegree = preset.third;
+
+  const p1 = preset.first || 'Dazed';
+  const p2 = preset.second || 'Stunned';
+  const p3 = preset.third || 'Paralyzed';
+
+  const secPairs = {
+    'Dazed': 'Vulnerable',
+    'Fatigued': 'Hindered',
+    'Hindered': 'Vulnerable',
+    'Impaired': 'Vulnerable',
+    'Vulnerable': 'Dazed',
+    'Entranced': 'Vulnerable',
+    'Stunned': 'Defenseless',
+    'Exhausted': 'Immobile',
+    'Compelled': 'Defenseless',
+    'Immobile': 'Defenseless',
+    'Disabled': 'Defenseless',
+    'Paralyzed': 'Incapacitated',
+    'Asleep': 'Unaware',
+    'Controlled': 'Defenseless',
+    'Incapacitated': 'Paralyzed'
+  };
+
+  const s1 = secPairs[p1] || (cfg.value?.firstDegree?.find(x => x !== p1) || 'Vulnerable');
+  const s2 = secPairs[p2] || (cfg.value?.secondDegree?.find(x => x !== p2) || 'Defenseless');
+  const s3 = secPairs[p3] || (cfg.value?.thirdDegree?.find(x => x !== p3) || 'Incapacitated');
+
+  const t1 = cfg.value?.firstDegree?.find(x => x !== p1 && x !== s1) || 'Hindered';
+  const t2 = cfg.value?.secondDegree?.find(x => x !== p2 && x !== s2) || 'Disabled';
+  const t3 = cfg.value?.thirdDegree?.find(x => x !== p3 && x !== s3) || 'Blind';
+
+  props.effect.config.firstConditions = [p1, s1, t1];
+  props.effect.config.secondConditions = [p2, s2, t2];
+  props.effect.config.thirdConditions = [p3, s3, t3];
+
+  props.effect.config.firstDegree = props.effect.config.firstConditions.slice(0, conditionsPerDegree.value).join(' & ');
+  props.effect.config.secondDegree = props.effect.config.secondConditions.slice(0, conditionsPerDegree.value).join(' & ');
+  props.effect.config.thirdDegree = props.effect.config.thirdConditions.slice(0, conditionsPerDegree.value).join(' & ');
+
   props.effect.config.resistance = preset.res;
   props.effect.resistance = preset.res;
   updateConfig();
@@ -944,6 +1401,76 @@ function selectAfflictionResistance(resOpt) {
   props.effect.config.resistance = resOpt;
   props.effect.resistance = resOpt;
   updateConfig();
+}
+
+function toggleAfflictionModifier(modName, isFlaw = false) {
+  if (!props.effect) return;
+  const list = isFlaw
+    ? (props.effect.flaws = Array.isArray(props.effect.flaws) ? props.effect.flaws : [])
+    : (props.effect.extras = Array.isArray(props.effect.extras) ? props.effect.extras : []);
+  
+  const idx = list.findIndex(m => m.name === modName);
+  if (idx !== -1) {
+    list.splice(idx, 1);
+    if (modName === 'Extra Condition' && props.effect.config) {
+      if (props.effect.config.firstConditions?.[0]) props.effect.config.firstDegree = props.effect.config.firstConditions[0];
+      if (props.effect.config.secondConditions?.[0]) props.effect.config.secondDegree = props.effect.config.secondConditions[0];
+      if (props.effect.config.thirdConditions?.[0]) props.effect.config.thirdDegree = props.effect.config.thirdConditions[0];
+    }
+  } else {
+    const source = isFlaw ? FLAWS : EXTRAS;
+    const found = source.find(m => m.name === modName) || { name: modName, cost: isFlaw ? -1 : 1, type: 'per_rank' };
+    list.push(normalizeModifier({
+      name: found.name,
+      cost: found.cost,
+      type: found.type,
+      ranks: 1,
+      hasRanks: found.hasRanks,
+      maxRanks: found.maxRanks,
+      desc: found.desc,
+      category: found.category,
+      options: found.options
+    }));
+    if (modName === 'Extra Condition' && props.effect.config) {
+      const p1 = getDegreeCondition('first', 0);
+      const s1 = getDegreeCondition('first', 1);
+      props.effect.config.firstDegree = `${p1} & ${s1}`;
+
+      const p2 = getDegreeCondition('second', 0);
+      const s2 = getDegreeCondition('second', 1);
+      props.effect.config.secondDegree = `${p2} & ${s2}`;
+
+      const p3 = getDegreeCondition('third', 0);
+      const s3 = getDegreeCondition('third', 1);
+      props.effect.config.thirdDegree = `${p3} & ${s3}`;
+    }
+  }
+  updateConfig();
+}
+
+function stepModifierRanks(modName, isFlaw = false, delta = 1) {
+  if (!props.effect) return;
+  const list = isFlaw ? props.effect.flaws : props.effect.extras;
+  if (!Array.isArray(list)) return;
+  const mod = list.find(m => m.name === modName);
+  if (mod) {
+    const current = Number(mod.ranks) || 1;
+    const next = Math.max(1, Math.min(2, current + delta));
+    mod.ranks = next;
+    if (modName === 'Extra Condition' && props.effect.config) {
+      const perDeg = 1 + next;
+      if (props.effect.config.firstConditions) {
+        props.effect.config.firstDegree = props.effect.config.firstConditions.slice(0, perDeg).join(' & ');
+      }
+      if (props.effect.config.secondConditions) {
+        props.effect.config.secondDegree = props.effect.config.secondConditions.slice(0, perDeg).join(' & ');
+      }
+      if (props.effect.config.thirdConditions) {
+        props.effect.config.thirdDegree = props.effect.config.thirdConditions.slice(0, perDeg).join(' & ');
+      }
+    }
+    updateConfig();
+  }
 }
 
 /* =========================================================================
@@ -1950,20 +2477,333 @@ function selectVariableTheme(theme) {
   color: #d8b4fe;
 }
 
+/* Quick Affliction Modifiers Strip */
+.affliction-modifiers-strip {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.strip-label {
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.strip-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.mod-chip-group {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.mod-toggle-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.32rem 0.65rem;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 6px;
+  color: #94a3b8;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.mod-chip-group .mod-toggle-chip {
+  border: none;
+  border-radius: 0;
+  background: transparent;
+}
+
+.mod-toggle-chip:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #f1f5f9;
+}
+
+.mod-toggle-chip.active {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: #93c5fd;
+  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+}
+
+.mod-toggle-chip.flaw.active {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: #ef4444;
+  color: #fca5a5;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
+}
+
+.chip-rank-badge {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.05rem 0.3rem;
+  border-radius: 4px;
+  background: rgba(59, 130, 246, 0.35);
+  color: #ffffff;
+}
+
+.chip-rank-badge.flaw {
+  background: rgba(239, 68, 68, 0.35);
+}
+
+.chip-step-controls {
+  display: inline-flex;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.chip-step-controls .step-btn {
+  padding: 0.2rem 0.4rem;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 800;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.chip-step-controls .step-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+}
+
+.chip-step-controls .step-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+/* Progression Track Ribbon */
+.affliction-progression-ribbon {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.affliction-progression-ribbon.progressive {
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
+  border-color: rgba(6, 182, 212, 0.3);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.15);
+}
+
+.affliction-progression-ribbon.cumulative {
+  background: linear-gradient(90deg, rgba(168, 85, 247, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 0 0 12px rgba(168, 85, 247, 0.15);
+}
+
+.progression-ribbon-left {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.affliction-progression-ribbon.progressive i {
+  font-size: 1.25rem;
+  color: #22d3ee;
+}
+
+.affliction-progression-ribbon.cumulative i {
+  font-size: 1.25rem;
+  color: #c084fc;
+}
+
+.progression-text-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.progression-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+.progression-desc {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.progression-track-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.step-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.7rem;
+}
+
+.step-pill .pill-deg {
+  font-weight: 800;
+  color: #cbd5e1;
+}
+
+.step-pill .pill-name {
+  color: #67e8f9;
+  font-weight: 600;
+}
+
+.step-pill.disabled {
+  opacity: 0.4;
+  border-style: dashed;
+}
+
+.step-arrow {
+  color: #64748b;
+  font-size: 0.85rem;
+}
+
+/* Degrees Grid & Multi-Conditions */
 .degrees-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 0.75rem;
 }
 
 .degree-box {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.5rem;
   padding: 0.75rem;
   border-radius: 8px;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid rgba(255, 255, 255, 0.06);
+  position: relative;
+  transition: all 0.2s ease;
+}
+
+.deg-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.multi-cond-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(56, 239, 125, 0.15);
+  border: 1px solid rgba(56, 239, 125, 0.3);
+  color: #4ade80;
+}
+
+.eliminated-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: #f87171;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.degree-conditions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.condition-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cond-slot-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.degree-select.slot-secondary {
+  border-color: rgba(56, 239, 125, 0.35);
+  background: #0f1c18;
+}
+
+.degree-select.slot-tertiary {
+  border-color: rgba(234, 179, 8, 0.35);
+  background: #1c180f;
+}
+
+/* Eliminated / Locked State */
+.degree-box.eliminated-box {
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(0, 0, 0, 0.35),
+    rgba(0, 0, 0, 0.35) 8px,
+    rgba(239, 68, 68, 0.04) 8px,
+    rgba(239, 68, 68, 0.04) 16px
+  );
+  border-color: rgba(239, 68, 68, 0.2);
+  opacity: 0.85;
+}
+
+.eliminated-lock-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.25rem 0.75rem;
+  gap: 0.35rem;
+}
+
+.lock-icon {
+  font-size: 1.75rem;
+  color: #f87171;
+  opacity: 0.8;
+}
+
+.eliminated-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fca5a5;
+}
+
+.eliminated-desc {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.35;
 }
 
 .degree-header {
@@ -2018,6 +2858,7 @@ function selectVariableTheme(theme) {
   font-style: italic;
 }
 
+/* Resistance Row Enhancements */
 .resistance-defense-row {
   display: flex;
   align-items: center;
@@ -2029,6 +2870,12 @@ function selectVariableTheme(theme) {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
+.res-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .res-label {
   font-size: 0.82rem;
   font-weight: 600;
@@ -2038,9 +2885,23 @@ function selectVariableTheme(theme) {
   gap: 0.35rem;
 }
 
+.alt-res-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(168, 85, 247, 0.2);
+  border: 1px solid rgba(168, 85, 247, 0.4);
+  color: #d8b4fe;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .res-toggle-group {
   display: flex;
   gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
 .res-btn {
@@ -2074,6 +2935,38 @@ function selectVariableTheme(theme) {
   font-size: 0.75rem;
   color: #64748b;
   margin-left: auto;
+}
+
+/* Mechanic Callout */
+.mechanic-callout-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
+}
+
+.instant-recovery-callout {
+  background: rgba(234, 179, 8, 0.08);
+  border: 1px solid rgba(234, 179, 8, 0.25);
+}
+
+.instant-recovery-callout .callout-icon {
+  font-size: 1.1rem;
+  color: #facc15;
+  margin-top: 0.1rem;
+}
+
+.instant-recovery-callout .callout-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #fef08a;
+  display: block;
+}
+
+.instant-recovery-callout .callout-desc {
+  font-size: 0.72rem;
+  color: #cbd5e1;
 }
 
 /* 4. Illusion Styles */

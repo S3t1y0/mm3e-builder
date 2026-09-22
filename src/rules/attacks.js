@@ -186,7 +186,7 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       dc = 15 + effectRank;
       res = 'Toughness';
     } else if (baseEffect === 'Affliction') {
-      res = effect.resistance || (/snare/i.test(opt.slotName || power.name || '') ? 'Dodge' : 'Fortitude');
+      res = effect.resistance || effect.config?.resistance || (/snare/i.test(opt.slotName || power.name || '') ? 'Dodge' : 'Fortitude');
     } else if (baseEffect === 'Move Object') {
       res = effect.resistance || 'Dodge';
     } else if (baseEffect === 'Weaken') {
@@ -201,6 +201,9 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     if ((effect.extras || []).some(e => e.name === 'Penetrating')) tags.push('Penetrating');
     if ((effect.extras || []).some(e => e.name === 'Cumulative')) tags.push('Cumulative');
     if ((effect.extras || []).some(e => e.name === 'Progressive')) tags.push('Progressive');
+    if ((effect.extras || []).some(e => e.name === 'Extra Condition')) tags.push('Extra Condition');
+    if ((effect.flaws || []).some(f => f.name === 'Limited Degree')) tags.push('Limited Degree');
+    if ((effect.flaws || []).some(f => f.name === 'Instant Recovery')) tags.push('Instant Recovery');
 
     return {
       id: opt.id || ('atk_' + power.id + '_' + (opt.slotId || 'main')),
