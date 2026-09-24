@@ -163,11 +163,13 @@
           <span class="param-lbl">Duration:</span>
           <span class="param-val">{{ effect.duration || 'Instant' }}</span>
         </div>
-        <div class="param-status-divider"></div>
-        <div class="param-status-item highlight">
-          <span class="param-lbl">Resisted By:</span>
-          <span class="param-val">{{ effect.resistance || 'Toughness' }}</span>
-        </div>
+        <template v-if="hasResistanceCheck(effect)">
+          <div class="param-status-divider"></div>
+          <div class="param-status-item highlight">
+            <span class="param-lbl">Resisted By:</span>
+            <span class="param-val">{{ effect.resistance || 'Toughness' }}</span>
+          </div>
+        </template>
       </div>
 
       <!-- Effect Configurator (Enhanced Trait, Senses, Affliction, Illusion, Immunity, Movement, etc.) -->
@@ -523,7 +525,7 @@
               <span class="collapsed-rank-chip">Rank {{ linkedEff.ranks }}</span>
               <span class="collapsed-param-chip">{{ linkedEff.action || 'Standard' }}</span>
               <span class="collapsed-param-chip">{{ linkedEff.range || 'Close' }}</span>
-              <span class="collapsed-param-chip highlight">{{ linkedEff.resistance || 'Toughness' }}</span>
+              <span v-if="hasResistanceCheck(linkedEff)" class="collapsed-param-chip highlight">{{ linkedEff.resistance || 'Toughness' }}</span>
             </div>
             <div class="collapsed-summary-right">
               <span class="collapsed-mods-count">
@@ -624,7 +626,7 @@
                     <span class="param-label">Duration:</span>
                     <span class="param-value">{{ linkedEff.duration || 'Instant' }}</span>
                   </div>
-                  <div class="param-chip">
+                  <div v-if="hasResistanceCheck(linkedEff)" class="param-chip">
                     <span class="param-label">Resisted By:</span>
                     <span class="param-value highlight">{{ linkedEff.resistance || 'Toughness' }}</span>
                   </div>
@@ -910,7 +912,7 @@
 import { computed, ref } from 'vue';
 import { usePowerBuilderStore } from '../../stores/powerBuilderStore.js';
 import { useHeroStore } from '../../stores/heroStore.js';
-import { BASE_EFFECTS, EXTRAS, FLAWS, calculateEffectCost } from '../../rules/powerEngine.js';
+import { BASE_EFFECTS, EXTRAS, FLAWS, calculateEffectCost, hasResistanceCheck } from '../../rules/powerEngine.js';
 import EffectsLibraryModal from './EffectsLibraryModal.vue';
 import EffectConfigurator from './EffectConfigurator.vue';
 

@@ -410,9 +410,9 @@
                   <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
                   <span class="spec-value">{{ getActiveEffect(pow).duration || 'Instant' }}</span>
                 </div>
-                <div class="spec-item">
+                <div v-if="hasResistanceCheck(getActiveEffect(pow))" class="spec-item">
                   <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
-                  <span class="spec-value highlight">{{ calculateDC(getActiveEffect(pow)) || (getActiveEffect(pow).resistance ? `vs ${getActiveEffect(pow).resistance}` : 'None') }}</span>
+                  <span class="spec-value highlight">{{ calculateDC(getActiveEffect(pow)) || (getActiveEffect(pow).resistance ? `vs ${getActiveEffect(pow).resistance}` : '') }}</span>
                 </div>
               </div>
 
@@ -584,9 +584,9 @@
                       <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
                       <span class="spec-value">{{ linked.duration || 'Instant' }}</span>
                     </div>
-                    <div class="spec-item">
+                    <div v-if="hasResistanceCheck(linked)" class="spec-item">
                       <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
-                      <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : 'None') }}</span>
+                      <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : '') }}</span>
                     </div>
                   </div>
 
@@ -849,10 +849,10 @@
                     <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
                     <span class="spec-value">{{ getSubPowerActiveEffect(sub).duration || 'Instant' }}</span>
                   </div>
-                  <div class="spec-item">
+                  <div v-if="hasResistanceCheck(getSubPowerActiveEffect(sub))" class="spec-item">
                     <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
                     <span class="spec-value highlight">
-                      {{ calculateDC(getSubPowerActiveEffect(sub)) || (getSubPowerActiveEffect(sub).resistance ? `vs ${getSubPowerActiveEffect(sub).resistance}` : 'None') }}
+                      {{ calculateDC(getSubPowerActiveEffect(sub)) || (getSubPowerActiveEffect(sub).resistance ? `vs ${getSubPowerActiveEffect(sub).resistance}` : '') }}
                     </span>
                   </div>
                 </div>
@@ -1041,9 +1041,9 @@
                         <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
                         <span class="spec-value">{{ linked.duration || 'Instant' }}</span>
                       </div>
-                      <div class="spec-item">
+                      <div v-if="hasResistanceCheck(linked)" class="spec-item">
                         <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
-                        <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : 'None') }}</span>
+                        <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : '') }}</span>
                       </div>
                     </div>
 
@@ -1254,9 +1254,9 @@
                       <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
                       <span class="spec-value">{{ getSubPowerActiveEffect(sub).duration || 'Instant' }}</span>
                     </div>
-                    <div class="spec-item">
+                    <div v-if="hasResistanceCheck(getSubPowerActiveEffect(sub))" class="spec-item">
                       <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
-                      <span class="spec-value highlight">{{ calculateDC(getSubPowerActiveEffect(sub)) || (getSubPowerActiveEffect(sub).resistance ? `vs ${getSubPowerActiveEffect(sub).resistance}` : 'None') }}</span>
+                      <span class="spec-value highlight">{{ calculateDC(getSubPowerActiveEffect(sub)) || (getSubPowerActiveEffect(sub).resistance ? `vs ${getSubPowerActiveEffect(sub).resistance}` : '') }}</span>
                     </div>
                   </div>
 
@@ -1377,9 +1377,9 @@
                         <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
                         <span class="spec-value">{{ linked.duration || 'Instant' }}</span>
                       </div>
-                      <div class="spec-item">
+                      <div v-if="hasResistanceCheck(linked)" class="spec-item">
                         <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
-                        <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : 'None') }}</span>
+                        <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : '') }}</span>
                       </div>
                     </div>
 
@@ -1524,7 +1524,7 @@ import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { usePowerBuilderStore } from '../../stores/powerBuilderStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
-import { BASE_EFFECTS, EXTRAS, FLAWS, CONFIGURABLE_EFFECTS, calculatePowerTotalCost } from '../../rules/powerEngine.js';
+import { BASE_EFFECTS, EXTRAS, FLAWS, CONFIGURABLE_EFFECTS, calculatePowerTotalCost, hasResistanceCheck } from '../../rules/powerEngine.js';
 import { sendFeatureToVTT } from '../../services/vttBridge.js';
 
 const heroStore = useHeroStore();
@@ -2315,20 +2315,28 @@ function calculateDC(eff) {
   if (!eff || !eff.baseEffect) return '';
   const ranks = Number(eff.ranks) || 0;
   const base = (eff.baseEffect || '').toLowerCase();
-  if (base === 'damage') {
+  if (base === 'damage' || base === 'blast') {
     return `DC ${15 + ranks} vs ${eff.resistance || 'Toughness'}`;
   }
   if (['affliction', 'weaken', 'nullify', 'mind control'].includes(base)) {
     return `DC ${10 + ranks} vs ${eff.resistance || 'Fortitude'}`;
+  }
+  if (base === 'mind reading') {
+    return `DC ${10 + ranks} vs ${eff.resistance || 'Will'}`;
+  }
+  const extras = Array.isArray(eff.extras) ? eff.extras : [];
+  const hasAttackExtra = extras.some(x => (x.name || '').trim().toLowerCase() === 'attack');
+  if (hasAttackExtra) {
+    return `DC ${10 + ranks} vs ${eff.resistance || 'Dodge'}`;
   }
   const nonResistanceEffects = [
     'senses', 'enhanced trait', 'movement', 'immunity', 'flight', 'speed', 'quickness',
     'leaping', 'swimming', 'growth', 'shrinking', 'morph', 'variable', 'comprehend',
     'feature', 'protection', 'regeneration', 'immortality', 'elongation', 'invisibility',
     'insubstantial', 'burrowing', 'teleport', 'deflect', 'healing', 'remote sensing',
-    'create', 'illusion', 'transform', 'communication', 'luck control'
+    'create', 'illusion', 'transform', 'communication', 'luck control', 'extra limbs', 'environment', 'summon'
   ];
-  if (nonResistanceEffects.includes(base) || eff.action === 'None' || (!eff.resistance || eff.resistance === 'None')) {
+  if (nonResistanceEffects.includes(base) || eff.action === 'None' || (!eff.resistance || eff.resistance === 'None' || eff.resistance === 'none')) {
     return '';
   }
   return eff.resistance && eff.resistance !== 'Toughness' ? `vs ${eff.resistance}` : '';
@@ -2339,11 +2347,19 @@ function calculateCompactDC(eff) {
   const ranks = Number(eff.ranks) || 0;
   const base = (eff.baseEffect || '').toLowerCase();
   const res = eff.resistance ? eff.resistance.slice(0, 4) : '';
-  if (base === 'damage') {
+  if (base === 'damage' || base === 'blast') {
     return `DC ${15 + ranks} ${res || 'Tou'}`;
   }
   if (['affliction', 'weaken', 'nullify', 'mind control'].includes(base)) {
     return `DC ${10 + ranks} ${res || 'Fort'}`;
+  }
+  if (base === 'mind reading') {
+    return `DC ${10 + ranks} ${res || 'Will'}`;
+  }
+  const extras = Array.isArray(eff.extras) ? eff.extras : [];
+  const hasAttackExtra = extras.some(x => (x.name || '').trim().toLowerCase() === 'attack');
+  if (hasAttackExtra) {
+    return `DC ${10 + ranks} ${res || 'Dod'}`;
   }
   return '';
 }

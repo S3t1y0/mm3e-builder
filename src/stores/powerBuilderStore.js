@@ -724,7 +724,7 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
       effect.action = ref.action;
       effect.range = ref.range;
       effect.duration = ref.duration;
-      effect.resistance = ref.resistance || 'Toughness';
+      effect.resistance = ref.resistance || (ref.category === 'Attack' ? (ref.name === 'Affliction' ? 'Fortitude' : 'Toughness') : '');
 
       // Normalize to initialize full configuration for all 12 configurable types
       const norm = normalizeEffect(effect);

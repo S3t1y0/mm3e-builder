@@ -2314,6 +2314,38 @@ export const MODIFIER_CATEGORIES = [
 ];
 
 /**
+ * Checks whether an effect requires a resistance check according to M&M 3e rules.
+ * Attack effects (Damage, Blast, Affliction, Weaken, Nullify, etc.), effects with the Attack extra,
+ * or hostile/resisted effects allow a resistance check. Non-combat/utility/movement/defense effects do not.
+ */
+export function hasResistanceCheck(eff) {
+  if (!eff) return false;
+  const base = (eff.baseEffect || eff.name || '').toLowerCase();
+  const inherentAttackEffects = ['damage', 'blast', 'affliction', 'weaken', 'nullify', 'mind reading', 'mind control'];
+  if (inherentAttackEffects.includes(base)) return true;
+
+  const extras = Array.isArray(eff.extras) ? eff.extras : [];
+  const hasAttackExtra = extras.some(x => (x.name || '').trim().toLowerCase() === 'attack');
+  if (hasAttackExtra) return true;
+
+  const nonResistanceEffects = [
+    'senses', 'enhanced trait', 'movement', 'immunity', 'flight', 'speed', 'quickness',
+    'leaping', 'swimming', 'growth', 'shrinking', 'morph', 'variable', 'comprehend',
+    'feature', 'protection', 'regeneration', 'immortality', 'elongation', 'invisibility',
+    'insubstantial', 'burrowing', 'teleport', 'deflect', 'healing', 'remote sensing',
+    'create', 'illusion', 'transform', 'communication', 'luck control', 'extra limbs', 'environment', 'summon'
+  ];
+  if (nonResistanceEffects.includes(base) || eff.action === 'None') {
+    return false;
+  }
+
+  const res = (eff.resistance || '').trim().toLowerCase();
+  if (!res || res === 'none' || res === '-') return false;
+
+  return ['toughness', 'fortitude', 'will', 'dodge', 'parry', 'fortitude or will', 'dodge or will', 'dodge or fortitude'].includes(res);
+}
+
+/**
  * Creates a normalized empty Power Effect.
  */
 export function createEmptyEffect(baseName = 'Damage') {
@@ -2328,7 +2360,7 @@ export function createEmptyEffect(baseName = 'Damage') {
     action: base.action || 'Standard',
     range: base.range || 'Close',
     duration: base.duration || 'Instant',
-    resistance: base.resistance || (base.name === 'Affliction' ? 'Fortitude' : 'Toughness'),
+    resistance: base.resistance || (base.category === 'Attack' ? (base.name === 'Affliction' ? 'Fortitude' : 'Toughness') : ''),
     extras: [],
     flaws: []
   };
@@ -2734,7 +2766,27 @@ export function normalizeEffect(rawEffect) {
   eff.action = eff.action || (baseRef ? baseRef.action : 'Standard');
   eff.range = eff.range || (baseRef ? baseRef.range : 'Close');
   eff.duration = eff.duration || (baseRef ? baseRef.duration : 'Instant');
-  eff.resistance = eff.resistance || (baseRef ? (baseRef.resistance || 'Toughness') : 'Toughness');
+
+  const isAttackEffect = baseRef ? (baseRef.category === 'Attack' || ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify', 'Mind Reading'].includes(baseRef.name)) : false;
+  const hasAttackExtra = Array.isArray(eff.extras) && eff.extras.some(x => (x.name || '').trim().toLowerCase() === 'attack');
+
+  if (isAttackEffect || hasAttackExtra) {
+    eff.resistance = eff.resistance || (baseRef ? (baseRef.resistance || (baseRef.name === 'Affliction' ? 'Fortitude' : 'Toughness')) : 'Toughness');
+  } else {
+    const nonResList = [
+      'senses', 'enhanced trait', 'movement', 'immunity', 'flight', 'speed', 'quickness',
+      'leaping', 'swimming', 'growth', 'shrinking', 'morph', 'variable', 'comprehend',
+      'feature', 'protection', 'regeneration', 'immortality', 'elongation', 'invisibility',
+      'insubstantial', 'burrowing', 'teleport', 'deflect', 'healing', 'remote sensing',
+      'create', 'illusion', 'transform', 'communication', 'luck control', 'extra limbs', 'environment', 'summon'
+    ];
+    if (nonResList.includes((eff.baseEffect || '').toLowerCase()) || eff.action === 'None' || eff.resistance === 'None' || eff.resistance === 'none') {
+      eff.resistance = '';
+    } else {
+      eff.resistance = eff.resistance && eff.resistance !== 'Toughness' ? eff.resistance : (baseRef?.resistance || '');
+    }
+  }
+
   eff.extras = Array.isArray(eff.extras) ? eff.extras.map(normalizeModifier) : [];
   eff.flaws = Array.isArray(eff.flaws) ? eff.flaws.map(normalizeModifier) : [];
 

@@ -386,6 +386,10 @@ export const useHeroStore = defineStore('hero', {
       return compileTargetedAttacks(state.character, this.effectiveAbilities, this.getAdvantageRanks);
     },
 
+    allTargetedAttacks() {
+      return this.targetedAttacks;
+    },
+
     speedBaseRank() {
       let speedRank = 0;
       for (const eff of this.activeEffects) {
@@ -768,6 +772,10 @@ export const useHeroStore = defineStore('hero', {
         this.character.powers = this.character.powers.map(p => normalizePower(p));
       }
       this.pushHistory();
+    },
+
+    loadFromCombatant(combatant) {
+      this.loadCharacter(combatant);
     },
 
     resetCharacter() {
