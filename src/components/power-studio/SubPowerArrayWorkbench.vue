@@ -25,7 +25,7 @@
     </div>
 
     <!-- Collapsible Rules Guide -->
-    <details class="array-rules-collapsible">
+    <details class="array-rules-collapsible" open>
       <summary class="array-rules-summary">
         <i class="ri-information-line"></i>
         <span>M&M 3e Array Rules: Capacity & Costs</span>

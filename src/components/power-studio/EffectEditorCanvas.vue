@@ -919,7 +919,7 @@ import EffectConfigurator from './EffectConfigurator.vue';
 const heroStore = useHeroStore();
 const builderStore = usePowerBuilderStore();
 
-const showRules = ref(false);
+const showRules = ref(true);
 
 const canHaveLinkedEffects = computed(() => {
   return ['main', 'slot', 'compound', 'compound_slot'].includes(builderStore.activeTargetType);

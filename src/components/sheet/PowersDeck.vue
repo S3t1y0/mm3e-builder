@@ -204,7 +204,8 @@
           <div v-if="!isExpanded(pow.id || idx)" class="glance-combat-flow">
             <div class="glance-specs-flow">
               <span class="glance-spec-item effect-main">
-                <strong>{{ getActiveEffect(pow).baseEffect }}</strong> {{ getActiveEffect(pow).ranks }}R
+                <strong class="glance-effect-name">{{ getActiveEffect(pow).baseEffect }}</strong>
+                <span class="glance-rank-pill">{{ getActiveEffect(pow).ranks }}R</span>
                 <small v-if="getEffectConfigDetails(getActiveEffect(pow))?.quickText" class="glance-config-text">
                   ({{ getEffectConfigDetails(getActiveEffect(pow)).quickText }})
                 </small>
@@ -381,9 +382,12 @@
             <div class="dossier-block effect-rules-block">
               <div class="dossier-block-head">
                 <div class="dossier-head-left">
-                  <i class="ri-flashlight-line"></i>
+                  <i class="ri-flashlight-line dossier-effect-icon"></i>
                   <span v-if="getActiveSlotTitle(pow)" class="active-stunt-mode-title">{{ getActiveSlotTitle(pow) }}:</span>
-                  <span>Base Effect: {{ getActiveEffect(pow).baseEffect }} (Rank {{ getActiveEffect(pow).ranks }})</span>
+                  <span class="sub-effect-chip standard-effect-chip">
+                    <strong class="sub-effect-name">{{ getActiveEffect(pow).baseEffect }}</strong>
+                    <span class="sub-effect-rank">Rank {{ getActiveEffect(pow).ranks }}</span>
+                  </span>
                 </div>
                 <button
                   type="button"
@@ -550,7 +554,10 @@
                       <div class="linked-title-group">
                         <div class="linked-title-row">
                           <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
-                          <span class="linked-effect-chip">{{ linked.baseEffect }} (Rank {{ linked.ranks }})</span>
+                          <span class="linked-effect-chip">
+                            <strong class="linked-effect-name">{{ linked.baseEffect }}</strong>
+                            <span class="linked-effect-rank">Rank {{ linked.ranks }}</span>
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -771,18 +778,15 @@
                 >
                   <!-- Sub-Effect Master Header -->
                   <div class="sub-card-master-header">
-                    <div
-                      class="sub-sys-badge-lg compound-badge"
-                      :class="{ 'is-primary': isCompoundSubPrimary(pow, sub, sIdx) }"
-                    >
-                      <i :class="isCompoundSubPrimary(pow, sub, sIdx) ? 'ri-star-fill' : getEffectIcon(getSubPowerActiveEffect(sub).baseEffect)"></i>
-                      <span>#{{ sIdx + 1 }}</span>
-                    </div>
-                <div class="sub-sys-title-block">
+                    <div class="sub-sys-title-block">
                   <div class="sub-sys-title-line">
                     <h4 class="sub-sys-heading">{{ sub.name || `Component #${sIdx + 1}` }}</h4>
-                    <span class="sub-effect-chip">
-                      {{ getSubPowerActiveEffect(sub).baseEffect }} (Rank {{ getSubPowerActiveEffect(sub).ranks || 1 }})
+                    <span
+                      class="sub-effect-chip"
+                      :class="{ 'is-primary-effect': isCompoundSubPrimary(pow, sub, sIdx) }"
+                    >
+                      <strong class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
+                      <span class="sub-effect-rank">Rank {{ getSubPowerActiveEffect(sub).ranks || 1 }}</span>
                     </span>
                     <span v-if="sub.alternateEffects?.length > 0" class="sub-array-indicator">
                       <i class="ri-shuffle-line"></i> Array ({{ sub.alternateEffects.length + 1 }} Modes)
@@ -1007,7 +1011,10 @@
                         <div class="linked-title-group">
                           <div class="linked-title-row">
                             <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
-                            <span class="linked-effect-chip">{{ linked.baseEffect }} (Rank {{ linked.ranks }})</span>
+                            <span class="linked-effect-chip">
+                              <strong class="linked-effect-name">{{ linked.baseEffect }}</strong>
+                              <span class="linked-effect-rank">Rank {{ linked.ranks }}</span>
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -1181,14 +1188,13 @@
                     <i :class="sub.active !== false && pow.active !== false ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'"></i>
                     <span class="sub-toggle-text">{{ sub.active !== false && pow.active !== false ? 'ONLINE' : 'OFFLINE' }}</span>
                   </button>
-                  <div class="sub-sys-badge-lg">
-                    <i class="ri-flashlight-fill"></i>
-                    <span>#{{ sIdx + 1 }}</span>
-                  </div>
                   <div class="sub-sys-title-block">
                     <div class="sub-sys-title-line">
                       <h4 class="sub-sys-heading">{{ sub.name }}</h4>
-                      <span class="sub-effect-chip">{{ getSubPowerActiveEffect(sub).baseEffect }} (Rank {{ getSubPowerActiveEffect(sub).ranks }})</span>
+                      <span class="sub-effect-chip">
+                        <strong class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
+                        <span class="sub-effect-rank">Rank {{ getSubPowerActiveEffect(sub).ranks }}</span>
+                      </span>
                       <span v-if="sub.alternateEffects?.length > 0" class="sub-array-indicator">
                         <i class="ri-shuffle-line"></i> Array ({{ sub.alternateEffects.length + 1 }} Modes)
                       </span>
@@ -1343,7 +1349,10 @@
                         <div class="linked-title-group">
                           <div class="linked-title-row">
                             <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
-                            <span class="linked-effect-chip">{{ linked.baseEffect }} (Rank {{ linked.ranks }})</span>
+                            <span class="linked-effect-chip">
+                              <strong class="linked-effect-name">{{ linked.baseEffect }}</strong>
+                              <span class="linked-effect-rank">Rank {{ linked.ranks }}</span>
+                            </span>
                           </div>
                         </div>
                       </div>
@@ -2852,8 +2861,8 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .chip-sys-effect {
-  font-size: 0.68rem;
-  color: var(--text-secondary);
+  font-size: 0.74rem;
+  color: #94a3b8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -3168,12 +3177,30 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .glance-spec-item.effect-main {
   color: var(--text-primary);
+  font-size: 0.85rem;
   font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.glance-spec-item.effect-main strong {
-  color: var(--accent-primary);
+.glance-effect-name {
+  color: #38bdf8;
   font-weight: 800;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+}
+
+.glance-rank-pill {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.16);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 0.04rem 0.32rem;
+  border-radius: 3px;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
 }
 
 .glance-spec-item i {
@@ -3406,8 +3433,8 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .chip-sys-effect {
-  font-size: 0.68rem;
-  color: var(--text-secondary);
+  font-size: 0.74rem;
+  color: #94a3b8;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -4265,20 +4292,44 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .linked-heading {
-  font-size: 0.88rem;
+  font-size: 0.94rem;
   font-weight: 800;
-  color: var(--text-primary);
+  color: #ffffff;
   margin: 0;
   letter-spacing: -0.01em;
 }
 
 .linked-effect-chip {
-  font-size: 0.68rem;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.25;
+  padding: 0.14rem 0.45rem;
+  border-radius: 5px;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.linked-effect-chip .linked-effect-name {
+  font-size: 0.78rem;
+  font-weight: 800;
   color: #22d3ee;
-  background: rgba(6, 182, 212, 0.1);
-  padding: 0.1rem 0.38rem;
-  border-radius: var(--radius-xs);
+  letter-spacing: 0.01em;
+}
+
+.linked-effect-chip .linked-effect-rank {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #a5f3fc;
+  background: rgba(6, 182, 212, 0.2);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  padding: 0.04rem 0.3rem;
+  border-radius: 3px;
+  font-variant-numeric: tabular-nums;
 }
 
 
@@ -4542,32 +4593,76 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .sub-sys-heading {
-  font-size: 0.96rem;
+  font-size: 1.02rem;
   font-weight: 800;
-  color: #fff;
+  color: #ffffff;
+  letter-spacing: -0.015em;
   margin: 0;
+  display: inline-flex;
+  align-items: center;
 }
 
 .sub-effect-chip {
-  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  font-size: 0.82rem;
+  line-height: 1.25;
+  padding: 0.18rem 0.52rem;
+  border-radius: var(--radius-sm, 6px);
+  background: rgba(14, 165, 233, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.32);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.sub-effect-chip .sub-effect-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: #38bdf8;
+  letter-spacing: 0.01em;
+}
+
+.sub-effect-chip .sub-effect-rank {
+  font-size: 0.74rem;
   font-weight: 700;
-  color: #fde68a;
-  background: rgba(245, 158, 11, 0.12);
-  padding: 0.15rem 0.45rem;
-  border-radius: 4px;
+  color: #bae6fd;
+  background: rgba(56, 189, 248, 0.18);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  padding: 0.04rem 0.35rem;
+  border-radius: 3px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+
+.sub-effect-chip.is-primary-effect {
+  background: rgba(245, 158, 11, 0.14);
+  border-color: rgba(245, 158, 11, 0.38);
+}
+
+.sub-effect-chip.is-primary-effect .sub-effect-name {
+  color: #fde047;
+}
+
+.sub-effect-chip.is-primary-effect .sub-effect-rank {
+  color: #fef08a;
+  background: rgba(245, 158, 11, 0.22);
+  border-color: rgba(245, 158, 11, 0.32);
 }
 
 .sub-array-indicator {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  padding: 0.15rem 0.45rem;
+  color: #7dd3fc;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  padding: 0.14rem 0.45rem;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
+  white-space: nowrap;
 }
 
 .sub-sys-actions {
