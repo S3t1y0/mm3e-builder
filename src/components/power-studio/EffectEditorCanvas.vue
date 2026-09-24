@@ -14,112 +14,164 @@
 
     <!-- Core Effect Form Grid -->
     <div class="canvas-form-grid">
-      <!-- Effect Name -->
-      <div class="form-group span-full">
-        <label class="field-label">Custom Effect Name</label>
-        <div class="input-with-icon">
-          <i class="ri-edit-line"></i>
+      <!-- 1. Compound Sub-Effect Identity & Role Bar (Only in Compound Component Mode) -->
+      <div v-if="builderStore.isCompoundMode && (builderStore.activeTargetType === 'compound' || builderStore.activeTargetType === 'compound_linked') && builderStore.activeCompoundEffect" class="sub-effect-identity-bar span-full">
+        <div class="sub-name-group">
+          <label class="sub-name-label">
+            <i class="ri-edit-line"></i>
+            <span>Sub-Effect Name</span>
+          </label>
           <input
-            v-model="effect.name"
+            v-model="builderStore.activeCompoundEffect.name"
             type="text"
-            class="text-input"
-            placeholder="e.g. Plasma Burst, Kinetic Barrier..."
+            class="sub-name-input"
+            placeholder="e.g. Frostbite Damage, Hypothermia Affliction..."
           />
+        </div>
+        <div class="sub-role-actions">
+          <button
+            type="button"
+            class="btn-primary-role"
+            :class="{ active: builderStore.activeCompoundEffect.isPrimaryAction }"
+            @click="builderStore.setPrimaryCompoundEffect(builderStore.activeCompoundIndex)"
+            :title="builderStore.activeCompoundEffect.isPrimaryAction ? 'Current Primary Action Effect' : 'Designate as Primary Effect'"
+          >
+            <i :class="builderStore.activeCompoundEffect.isPrimaryAction ? 'ri-star-fill' : 'ri-star-line'"></i>
+            <span>{{ builderStore.activeCompoundEffect.isPrimaryAction ? 'Primary Action Effect' : 'Make Primary' }}</span>
+          </button>
         </div>
       </div>
 
-      <!-- Base Effect Banner & Catalog Trigger (Split 2-Column Layout) -->
-      <div class="form-group span-full">
-        <div class="base-effect-card split-layout">
-          <!-- Left Column: Identity & Selection Controls (~38%) -->
-          <div class="base-col-control">
-            <div class="base-col-identity">
-              <div class="base-effect-icon-box">
-                <i class="ri-flashlight-line"></i>
-              </div>
-              <div class="base-identity-text">
-                <div class="base-effect-name-row">
-                  <span class="base-effect-title">{{ effect.baseEffect || 'Damage' }}</span>
-                  <span class="badge badge-accent">{{ currentBaseInfo?.category || 'Effect' }}</span>
-                  <span class="base-effect-cost-tag">{{ currentBaseInfo?.cost || 1 }} PP / Rank</span>
-                </div>
-              </div>
-            </div>
+      <!-- 2. Alternate Slot Name & Capacity Bar -->
+      <div v-else-if="currentSlotRef" class="sub-effect-identity-bar span-full slot-identity-container">
+        <div class="sub-name-group">
+          <label class="sub-name-label">
+            <i class="ri-shuffle-line"></i>
+            <span>{{ isCompoundSlot ? 'Compound Stunt Name' : 'Alternate Stunt Name' }}</span>
+          </label>
+          <input
+            v-model="currentSlotRef.name"
+            type="text"
+            class="sub-name-input"
+            placeholder="e.g. Heat Wave, Stun Burst..."
+          />
+        </div>
 
-            <div class="base-col-actions">
+        <!-- Slot Capacity Meter / Warning -->
+        <div v-if="builderStore.activeSlotContext" class="slot-capacity-pill" :class="{ 'is-overflow': builderStore.activeSlotContext.isOverflow }">
+          <i :class="builderStore.activeSlotContext.isOverflow ? 'ri-error-warning-line' : 'ri-shield-check-line'"></i>
+          <span class="capacity-text">
+            Slot: <strong>{{ builderStore.activeSlotContext.slotValue }} PP</strong> / Cap: <strong>{{ builderStore.activeSlotContext.capacity }} PP</strong>
+          </span>
+          <span v-if="builderStore.activeSlotContext.isOverflow" class="overflow-tag">
+            +{{ builderStore.activeSlotContext.slotValue - builderStore.activeSlotContext.capacity }} Overflow!
+          </span>
+        </div>
+      </div>
+
+      <!-- 3. Base Effect Hero Strip (Compact & Streamlined) -->
+      <div class="base-effect-hero-strip span-full">
+        <div class="hero-left">
+          <div class="base-icon-box">
+            <i :class="getEffectIcon(effect.baseEffect)"></i>
+          </div>
+          <div class="base-identity-info">
+            <div class="base-title-row">
+              <span class="base-effect-title">{{ effect.baseEffect || 'Damage' }}</span>
+              <span class="badge-cat-tag">{{ currentBaseInfo?.category || 'Effect' }}</span>
+              <span class="base-cost-tag">{{ currentBaseInfo?.cost || 1 }} PP / Rank</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            class="btn-catalog-trigger"
+            @click="builderStore.openEffectsLibrary(effect)"
+          >
+            <i class="ri-book-open-line"></i>
+            <span>Change Effect</span>
+          </button>
+        </div>
+
+        <div class="hero-right">
+          <!-- Rank Stepper with numeric typing -->
+          <div class="rank-stepper-box">
+            <span class="rank-lbl">Rank</span>
+            <div class="rank-stepper-row">
               <button
                 type="button"
-                class="btn-open-effects-catalog"
-                @click="builderStore.openEffectsLibrary(effect)"
+                class="btn-step"
+                :disabled="effect.ranks <= 1"
+                @click="builderStore.updateEffectRank(effect, -1)"
+                title="Decrease Rank"
               >
-                <i class="ri-book-open-line"></i>
-                <span>Browse Effects Library ({{ BASE_EFFECTS.length }} Effects)</span>
+                <i class="ri-subtract-line"></i>
               </button>
-
-              <div class="base-rank-stepper-box">
-                <label class="base-rank-label">
-                  <span>Effect Rank:</span>
-                </label>
-                <div class="rank-stepper-row">
-                  <button
-                    type="button"
-                    class="btn-step"
-                    :disabled="effect.ranks <= 1"
-                    @click="builderStore.updateEffectRank(effect, -1)"
-                    title="Decrease Rank"
-                  >
-                    <i class="ri-subtract-line"></i>
-                  </button>
-                  <span class="rank-display">Rank {{ effect.ranks }}</span>
-                  <button
-                    type="button"
-                    class="btn-step"
-                    @click="builderStore.updateEffectRank(effect, 1)"
-                    title="Increase Rank"
-                  >
-                    <i class="ri-add-line"></i>
-                  </button>
-                </div>
-              </div>
+              <input
+                v-model.number="effect.ranks"
+                type="number"
+                min="1"
+                max="30"
+                class="rank-num-input"
+              />
+              <button
+                type="button"
+                class="btn-step"
+                @click="builderStore.updateEffectRank(effect, 1)"
+                title="Increase Rank"
+              >
+                <i class="ri-add-line"></i>
+              </button>
             </div>
           </div>
 
-          <!-- Right Column: Official Rules & Mechanics (~62%) -->
-          <div class="base-col-details">
-            <div class="base-details-header">
-              <i class="ri-file-list-3-line"></i>
-              <span class="base-details-title">Effect Rules & Mechanics</span>
-            </div>
-            <p class="base-effect-desc">{{ currentBaseInfo?.desc || 'Official M&M 3E base effect.' }}</p>
-          </div>
+          <!-- Rules Toggle -->
+          <button
+            type="button"
+            class="btn-toggle-rules"
+            :class="{ active: showRules }"
+            @click="showRules = !showRules"
+            title="Toggle Official M&M 3e Rules"
+          >
+            <i class="ri-book-read-line"></i>
+            <span>{{ showRules ? 'Hide Rules' : 'M&M Rules' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Collapsible Rules Drawer -->
+      <div v-if="showRules" class="rules-collapsible-drawer span-full">
+        <div class="rules-drawer-head">
+          <i class="ri-file-list-3-line"></i>
+          <span>Official Mechanics & Rules (DHH)</span>
+        </div>
+        <p class="rules-desc-text">{{ currentBaseInfo?.desc || 'Official M&M 3E base effect.' }}</p>
+      </div>
+
+      <!-- Combat Parameters Status Strip -->
+      <div class="params-status-strip span-full">
+        <div class="param-status-item">
+          <span class="param-lbl">Action:</span>
+          <span class="param-val">{{ effect.action || 'Standard' }}</span>
+        </div>
+        <div class="param-status-divider"></div>
+        <div class="param-status-item">
+          <span class="param-lbl">Range:</span>
+          <span class="param-val">{{ effect.range || 'Close' }}</span>
+        </div>
+        <div class="param-status-divider"></div>
+        <div class="param-status-item">
+          <span class="param-lbl">Duration:</span>
+          <span class="param-val">{{ effect.duration || 'Instant' }}</span>
+        </div>
+        <div class="param-status-divider"></div>
+        <div class="param-status-item highlight">
+          <span class="param-lbl">Resisted By:</span>
+          <span class="param-val">{{ effect.resistance || 'Toughness' }}</span>
         </div>
       </div>
 
       <!-- Effect Configurator (Enhanced Trait, Senses, Affliction, Illusion, Immunity, Movement, etc.) -->
       <EffectConfigurator :effect="effect" class="span-full" />
-
-      <!-- Combat Parameters (Action, Range, Duration, Resistance) -->
-      <div class="form-group span-full">
-        <label class="field-label">Action & Timing Parameters</label>
-        <div class="params-row">
-          <div class="param-chip">
-            <span class="param-label">Action:</span>
-            <span class="param-value">{{ effect.action || 'Standard' }}</span>
-          </div>
-          <div class="param-chip">
-            <span class="param-label">Range:</span>
-            <span class="param-value">{{ effect.range || 'Close' }}</span>
-          </div>
-          <div class="param-chip">
-            <span class="param-label">Duration:</span>
-            <span class="param-value">{{ effect.duration || 'Instant' }}</span>
-          </div>
-          <div class="param-chip">
-            <span class="param-label">Resisted By:</span>
-            <span class="param-value highlight">{{ effect.resistance || 'Toughness' }}</span>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Modifiers Section (Extras & Flaws) -->
@@ -139,245 +191,251 @@
         </button>
       </div>
 
-      <!-- Applied Extras List -->
-      <div class="mods-category-block">
-        <div class="mods-block-header">
-          <span class="mods-subhead extras-head">
-            <i class="ri-add-circle-line"></i> Extras ({{ effect.extras?.length || 0 }})
-          </span>
-        </div>
+      <!-- Applied Extras & Flaws (2-Column Grid) -->
+      <div class="modifiers-two-col-grid">
+        <!-- Extras Column -->
+        <div class="mods-category-block">
+          <div class="mods-block-header">
+            <span class="mods-subhead extras-head">
+              <i class="ri-add-circle-line"></i> Extras ({{ effect.extras?.length || 0 }})
+            </span>
+          </div>
 
-        <div v-if="effect.extras && effect.extras.length > 0" class="applied-cards-grid">
-          <div
-            v-for="(extra, idx) in effect.extras"
-            :key="extra.name + '_' + idx"
-            class="modifier-card mod-card-extra"
-          >
-            <!-- Card Header: Title, Cost Badge, Delete -->
-            <div class="mod-card-header">
-              <div class="mod-card-identity">
-                <span class="mod-card-title">{{ extra.name }}</span>
-                <span v-if="extra.customText" class="mod-card-custom-preview">: {{ extra.customText }}</span>
-              </div>
-              <div class="mod-card-header-actions">
-                <span class="mod-card-cost extra-cost">
-                  {{ formatModCost(extra, false) }}
-                </span>
-                <button
-                  type="button"
-                  class="mod-card-del-btn"
-                  title="Remove Extra"
-                  @click="builderStore.removeModifierFromTarget(effect, false, extra.id || idx)"
-                >
-                  <i class="ri-close-line"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Card Body: Description of Effect & Rules -->
-            <div class="mod-card-body">
-              <p class="mod-card-desc">{{ getModifierMeta(extra, false).desc }}</p>
-
-              <!-- Custom Player Specification Input -->
-              <div
-                v-if="getModifierMeta(extra, false).hasCustomText || extra.customText !== undefined"
-                class="mod-custom-text-wrapper"
-              >
-                <label class="mod-custom-text-label">
-                  <i class="ri-edit-line"></i>
-                  <span>{{ getModifierMeta(extra, false).customTextLabel || 'Specification / Detail:' }}</span>
-                </label>
-                <input
-                  v-model="extra.customText"
-                  type="text"
-                  class="form-control form-control-sm mod-custom-input"
-                  :placeholder="getModifierMeta(extra, false).customTextPlaceholder || 'Specify details...'"
-                  @input="onModifierCustomTextInput(extra)"
-                />
-              </div>
-
-              <!-- Optional Variant Chips (if options exist) -->
-              <div
-                v-if="getModifierMeta(extra, false).options?.length > 0"
-                class="mod-card-options-wrapper"
-              >
-                <span class="mod-options-label">Active Variant:</span>
-                <div class="mod-options-pills">
+          <div v-if="effect.extras && effect.extras.length > 0" class="applied-cards-grid">
+            <div
+              v-for="(extra, idx) in effect.extras"
+              :key="extra.name + '_' + idx"
+              class="modifier-card mod-card-extra"
+            >
+              <!-- Card Header: Title, Cost Badge, Delete -->
+              <div class="mod-card-header">
+                <div class="mod-card-identity">
+                  <span class="mod-card-title">{{ extra.name }}</span>
+                  <span v-if="extra.customText" class="mod-card-custom-preview">: {{ extra.customText }}</span>
+                </div>
+                <div class="mod-card-header-actions">
+                  <span class="mod-card-cost extra-cost">
+                    {{ formatModCost(extra, false) }}
+                  </span>
                   <button
-                    v-for="opt in getModifierMeta(extra, false).options"
-                    :key="opt.id"
                     type="button"
-                    class="mod-option-pill extra-opt"
-                    :class="{ active: (getSelectedOptionId(extra) || getModifierMeta(extra, false).options[0]?.id) === opt.id }"
-                    @click="setModifierOptionDirect(extra, opt)"
+                    class="mod-card-del-btn"
+                    title="Remove Extra"
+                    @click="builderStore.removeModifierFromTarget(effect, false, extra.id || idx)"
                   >
-                    {{ opt.label }}
+                    <i class="ri-close-line"></i>
                   </button>
                 </div>
               </div>
-            </div>
 
-            <!-- Card Footer: Stepper & Subtotal impact -->
-            <div class="mod-card-footer">
-              <div v-if="extra.hasRanks || getModifierMeta(extra, false).hasRanks" class="mod-card-stepper">
-                <span class="stepper-label">Ranks:</span>
-                <div class="stepper-group">
-                  <button
-                    type="button"
-                    class="step-btn"
-                    :disabled="(extra.ranks || 1) <= 1"
-                    @click="builderStore.stepModifierRank(extra, -1)"
-                  >-</button>
-                  <span class="step-value">R{{ extra.ranks || 1 }}</span>
-                  <button
-                    type="button"
-                    class="step-btn"
-                    @click="builderStore.stepModifierRank(extra, 1)"
-                  >+</button>
+              <!-- Card Body: Description of Effect & Rules -->
+              <div class="mod-card-body">
+                <p class="mod-card-desc">{{ getModifierMeta(extra, false).desc }}</p>
+
+                <!-- Custom Player Specification Input -->
+                <div
+                  v-if="getModifierMeta(extra, false).hasCustomText || extra.customText !== undefined"
+                  class="mod-custom-text-wrapper"
+                >
+                  <label class="mod-custom-text-label">
+                    <i class="ri-edit-line"></i>
+                    <span>{{ getModifierMeta(extra, false).customTextLabel || 'Specification / Detail:' }}</span>
+                  </label>
+                  <input
+                    v-model="extra.customText"
+                    type="text"
+                    class="form-control form-control-sm mod-custom-input"
+                    :placeholder="getModifierMeta(extra, false).customTextPlaceholder || 'Specify details...'"
+                    @input="onModifierCustomTextInput(extra)"
+                  />
+                </div>
+
+                <!-- Optional Variant Chips (if options exist) -->
+                <div
+                  v-if="getModifierMeta(extra, false).options?.length > 0"
+                  class="mod-card-options-wrapper"
+                >
+                  <span class="mod-options-label">Active Variant:</span>
+                  <div class="mod-options-pills">
+                    <button
+                      v-for="opt in getModifierMeta(extra, false).options"
+                      :key="opt.id"
+                      type="button"
+                      class="mod-option-pill extra-opt"
+                      :class="{ active: (getSelectedOptionId(extra) || getModifierMeta(extra, false).options[0]?.id) === opt.id }"
+                      @click="setModifierOptionDirect(extra, opt)"
+                    >
+                      {{ opt.label }}
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div v-else class="mod-card-flat-info">
-                <i class="ri-shield-flash-line"></i>
-                <span>Fixed Extra</span>
-              </div>
 
-              <div class="mod-card-subtotal">
-                <span class="subtotal-label">Subtotal:</span>
-                <span class="subtotal-val extra-text">
-                  {{ calculateModSubtotal(extra, false) }}
-                </span>
+              <!-- Card Footer: Stepper & Subtotal impact -->
+              <div class="mod-card-footer">
+                <div v-if="extra.hasRanks || getModifierMeta(extra, false).hasRanks" class="mod-card-stepper">
+                  <span class="stepper-label">Ranks:</span>
+                  <div class="stepper-group">
+                    <button
+                      type="button"
+                      class="step-btn"
+                      :disabled="(extra.ranks || 1) <= 1"
+                      @click="builderStore.stepModifierRank(extra, -1)"
+                    >-</button>
+                    <span class="step-value">R{{ extra.ranks || 1 }}</span>
+                    <button
+                      type="button"
+                      class="step-btn"
+                      @click="builderStore.stepModifierRank(extra, 1)"
+                    >+</button>
+                  </div>
+                </div>
+                <div v-else class="mod-card-flat-info">
+                  <i class="ri-shield-flash-line"></i>
+                  <span>Fixed Extra</span>
+                </div>
+
+                <div class="mod-card-subtotal">
+                  <span class="subtotal-label">Subtotal:</span>
+                  <span class="subtotal-val extra-text">
+                    {{ calculateModSubtotal(extra, false) }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
+
+          <div v-else class="empty-mods-clean">
+            <i class="ri-information-line"></i>
+            <span>No extras applied.</span>
+          </div>
         </div>
 
-        <div v-else class="empty-mods-notice">
-          <i class="ri-information-line"></i>
-          <span>No extras applied. Click "Browse Extras / Flaws" to add Multiattack, Area, Penetrating, etc.</span>
-        </div>
-      </div>
+        <!-- Flaws Column -->
+        <div class="mods-category-block">
+          <div class="mods-block-header">
+            <span class="mods-subhead flaws-head">
+              <i class="ri-indeterminate-circle-line"></i> Flaws ({{ effect.flaws?.length || 0 }})
+            </span>
+          </div>
 
-      <!-- Applied Flaws List -->
-      <div class="mods-category-block">
-        <div class="mods-block-header">
-          <span class="mods-subhead flaws-head">
-            <i class="ri-indeterminate-circle-line"></i> Flaws ({{ effect.flaws?.length || 0 }})
-          </span>
-        </div>
-
-        <div v-if="effect.flaws && effect.flaws.length > 0" class="applied-cards-grid">
-          <div
-            v-for="(flaw, idx) in effect.flaws"
-            :key="flaw.name + '_' + idx"
-            class="modifier-card mod-card-flaw"
-          >
-            <!-- Card Header: Title, Cost Badge, Delete -->
-            <div class="mod-card-header">
-              <div class="mod-card-identity">
-                <span class="mod-card-title">{{ flaw.name }}</span>
-                <span v-if="flaw.customText" class="mod-card-custom-preview">: {{ flaw.customText }}</span>
-              </div>
-              <div class="mod-card-header-actions">
-                <span class="mod-card-cost flaw-cost">
-                  {{ formatModCost(flaw, true) }}
-                </span>
-                <button
-                  type="button"
-                  class="mod-card-del-btn"
-                  title="Remove Flaw"
-                  @click="builderStore.removeModifierFromTarget(effect, true, flaw.id || idx)"
-                >
-                  <i class="ri-close-line"></i>
-                </button>
-              </div>
-            </div>
-
-            <!-- Card Body: Description of Effect & Rules -->
-            <div class="mod-card-body">
-              <p class="mod-card-desc">{{ getModifierMeta(flaw, true).desc }}</p>
-
-              <!-- Custom Player Specification Input -->
-              <div
-                v-if="getModifierMeta(flaw, true).hasCustomText || flaw.customText !== undefined"
-                class="mod-custom-text-wrapper"
-              >
-                <label class="mod-custom-text-label">
-                  <i class="ri-edit-line"></i>
-                  <span>{{ getModifierMeta(flaw, true).customTextLabel || 'Specification / Detail:' }}</span>
-                </label>
-                <input
-                  v-model="flaw.customText"
-                  type="text"
-                  class="form-control form-control-sm mod-custom-input"
-                  :placeholder="getModifierMeta(flaw, true).customTextPlaceholder || 'Specify details...'"
-                  @input="onModifierCustomTextInput(flaw)"
-                />
-              </div>
-
-              <!-- Optional Variant Chips (if options exist) -->
-              <div
-                v-if="getModifierMeta(flaw, true).options?.length > 0"
-                class="mod-card-options-wrapper"
-              >
-                <span class="mod-options-label">Active Variant:</span>
-                <div class="mod-options-pills">
+          <div v-if="effect.flaws && effect.flaws.length > 0" class="applied-cards-grid">
+            <div
+              v-for="(flaw, idx) in effect.flaws"
+              :key="flaw.name + '_' + idx"
+              class="modifier-card mod-card-flaw"
+            >
+              <!-- Card Header: Title, Cost Badge, Delete -->
+              <div class="mod-card-header">
+                <div class="mod-card-identity">
+                  <span class="mod-card-title">{{ flaw.name }}</span>
+                  <span v-if="flaw.customText" class="mod-card-custom-preview">: {{ flaw.customText }}</span>
+                </div>
+                <div class="mod-card-header-actions">
+                  <span class="mod-card-cost flaw-cost">
+                    {{ formatModCost(flaw, true) }}
+                  </span>
                   <button
-                    v-for="opt in getModifierMeta(flaw, true).options"
-                    :key="opt.id"
                     type="button"
-                    class="mod-option-pill flaw-opt"
-                    :class="{ active: (getSelectedOptionId(flaw) || getModifierMeta(flaw, true).options[0]?.id) === opt.id }"
-                    @click="setModifierOptionDirect(flaw, opt)"
+                    class="mod-card-del-btn"
+                    title="Remove Flaw"
+                    @click="builderStore.removeModifierFromTarget(effect, true, flaw.id || idx)"
                   >
-                    {{ opt.label }}
+                    <i class="ri-close-line"></i>
                   </button>
                 </div>
               </div>
-            </div>
 
-            <!-- Card Footer: Stepper & Subtotal impact -->
-            <div class="mod-card-footer">
-              <div v-if="flaw.hasRanks || getModifierMeta(flaw, true).hasRanks" class="mod-card-stepper">
-                <span class="stepper-label">Ranks:</span>
-                <div class="stepper-group">
-                  <button
-                    type="button"
-                    class="step-btn"
-                    :disabled="(flaw.ranks || 1) <= 1"
-                    @click="builderStore.stepModifierRank(flaw, -1)"
-                  >-</button>
-                  <span class="step-value">R{{ flaw.ranks || 1 }}</span>
-                  <button
-                    type="button"
-                    class="step-btn"
-                    @click="builderStore.stepModifierRank(flaw, 1)"
-                  >+</button>
+              <!-- Card Body: Description of Effect & Rules -->
+              <div class="mod-card-body">
+                <p class="mod-card-desc">{{ getModifierMeta(flaw, true).desc }}</p>
+
+                <!-- Custom Player Specification Input -->
+                <div
+                  v-if="getModifierMeta(flaw, true).hasCustomText || flaw.customText !== undefined"
+                  class="mod-custom-text-wrapper"
+                >
+                  <label class="mod-custom-text-label">
+                    <i class="ri-edit-line"></i>
+                    <span>{{ getModifierMeta(flaw, true).customTextLabel || 'Specification / Detail:' }}</span>
+                  </label>
+                  <input
+                    v-model="flaw.customText"
+                    type="text"
+                    class="form-control form-control-sm mod-custom-input"
+                    :placeholder="getModifierMeta(flaw, true).customTextPlaceholder || 'Specify details...'"
+                    @input="onModifierCustomTextInput(flaw)"
+                  />
+                </div>
+
+                <!-- Optional Variant Chips (if options exist) -->
+                <div
+                  v-if="getModifierMeta(flaw, true).options?.length > 0"
+                  class="mod-card-options-wrapper"
+                >
+                  <span class="mod-options-label">Active Variant:</span>
+                  <div class="mod-options-pills">
+                    <button
+                      v-for="opt in getModifierMeta(flaw, true).options"
+                      :key="opt.id"
+                      type="button"
+                      class="mod-option-pill flaw-opt"
+                      :class="{ active: (getSelectedOptionId(flaw) || getModifierMeta(flaw, true).options[0]?.id) === opt.id }"
+                      @click="setModifierOptionDirect(flaw, opt)"
+                    >
+                      {{ opt.label }}
+                    </button>
+                  </div>
                 </div>
               </div>
-              <div v-else class="mod-card-flat-info">
-                <i class="ri-alert-line"></i>
-                <span>Fixed Limitation</span>
-              </div>
 
-              <div class="mod-card-subtotal">
-                <span class="subtotal-label">Discount:</span>
-                <span class="subtotal-val flaw-text">
-                  {{ calculateModSubtotal(flaw, true) }}
-                </span>
+              <!-- Card Footer: Stepper & Subtotal impact -->
+              <div class="mod-card-footer">
+                <div v-if="flaw.hasRanks || getModifierMeta(flaw, true).hasRanks" class="mod-card-stepper">
+                  <span class="stepper-label">Ranks:</span>
+                  <div class="stepper-group">
+                    <button
+                      type="button"
+                      class="step-btn"
+                      :disabled="(flaw.ranks || 1) <= 1"
+                      @click="builderStore.stepModifierRank(flaw, -1)"
+                    >-</button>
+                    <span class="step-value">R{{ flaw.ranks || 1 }}</span>
+                    <button
+                      type="button"
+                      class="step-btn"
+                      @click="builderStore.stepModifierRank(flaw, 1)"
+                    >+</button>
+                  </div>
+                </div>
+                <div v-else class="mod-card-flat-info">
+                  <i class="ri-alert-line"></i>
+                  <span>Fixed Limitation</span>
+                </div>
+
+                <div class="mod-card-subtotal">
+                  <span class="subtotal-label">Discount:</span>
+                  <span class="subtotal-val flaw-text">
+                    {{ calculateModSubtotal(flaw, true) }}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div v-else class="empty-mods-notice">
-          <i class="ri-information-line"></i>
-          <span>No flaws applied. Click "Browse Extras / Flaws" to add Noticeable, Quirk, Tiring, Unreliable, etc.</span>
+          <div v-else class="empty-mods-clean">
+            <i class="ri-information-line"></i>
+            <span>No flaws applied.</span>
+          </div>
         </div>
       </div>
     </div>
 
     <!-- LINKED EFFECTS SUITE (SIMULTANEOUS POWERS) -->
-    <div class="canvas-linked-section">
+    <div
+      v-if="canHaveLinkedEffects"
+      class="canvas-linked-section"
+    >
       <div class="linked-section-header">
         <div class="sec-title">
           <i class="ri-links-line"></i>
@@ -859,6 +917,51 @@ import EffectConfigurator from './EffectConfigurator.vue';
 const heroStore = useHeroStore();
 const builderStore = usePowerBuilderStore();
 
+const showRules = ref(false);
+
+const canHaveLinkedEffects = computed(() => {
+  return ['main', 'slot', 'compound', 'compound_slot'].includes(builderStore.activeTargetType);
+});
+
+const isCompoundSlot = computed(() => {
+  return builderStore.activeTargetType === 'compound_slot' || builderStore.activeTargetType === 'compound_slot_linked';
+});
+
+const currentSlotRef = computed(() => {
+  if (builderStore.activeTargetType === 'slot' || builderStore.activeTargetType === 'slot_linked') {
+    if (builderStore.power.type === 'device') {
+      return builderStore.activeSubPower?.alternateEffects?.[builderStore.activeSlotIndex] || null;
+    }
+    return builderStore.power.alternateEffects?.[builderStore.activeSlotIndex] || null;
+  }
+  if (builderStore.activeTargetType === 'compound_slot' || builderStore.activeTargetType === 'compound_slot_linked') {
+    return builderStore.activeCompoundEffect?.alternateEffects?.[builderStore.activeSlotIndex] || null;
+  }
+  return null;
+});
+
+function getEffectIcon(baseEffect) {
+  const map = {
+    Damage: 'ri-sword-line',
+    Blast: 'ri-flashlight-line',
+    Affliction: 'ri-virus-line',
+    Protection: 'ri-shield-line',
+    Flight: 'ri-flight-takeoff-line',
+    Speed: 'ri-run-line',
+    Quickness: 'ri-timer-flash-line',
+    'Enhanced Trait': 'ri-arrow-up-circle-line',
+    Healing: 'ri-heart-pulse-line',
+    Weaken: 'ri-arrow-down-circle-line',
+    'Move Object': 'ri-hand-coin-line',
+    Environment: 'ri-sun-cloud-line',
+    Concealment: 'ri-eye-close-line',
+    Senses: 'ri-radar-line',
+    Immunity: 'ri-shield-cross-line',
+    Regeneration: 'ri-refresh-line'
+  };
+  return map[baseEffect] || 'ri-flashlight-line';
+}
+
 const props = defineProps({
   effect: {
     type: Object,
@@ -890,24 +993,15 @@ const currentBaseInfo = computed(() => {
 });
 
 const linkedEffectsList = computed(() => {
-  if (Array.isArray(props.effect.linkedEffects) && props.effect.linkedEffects.length > 0) {
-    return props.effect.linkedEffects;
-  }
-  if (builderStore.power.type === 'device') {
-    return builderStore.activeSubPower?.linkedEffects || [];
-  }
-  if (builderStore.activeTargetType === 'slot') {
-    return builderStore.power.alternateEffects?.[builderStore.activeSlotIndex]?.linkedEffects || [];
-  }
-  return builderStore.power.linkedEffects || [];
+  return builderStore.currentLinkedEffects;
 });
 
 function handleAddLinkedEffect() {
-  builderStore.addLinkedEffect(props.effect, 'Affliction');
+  builderStore.addLinkedEffect(null, 'Affliction');
 }
 
 function handleRemoveLinkedEffect(idx) {
-  builderStore.removeLinkedEffect(props.effect, idx);
+  builderStore.removeLinkedEffect(null, idx);
 }
 
 function getLinkedCost(linkedEff) {
@@ -1066,6 +1160,321 @@ function calculateModSubtotal(mod, isFlaw = false) {
   font-weight: 900;
   color: var(--accent-primary);
   font-variant-numeric: tabular-nums;
+}
+
+/* Compound & Stunt Sub-Effect Identity Bar */
+.sub-effect-identity-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: rgba(0, 111, 184, 0.08);
+  border: 1px solid rgba(0, 111, 184, 0.25);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.85rem;
+  flex-wrap: wrap;
+}
+
+.sub-name-group {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  flex: 1;
+  min-width: 240px;
+}
+
+.sub-name-label {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.sub-name-input {
+  flex: 1;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.35rem 0.6rem;
+  outline: none;
+  transition: all var(--trans-fast);
+}
+
+.sub-name-input:focus {
+  border-color: var(--accent-primary);
+  box-shadow: 0 0 0 1px rgba(0, 111, 184, 0.3);
+}
+
+.sub-role-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-primary-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-primary-role.active {
+  background: rgba(234, 179, 8, 0.15);
+  border-color: #eab308;
+  color: #fde047;
+}
+
+/* Base Effect Hero Strip */
+.base-effect-hero-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 1rem;
+  flex-wrap: wrap;
+}
+
+.hero-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.base-icon-box {
+  width: 38px;
+  height: 38px;
+  background: rgba(0, 111, 184, 0.12);
+  border: 1px solid rgba(0, 111, 184, 0.35);
+  color: var(--accent-secondary);
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  flex-shrink: 0;
+}
+
+.base-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.base-effect-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.badge-cat-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  padding: 0.15rem 0.4rem;
+  border-radius: var(--radius-xs);
+}
+
+.base-cost-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-secondary);
+  font-family: var(--font-mono);
+}
+
+.btn-catalog-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-catalog-trigger:hover {
+  background: var(--bg-card-hover);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.hero-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.rank-stepper-box {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.rank-lbl {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.rank-num-input {
+  width: 44px;
+  background: transparent;
+  border: none;
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  outline: none;
+}
+
+.rank-num-input::-webkit-inner-spin-button,
+.rank-num-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.btn-toggle-rules {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.38rem 0.65rem;
+  font-size: 0.72rem;
+  font-weight: 600;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-toggle-rules:hover,
+.btn-toggle-rules.active {
+  background: rgba(0, 111, 184, 0.15);
+  border-color: rgba(0, 111, 184, 0.4);
+  color: var(--accent-secondary);
+}
+
+/* Rules Drawer */
+.rules-collapsible-drawer {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.95rem;
+}
+
+.rules-drawer-head {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-amber);
+  margin-bottom: 0.35rem;
+}
+
+.rules-desc-text {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Combat Parameters Status Strip */
+.params-status-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.param-status-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+}
+
+.param-status-item .param-lbl {
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.param-status-item .param-val {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.param-status-item.highlight .param-val {
+  color: #38bdf8;
+}
+
+.param-status-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-subtle);
+}
+
+/* Modifiers 2-Column Responsive Deck */
+.modifiers-two-col-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+}
+
+@media (max-width: 900px) {
+  .modifiers-two-col-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.empty-mods-clean {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.65rem 0.85rem;
+  background: var(--bg-card);
+  border: 1px dashed var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.74rem;
 }
 
 .canvas-form-grid {
@@ -2359,5 +2768,40 @@ function calculateModSubtotal(mod, isFlaw = false) {
   margin-left: auto;
   margin-right: auto;
   text-align: center;
+}
+
+.slot-identity-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.slot-capacity-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-sm);
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.slot-capacity-pill.is-overflow {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #ef4444;
+}
+
+.slot-capacity-pill .overflow-tag {
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.35rem;
+  border-radius: 3px;
 }
 </style>

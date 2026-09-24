@@ -116,6 +116,12 @@ export const useHeroStore = defineStore('hero', {
               if (Array.isArray(s?.linkedEffects)) activeEffects.push(...s.linkedEffects);
             }
           }
+        } else if (p.type === 'compound' && Array.isArray(p.compoundEffects)) {
+          for (const sub of p.compoundEffects) {
+            if (sub.active !== false && sub.effect) {
+              activeEffects.push(sub.effect);
+            }
+          }
         } else if (!isArray || p.activeSlotId === 'main' || !p.alternateEffects?.some(s => s.id === p.activeSlotId)) {
           if (p.mainEffect) activeEffects.push(p.mainEffect);
           else if (p.baseEffect || p.effectType) activeEffects.push(p);
@@ -830,6 +836,14 @@ export const useHeroStore = defineStore('hero', {
       const p = (this.character.powers || []).find(pow => pow.id === powerId);
       if (p && p.type === 'device' && p.devicePowers?.[devSubIdx]) {
         p.devicePowers[devSubIdx].activeSlotId = slotId;
+        this.pushHistory();
+      }
+    },
+
+    setActiveCompoundSubSlot(powerId, compSubIdx, slotId) {
+      const p = (this.character.powers || []).find(pow => pow.id === powerId);
+      if (p && p.type === 'compound' && p.compoundEffects?.[compSubIdx]) {
+        p.compoundEffects[compSubIdx].activeSlotId = slotId;
         this.pushHistory();
       }
     },

@@ -116,6 +116,52 @@ export function pruneCharacterForShare(rawChar) {
         return subOut;
       });
     }
+    if (Array.isArray(p.compoundEffects) && p.compoundEffects.length > 0) {
+      out.compoundEffects = p.compoundEffects.map(ce => {
+        const ceOut = {
+          id: ce.id,
+          name: ce.name,
+          isPrimaryAction: Boolean(ce.isPrimaryAction),
+          isLinked: Boolean(ce.isLinked),
+          effect: pruneEffect(ce.effect || ce.mainEffect || ce)
+        };
+        const rawCeLinked = (Array.isArray(ce.linkedEffects) && ce.linkedEffects.length > 0)
+          ? ce.linkedEffects
+          : (Array.isArray(ce.effect?.linkedEffects) && ce.effect.linkedEffects.length > 0
+            ? ce.effect.linkedEffects
+            : (Array.isArray(ce.mainEffect?.linkedEffects) ? ce.mainEffect.linkedEffects : []));
+        if (rawCeLinked.length > 0) {
+          ceOut.linkedEffects = rawCeLinked.map(pruneEffect);
+        }
+        if (Array.isArray(ce.alternateEffects) && ce.alternateEffects.length > 0) {
+          ceOut.alternateEffects = ce.alternateEffects.map(ae => {
+            const altOut = {
+              id: ae.id,
+              name: ae.name,
+              isDynamic: Boolean(ae.isDynamic),
+              effect: pruneEffect(ae.effect || ae.mainEffect || ae)
+            };
+            const rawAltLinked = (Array.isArray(ae.linkedEffects) && ae.linkedEffects.length > 0)
+              ? ae.linkedEffects
+              : (Array.isArray(ae.effect?.linkedEffects) ? ae.effect.linkedEffects : []);
+            if (rawAltLinked.length > 0) {
+              altOut.linkedEffects = rawAltLinked.map(pruneEffect);
+            }
+            return altOut;
+          });
+        }
+        if (ce.activeSlotId && ce.activeSlotId !== 'main') ceOut.activeSlotId = ce.activeSlotId;
+        if (ce.active !== undefined && ce.active !== true) ceOut.active = ce.active;
+        if (ce.linkGroupId) ceOut.linkGroupId = ce.linkGroupId;
+        return ceOut;
+      });
+    }
+    if (Array.isArray(p.sharedModifiers) && p.sharedModifiers.length > 0) {
+      out.sharedModifiers = p.sharedModifiers;
+    }
+    if (p.compoundMode) out.compoundMode = p.compoundMode;
+    if (p.activation && p.activation !== 'none') out.activation = p.activation;
+    if (p.activationCost) out.activationCost = p.activationCost;
     if (Array.isArray(p.descriptors) && p.descriptors.length > 0) {
       out.descriptors = p.descriptors;
     }

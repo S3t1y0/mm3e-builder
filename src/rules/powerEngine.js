@@ -2350,23 +2350,44 @@ export function createEmptyDeviceSubPower(name = 'Sub-Power', baseEffect = 'Dama
 }
 
 /**
- * Creates a full normalized Power conforming to the new Power Schema.
+ * Creates an empty sub-effect component for a Compound Power.
+ * M&M 3e rules allow compound powers to combine multiple effects into a single named power.
  */
-export function createEmptyPower() {
+export function createEmptyCompoundEffect(name = '', baseEffect = 'Damage', isPrimary = false, isLinked = false) {
+  const eff = createEmptyEffect(baseEffect);
+  if (name) eff.name = name;
   return {
+    id: 'comp_eff_' + Date.now() + Math.random().toString(36).substr(2, 4),
+    name: name || eff.name || baseEffect,
+    isPrimaryAction: Boolean(isPrimary),
+    isLinked: Boolean(isLinked),
+    linkGroupId: 'link_group_1',
+    effect: eff,
+    active: true
+  };
+}
+
+/**
+ * Creates a full normalized Power conforming to the Power Schema.
+ */
+export function createEmptyPower(type = 'standard') {
+  const power = {
     id: 'pow_' + Date.now() + Math.random().toString(36).substr(2, 4),
     name: '',
     summary: '',
-    type: 'standard', // 'standard' | 'compound' | 'array' | 'device'
-    activation: 'none', // 'none' | 'move' | 'standard'
+    type: type || 'standard',
+    compoundMode: 'suite', // 'suite'
+    activation: 'none',
     activationCost: 0,
+    sharedModifiers: [],
     descriptors: [],
     mainEffect: createEmptyEffect('Damage'),
     linkedEffects: [],
     alternateEffects: [],
-    devicePowers: [], // For 'device' container structure
+    compoundEffects: [],
+    devicePowers: [],
     deviceConfig: {
-      type: 'none', // 'none' | 'removable' | 'easily_removable'
+      type: 'none',
       descriptor: '',
       toughness: 10
     },
@@ -2374,6 +2395,16 @@ export function createEmptyPower() {
     activeSlotId: 'main',
     notes: ''
   };
+
+  if (type === 'compound') {
+    power.compoundEffects = [
+      createEmptyCompoundEffect('Component #1', 'Damage', true, false),
+      createEmptyCompoundEffect('Component #2', 'Affliction', false, false)
+    ];
+    power.mainEffect = power.compoundEffects[0].effect;
+  }
+
+  return power;
 }
 
 /**
@@ -2560,6 +2591,67 @@ export function normalizePower(rawPower) {
       power.mainEffect = power.devicePowers[0].effect || power.devicePowers[0].mainEffect;
     }
     // Device containers group sub-powers; top-level linked and alternate effects must be empty
+    power.linkedEffects = [];
+    power.alternateEffects = [];
+  }
+
+  // Compound Power normalization (M&M 3e Deluxe Hero's Handbook p. 136-137 & p. 147)
+  if (power.type === 'compound') {
+    power.compoundMode = power.compoundMode || 'linked';
+    power.sharedModifiers = Array.isArray(power.sharedModifiers)
+      ? power.sharedModifiers.map(normalizeModifier)
+      : [];
+
+    if (!Array.isArray(power.compoundEffects) || power.compoundEffects.length === 0) {
+      const primaryEff = power.mainEffect ? normalizeEffect(power.mainEffect) : createEmptyEffect('Damage');
+      power.compoundEffects = [
+        {
+          id: 'comp_eff_' + Date.now() + '_0',
+          name: primaryEff.name || 'Primary Effect',
+          isPrimaryAction: true,
+          isLinked: true,
+          linkGroupId: 'link_group_1',
+          effect: primaryEff,
+          active: true
+        }
+      ];
+      if (Array.isArray(power.linkedEffects) && power.linkedEffects.length > 0) {
+        power.linkedEffects.forEach((le, lIdx) => {
+          power.compoundEffects.push({
+            id: 'comp_eff_' + Date.now() + '_' + (lIdx + 1),
+            name: le.name || `Linked Effect #${lIdx + 1}`,
+            isPrimaryAction: false,
+            isLinked: true,
+            linkGroupId: 'link_group_1',
+            effect: normalizeEffect(le),
+            active: true
+          });
+        });
+      }
+    } else {
+      power.compoundEffects = power.compoundEffects.map((item, idx) => {
+        const subEff = item.effect || item.mainEffect || item;
+        const normEff = normalizeEffect(subEff);
+        const rawLinked = Array.isArray(item.linkedEffects) ? item.linkedEffects : [];
+        const rawAlts = Array.isArray(item.alternateEffects) ? item.alternateEffects : [];
+        return {
+          id: item.id || ('comp_eff_' + Date.now() + '_' + idx),
+          name: item.name || normEff.name || `Sub-Effect #${idx + 1}`,
+          isPrimaryAction: item.isPrimaryAction !== undefined ? Boolean(item.isPrimaryAction) : (idx === 0),
+          isLinked: false,
+          linkGroupId: item.linkGroupId || 'link_group_1',
+          effect: normEff,
+          active: item.active !== undefined ? Boolean(item.active) : true,
+          linkedEffects: rawLinked.map(normalizeEffect),
+          alternateEffects: rawAlts.map(normalizeAlternateSlot)
+        };
+      });
+    }
+
+    const primaryComp = power.compoundEffects.find(c => c.isPrimaryAction) || power.compoundEffects[0];
+    if (primaryComp) {
+      power.mainEffect = primaryComp.effect;
+    }
     power.linkedEffects = [];
     power.alternateEffects = [];
   }
@@ -2998,6 +3090,32 @@ export function calculatePowerTotalCost(rawPower) {
     return Math.max(1, subtotalRaw - discount);
   }
 
+  // Compound Power: Sum of all sub-effects + linked + alternate stunts + shared flat modifiers + activation flaw
+  if (power.type === 'compound' && Array.isArray(power.compoundEffects) && power.compoundEffects.length > 0) {
+    let compoundSum = 0;
+    for (const item of power.compoundEffects) {
+      const itemMainCost = calculateEffectCost(item.effect, 0).totalCost;
+      let itemLinkedCost = 0;
+      for (const linked of (item.linkedEffects || [])) {
+        itemLinkedCost += calculateEffectCost(linked, 0).totalCost;
+      }
+      let itemAltCost = 0;
+      for (const alt of (item.alternateEffects || [])) {
+        itemAltCost += alt.isDynamic ? 2 : 1;
+      }
+      compoundSum += itemMainCost + itemLinkedCost + itemAltCost;
+    }
+    let sharedFlatTotal = Number(power.activationCost) || 0;
+    if (Array.isArray(power.sharedModifiers)) {
+      for (const mod of power.sharedModifiers) {
+        sharedFlatTotal += Number(mod.cost) || 0;
+      }
+    }
+    const rawSubtotal = Math.max(1, compoundSum + sharedFlatTotal);
+    const discount = calculateDeviceDiscount(rawSubtotal, power.deviceConfig?.type || 'none');
+    return Math.max(1, rawSubtotal - discount);
+  }
+
   // 1. Main effect cost
   const mainCost = calculateEffectCost(power.mainEffect, 0).totalCost;
 
@@ -3133,6 +3251,131 @@ export function calculatePowerDetailedBreakdown(rawPower) {
       finalCost,
       formulaString,
       arrayCapacity: rawSubtotal
+    };
+  }
+
+  // Compound Power Architecture (Deluxe Hero's Handbook p. 136-137 & p. 147)
+  if (power.type === 'compound') {
+    const compoundBreakdowns = (power.compoundEffects || []).map((sub, idx) => {
+      const breakdown = calculateEffectCost(sub.effect || createEmptyEffect(), 0);
+      const subMainCost = breakdown.totalCost;
+
+      const subLinkedBreakdowns = (sub.linkedEffects || []).map(l => ({
+        name: l.name || l.baseEffect,
+        cost: calculateEffectCost(l, 0).totalCost,
+        details: calculateEffectCost(l, 0)
+      }));
+      const subLinkedCost = subLinkedBreakdowns.reduce((sum, item) => sum + item.cost, 0);
+
+      const isSubArray = Array.isArray(sub.alternateEffects) && sub.alternateEffects.length > 0;
+      const subAlternateBreakdowns = isSubArray ? sub.alternateEffects.map(a => {
+        const slotEffectCost = calculateEffectCost(a.effect || createEmptyEffect(), 0).totalCost;
+        const slotLinkedBreakdowns = (a.linkedEffects || []).map(le => ({
+          name: le.name || le.baseEffect,
+          cost: calculateEffectCost(le, 0).totalCost,
+          details: calculateEffectCost(le, 0)
+        }));
+        const slotLinkedCost = slotLinkedBreakdowns.reduce((sum, item) => sum + item.cost, 0);
+        const combinedSlotValue = slotEffectCost + slotLinkedCost;
+
+        return {
+          name: a.name || a.effect?.name || 'Alternate Slot',
+          isDynamic: Boolean(a.isDynamic),
+          slotCost: a.isDynamic ? 2 : 1,
+          effectCost: combinedSlotValue,
+          linkedCost: slotLinkedCost,
+          linkedBreakdowns: slotLinkedBreakdowns
+        };
+      }) : [];
+
+      const subAlternateCost = subAlternateBreakdowns.reduce((sum, item) => sum + item.slotCost, 0);
+      const subArrayCapacity = subMainCost + subLinkedCost;
+      const highestSlotCost = subAlternateBreakdowns.reduce((max, s) => Math.max(max, s.effectCost), 0);
+      const isArrayOverflow = isSubArray && highestSlotCost > subArrayCapacity;
+      const totalCost = subMainCost + subLinkedCost + subAlternateCost;
+
+      return {
+        id: sub.id || idx,
+        name: sub.name || `Effect #${idx + 1}`,
+        baseEffect: sub.effect?.baseEffect || 'Damage',
+        ranks: sub.effect?.ranks || 1,
+        range: sub.effect?.range || 'Close',
+        action: sub.effect?.action || 'Standard',
+        duration: sub.effect?.duration || 'Instant',
+        isPrimaryAction: Boolean(sub.isPrimaryAction),
+        isLinked: false,
+        linkGroupId: sub.linkGroupId || 'link_group_1',
+        mainCost: subMainCost,
+        breakdown,
+        linkedCost: subLinkedCost,
+        linkedBreakdowns: subLinkedBreakdowns,
+        isSubArray,
+        arrayCapacity: subArrayCapacity,
+        subArrayCapacity,
+        highestSlotCost,
+        isArrayOverflow,
+        alternateCost: subAlternateCost,
+        alternateBreakdowns: subAlternateBreakdowns,
+        totalCost,
+        cost: totalCost
+      };
+    });
+
+    const effectsSum = compoundBreakdowns.reduce((sum, item) => sum + item.totalCost, 0);
+    let sharedFlatTotal = Number(power.activationCost) || 0;
+    const sharedModBreakdowns = (power.sharedModifiers || []).map(m => {
+      const cost = Number(m.cost) || 0;
+      sharedFlatTotal += cost;
+      return {
+        name: m.name || 'Shared Modifier',
+        cost,
+        type: m.type || 'flat'
+      };
+    });
+
+    const rawSubtotal = Math.max(1, effectsSum + sharedFlatTotal);
+    const deviceType = power.deviceConfig?.type || 'none';
+    const deviceDiscount = calculateDeviceDiscount(rawSubtotal, deviceType);
+    const finalCost = Math.max(1, rawSubtotal - deviceDiscount);
+
+    const parts = compoundBreakdowns.map(item => `[${item.name}: ${item.totalCost} PP]`);
+    let formulaString = parts.length > 0 ? parts.join(' + ') : '0 PP';
+    if (power.activationCost) {
+      formulaString += ` - Activation (${power.activation === 'move' ? 'Move' : 'Standard'}): ${Math.abs(power.activationCost)} PP`;
+    }
+    sharedModBreakdowns.forEach(sm => {
+      if (sm.cost !== 0) {
+        formulaString += ` ${sm.cost > 0 ? '+' : '-'} ${sm.name}: ${Math.abs(sm.cost)} PP`;
+      }
+    });
+    if (deviceDiscount > 0) {
+      formulaString += ` - Device (${deviceType === 'easily_removable' ? 'Easily Removable' : 'Removable'}): ${deviceDiscount} PP`;
+    }
+    formulaString += ` = ${finalCost} PP`;
+
+    return {
+      isCompound: true,
+      isDeviceContainer: deviceDiscount > 0,
+      compoundMode: power.compoundMode || 'linked',
+      compoundBreakdowns,
+      effectsSum,
+      sharedModBreakdowns,
+      sharedFlatTotal,
+      activation: power.activation || 'none',
+      activationCost: power.activationCost || 0,
+      mainCost: compoundBreakdowns[0]?.mainCost || 0,
+      mainBreakdown: compoundBreakdowns[0]?.breakdown || calculateEffectCost(power.mainEffect, 0),
+      linkedCost: compoundBreakdowns.reduce((sum, item) => sum + item.linkedCost, 0),
+      alternateCost: compoundBreakdowns.reduce((sum, item) => sum + item.alternateCost, 0),
+      alternateBreakdowns: [],
+      rawSubtotal,
+      subtotalBeforeDiscount: rawSubtotal,
+      deviceType,
+      deviceDiscount,
+      discount: deviceDiscount,
+      finalCost,
+      formulaString,
+      arrayCapacity: finalCost
     };
   }
 
@@ -3280,6 +3523,57 @@ export function syncLinkedEffectWithMain(mainEffect, linkedEffect) {
   linkedEffect.action = mainEffect.action || 'Standard';
   linkedEffect.duration = mainEffect.duration || 'Instant';
   return linkedEffect;
+}
+
+/**
+ * Validates whether sub-effects in a Compound Power comply with M&M 3e rules (DHH p. 136-137 & p. 147).
+ * For linked effects, validates matching Range and Action.
+ */
+export function validateCompoundPower(rawPower) {
+  const power = normalizePower(rawPower);
+  if (power.type !== 'compound') {
+    return { isValid: true, warnings: [], linkedMismatchCount: 0 };
+  }
+
+  const primary = power.compoundEffects?.find(c => c.isPrimaryAction) || power.compoundEffects?.[0];
+  const pRange = primary?.effect?.range || 'Close';
+  const pAction = primary?.effect?.action || 'Standard';
+
+  return {
+    isValid: true,
+    warnings: [],
+    linkedMismatchCount: 0,
+    primaryRange: pRange,
+    primaryAction: pAction
+  };
+}
+
+/**
+ * Harmonizes all linked effects in a compound power to match the primary effect's Action and Range (DHH p. 147).
+ */
+export function harmonizeCompoundEffects(rawPower, primaryIdx = 0) {
+  const power = JSON.parse(JSON.stringify(rawPower));
+  if (!Array.isArray(power.compoundEffects) || power.compoundEffects.length === 0) return power;
+
+  const pIdx = Math.max(0, Math.min(primaryIdx, power.compoundEffects.length - 1));
+  const primary = power.compoundEffects[pIdx];
+  if (!primary || !primary.effect) return power;
+
+  const targetRange = primary.effect.range || 'Close';
+  const targetAction = primary.effect.action || 'Standard';
+  const targetDuration = primary.effect.duration || 'Instant';
+
+  power.compoundEffects.forEach((item, idx) => {
+    if (idx === pIdx) {
+      item.isPrimaryAction = true;
+    } else if (item.isLinked) {
+      item.effect.range = targetRange;
+      item.effect.action = targetAction;
+      item.effect.duration = targetDuration;
+    }
+  });
+
+  return power;
 }
 
 /**

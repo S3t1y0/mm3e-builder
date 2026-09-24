@@ -4,7 +4,7 @@
       <div class="step-banner-icon"><i class="ri-flashlight-line"></i></div>
       <div>
         <h3 class="step-title">Powers Studio</h3>
-        <p class="step-subtitle">Design custom powers, weapon arrays, or device containers.</p>
+        <p class="step-subtitle">Design custom powers, weapon arrays, or devices.</p>
       </div>
     </div>
 
@@ -23,7 +23,7 @@
           <i class="ri-flashlight-line"></i> Standard Power
         </button>
         <button class="btn btn-secondary btn-sm" @click="builderStore.openNewPower('device')">
-          <i class="ri-shield-keyhole-line"></i> Device Container
+          <i class="ri-shield-keyhole-line"></i> Device
         </button>
       </div>
     </div>

@@ -182,6 +182,18 @@ export function buildMarkdownSheet(character, heroStore) {
           }
           return spDesc;
         }).join(', ')}`;
+      } else if (p.type === 'compound') {
+        md += `*Compound Suite* - ${(p.compoundEffects || []).map(ce => {
+          let ceDesc = `${ce.name} [${ce.effect?.baseEffect || 'Effect'} ${ce.effect?.ranks || 1}`;
+          if (Array.isArray(ce.linkedEffects) && ce.linkedEffects.length > 0) {
+            ceDesc += ce.linkedEffects.map(le => ` + Linked ${le.name || le.baseEffect} ${le.ranks || 1}`).join('');
+          }
+          ceDesc += ']';
+          if (Array.isArray(ce.alternateEffects) && ce.alternateEffects.length > 0) {
+            ceDesc += ` (Array with ${ce.alternateEffects.length} alternate slots)`;
+          }
+          return ceDesc;
+        }).join(', ')}`;
       } else {
         const eff = p.mainEffect || p;
         md += `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`;

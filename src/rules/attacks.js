@@ -369,6 +369,124 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
           });
         }
       });
+    } else if (p.type === 'compound' || (Array.isArray(p.compoundEffects) && p.compoundEffects.length > 0)) {
+      // Compound Power (M&M 3e rules: Linked Combo or Power Suite)
+      const activeCompound = (p.compoundEffects || []).filter(sub => sub.active !== false);
+
+      const linkedOffensive = activeCompound.filter(sub => {
+        if (!sub.isLinked && p.compoundMode !== 'linked') return false;
+        const eff = sub.effect;
+        const base = eff?.baseEffect || eff?.name || '';
+        const isMoveDamaging = base === 'Move Object' && (eff?.extras || []).some(e => e.name === 'Damaging');
+        return ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify'].includes(base) || isMoveDamaging;
+      });
+
+      if (linkedOffensive.length > 1) {
+        // Multi-effect Linked Attack Combo (DHH p. 147: single attack check, multiple resistance checks)
+        const primarySub = linkedOffensive.find(s => s.isPrimaryAction) || linkedOffensive[0];
+        const primaryEff = primarySub.effect;
+        const baseAtk = processEffect(p, primaryEff, {
+          id: `atk_${p.id}_compound_linked`,
+          slotId: 'compound_linked',
+          slotName: p.name || 'Linked Combo',
+          sourceTitle: `${p.name} [Linked Combo]`,
+          isStandby: false,
+          isPowerDisabled
+        });
+
+        if (baseAtk) {
+          baseAtk.isCompoundLinked = true;
+          baseAtk.linkedTargets = linkedOffensive.map(sub => {
+            const subAtk = processEffect(p, sub.effect, {
+              slotName: sub.name,
+              sourceTitle: `${p.name} (${sub.name})`
+            });
+            return {
+              id: sub.id,
+              name: sub.name || sub.effect?.name,
+              baseEffect: sub.effect?.baseEffect || sub.effect?.name,
+              ranks: subAtk ? subAtk.effectRank : sub.effect?.ranks,
+              dc: subAtk ? subAtk.dc : 15,
+              resistance: subAtk ? subAtk.resistance : 'Toughness',
+              dcDescription: subAtk ? subAtk.dcDescription : '',
+              degrees: subAtk ? subAtk.degrees : []
+            };
+          });
+
+          baseAtk.dcDescription = baseAtk.linkedTargets.map(t => t.dcDescription).join(' & ');
+          attacks.push(baseAtk);
+        }
+
+        // Process any other offensive effects in the compound power that are NOT part of the linked combo
+        const unlinkedOffensive = activeCompound.filter(sub => !linkedOffensive.includes(sub));
+        unlinkedOffensive.forEach((sub, uIdx) => {
+          const subAtk = processEffect(p, sub.effect, {
+            id: `atk_${p.id}_comp_sub_${uIdx}`,
+            slotId: `comp_sub_${uIdx}`,
+            slotName: sub.name || sub.effect?.name,
+            sourceTitle: `${p.name} (${sub.name})`,
+            isStandby: false,
+            isPowerDisabled
+          });
+          if (subAtk) attacks.push(subAtk);
+        });
+      } else {
+        // Single offensive or suite mode: process each sub-effect independently
+        activeCompound.forEach((sub, cIdx) => {
+          const subAtk = processEffect(p, sub.effect, {
+            id: `atk_${p.id}_comp_${cIdx}`,
+            slotId: `comp_${cIdx}`,
+            slotName: sub.name || sub.effect?.name,
+            sourceTitle: `${p.name} (${sub.name})`,
+            isStandby: false,
+            isPowerDisabled
+          });
+          if (subAtk) attacks.push(subAtk);
+
+          if (Array.isArray(sub.linkedEffects)) {
+            sub.linkedEffects.forEach((link, lIdx) => {
+              const linkAtk = processEffect(p, link, {
+                id: `atk_${p.id}_comp_${cIdx}_link_${lIdx}`,
+                slotId: `comp_${cIdx}`,
+                slotName: link.name || `${sub.name} (Linked)`,
+                sourceTitle: `${p.name} (${sub.name}) [Linked]`,
+                isStandby: false,
+                isPowerDisabled
+              });
+              if (linkAtk) attacks.push(linkAtk);
+            });
+          }
+
+          if (Array.isArray(sub.alternateEffects)) {
+            sub.alternateEffects.forEach((alt, aIdx) => {
+              const altEff = alt.effect || alt.mainEffect || alt;
+              const altAtk = processEffect(p, altEff, {
+                id: `atk_${p.id}_comp_${cIdx}_slot_${aIdx}`,
+                slotId: alt.id || `comp_${cIdx}_slot_${aIdx}`,
+                slotName: alt.name,
+                sourceTitle: `${p.name} (${sub.name}) [${alt.name}]`,
+                isStandby: false,
+                isPowerDisabled
+              });
+              if (altAtk) attacks.push(altAtk);
+
+              if (Array.isArray(alt.linkedEffects)) {
+                alt.linkedEffects.forEach((csLnk, cslIdx) => {
+                  const csLnkAtk = processEffect(p, csLnk, {
+                    id: `atk_${p.id}_comp_${cIdx}_slot_${aIdx}_link_${cslIdx}`,
+                    slotId: alt.id || `comp_${cIdx}_slot_${aIdx}`,
+                    slotName: csLnk.name || `${alt.name} (Linked)`,
+                    sourceTitle: `${p.name} (${sub.name}) [${alt.name}] (Linked)`,
+                    isStandby: false,
+                    isPowerDisabled
+                  });
+                  if (csLnkAtk) attacks.push(csLnkAtk);
+                });
+              }
+            });
+          }
+        });
+      }
     } else if (!isContainer) {
       // Standard power (skip outer container shell if it has no direct mainEffect)
       const atk = processEffect(p, p.mainEffect, {

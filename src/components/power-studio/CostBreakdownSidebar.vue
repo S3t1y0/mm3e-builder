@@ -14,7 +14,7 @@
     <div class="sidebar-section-card">
       <div class="section-title">
         <i class="ri-calculator-line"></i>
-        <span>Cost Calculation Math</span>
+        <span>Power Point Breakdown</span>
       </div>
 
       <div v-if="builderStore.breakdown" class="breakdown-lines">
@@ -52,6 +52,47 @@
 
           <div class="math-line total-line">
             <span class="line-label">Final Device Cost:</span>
+            <span class="line-val highlight">{{ builderStore.totalCost }} PP</span>
+          </div>
+        </template>
+
+        <!-- If Compound Power -->
+        <template v-else-if="builderStore.power.type === 'compound'">
+          <div class="math-line">
+            <span class="line-label">Sub-Effects Total:</span>
+            <span class="line-val">{{ builderStore.breakdown.subtotalEffects || 0 }} PP</span>
+          </div>
+
+          <div
+            v-for="(sub, sIdx) in (builderStore.breakdown.subEffectBreakdowns || [])"
+            :key="sub.id || sIdx"
+            class="sub-breakdown-row"
+          >
+            <span class="sub-name-txt">
+              • {{ sub.name }} (Rank {{ sub.rank }}):
+              <small v-if="sub.isPrimary" class="primary-badge">PRIMARY</small>
+            </span>
+            <span class="sub-cost-txt">{{ sub.totalCost }} PP</span>
+          </div>
+
+          <div v-if="(builderStore.power.sharedModifiers || []).length > 0" class="math-line">
+            <span class="line-label">Suite Modifiers:</span>
+            <span class="line-val">
+              {{ (builderStore.breakdown.sharedModifiersCost || 0) >= 0 ? `+${builderStore.breakdown.sharedModifiersCost || 0}` : builderStore.breakdown.sharedModifiersCost }} PP
+            </span>
+          </div>
+
+          <div v-if="builderStore.power.activation && builderStore.power.activation !== 'none'" class="math-line discount-line">
+            <span class="line-label">
+              Activation ({{ builderStore.power.activation === 'move' ? 'Move Action' : 'Standard Action' }}):
+            </span>
+            <span class="line-val discount">{{ builderStore.breakdown.activationCost }} PP</span>
+          </div>
+
+          <div class="math-divider"></div>
+
+          <div class="math-line total-line">
+            <span class="line-label">Final Compound Cost:</span>
             <span class="line-val highlight">{{ builderStore.totalCost }} PP</span>
           </div>
         </template>
@@ -151,7 +192,9 @@ const structureText = computed(() => {
   let base = '';
   if (t === 'device') {
     const dType = builderStore.power.deviceConfig?.type;
-    base = `Device Container (${dType === 'easily_removable' ? 'Easily Removable' : 'Removable'})`;
+    base = `Device (${dType === 'easily_removable' ? 'Easily Removable' : 'Removable'})`;
+  } else if (t === 'compound') {
+    base = `Compound Power (${builderStore.power.compoundEffects?.length || 0} Sub-Effects)`;
   } else if (builderStore.power.alternateEffects?.length > 0) {
     base = `Standard Power with Array (${builderStore.power.alternateEffects.length} Stunts)`;
   } else {
@@ -177,9 +220,10 @@ const combatProfile = computed(() => {
 .cost-breakdown-sidebar {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
-  width: 320px;
-  flex-shrink: 0;
+  gap: 0.85rem;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
 }
 
 .total-cost-card {
@@ -226,6 +270,8 @@ const combatProfile = computed(() => {
   font-size: 0.72rem;
   color: var(--text-secondary);
   margin-top: 0.15rem;
+  line-height: 1.35;
+  word-break: break-word;
 }
 
 .sidebar-section-card {
@@ -265,32 +311,69 @@ const combatProfile = computed(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   font-size: 0.76rem;
 }
 
 .line-label {
   color: var(--text-secondary);
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .line-val {
   font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .sub-breakdown-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   font-size: 0.72rem;
   padding-left: 0.5rem;
   color: var(--text-muted);
+}
+
+.sub-name-txt {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .sub-cost-txt {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   color: var(--text-secondary);
+  flex-shrink: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.primary-badge {
+  color: var(--accent-primary, #38bdf8);
+  font-weight: 800;
+  font-size: 0.65rem;
+  margin-left: 0.3rem;
+  letter-spacing: 0.05em;
+}
+
+.linked-badge {
+  color: #38bdf8;
+  font-weight: 700;
+  font-size: 0.65rem;
+  margin-left: 0.3rem;
+  letter-spacing: 0.05em;
 }
 
 .discount-line .discount {
@@ -325,17 +408,25 @@ const combatProfile = computed(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 0.5rem;
   font-size: 0.76rem;
 }
 
 .c-label {
   color: var(--text-muted);
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 
 .c-val {
   font-weight: 700;
   color: var(--text-primary);
   font-variant-numeric: tabular-nums;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
 }
 
 .c-val.dc-val {
