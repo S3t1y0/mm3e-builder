@@ -80,7 +80,7 @@
           </div>
 
           <!-- Chips Grid for Traits (Horizontal Wrap) -->
-          <div class="trait-chips-grid" :class="{ 'scrollable-grid': currentTraitCategory === 'advantages' }">
+          <div class="trait-chips-grid" :class="{ 'scrollable-grid': currentTraitCategory === 'advantages' }" data-seamless-scroll>
             <button
               v-for="trait in filteredTraits"
               :key="trait"
@@ -170,7 +170,7 @@
       </div>
 
       <!-- Faculties Cards Grid (Horizontal Layout) -->
-      <div class="library-cards-grid horizontal-senses-grid">
+      <div class="library-cards-grid horizontal-senses-grid" data-seamless-scroll>
         <div
           v-for="fac in filteredFaculties"
           :key="fac.id"
@@ -663,7 +663,7 @@
         </div>
       </div>
 
-      <div class="library-cards-grid">
+      <div class="library-cards-grid" data-seamless-scroll>
         <div
           v-for="item in filteredImmunities"
           :key="item.id"
@@ -854,7 +854,7 @@
 
     <!-- SUB-EDITOR: COMPREHEND (comprehend_multiselect_library) -->
     <div v-else-if="cfg.type === 'comprehend_multiselect_library'" class="config-body config-library">
-      <div class="library-cards-grid">
+      <div class="library-cards-grid" data-seamless-scroll>
         <div
           v-for="mode in cfg.modes"
           :key="mode.id"
@@ -884,7 +884,7 @@
 
     <!-- SUB-EDITOR: ENVIRONMENT (environment_multiselect_library) -->
     <div v-else-if="cfg.type === 'environment_multiselect_library'" class="config-body config-library">
-      <div class="library-cards-grid">
+      <div class="library-cards-grid" data-seamless-scroll>
         <div
           v-for="el in cfg.elements"
           :key="el.id"
@@ -2022,6 +2022,7 @@ function selectVariableTheme(theme) {
   max-height: 200px;
   overflow-y: auto;
   padding-right: 0.35rem;
+  overscroll-behavior-y: auto !important;
 }
 
 .trait-chip {
@@ -2319,6 +2320,7 @@ function selectVariableTheme(theme) {
   max-height: 380px;
   overflow-y: auto;
   padding-right: 0.35rem;
+  overscroll-behavior-y: auto !important;
 }
 
 .lib-item-card {

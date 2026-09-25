@@ -80,7 +80,7 @@
     <!-- MODERN 3-PANE MASTER-DETAIL WORKBENCH -->
     <main class="workspace-main-content">
       <!-- PANE 1: LEFT NAVIGATION RAIL (~280px) -->
-      <aside class="workspace-rail-col">
+      <aside class="workspace-rail-col" data-seamless-scroll>
         <!-- 1. Structure Selector (Compact Segmented Architecture & Activation) -->
         <StructureSelector />
 
@@ -680,7 +680,7 @@
       </aside>
 
       <!-- PANE 2: CENTER STAGE (Crafting Canvas flex: 1) -->
-      <section class="workspace-center-col">
+      <section class="workspace-center-col" data-seamless-scroll>
         <EffectEditorCanvas
           :key="canvasKey"
           :effect="builderStore.currentEditingEffect"
@@ -689,7 +689,7 @@
       </section>
 
       <!-- PANE 3: RIGHT DOCK (~280px Live Math & Combat Profile) -->
-      <aside class="workspace-sidebar-col">
+      <aside class="workspace-sidebar-col" data-seamless-scroll>
         <CostBreakdownSidebar />
       </aside>
     </main>

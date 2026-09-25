@@ -1,4 +1,5 @@
 // js/rules/powerEngine.js
+import { ADVANTAGES } from './advantages.js';
 /**
  * Mutants & Masterminds 3e Power Engine
  * Official D20 Hero System Power Rules, Fractional Costs, Array Budgets,
@@ -8,10 +9,11 @@
 export const EFFECT_CATEGORIES = [
   'All',
   'Attack',
+  'Control',
   'Defense',
+  'General',
   'Movement',
-  'Sensory',
-  'Control & Utility'
+  'Sensory'
 ];
 
 export const BASE_EFFECTS = [
@@ -19,42 +21,42 @@ export const BASE_EFFECTS = [
   { name: 'Blast', category: 'Attack', cost: 2, range: 'Ranged', action: 'Standard', duration: 'Instant', resistance: 'Toughness', desc: 'You can make a damaging ranged attack. It might be a blast of energy, a projectile (arrow, bullet, throwing blade, etc.), or some similar effect. You make a ranged attack check against the target’s Dodge defense. The attack’s damage equals your power rank and the target makes a Toughness resistance check against it.' },
   { name: 'Burrowing', category: 'Movement', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can burrow through the ground, leaving a tunnel behind if you choose. You move through soil and sand at a speed rank equal to your Burrowing rank, minus 5. So Burrowing 8, for example, lets you move through the ground at speed rank 3 (around 16 MPH). Burrowing through hard clay and packed earth reduces speed one additional rank. Burrowing through solid rock reduces it by two additional ranks. The tunnel you leave behind is either permanent or collapses behind you immediately (your choice when you begin burrowing each new tunnel). Note that Burrowing differs from the Permeate effect of Movement, which allows you to pass through an obstacle like the ground at your normal speed without disturbing it at all.' },
   { name: 'Communication', category: 'Sensory', cost: 4, range: 'Rank', action: 'Free', duration: 'Sustained', desc: 'You can communicate over a distance using a medium other than your normal voice (such as mental telepathy, radio frequencies, mystical sendings, or ultrasonic signals) across distances determined by your rank on the Measurements Table.' },
-  { name: 'Comprehend', category: 'Control & Utility', cost: 2, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'You can comprehend different sorts of communication. Each rank in this effect allows you to understand, speak, or read foreign languages, communicate with animals, plants, machines, or spirits, or understand all spoken concepts.' },
-  { name: 'Concealment', category: 'Control & Utility', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You gain total concealment from a particular sense while this effect is active, making you undetectable to that sense and providing total concealment (+5 circumstance bonus to active defense against attacks relying on that sense). Two ranks grant concealment for an entire sense type.' },
-  { name: 'Create', category: 'Control & Utility', cost: 2, range: 'Ranged', action: 'Standard', duration: 'Sustained', desc: 'You can form solid objects essentially out of nowhere. They may be made of solidified energy, “hardened” water or air, transmuted bulk matter, ice, stone, or some other medium, depending on the effect’s descriptors. You can form any simple geometric shape or common object (such as a cube, sphere, dome, hammer, lens, disk, etc.). The GM has final say on whether or not a particular object is too complex for this effect. Generally, your objects can’t have any moving parts more complex than a hinge. They can be solid or hollow, opaque or transparent, as you choose when you use the effect, limited by your descriptors and the Gamemaster’s judgment.' },
+  { name: 'Comprehend', category: 'Sensory', cost: 2, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'You can comprehend different sorts of communication. Each rank in this effect allows you to understand, speak, or read foreign languages, communicate with animals, plants, machines, or spirits, or understand all spoken concepts.' },
+  { name: 'Concealment', category: 'Sensory', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You gain total concealment from a particular sense while this effect is active, making you undetectable to that sense and providing total concealment (+5 circumstance bonus to active defense against attacks relying on that sense). Two ranks grant concealment for an entire sense type.' },
+  { name: 'Create', category: 'Control', cost: 2, range: 'Ranged', action: 'Standard', duration: 'Sustained', desc: 'You can form solid objects essentially out of nowhere. They may be made of solidified energy, “hardened” water or air, transmuted bulk matter, ice, stone, or some other medium, depending on the effect’s descriptors. You can form any simple geometric shape or common object (such as a cube, sphere, dome, hammer, lens, disk, etc.). The GM has final say on whether or not a particular object is too complex for this effect. Generally, your objects can’t have any moving parts more complex than a hinge. They can be solid or hollow, opaque or transparent, as you choose when you use the effect, limited by your descriptors and the Gamemaster’s judgment.' },
   { name: 'Damage', category: 'Attack', cost: 1, range: 'Close', action: 'Standard', duration: 'Instant', resistance: 'Toughness', desc: 'You can inflict damage on a target by making a close attack. The exact nature of your Damage is up to you (from powerful kinetic impacts to razor claws, fire, or energy fields). The target resists with a Toughness check against DC 15 + Damage rank to resist bruised penalties (-1 to further checks), dazed, staggered, and incapacitated conditions.' },
   { name: 'Deflect', category: 'Defense', cost: 1, range: 'Ranged', action: 'Standard', duration: 'Instant', desc: 'You can actively defend for characters other than yourself, deflecting or diverting ranged attacks directed at allies within range using active defense checks with a d20 roll, and may be able to more effectively defend yourself depending on your rank.' },
-  { name: 'Elongation', category: 'Movement', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can elongate your body and/or limbs to extend your reach. Add your effect rank to your normal size rank to determine how far you can elongate; for a normalsized human (size rank -2) this is 15 feet at rank 1, 30 feet at rank 2, and so forth. Rank 20 Elongation can stretch 1,000 miles! “Snapping back” to your normal shape is a free action. You can use Elongation to make “close” attacks at a greater distance by elongating your limbs. Once elongated, you can make melee attacks within your new reach as a standard action. If you can’t accurately sense your target (you’re elongating around a corner, for example), apply the rules for concealment.' },
-  { name: 'Enhanced Trait', category: 'Control & Utility', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can temporarily improve one of your existing traits, chosen when you take this effect. While this effect is active, you increase the affected trait by its rank. So, for example, Enhanced Strength 5 increases your Strength by +5 while it is active. Your enhanced trait is still subject to power level limits, so your unenhanced rank must be below the limit by at least the amount of the enhancement to accommodate it. The cost of Enhanced Trait is the same per rank as acquiring a rank in the affected trait. The key differences are that Enhanced Trait is a power effect, rather than a natural trait, and as an effect it can be combined with extra effort and other effects.' },
-  { name: 'Environment', category: 'Control & Utility', cost: 2, range: 'Rank', action: 'Standard', duration: 'Sustained', desc: 'You can change the environment in an area: raising or lowering the temperature, creating intense light or darkness, causing rain, high winds, or impeditious terrain within a radius determined by your rank.' },
-  { name: 'Extra Limbs', category: 'Control & Utility', cost: 1, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'You have one or more additional limbs or appendages (tails, tentacles, extra arms, prehensile hair), granting you an advantage when performing multiple manipulative tasks and a bonus on grab checks.' },
-  { name: 'Feature', category: 'Control & Utility', cost: 1, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'The Feature effect is intended for minor, cosmetic, or utilitarian superhuman abilities that have a negligible game effect, costing 1 point flat per rank (such as internal compass, fur coat, or mimicry).' },
+  { name: 'Elongation', category: 'General', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can elongate your body and/or limbs to extend your reach. Add your effect rank to your normal size rank to determine how far you can elongate; for a normalsized human (size rank -2) this is 15 feet at rank 1, 30 feet at rank 2, and so forth. Rank 20 Elongation can stretch 1,000 miles! “Snapping back” to your normal shape is a free action. You can use Elongation to make “close” attacks at a greater distance by elongating your limbs. Once elongated, you can make melee attacks within your new reach as a standard action. If you can’t accurately sense your target (you’re elongating around a corner, for example), apply the rules for concealment.' },
+  { name: 'Enhanced Trait', category: 'General', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can temporarily improve one of your existing traits, chosen when you take this effect. While this effect is active, you increase the affected trait by its rank. So, for example, Enhanced Strength 5 increases your Strength by +5 while it is active. Your enhanced trait is still subject to power level limits, so your unenhanced rank must be below the limit by at least the amount of the enhancement to accommodate it. The cost of Enhanced Trait is the same per rank as acquiring a rank in the affected trait. The key differences are that Enhanced Trait is a power effect, rather than a natural trait, and as an effect it can be combined with extra effort and other effects.' },
+  { name: 'Environment', category: 'Control', cost: 2, range: 'Rank', action: 'Standard', duration: 'Sustained', desc: 'You can change the environment in an area: raising or lowering the temperature, creating intense light or darkness, causing rain, high winds, or impeditious terrain within a radius determined by your rank.' },
+  { name: 'Extra Limbs', category: 'General', cost: 1, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'You have one or more additional limbs or appendages (tails, tentacles, extra arms, prehensile hair), granting you an advantage when performing multiple manipulative tasks and a bonus on grab checks.' },
+  { name: 'Feature', category: 'General', cost: 1, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'The Feature effect is intended for minor, cosmetic, or utilitarian superhuman abilities that have a negligible game effect, costing 1 point flat per rank (such as internal compass, fur coat, or mimicry).' },
   { name: 'Flight', category: 'Movement', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can fly through the air, including hovering in place. You have a flight speed rank equal to your effect rank.' },
-  { name: 'Growth', category: 'Control & Utility', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can temporarily increase your size, gaining increased Strength, Stamina, and reach, but becoming easier to hit and less stealthy. Every 4 ranks increases your size rank by 1 and grants commensurate physical bonuses.' },
-  { name: 'Healing', category: 'Control & Utility', cost: 2, range: 'Close', action: 'Standard', duration: 'Instant', desc: 'You can heal Damage conditions by touch. Make an effect check (DC 10); success removes one degree of damage from the subject (bruised penalty, dazed, or staggered). You can also stabilize dying subjects automatically as a standard action.' },
-  { name: 'Illusion', category: 'Control & Utility', cost: 1, range: 'Perception', action: 'Standard', duration: 'Sustained', desc: 'You can project convincing sensory impressions (visual holographic images, phantom sounds, false scents, or tactile sensations) into an area. Targets observing the illusion make an Insight check to recognize it as false.' },
+  { name: 'Growth', category: 'General', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can temporarily increase your size, gaining increased Strength, Stamina, and reach, but becoming easier to hit and less stealthy. Every 4 ranks increases your size rank by 1 and grants commensurate physical bonuses.' },
+  { name: 'Healing', category: 'General', cost: 2, range: 'Close', action: 'Standard', duration: 'Instant', desc: 'You can heal Damage conditions by touch. Make an effect check (DC 10); success removes one degree of damage from the subject (bruised penalty, dazed, or staggered). You can also stabilize dying subjects automatically as a standard action.' },
+  { name: 'Illusion', category: 'Control', cost: 1, range: 'Perception', action: 'Standard', duration: 'Sustained', desc: 'You can project convincing sensory impressions (visual holographic images, phantom sounds, false scents, or tactile sensations) into an area. Targets observing the illusion make an Insight check to recognize it as false.' },
   { name: 'Immortality', category: 'Defense', cost: 2, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'You can recover from death! If your character is killed, you return to life after a period of time determined by your Immortality rank (from days at rank 1 to mere minutes or rounds at high ranks).' },
   { name: 'Immunity', category: 'Defense', cost: 1, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'You are completely immune to certain effects, hazards, or conditions, ranging from environmental heat/cold and disease/poison (1-2 ranks) to life support, critical hits, or broad damage descriptors (5 to 30 ranks).' },
-  { name: 'Insubstantial', category: 'Defense', cost: 5, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can assume a less solid form: Rank 1 Fluid (flow through openings), Rank 2 Gaseous (smoke/gas form), Rank 3 Energy (composed of coherent energy), or Rank 4 Incorporeal (completely intangible ghost, immune to physical damage).' },
+  { name: 'Insubstantial', category: 'General', cost: 5, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can assume a less solid form: Rank 1 Fluid (flow through openings), Rank 2 Gaseous (smoke/gas form), Rank 3 Energy (composed of coherent energy), or Rank 4 Incorporeal (completely intangible ghost, immune to physical damage).' },
   { name: 'Leaping', category: 'Movement', cost: 1, range: 'Personal', action: 'Free', duration: 'Instant', desc: 'You can make prodigious leaps, far beyond normal human capability. Add your effect rank to your normal jumping distance rank to determine how far you can leap as a move action.' },
-  { name: 'Luck Control', category: 'Control & Utility', cost: 3, range: 'Perception', action: 'Reaction', duration: 'Instant', desc: 'You can manipulate probability and luck in your favor or to the detriment of opponents, spending Victory Points to force re-rolls, negate unluck, or grant luck benefits to allies.' },
+  { name: 'Luck Control', category: 'Control', cost: 3, range: 'Perception', action: 'Reaction', duration: 'Instant', desc: 'You can manipulate probability and luck in your favor or to the detriment of opponents, spending Victory Points to force re-rolls, negate unluck, or grant luck benefits to allies.' },
   { name: 'Mind Reading', category: 'Sensory', cost: 2, range: 'Perception', action: 'Standard', duration: 'Sustained', resistance: 'Will', desc: 'You can read another character’s mind via an opposed effect check against the target’s Will defense. Degrees of success allow you to read surface thoughts, probe memories, or uncover deepest subconscious secrets.' },
-  { name: 'Morph', category: 'Control & Utility', cost: 5, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can alter your cosmetic appearance, gaining a +20 circumstance bonus to Deception checks to disguise yourself. Ranks determine whether you can assume a single form, narrow group, broad category, or any form of equal mass.' },
-  { name: 'Move Object', category: 'Control & Utility', cost: 2, range: 'Ranged', action: 'Standard', duration: 'Sustained', desc: 'You can move objects at a distance without touching them (telekinetically or magnetically). Your effective Strength for lifting and throwing objects is equal to your rank on the Measurements Table.' },
+  { name: 'Morph', category: 'General', cost: 5, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can alter your cosmetic appearance, gaining a +20 circumstance bonus to Deception checks to disguise yourself. Ranks determine whether you can assume a single form, narrow group, broad category, or any form of equal mass.' },
+  { name: 'Move Object', category: 'Control', cost: 2, range: 'Ranged', action: 'Standard', duration: 'Sustained', desc: 'You can move objects at a distance without touching them (telekinetically or magnetically). Your effective Strength for lifting and throwing objects is equal to your rank on the Measurements Table.' },
   { name: 'Movement', category: 'Movement', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You have special superhuman modes of locomotion. Each rank allows choosing options such as Dimension Travel, Environmental Adaptation, Permeate, Safe Fall, Slithering, Space Travel, Trackless, Wall-crawling, or Water Walking.' },
   { name: 'Nullify', category: 'Attack', cost: 1, range: 'Ranged', action: 'Standard', duration: 'Instant', resistance: 'Will', desc: 'You can counter and shut down active powers matching a designated descriptor (such as fire, magical, or mental effects) via an opposed power check against the target’s power rank or Will check.' },
   { name: 'Protection', category: 'Defense', cost: 1, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'Protection shields you against damage, giving you +1 to your Toughness defense per rank. An active defense modifier or descriptor (such as armor, force fields, or mystic barriers) explains how this protection operates.' },
-  { name: 'Quickness', category: 'Control & Utility', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can perform routine physical or mental tasks at superhuman speed. Subtract your effect rank from the normal time rank to perform routine tasks (research, assembly, repairs, reading) in fractions of a second.' },
-  { name: 'Regeneration', category: 'Control & Utility', cost: 1, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'You recover quickly from damage automatically without rest. Remove bruised penalties and recover from staggered/incapacitated damage conditions at an accelerated rate determined by your rank.' },
+  { name: 'Quickness', category: 'General', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can perform routine physical or mental tasks at superhuman speed. Subtract your effect rank from the normal time rank to perform routine tasks (research, assembly, repairs, reading) in fractions of a second.' },
+  { name: 'Regeneration', category: 'Defense', cost: 1, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'You recover quickly from damage automatically without rest. Remove bruised penalties and recover from staggered/incapacitated damage conditions at an accelerated rate determined by your rank.' },
   { name: 'Remote Sensing', category: 'Sensory', cost: 1, range: 'Rank', action: 'Free', duration: 'Sustained', desc: 'You can displace one or more of your senses over a distance, perceiving as if you were physically present at that distant location without crossing the intervening space.' },
   { name: 'Senses', category: 'Sensory', cost: 1, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'One or more of your sensory faculties are superhumanly enhanced or expanded beyond the normal five senses (such as Darkvision, Infravision, Acute Scent, Radar, Tremorsense, or Danger Sense).' },
-  { name: 'Shrinking', category: 'Control & Utility', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can temporarily decrease your size, becoming smaller, harder to see, and harder to hit (+active defenses and +Stealth bonuses) at the cost of reduced Strength and ground movement speed.' },
+  { name: 'Shrinking', category: 'General', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can temporarily decrease your size, becoming smaller, harder to see, and harder to hit (+active defenses and +Stealth bonuses) at the cost of reduced Strength and ground movement speed.' },
   { name: 'Speed', category: 'Movement', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can run and move overland faster than normal human limits, with your ground speed rank equal to your effect rank on the Measurements Table.' },
-  { name: 'Summon', category: 'Control & Utility', cost: 2, range: 'Close', action: 'Standard', duration: 'Sustained', desc: 'You can call upon another creature (a minion) to aid you. This creature is created as an independent character with (effect rank × 15) character points, limited to a Power Level equal to the Summon rank. You summon your minion automatically as a standard action in an open space beside you.' },
+  { name: 'Summon', category: 'Control', cost: 2, range: 'Close', action: 'Standard', duration: 'Sustained', desc: 'You can call upon another creature (a minion) to aid you. This creature is created as an independent character with (effect rank × 15) character points, limited to a Power Level equal to the Summon rank. You summon your minion automatically as a standard action in an open space beside you.' },
   { name: 'Swimming', category: 'Movement', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can swim effortlessly through water at high speed, with a water speed rank equal to your Swimming rank minus 2.' },
   { name: 'Teleport', category: 'Movement', cost: 2, range: 'Personal', action: 'Move', duration: 'Instant', desc: 'You can move instantly from place to place without crossing the distance in between, transporting yourself and carrying mass based on your rank on the Measurements Table as a move action.' },
-  { name: 'Transform', category: 'Control & Utility', cost: 2, range: 'Close', action: 'Standard', duration: 'Sustained', desc: 'You can change objects into other objects, altering their shape or material composition in the process. You must touch the chosen object (requiring a close attack check if held or worn). Transmuted objects remain in their new form until changed back or dispelled.' },
-  { name: 'Variable', category: 'Control & Utility', cost: 7, range: 'Personal', action: 'Standard', duration: 'Sustained', desc: 'You can gain or use potentially any effect of the appropriate type and descriptor! A Variable effect provides you with a pool of (rank × 5) character points you can allocate to different effects matching your theme, subject to normal power level limits.' },
+  { name: 'Transform', category: 'Control', cost: 2, range: 'Close', action: 'Standard', duration: 'Sustained', desc: 'You can change objects into other objects, altering their shape or material composition in the process. You must touch the chosen object (requiring a close attack check if held or worn). Transmuted objects remain in their new form until changed back or dispelled.' },
+  { name: 'Variable', category: 'General', cost: 7, range: 'Personal', action: 'Standard', duration: 'Sustained', desc: 'You can gain or use potentially any effect of the appropriate type and descriptor! A Variable effect provides you with a pool of (rank × 5) character points you can allocate to different effects matching your theme, subject to normal power level limits.' },
   { name: 'Weaken', category: 'Attack', cost: 1, range: 'Close', action: 'Standard', duration: 'Instant', resistance: 'Fortitude or Will', desc: 'You can temporarily lower one of a target’s traits (an Ability, Defense, or Power effect), chosen when this effect is acquired. You touch the target with a close attack check. The target makes a Fortitude or Will resistance check vs DC 10 + Weaken rank. Each degree of failure lowers the chosen trait by 1 point, which recovers at a rate of 1 point per round.' }
 ];
 
@@ -110,21 +112,7 @@ export const CONFIGURABLE_EFFECTS = {
         label: 'Advantage (+1 PP/Rank)',
         cost: 1,
         costDisplay: '1 PP/Rank',
-        traits: [
-          'Accurate Attack', 'Agile Feint', 'All-out Attack', 'Assessment', 'Benefit',
-          'Chokehold', 'Close Attack', 'Connected', 'Contacts', 'Daze', 'Defensive Attack',
-          'Defensive Roll', 'Diehard', 'Eidetic Memory', 'Equipment', 'Evasion',
-          'Extraordinary Effort', 'Fast Feint', 'Favored Environment', 'Favored Foe',
-          'Fearless', 'Grabbing Finesse', 'Great Endurance', 'Hide in Plain Sight',
-          'Improved Aim', 'Improved Critical', 'Improved Defense', 'Improved Disarm',
-          'Improved Grab', 'Improved Hold', 'Improved Initiative', 'Improved Smash',
-          'Improved Trip', 'Inspire', 'Instant Up', 'Interpose', 'Jack-of-all-trades',
-          'Leadership', 'Luck', 'Move-by Action', 'Power Attack', 'Prone Fighting',
-          'Quick Draw', 'Ranged Attack', 'Redirect', 'Seize Initiative', 'Set-up',
-          'Sidekick', 'Skill Mastery', 'Startle', 'Takedown', 'Taunt', 'Teamwork',
-          'Throwing Mastery', 'Tracking', 'Trance', 'Ultimate Effort', 'Uncanny Dodge',
-          'Weapon Bind', 'Weapon Break', 'Well-informed'
-        ]
+        traits: ADVANTAGES.map(a => a.name)
       }
     },
     defaultCategory: 'abilities',
@@ -1587,6 +1575,268 @@ export const EXTRAS = [
       }
     ]
   }
+,
+  {
+    "name": "Accurate (Destination)",
+    "category": "Movement",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Teleport"
+    ],
+    "desc": "You do not need to know or accurately sense your destination to teleport there, just be able to generally describe it (e.g., 'inside the capitol building lobby' or 'atop the Emerald Tower’s roof'). If the destination isn’t in your Teleport range, nothing happens."
+  },
+  {
+    "name": "Concentration (Maintained Effect)",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Affliction",
+      "Weaken",
+      "Nullify"
+    ],
+    "desc": "Once you have hit with a Concentration effect, so long as you continue to take a standard action each round to concentrate, the subject makes an additional resistance check against the effect on your turn without requiring a new attack roll."
+  },
+  {
+    "name": "Continuous (Permanent State)",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Create",
+      "Extra Limbs",
+      "Flight",
+      "Insubstantial",
+      "Move Object"
+    ],
+    "desc": "Extends duration to continuous (+1 cost per rank). For Create, objects remain until destroyed or nullified. For Flight, you remain aloft even when incapacitated. For Insubstantial, Extra Limbs, or Move Object, the effect persists without conscious maintenance."
+  },
+  {
+    "name": "Sustained (Toggleable)",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 0,
+    "costDisplay": "+0 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Extra Limbs",
+      "Immunity"
+    ],
+    "desc": "Converts a permanent or continuous effect into sustained (+0 cost per rank). This allows you to turn the effect on and off at will and improve it using extra effort."
+  },
+  {
+    "name": "Sustained (Counter Suppression)",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Nullify"
+    ],
+    "desc": "Any countered effect is suppressed and cannot be reactivated while you maintain this effect as a free action each round."
+  },
+  {
+    "name": "Rapid (Fast Transmission)",
+    "category": "Sensory",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "appliesTo": [
+      "Communication"
+    ],
+    "desc": "Your communication occurs 10 times faster than normal speech per rank (speed rank -1 per rank). Excellent for high-speed digital broadcasts or telepathic data downloads."
+  },
+  {
+    "name": "Projection",
+    "category": "Utility",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Extra Limbs"
+    ],
+    "desc": "Your Extra Limbs are merely a projection of your power (such as psychic force, solid light, or shadow) rather than an extension of your physical body. Attacks cannot damage you through them."
+  },
+  {
+    "name": "Action (Move Action)",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing"
+    ],
+    "desc": "Reduces the action required to use Healing from a standard action to a move action (+1 cost per rank)."
+  },
+  {
+    "name": "Action (Accelerated Reconfig)",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": 3,
+    "costDisplay": "+3 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Variable"
+    ],
+    "desc": "You can change the configuration of your Variable effect faster: +1 cost per rank for a move action, +2 cost per rank for a free action, or +3 cost per rank for a reaction."
+  },
+  {
+    "name": "Perception (No Attack Check)",
+    "category": "Range & Targeting",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing",
+      "Move Object",
+      "Variable"
+    ],
+    "desc": "Applied to a Ranged effect: it does not require an attack check and can affect any subject or object you can accurately perceive within range."
+  },
+  {
+    "name": "Ranged (Remote Touch)",
+    "category": "Range & Area",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Healing",
+      "Immunity",
+      "Variable"
+    ],
+    "desc": "Extends a Close or Personal (Affects Others) effect to Ranged (requires a ranged attack check to hit an unwilling target, or touches an ally at distance)."
+  },
+  {
+    "name": "Ranged (Remote Burrowing)",
+    "category": "Range & Area",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1-2 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "options": [
+      {
+        "id": "ranged",
+        "label": "Ranged (+1 PP/Rank)",
+        "cost": 1,
+        "type": "per_rank",
+        "desc": "Create tunnels at distance (Standard range)."
+      },
+      {
+        "id": "perception",
+        "label": "Perception (+2 PP/Rank)",
+        "cost": 2,
+        "type": "per_rank",
+        "desc": "Create tunnels anywhere accurately perceived."
+      }
+    ],
+    "appliesTo": [
+      "Burrowing"
+    ],
+    "desc": "Allows you to create tunnels at a distance without having to travel through them yourself."
+  },
+  {
+    "name": "Ranged (Sensory Projection)",
+    "category": "Range & Area",
+    "type": "per_rank",
+    "cost": 2,
+    "costDisplay": "+2 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Senses"
+    ],
+    "desc": "Applies to Senses with Affects Others, extending the range at which you can bestow senses onto allies from Close to Ranged (+2 cost per rank)."
+  },
+  {
+    "name": "Independent",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Illusion"
+    ],
+    "desc": "Your active illusions only require a free action to maintain and change, rather than a standard action each round."
+  },
+  {
+    "name": "Luck (Bonus Ranks)",
+    "category": "Utility",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "appliesTo": [
+      "Luck Control"
+    ],
+    "desc": "Each rank in this extra gives you the benefit of a rank in the Luck advantage, expanding your pool of rerolls."
+  },
+  {
+    "name": "Permanent (Inherent Trait)",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 0,
+    "costDisplay": "+0 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Growth"
+    ],
+    "desc": "Growth is permanent, innate, and cannot be deactivated. Typical for naturally giant species, colossi, and towering automatons."
+  },
+  {
+    "name": "Attack (Force Insubstantial)",
+    "category": "Combat",
+    "type": "per_rank",
+    "cost": 1,
+    "costDisplay": "+1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Insubstantial"
+    ],
+    "desc": "Allows turning another character insubstantial as an offensive attack (close attack check resisted by Dodge or Fortitude)."
+  },
+  {
+    "name": "Improvised Weapon (TK)",
+    "category": "Combat",
+    "type": "flat_per_rank",
+    "cost": 1,
+    "costDisplay": "1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "appliesTo": [
+      "Move Object"
+    ],
+    "desc": "You are adept at using objects as weapons with telekinesis. Each rank gives the equivalent of a rank of Throwing Mastery or Improvised Weapon."
+  }
 ];
 
 export const FLAWS = [
@@ -2297,6 +2547,224 @@ export const FLAWS = [
       "Flight"
     ],
     "desc": "Flight relies on physical wings that require open clearance to spread and can be fouled, bound, or pinned."
+  }
+,
+  {
+    "name": "Sustained (Force Field)",
+    "category": "Defense & Recovery",
+    "type": "per_rank",
+    "cost": 0,
+    "costDisplay": "+0 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Protection"
+    ],
+    "desc": "Your Protection is a sustained effect rather than permanent. It can be turned on/off, maintained with free action, and improved with extra effort, but drops if you become stunned or incapacitated."
+  },
+  {
+    "name": "Type (Restricted Group)",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -2,
+    "costDisplay": "-2 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Comprehend"
+    ],
+    "desc": "You can only comprehend a broad type of subject (such as only elves, only canines, only avians, or only insectoid machines)."
+  },
+  {
+    "name": "Reduced Trait",
+    "category": "Limitations",
+    "type": "flat_per_rank",
+    "cost": -1,
+    "costDisplay": "-1 flat per rank",
+    "hasRanks": true,
+    "hasConfig": false,
+    "appliesTo": [
+      "Enhanced Trait"
+    ],
+    "desc": "One or more of your traits is lowered while others are enhanced (e.g. gaining Enhanced Strength lowers Agility by the same amount). Gives -1 PP per rank of reduced trait."
+  },
+  {
+    "name": "Limited to One Subject",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Illusion"
+    ],
+    "desc": "Only a single subject at a time can perceive your Illusion."
+  },
+  {
+    "name": "Absent Strength",
+    "category": "Limitations",
+    "type": "flat",
+    "cost": -1,
+    "costDisplay": "-1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Insubstantial"
+    ],
+    "desc": "Applies only to Rank 1 Insubstantial (Fluid form). Removes your effective Strength while in liquid form, preventing physical manipulation."
+  },
+  {
+    "name": "Acrobatics Check Required",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Leaping"
+    ],
+    "desc": "In order to use Leaping, you must make an Acrobatics skill check (DC 10). Each point your check exceeds 10 provides 1 rank of your Leaping effect."
+  },
+  {
+    "name": "Action (Standard Action)",
+    "category": "Action & Activation",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Luck Control"
+    ],
+    "desc": "Increases the action required for Luck Control from a reaction to a standard action, drastically limiting when it can be used."
+  },
+  {
+    "name": "Ranged (Attack Check Required)",
+    "category": "Range & Targeting",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Mind Reading",
+      "Luck Control",
+      "Illusion"
+    ],
+    "desc": "Reduces normally Perception-range power to Ranged, requiring a ranged attack check to hit in addition to normal defense/resistance."
+  },
+  {
+    "name": "Close (Touch Range Only)",
+    "category": "Range & Targeting",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Mind Reading",
+      "Move Object"
+    ],
+    "desc": "Reduces range to Close. For Mind Reading, you must touch the subject. For Move Object, you can only move objects within physical reach (tactile telekinesis)."
+  },
+  {
+    "name": "Limited to Sensory Link",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Mind Reading"
+    ],
+    "desc": "You can only tap into a subject's senses with Sensory Link, but cannot read surface thoughts or probe memories."
+  },
+  {
+    "name": "Limited to One Type",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Quickness"
+    ],
+    "desc": "Your Quickness applies to only physical tasks or only mental tasks, not both."
+  },
+  {
+    "name": "Limited to One Task",
+    "category": "Limitations",
+    "type": "per_rank",
+    "cost": -2,
+    "costDisplay": "-2 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Quickness"
+    ],
+    "desc": "Your Quickness applies to only one particular task, such as reading, mathematical calculations, drawing, or typing."
+  },
+  {
+    "name": "Permanent (Cannot Dismiss)",
+    "category": "Duration & Action",
+    "type": "per_rank",
+    "cost": 0,
+    "costDisplay": "+0 per rank",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Create",
+      "Enhanced Trait",
+      "Insubstantial"
+    ],
+    "desc": "The effect is permanent and cannot be dismissed voluntarily. Created objects are permanent real matter; Enhanced Traits cannot be turned off; Insubstantial form is permanent."
+  },
+  {
+    "name": "Noticeable",
+    "category": "Limitations",
+    "type": "flat",
+    "cost": -1,
+    "costDisplay": "-1 flat point",
+    "hasRanks": false,
+    "hasConfig": false,
+    "appliesTo": [
+      "Remote Sensing",
+      "Senses"
+    ],
+    "desc": "The power has a noticeable trait that cannot be hidden or disguised (e.g. glowing eyes, a buzzing mystical drone, or visible sensory conduit)."
+  },
+  {
+    "name": "Attitude",
+    "category": "Minions & Summon",
+    "type": "per_rank",
+    "cost": -1,
+    "costDisplay": "-1-2 per rank",
+    "hasRanks": false,
+    "hasConfig": true,
+    "options": [
+      {
+        "id": "indifferent",
+        "label": "Indifferent (-1 PP/Rank)",
+        "cost": -1,
+        "type": "per_rank",
+        "desc": "Summoned minion is indifferent to you (-1 PP/Rank)."
+      },
+      {
+        "id": "unfavorable",
+        "label": "Unfavorable / Hostile (-2 PP/Rank)",
+        "cost": -2,
+        "type": "per_rank",
+        "desc": "Summoned minion is hostile/unfavorable to you (-2 PP/Rank)."
+      }
+    ],
+    "appliesTo": [
+      "Summon"
+    ],
+    "desc": "Summoned minions are less cooperative than normal, requiring social interaction or checks to command."
   }
 ];
 

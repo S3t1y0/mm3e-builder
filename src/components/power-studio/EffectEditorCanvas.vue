@@ -975,7 +975,7 @@ const props = defineProps({
   }
 });
 
-const effectCategories = ['Attack', 'Defense', 'Movement', 'Sensory', 'Control & Utility'];
+const effectCategories = ['Attack', 'Control', 'Defense', 'General', 'Movement', 'Sensory'];
 
 function getEffectsByCategory(category) {
   return BASE_EFFECTS.filter(b => b.category === category);

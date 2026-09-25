@@ -187,10 +187,11 @@ watch(() => builderStore.isEffectsLibraryOpen, (isOpen) => {
 function getCategoryIcon(cat) {
   switch (cat) {
     case 'Attack': return 'ri-sword-line';
+    case 'Control': return 'ri-equalizer-line';
     case 'Defense': return 'ri-shield-line';
+    case 'General': return 'ri-tools-line';
     case 'Movement': return 'ri-flight-takeoff-line';
     case 'Sensory': return 'ri-eye-line';
-    case 'Control & Utility': return 'ri-equalizer-line';
     default: return 'ri-apps-line';
   }
 }
@@ -198,10 +199,12 @@ function getCategoryIcon(cat) {
 function getCategoryClass(cat) {
   switch (cat) {
     case 'Attack': return 'cat-attack';
+    case 'Control': return 'cat-control';
     case 'Defense': return 'cat-defense';
+    case 'General': return 'cat-general';
     case 'Movement': return 'cat-movement';
     case 'Sensory': return 'cat-sensory';
-    default: return 'cat-control';
+    default: return 'cat-general';
   }
 }
 
@@ -487,10 +490,11 @@ function selectEffect(effectName) {
 }
 
 .cat-attack { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
-.cat-defense { background: rgba(56, 189, 248, 0.15); color: #7dd3fc; }
-.cat-movement { background: rgba(245, 158, 11, 0.15); color: #fde68a; }
-.cat-sensory { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
 .cat-control { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; }
+.cat-defense { background: rgba(56, 189, 248, 0.15); color: #7dd3fc; }
+.cat-general { background: rgba(245, 158, 11, 0.15); color: #fde68a; }
+.cat-movement { background: rgba(59, 130, 246, 0.15); color: #93c5fd; }
+.cat-sensory { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; }
 
 .effect-cost-badge {
   font-size: 0.72rem;
