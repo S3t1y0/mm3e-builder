@@ -704,7 +704,7 @@ import { computed } from 'vue';
 import { usePowerBuilderStore } from '../../stores/powerBuilderStore.js';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
-import { calculatePowerTotalCost, calculateEffectCost } from '../../rules/powerEngine.js';
+import { calculatePowerTotalCost, calculateEffectCost, getBaseEffectIcon } from '../../rules/powerEngine.js';
 
 import StructureSelector from './StructureSelector.vue';
 import EffectEditorCanvas from './EffectEditorCanvas.vue';
@@ -792,25 +792,7 @@ function getSlotCombinedValue(slot) {
 }
 
 function getEffectIcon(baseEffect) {
-  const map = {
-    Damage: 'ri-sword-line',
-    Blast: 'ri-flashlight-line',
-    Affliction: 'ri-virus-line',
-    Protection: 'ri-shield-line',
-    Flight: 'ri-flight-takeoff-line',
-    Speed: 'ri-run-line',
-    Quickness: 'ri-timer-flash-line',
-    'Enhanced Trait': 'ri-arrow-up-circle-line',
-    Healing: 'ri-heart-pulse-line',
-    Weaken: 'ri-arrow-down-circle-line',
-    'Move Object': 'ri-hand-coin-line',
-    Environment: 'ri-sun-cloud-line',
-    Concealment: 'ri-eye-close-line',
-    Senses: 'ri-radar-line',
-    Immunity: 'ri-shield-cross-line',
-    Regeneration: 'ri-refresh-line'
-  };
-  return map[baseEffect] || 'ri-flashlight-line';
+  return getBaseEffectIcon(baseEffect);
 }
 
 function handlePowerSelectChange(val) {

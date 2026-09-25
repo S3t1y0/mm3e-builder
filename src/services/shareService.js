@@ -235,7 +235,7 @@ function base64UrlToUint8(base64url) {
  * @param {Object} options - { forceOffline: boolean }
  * @returns {Promise<{ url: string, type: 'kv'|'compressed', id: string|null, originalSize: number, compressedSize: number, ratio: number, charCount: number }>}
  */
-export async function generateShareUrl(character, { forceOffline = false } = {}) {
+export async function generateShareUrl(character, { forceOffline = false, forceNew = false } = {}) {
   const baseUrl = typeof window !== 'undefined'
     ? `${window.location.origin}${window.location.pathname}`
     : 'https://localhost/';
@@ -246,12 +246,26 @@ export async function generateShareUrl(character, { forceOffline = false } = {})
   if (!forceOffline) {
     try {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 6000);
+      const timeoutId = setTimeout(() => controller.abort(), 7000);
+
+      const existingId = (!forceNew && character?.shareInfo?.id) ? character.shareInfo.id : null;
+      const existingToken = (!forceNew && character?.shareInfo?.editToken) ? character.shareInfo.editToken : null;
+
+      const payload = {
+        character: pruned
+      };
+      if (existingId && existingToken) {
+        payload.id = existingId;
+        payload.editToken = existingToken;
+      }
+      if (forceNew) {
+        payload.fork = true;
+      }
 
       const res = await fetch(`${CLOUDFLARE_WORKER_URL}/api/save`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: jsonStr,
+        body: JSON.stringify(payload),
         signal: controller.signal
       });
       clearTimeout(timeoutId);
@@ -264,6 +278,11 @@ export async function generateShareUrl(character, { forceOffline = false } = {})
             url,
             type: 'kv',
             id: data.id,
+            editToken: data.editToken || existingToken || null,
+            updated: Boolean(data.updated),
+            isNew: Boolean(data.isNew),
+            version: data.version || 1,
+            updatedAt: data.updatedAt || new Date().toISOString(),
             originalSize: jsonStr.length,
             compressedSize: data.id.length,
             ratio: Math.round((1 - data.id.length / jsonStr.length) * 100),
@@ -283,6 +302,11 @@ export async function generateShareUrl(character, { forceOffline = false } = {})
     url,
     type: 'compressed',
     id: null,
+    editToken: null,
+    updated: false,
+    isNew: false,
+    version: 1,
+    updatedAt: null,
     originalSize: jsonStr.length,
     compressedSize: compressed.length,
     ratio: Math.round((1 - compressed.length / jsonStr.length) * 100),

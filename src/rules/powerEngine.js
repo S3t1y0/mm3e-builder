@@ -16,6 +16,56 @@ export const EFFECT_CATEGORIES = [
   'Sensory'
 ];
 
+
+export const BASE_EFFECT_ICONS = {
+  Affliction: 'ri-virus-line',
+  Blast: 'ri-flashlight-line',
+  Burrowing: 'ri-earth-line',
+  Communication: 'ri-broadcast-line',
+  Comprehend: 'ri-translate-2',
+  Concealment: 'ri-eye-close-line',
+  Create: 'ri-magic-line',
+  Damage: 'ri-sword-line',
+  Deflect: 'ri-shield-flash-line',
+  Elongation: 'ri-expand-diagonal-line',
+  'Enhanced Trait': 'ri-arrow-up-circle-line',
+  Environment: 'ri-sun-cloudy-line',
+  'Extra Limbs': 'ri-git-branch-line',
+  Feature: 'ri-sparkling-line',
+  Flight: 'ri-flight-takeoff-line',
+  Growth: 'ri-fullscreen-line',
+  Healing: 'ri-heart-pulse-line',
+  Illusion: 'ri-sparkling-2-line',
+  Immortality: 'ri-infinity-line',
+  Immunity: 'ri-shield-cross-line',
+  Insubstantial: 'ri-ghost-line',
+  Leaping: 'ri-arrow-up-line',
+  'Luck Control': 'ri-dice-line',
+  'Mind Reading': 'ri-brain-line',
+  Morph: 'ri-user-shared-line',
+  'Move Object': 'ri-hand-coin-line',
+  Movement: 'ri-compass-3-line',
+  Nullify: 'ri-prohibited-line',
+  Protection: 'ri-shield-line',
+  Quickness: 'ri-timer-flash-line',
+  Regeneration: 'ri-refresh-line',
+  'Remote Sensing': 'ri-radar-line',
+  Senses: 'ri-eye-line',
+  Shrinking: 'ri-fullscreen-exit-line',
+  Speed: 'ri-run-line',
+  Summon: 'ri-team-line',
+  Swimming: 'ri-drop-line',
+  Teleport: 'ri-crosshair-2-line',
+  Transform: 'ri-flask-line',
+  Variable: 'ri-dashboard-3-line',
+  Weaken: 'ri-arrow-down-circle-line'
+};
+
+export function getBaseEffectIcon(baseEffect) {
+  if (!baseEffect) return 'ri-flashlight-line';
+  return BASE_EFFECT_ICONS[baseEffect] || 'ri-flashlight-line';
+}
+
 export const BASE_EFFECTS = [
   { name: 'Affliction', category: 'Attack', cost: 1, range: 'Close', action: 'Standard', duration: 'Instant', resistance: 'Fortitude or Will', desc: 'You can impose some debilitating condition or conditions on a target by making a close attack. You set the conditions your Affliction inflicts at each of three degrees of failure (Fortitude or Will vs DC 10 + rank). First degree causes conditions like Dazed, Hindered, or Fatigued; second degree causes Compelled, Defenseless, Disabled, Exhausted, Immobile, or Stunned; third degree causes Asleep, Controlled, Incapacitated, Paralyzed, or Transformed.' },
   { name: 'Blast', category: 'Attack', cost: 2, range: 'Ranged', action: 'Standard', duration: 'Instant', resistance: 'Toughness', desc: 'You can make a damaging ranged attack. It might be a blast of energy, a projectile (arrow, bullet, throwing blade, etc.), or some similar effect. You make a ranged attack check against the target’s Dodge defense. The attack’s damage equals your power rank and the target makes a Toughness resistance check against it.' },

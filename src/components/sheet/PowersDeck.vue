@@ -1921,17 +1921,38 @@ function broadcastPower(pow) {
     alternateStunts = stuntsList.join(', ');
   }
 
-  // Device context
+  // Device context (works for Device container OR Removable flaw on any power)
   let deviceType = '';
   let deviceSystems = '';
-  if (pow.type === 'device') {
-    deviceType = pow.deviceConfig?.type === 'easily_removable' ? 'Easily Removable (-2/5 PP)' : 'Removable (-1/5 PP)';
-    if (Array.isArray(pow.devicePowers) && pow.devicePowers.length > 0) {
-      deviceSystems = pow.devicePowers.map((s, idx) => {
-        const sEff = getSubPowerActiveEffect(s);
-        const sStatus = (pow.active !== false && s.active !== false) ? 'ONLINE' : 'OFFLINE';
-        return `[${sStatus}] ${s.name || `System ${idx + 1}`} (${sEff.baseEffect || 'Effect'} Rank ${sEff.ranks || 1})`;
-      }).join('; ');
+  if (pow.type === 'device' || pow.deviceConfig?.type) {
+    const devTypeVal = pow.deviceConfig?.type || (pow.type === 'device' ? 'removable' : '');
+    if (devTypeVal === 'easily_removable') {
+      deviceType = 'Easily Removable (-2/5 PP)';
+    } else if (devTypeVal === 'removable') {
+      deviceType = 'Removable (-1/5 PP)';
+    }
+  }
+  if (pow.type === 'device' && Array.isArray(pow.devicePowers) && pow.devicePowers.length > 0) {
+    deviceSystems = pow.devicePowers.map((s, idx) => {
+      const sEff = getSubPowerActiveEffect(s);
+      const sStatus = (pow.active !== false && s.active !== false) ? 'ONLINE' : 'OFFLINE';
+      return `[${sStatus}] ${s.name || `System ${idx + 1}`} (${sEff.baseEffect || 'Effect'} Rank ${sEff.ranks || 1})`;
+    }).join('; ');
+  }
+
+  // Compound context
+  let compoundComponents = '';
+  let sharedModifiers = '';
+  if (pow.type === 'compound' && Array.isArray(pow.compoundEffects) && pow.compoundEffects.length > 0) {
+    compoundComponents = pow.compoundEffects.map((s, idx) => {
+      const sEff = getSubPowerActiveEffect(s);
+      const priTag = (s.isPrimaryAction || s.isPrimary) ? '★ ' : '';
+      const dc = calculateDC(sEff);
+      const dcStr = dc ? ` [${dc}]` : '';
+      return `${priTag}${s.name || `Component ${idx + 1}`} (${sEff?.baseEffect || 'Effect'} Rank ${sEff?.ranks || 1}${dcStr})`;
+    }).join('; ');
+    if (Array.isArray(pow.sharedModifiers) && pow.sharedModifiers.length > 0) {
+      sharedModifiers = formatModifiersInline(pow.sharedModifiers);
     }
   }
 
@@ -1948,6 +1969,9 @@ function broadcastPower(pow) {
     activation,
     deviceType,
     deviceSystems,
+    compoundMode: pow.compoundMode || 'Suite (Simultaneous)',
+    compoundComponents,
+    sharedModifiers,
     arrayContext: isArray,
     activeStuntName,
     alternateStunts,
@@ -1974,6 +1998,7 @@ function broadcastPower(pow) {
 }
 
 function broadcastSubPower(parentPow, subPow, subIdx) {
+  const isCompound = parentPow.type === 'compound';
   const eff = getSubPowerActiveEffect(subPow);
   const dc = calculateDC(eff);
   const range = formatRange(eff);
@@ -1992,11 +2017,16 @@ function broadcastSubPower(parentPow, subPow, subIdx) {
     ? (parentPow.activation === 'move' ? 'Move Action (-1 PP)' : 'Standard Action (-2 PP)')
     : '';
 
+  const isPrimary = Boolean(subPow.isPrimaryAction || subPow.isPrimary);
+
   sendFeatureToVTT({
-    name: subPow.name || `System ${subIdx + 1}`,
+    name: subPow.name || (isCompound ? `Component ${subIdx + 1}` : `System ${subIdx + 1}`),
+    componentName: subPow.name || (isCompound ? `Component ${subIdx + 1}` : `System ${subIdx + 1}`),
     systemName: subPow.name || `System ${subIdx + 1}`,
-    parentDevice: parentPow.name || 'Device',
-    category: 'device_subpower',
+    parentDevice: !isCompound ? (parentPow.name || 'Device') : '',
+    parentCompound: isCompound ? (parentPow.name || 'Compound Power') : '',
+    category: isCompound ? 'compound_component' : 'device_subpower',
+    isPrimary,
     status,
     activation,
     baseEffect: eff?.baseEffect || '',
@@ -2014,7 +2044,8 @@ function broadcastSubPower(parentPow, subPow, subIdx) {
     description: flavor || rules
   }, heroStore.character);
 
-  uiStore.showToast(`Broadcasted sub-system "${subPow.name || 'System'}" to Roll20!`, 'info');
+  const label = isCompound ? 'component' : 'sub-system';
+  uiStore.showToast(`Broadcasted ${label} "${subPow.name || (isCompound ? 'Component' : 'System')}" to Roll20!`, 'info');
 }
 
 function broadcastEffect(pow, effect, isLinked = false) {

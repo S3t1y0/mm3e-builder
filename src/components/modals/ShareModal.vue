@@ -3,16 +3,16 @@
     <div class="modal-card">
       <!-- HEADER -->
       <div class="modal-header">
-        <div style="display: flex; align-items: center; gap: 0.65rem;">
+        <div class="modal-header-left">
           <div class="modal-icon">
-            <i class="ri-share-forward-fill"></i>
+            <i class="ri-share-forward-line"></i>
           </div>
           <div>
-            <h2 class="modal-title">Share Character Link</h2>
-            <p class="modal-sub">Cloudflare Worker KV shortlink with offline compression fallback</p>
+            <h2 class="modal-title">Share Character</h2>
+            <p class="modal-sub">Create a link to view or play this character sheet</p>
           </div>
         </div>
-        <button class="btn btn-ghost btn-sm" @click="uiStore.closeModal('share')">
+        <button class="btn btn-ghost btn-sm" @click="uiStore.closeModal('share')" aria-label="Close">
           <i class="ri-close-line" style="font-size: 1.25rem;"></i>
         </button>
       </div>
@@ -20,41 +20,29 @@
       <!-- BODY -->
       <div class="modal-body">
         <!-- Hero Summary Strip -->
-        <div class="hero-share-card mb-3">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <div style="font-weight: 800; color: #fff; font-size: 1.05rem;">
-              {{ heroStore.character.name || 'Hero Name' }}
-              <span class="badge badge-primary" style="margin-left: 0.35rem; font-size: 0.72rem;">PL {{ heroStore.character.powerLevel || 10 }}</span>
+        <div class="hero-share-card">
+          <div class="hero-share-title-row">
+            <div class="hero-share-name">
+              {{ heroStore.character.name || 'Hero' }}
+              <span class="badge badge-primary">PL {{ heroStore.character.powerLevel || 10 }}</span>
             </div>
-            <div v-if="shareData.type" class="link-type-badge-container">
-              <span v-if="shareData.type === 'kv'" class="badge-kv-tag">
-                <i class="ri-flashlight-fill"></i> Cloudflare KV Link
-              </span>
-              <span v-else class="badge-compressed-tag">
-                <i class="ri-archive-line"></i> Compressed URL
-              </span>
-            </div>
+            <span v-if="hasActiveShareLink" class="status-pill">
+              Synced
+            </span>
           </div>
-          <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.3rem;">
+          <div class="hero-share-meta">
             {{ heroStore.totalSpentPP }} / {{ heroStore.totalBudgetPP }} PP • {{ heroStore.character.powers?.length || 0 }} Powers • {{ heroStore.character.skills?.length || 0 }} Skills
           </div>
         </div>
 
         <!-- URL Input Section -->
-        <div class="share-input-section">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.4rem;">
-            <label style="font-size: 0.75rem; font-weight: 700; color: var(--text-secondary);">
-              SHAREABLE URL LINK
-            </label>
-            <span v-if="!isGenerating && shareData.charCount" style="font-size: 0.72rem; color: var(--text-muted);">
-              {{ shareData.charCount }} characters
-            </span>
-          </div>
+        <div class="share-input-section mt-3">
+          <label class="share-input-label">Share link</label>
 
           <!-- Loading State -->
           <div v-if="isGenerating" class="generating-box">
             <i class="ri-loader-4-line spin-icon"></i>
-            <span>Connecting to Cloudflare Worker KV...</span>
+            <span>Generating link...</span>
           </div>
 
           <!-- Active URL Row -->
@@ -68,68 +56,59 @@
             />
             <button class="btn btn-primary" :disabled="!shareData.url" @click="copyLink">
               <i :class="copied ? 'ri-check-line' : 'ri-file-copy-line'"></i>
-              {{ copied ? 'Copied!' : 'Copy Link' }}
+              {{ copied ? 'Copied' : 'Copy' }}
             </button>
           </div>
         </div>
 
-        <!-- Mode Toggle & Regeneration -->
-        <div class="share-controls-strip mt-3">
-          <label class="toggle-offline-label">
+        <!-- Dynamic Link Sync Panel -->
+        <div v-if="shareData.type === 'kv' && hasActiveShareLink" class="dynamic-share-panel mt-3">
+          <div class="dynamic-panel-header">
+            <div class="dynamic-title-group">
+              <span class="dynamic-panel-title">Dynamic link</span>
+              <span class="version-chip">v{{ characterShareInfo?.version || 1 }}</span>
+            </div>
+            <span v-if="characterShareInfo?.updatedAt" class="dynamic-updated-time">
+              Updated {{ formatUpdatedTime(characterShareInfo.updatedAt) }}
+            </span>
+          </div>
+          <p class="dynamic-panel-desc">
+            This link updates when you save changes, so anyone with the link always sees your latest sheet.
+          </p>
+          <div class="dynamic-panel-buttons">
+            <button
+              class="btn btn-sm btn-update-link"
+              :disabled="isGenerating"
+              @click="generateLink(false)"
+            >
+              <i class="ri-refresh-line" :class="{ 'spin-icon': isGenerating }"></i>
+              Update Link
+            </button>
+            <button
+              class="btn btn-sm btn-new-link"
+              :disabled="isGenerating"
+              title="Create a separate link with its own address"
+              @click="generateLink(true)"
+            >
+              <i class="ri-add-line"></i>
+              Create New Link
+            </button>
+          </div>
+        </div>
+
+        <!-- Offline Option Toggle -->
+        <div class="share-options-row mt-3">
+          <label class="offline-option-label">
             <input
               type="checkbox"
               v-model="forceOffline"
               class="offline-checkbox"
             />
-            <span class="toggle-text">
-              <strong>Prefer Stateless Offline Link</strong>
-              <small>Encode entire hero into URL hash without contacting Cloudflare</small>
+            <span class="offline-text">
+              <strong>Standalone offline link</strong>
+              <small>Embed all character data directly in the link so it opens without a network connection</small>
             </span>
           </label>
-          <button
-            class="btn btn-ghost btn-xs"
-            :disabled="isGenerating"
-            title="Regenerate link with latest sheet updates"
-            @click="generateLink"
-          >
-            <i class="ri-refresh-line" :class="{ 'spin-icon': isGenerating }"></i>
-            Regenerate
-          </button>
-        </div>
-
-        <!-- Compression / Link Metrics -->
-        <div class="compression-metrics-grid mt-3">
-          <div class="metric-card">
-            <div class="metric-label">RAW JSON PAYLOAD</div>
-            <div class="metric-val">{{ (shareData.originalSize / 1024).toFixed(1) }} KB</div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">LINK TYPE</div>
-            <div class="metric-val" :class="shareData.type === 'kv' ? 'text-kv' : 'text-primary'">
-              {{ shareData.type === 'kv' ? 'KV (~32 chars)' : 'Hash Slug' }}
-            </div>
-          </div>
-          <div class="metric-card">
-            <div class="metric-label">SIZE REDUCTION</div>
-            <div class="metric-val text-success">-{{ shareData.ratio }}%</div>
-          </div>
-        </div>
-
-        <!-- Callout Explainer -->
-        <div class="how-it-works-box mt-3">
-          <div style="display: flex; gap: 0.65rem; align-items: flex-start;">
-            <i :class="shareData.type === 'kv' ? 'ri-flashlight-line text-kv' : 'ri-lightbulb-line'" style="font-size: 1.15rem; margin-top: 0.1rem;"></i>
-            <div style="font-size: 0.78rem; line-height: 1.45; color: var(--text-secondary);">
-              <template v-if="shareData.type === 'kv'">
-                <strong style="color: #fff;">Ultra-Compact Cloudflare KV Shortlink:</strong>
-                Your character payload is pruned and stored in Cloudflare Worker KV. The resulting ~30-character link (#s=...) is ideal for Discord, chat, and mobile sharing.
-              </template>
-              <template v-else>
-                <strong style="color: #fff;">Stateless Zero-Backend URL:</strong>
-                Full character data is compressed directly into the URL hash using LZ-String. It requires zero server storage and will work permanently even without internet.
-              </template>
-            </div>
-          </div>
         </div>
       </div>
 
@@ -144,7 +123,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue';
+import { ref, watch, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { generateShareUrl } from '../../services/shareService.js';
@@ -160,22 +139,65 @@ const shareData = ref({
   url: '',
   type: 'kv',
   id: null,
+  editToken: null,
+  updated: false,
+  isNew: false,
+  version: 1,
+  updatedAt: null,
   originalSize: 0,
   compressedSize: 0,
   ratio: 0,
   charCount: 0
 });
 
-async function generateLink() {
+const characterShareInfo = computed(() => heroStore.character?.shareInfo || null);
+const hasActiveShareLink = computed(() => {
+  return Boolean(characterShareInfo.value?.id && characterShareInfo.value?.editToken);
+});
+
+function formatUpdatedTime(isoStr) {
+  if (!isoStr) return '';
+  try {
+    const d = new Date(isoStr);
+    return d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: '2-digit'
+    });
+  } catch (e) {
+    return isoStr;
+  }
+}
+
+async function generateLink(forceNew = false) {
   isGenerating.value = true;
   try {
     const result = await generateShareUrl(heroStore.character, {
-      forceOffline: forceOffline.value
+      forceOffline: forceOffline.value,
+      forceNew
     });
     shareData.value = result;
+
+    if (result.type === 'kv' && result.id && result.editToken) {
+      heroStore.setShareInfo({
+        id: result.id,
+        editToken: result.editToken,
+        version: result.version || 1,
+        updatedAt: result.updatedAt || new Date().toISOString()
+      });
+
+      if (result.updated) {
+        uiStore.showToast('Character link updated.', 'success');
+      } else if (result.isNew && !forceNew) {
+        uiStore.showToast('Share link created.', 'success');
+      } else if (forceNew) {
+        uiStore.showToast('New separate link created.', 'success');
+      }
+    }
   } catch (err) {
     console.error('Share generation error:', err);
-    uiStore.showToast('Failed to generate short link, falling back to local URL.', 'warning');
+    uiStore.showToast('Could not generate short link, falling back to offline link.', 'warning');
   } finally {
     isGenerating.value = false;
   }
@@ -185,14 +207,14 @@ async function generateLink() {
 watch(() => uiStore.modals.share, (isOpen) => {
   if (isOpen) {
     copied.value = false;
-    generateLink();
+    generateLink(false);
   }
 });
 
 // Regenerate link when toggling forceOffline
 watch(forceOffline, () => {
   if (uiStore.modals.share) {
-    generateLink();
+    generateLink(false);
   }
 });
 
@@ -201,10 +223,10 @@ async function copyLink() {
   try {
     await navigator.clipboard.writeText(shareData.value.url);
     copied.value = true;
-    uiStore.showToast('Share link copied to clipboard!', 'success');
-    setTimeout(() => { copied.value = false; }, 2500);
+    uiStore.showToast('Link copied to clipboard.', 'success');
+    setTimeout(() => { copied.value = false; }, 2000);
   } catch (err) {
-    uiStore.showToast('Failed to copy link', 'error');
+    uiStore.showToast('Failed to copy link.', 'error');
   }
 }
 </script>
@@ -224,7 +246,7 @@ async function copyLink() {
 
 .modal-card {
   width: 100%;
-  max-width: 650px;
+  max-width: 520px;
   background: var(--bg-card);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-lg);
@@ -242,76 +264,91 @@ async function copyLink() {
   border-bottom: 1px solid var(--border-subtle);
 }
 
+.modal-header-left {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
 .modal-icon {
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: var(--radius-sm);
   background: rgba(168, 85, 247, 0.15);
-  border: 1px solid rgba(168, 85, 247, 0.3);
+  border: 1px solid rgba(168, 85, 247, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.2rem;
   color: #c084fc;
 }
 
 .modal-title {
-  font-size: 1.15rem;
-  font-weight: 800;
+  font-size: 1.1rem;
+  font-weight: 700;
   color: #fff;
   letter-spacing: -0.01em;
+  margin: 0;
 }
 
 .modal-sub {
   font-size: 0.78rem;
   color: var(--text-secondary);
-  margin-top: 0.15rem;
+  margin: 0.15rem 0 0 0;
 }
 
 .modal-body {
-  padding: 1.5rem;
+  padding: 1.25rem 1.5rem;
 }
 
 .hero-share-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  padding: 0.85rem 1.15rem;
+  padding: 0.85rem 1rem;
 }
 
-.badge-kv-tag {
-  display: inline-flex;
+.hero-share-title-row {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  gap: 4px;
-  background: rgba(16, 185, 129, 0.15);
-  color: #34d399;
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.72rem;
-  font-weight: 700;
 }
 
-.badge-compressed-tag {
-  display: inline-flex;
+.hero-share-name {
+  font-weight: 700;
+  color: #fff;
+  font-size: 1rem;
+  display: flex;
   align-items: center;
-  gap: 4px;
-  background: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  padding: 2px 8px;
-  border-radius: 4px;
-  font-size: 0.72rem;
-  font-weight: 700;
+  gap: 0.4rem;
 }
 
-.text-kv {
+.status-pill {
+  font-size: 0.72rem;
+  font-weight: 600;
   color: #34d399;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.hero-share-meta {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 0.35rem;
 }
 
 .share-input-section {
   display: flex;
   flex-direction: column;
+}
+
+.share-input-label {
+  font-size: 0.76rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 0.4rem;
 }
 
 .generating-box {
@@ -323,7 +360,7 @@ async function copyLink() {
   border: 1px dashed var(--border-subtle);
   border-radius: var(--radius-sm);
   padding: 0.75rem;
-  color: #93c5fd;
+  color: var(--text-secondary);
   font-size: 0.82rem;
 }
 
@@ -348,7 +385,7 @@ async function copyLink() {
   border-radius: var(--radius-sm);
   padding: 0.65rem 0.85rem;
   color: #93c5fd;
-  font-family: 'Geist Mono', monospace;
+  font-family: monospace;
   font-size: 0.82rem;
   cursor: text;
 }
@@ -358,85 +395,137 @@ async function copyLink() {
   border-color: var(--accent-primary);
 }
 
-.share-controls-strip {
+.dynamic-share-panel {
+  background: rgba(16, 185, 129, 0.05);
+  border: 1px solid rgba(52, 211, 153, 0.25);
+  border-radius: var(--radius-md);
+  padding: 0.85rem 1rem;
+}
+
+.dynamic-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.dynamic-title-group {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.dynamic-panel-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #34d399;
+}
+
+.version-chip {
+  background: rgba(52, 211, 153, 0.15);
+  color: #a7f3d0;
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+
+.dynamic-updated-time {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.dynamic-panel-desc {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.4;
+  margin: 0 0 0.75rem 0;
+}
+
+.dynamic-panel-buttons {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.btn-update-link {
+  background: #059669;
+  color: #fff;
+  border: 1px solid #10b981;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.btn-update-link:hover:not(:disabled) {
+  background: #10b981;
+}
+
+.btn-new-link {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-subtle);
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-sm);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.btn-new-link:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.share-options-row {
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  padding: 0.5rem 0.85rem;
+  padding: 0.6rem 0.85rem;
 }
 
-.toggle-offline-label {
+.offline-option-label {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: 8px;
   cursor: pointer;
   user-select: none;
 }
 
 .offline-checkbox {
+  margin-top: 2px;
   accent-color: var(--accent-primary);
-  width: 15px;
-  height: 15px;
 }
 
-.toggle-text {
+.offline-text {
   display: flex;
   flex-direction: column;
+  gap: 2px;
 }
 
-.toggle-text strong {
+.offline-text strong {
   font-size: 0.75rem;
   color: #fff;
+  font-weight: 600;
 }
 
-.toggle-text small {
-  font-size: 0.68rem;
+.offline-text small {
+  font-size: 0.7rem;
   color: var(--text-muted);
-}
-
-.compression-metrics-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 0.75rem;
-}
-
-.metric-card {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem;
-  text-align: center;
-}
-
-.metric-label {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-muted);
-}
-
-.metric-val {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #fff;
-  margin-top: 0.25rem;
-}
-
-.text-primary {
-  color: var(--accent-primary);
-}
-
-.text-success {
-  color: #34d399;
-}
-
-.how-it-works-box {
-  background: rgba(16, 185, 129, 0.04);
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  border-radius: var(--radius-md);
-  padding: 0.85rem 1rem;
+  line-height: 1.35;
 }
 
 .modal-footer {

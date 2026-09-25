@@ -72,7 +72,7 @@ export function sendRollToVTT(rollData, character = null) {
     improvedInitRanks: rollData.improvedInitRanks || 0,
     hasSeizeInitiative: !!rollData.hasSeizeInitiative,
     builderSource: 'mm3e-builder-vue',
-    builderVersion: '2.0.0',
+    builderVersion: '2.1.0',
     timestamp: Date.now()
   };
 
@@ -111,7 +111,7 @@ export function sendFeatureToVTT(featureData, character = null) {
     ...featureData,
     characterName: charName,
     builderSource: 'mm3e-builder-vue',
-    builderVersion: '2.0.0',
+    builderVersion: '2.1.0',
     timestamp: Date.now()
   };
 

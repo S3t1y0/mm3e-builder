@@ -43,7 +43,7 @@
               <i class="ri-sword-line"></i> {{ activeCategoryBreakdown.Combat }}
             </span>
             <span v-if="activeCategoryBreakdown.Fortune > 0" class="mini-cat-chip fortune">
-              <i class="ri-clover-line"></i> {{ activeCategoryBreakdown.Fortune }}
+              <i class="ri-dice-line"></i> {{ activeCategoryBreakdown.Fortune }}
             </span>
             <span v-if="activeCategoryBreakdown.Skill > 0" class="mini-cat-chip skill">
               <i class="ri-focus-3-line"></i> {{ activeCategoryBreakdown.Skill }}
@@ -159,10 +159,10 @@
         <div class="panel-header">
           <div class="panel-title-wrap">
             <h4 class="panel-title">
-              <i class="ri-book-mark-line text-accent"></i>
+              <i class="ri-bookmark-line text-accent"></i>
               <span>Advantages Catalog</span>
             </h4>
-            <span class="catalog-count-hint tabular-nums">{{ filteredCatalog.length }} of 59 Available</span>
+            <span class="catalog-count-hint tabular-nums">{{ filteredCatalog.length }} of 76 Available</span>
           </div>
         </div>
 
@@ -352,7 +352,7 @@ const quickRecommendations = [
 function getCategoryIconClass(cat) {
   switch (cat) {
     case 'Combat': return 'ri-sword-line';
-    case 'Fortune': return 'ri-clover-line';
+    case 'Fortune': return 'ri-dice-line';
     case 'Skill': return 'ri-focus-3-line';
     case 'General': return 'ri-shield-line';
     case 'Ranked': return 'ri-star-line';

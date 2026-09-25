@@ -335,7 +335,7 @@ async function loadFromHash() {
   const isKvLink = hash.startsWith('#s=');
 
   if (isKvLink) {
-    uiStore.showToast('Fetching shared hero from Cloudflare KV...', 'info', 2500);
+    uiStore.showToast('Loading shared character...', 'info', 2000);
   }
 
   try {
@@ -343,20 +343,16 @@ async function loadFromHash() {
     if (sharedChar && (sharedChar.name || sharedChar.abilities)) {
       heroStore.loadCharacter(sharedChar);
       uiStore.showToast(
-        `Loaded shared hero "${sharedChar.name || 'Hero'}" (PL ${sharedChar.powerLevel || 10})!`,
+        `Loaded "${sharedChar.name || 'Hero'}" (PL ${sharedChar.powerLevel || 10})`,
         'success',
-        4500
+        3500
       );
     } else if (isKvLink) {
-      uiStore.showToast('Could not find or decode character from Cloudflare KV link.', 'error', 4500);
+      uiStore.showToast('Character not found or link has expired.', 'error', 4000);
     }
   } catch (err) {
     console.error('Failed to load shared character from hash:', err);
-    uiStore.showToast(
-      isKvLink ? 'Failed to fetch character from Cloudflare KV. Check your connection or link ID.' : 'Failed to parse character from URL hash.',
-      'error',
-      4500
-    );
+    uiStore.showToast('Unable to load character from link.', 'error', 4000);
   }
 }
 

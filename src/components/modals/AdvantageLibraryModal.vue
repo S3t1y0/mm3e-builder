@@ -214,7 +214,7 @@ watch([activeCategory, searchQuery], () => {
 function getCategoryIconClass(cat) {
   switch (cat) {
     case 'Combat': return 'ri-sword-line';
-    case 'Fortune': return 'ri-clover-line';
+    case 'Fortune': return 'ri-dice-line';
     case 'Skill': return 'ri-focus-3-line';
     case 'General': return 'ri-shield-line';
     case 'Ranked': return 'ri-star-line';

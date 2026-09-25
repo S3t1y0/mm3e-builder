@@ -70,7 +70,8 @@ export function createDefaultCharacter() {
     customAttacks: [],
     resources: [],
     complications: [],
-    notes: ''
+    notes: '',
+    shareInfo: null
   };
 }
 
@@ -781,6 +782,21 @@ export const useHeroStore = defineStore('hero', {
     resetCharacter() {
       this.character = createDefaultCharacter();
       this.pushHistory();
+    },
+
+    setShareInfo(info) {
+      if (!this.character) return;
+      this.character.shareInfo = {
+        ...(this.character.shareInfo || {}),
+        ...info
+      };
+      this.saveToStorage();
+    },
+
+    clearShareInfo() {
+      if (!this.character) return;
+      this.character.shareInfo = null;
+      this.saveToStorage();
     },
 
     setAbility(key, rank) {

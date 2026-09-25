@@ -30,6 +30,7 @@
           :class="{ active: selectedCategory === cat.id }"
           @click="selectedCategory = cat.id"
         >
+          <i v-if="cat.icon" :class="cat.icon"></i>
           <span>{{ cat.label }}</span>
           <span class="tab-count">{{ cat.count }}</span>
         </button>
@@ -207,11 +208,11 @@ const availableCategories = computed(() => {
     }
   });
   return [
-    { id: 'all', label: 'All', count: counts.all },
-    { id: 'combat', label: 'Combat', count: counts.combat },
-    { id: 'skill', label: 'Skill', count: counts.skill },
-    { id: 'fortune', label: 'Fortune', count: counts.fortune },
-    { id: 'general', label: 'General', count: counts.general },
+    { id: 'all', label: 'All', count: counts.all, icon: 'ri-apps-line' },
+    { id: 'combat', label: 'Combat', count: counts.combat, icon: 'ri-sword-line' },
+    { id: 'skill', label: 'Skill', count: counts.skill, icon: 'ri-focus-3-line' },
+    { id: 'fortune', label: 'Fortune', count: counts.fortune, icon: 'ri-dice-line' },
+    { id: 'general', label: 'General', count: counts.general, icon: 'ri-shield-line' },
   ].filter(c => c.id === 'all' || c.count > 0);
 });
 
@@ -249,7 +250,7 @@ function getCategoryIcon(name) {
   const cat = getAdvCategory(name);
   switch (cat) {
     case 'Combat': return 'ri-sword-line';
-    case 'Fortune': return 'ri-clover-line';
+    case 'Fortune': return 'ri-dice-line';
     case 'Skill': return 'ri-focus-3-line';
     case 'General': return 'ri-shield-line';
     default: return 'ri-shield-line';
