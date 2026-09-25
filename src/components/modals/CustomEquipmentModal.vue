@@ -1137,6 +1137,7 @@ import {
   calculateTotalEquipmentCost,
   generateEquipmentDescription
 } from '../../rules/equipmentCalculator.js';
+import { getCombatSkillBonus } from '../../rules/skills.js';
 
 const props = defineProps({
   modelValue: {
@@ -1562,14 +1563,25 @@ function getCalculatedAtkBonus() {
       ? Number(heroStore.effectiveAbilities?.DEX || 0)
       : Number(heroStore.effectiveAbilities?.FGT || 0);
 
-    const skillMatch = isRanged
-      ? skills.find(s => s?.name === 'Ranged Combat')
-      : skills.find(s => s?.name === 'Close Combat');
+    const advBonus = isRanged
+      ? Number(heroStore.getAdvantageRanks('Ranged Attack') || 0)
+      : Number(heroStore.getAdvantageRanks('Close Attack') || 0);
 
-    const skillBonus = skillMatch ? (Number(skillMatch.ranks) || 0) : 0;
+    const isThrown = Boolean(weaponConfig.value.thrown);
+    const attackContext = {
+      name: weaponConfig.value.name || itemName.value || '',
+      weaponType: isRanged ? (isThrown ? 'weapon:thrown' : 'weapon:ranged') : 'weapon:melee',
+      description: weaponConfig.value.notes || customDescription.value || '',
+      traits: weaponConfig.value.traits || [],
+      descriptors: weaponConfig.value.traits || [],
+      isThrown,
+      range: isRanged ? 'Ranged' : 'Close'
+    };
+
+    const skillBonus = getCombatSkillBonus(skills, attackContext, isRanged);
     const gearBonus = weaponConfig.value.laserSight ? Number(weaponConfig.value.laserSightRanks || 1) : 0;
 
-    return abilBonus + skillBonus + gearBonus;
+    return abilBonus + advBonus + skillBonus + gearBonus;
   } catch (e) {
     console.error('Error calculating attack bonus:', e);
     return 0;

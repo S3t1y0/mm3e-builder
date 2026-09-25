@@ -1,4 +1,6 @@
 // src/rules/attacks.js
+import { getCombatSkillBonus } from './skills.js';
+
 /**
  * Mutants & Masterminds 3e Combat Attacks Generator
  * Compiles basic attacks (Unarmed) and offensive power attacks (Damage, Blast, Affliction, Weaken)
@@ -110,10 +112,9 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
   }
 
   // 1. Basic Unarmed (fallback when no explicit attacks are provided)
-  const unarmedSkill = (character.skills || []).find(
-    s => s.name === 'Close Combat' && /unarmed/i.test(s.subtype || '')
-  );
-  const unarmedBonus = fgt + (unarmedSkill ? Number(unarmedSkill.ranks) || 0 : 0) + closeAttackBonus;
+  const unarmedContext = { name: 'Unarmed Strike', range: 'Close' };
+  const unarmedSkillBonus = getCombatSkillBonus(character.skills || [], unarmedContext, false);
+  const unarmedBonus = fgt + unarmedSkillBonus + closeAttackBonus;
 
   attacks.push({
     id: 'unarmed_attack',
@@ -146,21 +147,29 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     const isArea = (effect.extras || []).some(e => e.name === 'Area');
     const isPerception = effect.range === 'Perception';
 
-    // Calculate attack roll bonus (FGT/DEX + Advantage bonus + Skill bonus + Accurate)
-    let rollBonus = isRanged ? (dex + rangedAttackBonus) : (fgt + closeAttackBonus);
-    const searchPattern = opt.slotName || power.name || effect.name;
+    const isThrown = /thrown/i.test(power.name || '') || /thrown/i.test(effect.name || '') || /thrown/i.test(opt.slotName || '') || (effect.extras || []).some(e => /thrown/i.test(e.name || ''));
 
-    if (isRanged) {
-      const rangedSkill = (character.skills || []).find(
-        s => s.name === 'Ranged Combat' && (new RegExp(searchPattern, 'i').test(s.subtype || '') || /blast/i.test(s.subtype || ''))
-      );
-      if (rangedSkill) rollBonus += Number(rangedSkill.ranks) || 0;
-    } else {
-      const closeSkill = (character.skills || []).find(
-        s => s.name === 'Close Combat' && new RegExp(searchPattern, 'i').test(s.subtype || '')
-      );
-      if (closeSkill) rollBonus += Number(closeSkill.ranks) || 0;
-    }
+    // Safe and robust skill matching (supports categories, power names, device context, and descriptors)
+    const attackContext = {
+      name: opt.slotName || effect.name || power.name,
+      slotName: opt.slotName,
+      powerName: power.name,
+      effectName: effect.name,
+      baseEffect: baseEffect,
+      sourceTitle: opt.sourceTitle,
+      descriptors: [
+        ...(Array.isArray(power.descriptors) ? power.descriptors : (power.descriptors ? [power.descriptors] : [])),
+        ...(Array.isArray(effect.descriptors) ? effect.descriptors : (effect.descriptors ? [effect.descriptors] : [])),
+        ...(Array.isArray(opt.descriptors) ? opt.descriptors : [])
+      ],
+      description: effect.description || power.description || '',
+      isThrown,
+      range: effect.range || (isRanged ? 'Ranged' : 'Close'),
+      deviceType: power.type
+    };
+
+    const skillBonus = getCombatSkillBonus(character.skills || [], attackContext, isRanged);
+    let rollBonus = (isRanged ? (dex + rangedAttackBonus) : (fgt + closeAttackBonus)) + skillBonus;
 
     // Accurate extra bonus (+2 per rank)
     const accurateMod = (effect.extras || []).find(e => e.name === 'Accurate');
@@ -174,7 +183,6 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
 
     // Throwing Mastery effect boost
     let effectRank = (Number(effect.ranks) || 1) + strBonus;
-    const isThrown = /thrown/i.test(power.name || '') || /thrown/i.test(effect.name || '') || /thrown/i.test(opt.slotName || '');
     if (isThrown && throwingMasteryBonus > 0) {
       effectRank += throwingMasteryBonus;
     }
@@ -527,27 +535,19 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     const isArea = (w.traits || []).some(t => /area/i.test(t)) || /Area/i.test(r.desc || '');
     const isAffliction = (w.traits || []).some(t => /affliction/i.test(t)) || /Affliction/i.test(r.desc || '');
 
-    // Safe skill matching (no crash-prone RegExp on arbitrary weapon names)
-    const rNameLower = (r.name || '').toLowerCase();
-    const skills = character.skills || [];
-    let skillBonus = 0;
-    if (isRanged) {
-      const matchSkill = skills.find(s => {
-        if (s.name !== 'Ranged Combat') return false;
-        const sub = (s.subtype || '').toLowerCase().trim();
-        if (!sub) return false;
-        return rNameLower.includes(sub) || sub.includes(rNameLower) || /firearms?|guns?|pistols?|rifles?|bows?/i.test(sub);
-      });
-      if (matchSkill) skillBonus = Number(matchSkill.ranks) || 0;
-    } else {
-      const matchSkill = skills.find(s => {
-        if (s.name !== 'Close Combat') return false;
-        const sub = (s.subtype || '').toLowerCase().trim();
-        if (!sub) return false;
-        return rNameLower.includes(sub) || sub.includes(rNameLower) || /blades?|swords?|knives|melee|unarmed/i.test(sub);
-      });
-      if (matchSkill) skillBonus = Number(matchSkill.ranks) || 0;
-    }
+    // Safe and comprehensive skill matching for equipped weapons
+    const isThrown = /thrown/i.test(r.subtype || '') || /thrown/i.test(r.desc || '') || (w.traits || []).some(t => /thrown/i.test(t));
+    const attackContext = {
+      name: r.name,
+      weaponType: r.subtype,
+      description: r.desc,
+      traits: w.traits || [],
+      descriptors: w.traits || [],
+      isThrown,
+      range: isRanged ? 'Ranged' : 'Close'
+    };
+
+    const skillBonus = getCombatSkillBonus(character.skills || [], attackContext, isRanged);
 
     const rollBonus = isRanged
       ? (dex + rangedAttackBonus + skillBonus + (w.attackBonus || 0))

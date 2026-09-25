@@ -1,5 +1,6 @@
 // js/rules/powerEngine.js
 import { ADVANTAGES } from './advantages.js';
+import { getCombatSkillBonus } from './skills.js';
 /**
  * Mutants & Masterminds 3e Power Engine
  * Official D20 Hero System Power Rules, Fractional Costs, Array Budgets,
@@ -4239,15 +4240,33 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
   } else if (isClose) {
     attackType = 'Close Attack';
     baseBonus = Number(abilities.FGT) || 0;
-    // Check for matching Close Combat skill
-    const closeSkill = skills.find(s => s.name === 'Close Combat' && s.subtype && new RegExp(power.name || effect.name, 'i').test(s.subtype));
-    if (closeSkill) baseBonus += Number(closeSkill.ranks) || 0;
+    const isThrown = /thrown/i.test(power.name || '') || /thrown/i.test(effect.name || '') || effect.extras.some(e => /thrown/i.test(e.name || ''));
+    const attackContext = {
+      name: power.name || effect.name,
+      powerName: power.name,
+      effectName: effect.name,
+      baseEffect: effect.baseEffect,
+      descriptors: Array.isArray(power.descriptors) ? power.descriptors : [],
+      description: power.description || effect.description || '',
+      isThrown,
+      range: 'Close'
+    };
+    baseBonus += getCombatSkillBonus(skills, attackContext, false);
   } else {
     attackType = 'Ranged Attack';
     baseBonus = Number(abilities.DEX) || 0;
-    // Check for matching Ranged Combat skill
-    const rangedSkill = skills.find(s => s.name === 'Ranged Combat' && s.subtype && new RegExp(power.name || effect.name, 'i').test(s.subtype));
-    if (rangedSkill) baseBonus += Number(rangedSkill.ranks) || 0;
+    const isThrown = /thrown/i.test(power.name || '') || /thrown/i.test(effect.name || '') || effect.extras.some(e => /thrown/i.test(e.name || ''));
+    const attackContext = {
+      name: power.name || effect.name,
+      powerName: power.name,
+      effectName: effect.name,
+      baseEffect: effect.baseEffect,
+      descriptors: Array.isArray(power.descriptors) ? power.descriptors : [],
+      description: power.description || effect.description || '',
+      isThrown,
+      range: 'Ranged'
+    };
+    baseBonus += getCombatSkillBonus(skills, attackContext, true);
   }
 
   const finalAttackBonus = (isArea || isPerception) ? null : (baseBonus + modAttackBonus);

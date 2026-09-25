@@ -80,7 +80,7 @@
               <span class="toggle-status-text">{{ pow.active !== false ? 'ACTIVE' : 'OFFLINE' }}</span>
             </button>
 
-            <h4 class="pow-name">{{ pow.name || 'Unnamed Power' }}</h4>
+            <h4 class="pow-name" :title="pow.name || 'Unnamed Power'">{{ pow.name || 'Unnamed Power' }}</h4>
 
             <!-- Structure Type Badge (Device / Compound / Array) -->
             <span v-if="pow.type && pow.type !== 'standard'" class="structure-badge" :class="`badge-${pow.type}`">
@@ -2622,15 +2622,17 @@ function getModifierInfo(modName, isFlaw = false) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.75rem;
-  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex-wrap: nowrap;
 }
 
 .pow-title-area {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
-  flex-wrap: wrap;
+  gap: 0.45rem;
+  flex-wrap: nowrap;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 /* Power Active / Inactive Toggle Switch */
@@ -2649,6 +2651,7 @@ function getModifierInfo(modName, isFlaw = false) {
   cursor: pointer;
   transition: all var(--trans-fast);
   user-select: none;
+  flex-shrink: 0;
 }
 
 .power-toggle-btn i {
@@ -2771,10 +2774,14 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .pow-name {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: #fff;
   margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 .structure-badge {
@@ -2783,6 +2790,7 @@ function getModifierInfo(modName, isFlaw = false) {
   padding: 0.1rem 0.45rem;
   border-radius: var(--radius-xs);
   letter-spacing: var(--letter-spacing-caps);
+  flex-shrink: 0;
 }
 
 .badge-device { background: rgba(245, 158, 11, 0.2); color: #fde68a; }
@@ -3010,7 +3018,9 @@ function getModifierInfo(modName, isFlaw = false) {
 .pow-card-actions {
   display: flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.35rem;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .pow-cost-badge {
@@ -3022,6 +3032,12 @@ function getModifierInfo(modName, isFlaw = false) {
   padding: 0.15rem 0.55rem;
   border-radius: var(--radius-pill);
   font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.btn-send-vtt {
+  flex-shrink: 0;
 }
 
 .btn-edit-power {
@@ -3037,6 +3053,8 @@ function getModifierInfo(modName, isFlaw = false) {
   border-radius: var(--radius-xs);
   cursor: pointer;
   transition: background-color var(--trans-fast), color var(--trans-fast), transform var(--trans-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-edit-power:hover {
@@ -3061,6 +3079,8 @@ function getModifierInfo(modName, isFlaw = false) {
   border-radius: var(--radius-xs);
   cursor: pointer;
   transition: all var(--trans-fast);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .btn-toggle-expand:hover {
@@ -3089,6 +3109,7 @@ function getModifierInfo(modName, isFlaw = false) {
   display: inline-flex;
   align-items: center;
   transition: color var(--trans-fast);
+  flex-shrink: 0;
 }
 
 .btn-del-power:hover {
@@ -3213,6 +3234,7 @@ function getModifierInfo(modName, isFlaw = false) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  flex-wrap: wrap;
 }
 
 .glance-effect-name {

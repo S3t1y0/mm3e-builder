@@ -248,6 +248,7 @@ import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { RESOURCE_CATEGORIES, RESOURCE_PRESETS } from '../../rules/resources.js';
+import { getCombatSkillBonus } from '../../rules/skills.js';
 import { sendFeatureToVTT } from '../../services/vttBridge.js';
 import CustomEquipmentModal from '../modals/CustomEquipmentModal.vue';
 
@@ -401,26 +402,28 @@ function getWeaponAttackBonus(r) {
   const w = r.weapon || {};
   const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
   const skills = heroStore.character.skills || [];
-  const rNameLower = (r.name || '').toLowerCase();
+
+  const isThrown = /thrown/i.test(r.subtype || '') || /thrown/i.test(r.desc || '') || (w.traits || []).some(t => /thrown/i.test(t));
+  const attackContext = {
+    name: r.name,
+    weaponType: r.subtype,
+    description: r.desc,
+    traits: w.traits || [],
+    descriptors: w.traits || [],
+    isThrown,
+    range: isRanged ? 'Ranged' : 'Close'
+  };
+
+  const skillBonus = getCombatSkillBonus(skills, attackContext, isRanged);
 
   if (isRanged) {
     const dex = Number(heroStore.effectiveAbilities.DEX) || 0;
     const rangedAdv = Number(heroStore.getAdvantageRanks('Ranged Attack')) || 0;
-    const skill = skills.find(s => {
-      if (s.name !== 'Ranged Combat') return false;
-      const sub = (s.subtype || '').toLowerCase().trim();
-      return sub && (rNameLower.includes(sub) || sub.includes(rNameLower) || /firearms?|guns?|pistols?|rifles?|bows?/i.test(sub));
-    });
-    return dex + rangedAdv + (skill ? Number(skill.ranks) || 0 : 0) + (w.attackBonus || 0);
+    return dex + rangedAdv + skillBonus + (w.attackBonus || 0);
   } else {
     const fgt = Number(heroStore.effectiveAbilities.FGT) || 0;
     const closeAdv = Number(heroStore.getAdvantageRanks('Close Attack')) || 0;
-    const skill = skills.find(s => {
-      if (s.name !== 'Close Combat') return false;
-      const sub = (s.subtype || '').toLowerCase().trim();
-      return sub && (rNameLower.includes(sub) || sub.includes(rNameLower) || /blades?|swords?|knives|melee|unarmed/i.test(sub));
-    });
-    return fgt + closeAdv + (skill ? Number(skill.ranks) || 0 : 0) + (w.attackBonus || 0);
+    return fgt + closeAdv + skillBonus + (w.attackBonus || 0);
   }
 }
 
