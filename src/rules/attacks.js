@@ -1,5 +1,270 @@
 // src/rules/attacks.js
 import { getCombatSkillBonus } from './skills.js';
+import {
+  BASIC_CONDITIONS,
+  COMBINED_CONDITIONS,
+  CONDITION_BRIEF_EFFECTS,
+  getConditionBriefEffect,
+  isConditionSevere
+} from './conditions.js';
+
+export function getConditionExplanation(name) {
+  if (!name) return 'Combat condition';
+  const clean = name.trim();
+  const explanations = {
+    Dazed: 'Limited to free actions and 1 standard action per turn (no move action)',
+    Stunned: 'Cannot take any actions; active defense (Dodge/Parry) is 0',
+    Incapacitated: 'Defenseless, stunned, and unaware; character falls prone',
+    Paralyzed: 'Speed 0, defenseless, and physically stunned, but mentally aware',
+    Compelled: 'Actions directed by attacker (free actions + 1 standard action of attacker choice)',
+    Controlled: 'No free will; all actions dictated by attacker',
+    Hindered: 'Movement speed is halved (-1 speed rank)',
+    Immobile: 'Movement speed is 0; cannot move from current spot',
+    Impaired: '-2 circumstance penalty on all checks',
+    Disabled: '-5 circumstance penalty on all checks',
+    Fatigued: 'Hindered; recovers after 1 hour of rest',
+    Exhausted: 'Impaired and hindered (-2 checks, half speed); near collapse',
+    Defenseless: 'Active defenses (Dodge & Parry) are 0; attacks against target are routine or auto-critical',
+    Vulnerable: 'Active defenses (Dodge & Parry) are halved (rounded up)',
+    Asleep: 'Defenseless, stunned, and unaware until awakened by noise or damage',
+    Blind: 'Total visual concealment; hindered, visually unaware, and vulnerable',
+    Deaf: 'Total auditory concealment; unaware of sound',
+    Entranced: 'Fascinated; takes no actions other than paying attention to effect',
+    Transformed: 'Some or all traits altered by outside agency',
+    Unaware: 'Completely unaware of surroundings; cannot make interaction or Perception checks',
+    Prone: 'Lying on ground (-5 close attack, +5 close defense, -5 ranged defense)',
+    Bruised: '-1 cumulative penalty to subsequent Toughness checks against damage',
+    Weakened: 'Temporarily lost power points/ranks in targeted trait (1 rank per point of failure)'
+  };
+  return explanations[clean] || getConditionBriefEffect(clean) || 'Combat tactical condition';
+}
+
+export function buildEffectBreakdown(baseEffect, effect = {}, dc = 15, res = 'Toughness', opt = {}) {
+  const cfg = effect.config || {};
+  const extras = Array.isArray(effect.extras) ? effect.extras : [];
+  const flaws = Array.isArray(effect.flaws) ? effect.flaws : [];
+
+  const tacticalModifiers = [];
+  if (extras.some(e => e.name === 'Cumulative')) {
+    tacticalModifiers.push({
+      name: 'Cumulative',
+      badge: 'Cumulative',
+      desc: 'Failure degrees accumulate across multiple hits until target recovers'
+    });
+  }
+  if (extras.some(e => e.name === 'Progressive')) {
+    tacticalModifiers.push({
+      name: 'Progressive',
+      badge: 'Progressive',
+      desc: 'Conditions worsen by 1 degree each round automatically if target fails check'
+    });
+  }
+  if (extras.some(e => e.name === 'Multiattack')) {
+    tacticalModifiers.push({
+      name: 'Multiattack',
+      badge: 'Multiattack',
+      desc: 'Attack multiple targets (-2 check) or gain bonus single-target damage (+2/+5)'
+    });
+  }
+  if (extras.some(e => e.name === 'Penetrating')) {
+    tacticalModifiers.push({
+      name: 'Penetrating',
+      badge: 'Penetrating',
+      desc: 'Overcomes target Impervious Toughness up to Penetrating rank'
+    });
+  }
+  if (extras.some(e => e.name === 'Extra Condition')) {
+    tacticalModifiers.push({
+      name: 'Extra Condition',
+      badge: 'Extra Condition',
+      desc: 'Inflicts 2 conditions simultaneously at each degree of failure'
+    });
+  }
+  if (flaws.some(f => f.name === 'Limited Degree')) {
+    tacticalModifiers.push({
+      name: 'Limited Degree',
+      badge: 'Limited Degree',
+      desc: 'Effect is capped at a specific maximum degree (e.g. 2nd degree)'
+    });
+  }
+  if (flaws.some(f => f.name === 'Instant Recovery')) {
+    tacticalModifiers.push({
+      name: 'Instant Recovery',
+      badge: 'Instant Recovery',
+      desc: 'Target recovers automatically at start of next turn without a check'
+    });
+  }
+  const areaExtra = extras.find(e => e.name === 'Area');
+  if (areaExtra) {
+    tacticalModifiers.push({
+      name: 'Area',
+      badge: 'Area',
+      desc: 'Targets in area make Dodge check (DC 10+rank) for half effect'
+    });
+  }
+  if (extras.some(e => e.name === 'Contagious')) {
+    tacticalModifiers.push({
+      name: 'Contagious',
+      badge: 'Contagious',
+      desc: 'Conditions spread to anyone who touches or makes contact with target'
+    });
+  }
+  if (extras.some(e => e.name === 'Secondary Effect')) {
+    tacticalModifiers.push({
+      name: 'Secondary Effect',
+      badge: 'Secondary Effect',
+      desc: 'Effect strikes target again automatically on the following round'
+    });
+  }
+
+  let degrees = [];
+  let summary = '';
+  let resistanceGuide = `Target makes ${res} resistance check vs DC ${dc}`;
+
+  if (baseEffect === 'Affliction') {
+    const parseConditions = (degVal, defVal) => {
+      if (Array.isArray(degVal) && degVal.length > 0) return degVal.filter(Boolean);
+      if (typeof degVal === 'string' && degVal.trim()) {
+        return degVal.split(/\s*(?:&|,)\s*/).filter(Boolean);
+      }
+      return [defVal];
+    };
+
+    let first = parseConditions(cfg.firstConditions || cfg.firstDegree, 'Dazed');
+    let second = parseConditions(cfg.secondConditions || cfg.secondDegree, 'Stunned');
+    let third = parseConditions(cfg.thirdConditions || cfg.thirdDegree, 'Paralyzed');
+
+    const contextName = (opt.slotName || effect.name || '').toLowerCase();
+    if (!cfg.firstConditions && !cfg.firstDegree) {
+      if (/sleep|sedative|tranquil/i.test(contextName)) {
+        first = ['Fatigued']; second = ['Exhausted']; third = ['Asleep'];
+      } else if (/mind|mental|puppet|hypno/i.test(contextName)) {
+        first = ['Dazed']; second = ['Compelled']; third = ['Controlled'];
+      } else if (/snare|entangle|web|glue/i.test(contextName)) {
+        first = ['Hindered']; second = ['Immobile']; third = ['Incapacitated'];
+      } else if (/poison|toxin|nausea|sick/i.test(contextName)) {
+        first = ['Impaired']; second = ['Disabled']; third = ['Incapacitated'];
+      }
+    }
+
+    degrees = [
+      {
+        degree: '1st',
+        label: '1st Degree',
+        margin: 'Fail by 1-5',
+        conditions: first,
+        desc: first.map(c => getConditionExplanation(c)).join(' • '),
+        isSevere: first.some(c => isConditionSevere(c))
+      },
+      {
+        degree: '2nd',
+        label: '2nd Degree',
+        margin: 'Fail by 6-10',
+        conditions: second,
+        desc: second.map(c => getConditionExplanation(c)).join(' • '),
+        isSevere: second.some(c => isConditionSevere(c))
+      },
+      {
+        degree: '3rd',
+        label: '3rd Degree',
+        margin: 'Fail by 11+',
+        conditions: third,
+        desc: third.map(c => getConditionExplanation(c)).join(' • '),
+        isSevere: third.some(c => isConditionSevere(c))
+      }
+    ];
+
+    summary = `Affliction (${first.join(' & ')} > ${second.join(' & ')} > ${third.join(' & ')})`;
+    resistanceGuide = `Target makes ${res} resistance check vs DC ${dc} (DC 10 + Rank ${effect.ranks || (dc - 10)})`;
+  } else if (baseEffect === 'Damage' || baseEffect === 'Blast') {
+    degrees = [
+      {
+        degree: '1st',
+        label: '1st Degree',
+        margin: 'Fail by 1-5',
+        conditions: ['Bruised'],
+        desc: getConditionExplanation('Bruised'),
+        isSevere: false
+      },
+      {
+        degree: '2nd',
+        label: '2nd Degree',
+        margin: 'Fail by 6-10',
+        conditions: ['Dazed', 'Bruised'],
+        desc: `${getConditionExplanation('Dazed')} + Bruised penalty`,
+        isSevere: false
+      },
+      {
+        degree: '3rd',
+        label: '3rd Degree',
+        margin: 'Fail by 11-15',
+        conditions: ['Staggered', 'Bruised'],
+        desc: `${getConditionExplanation('Staggered')} + Bruised penalty`,
+        isSevere: true
+      },
+      {
+        degree: '4th',
+        label: '4th Degree',
+        margin: 'Fail by 16+',
+        conditions: ['Incapacitated'],
+        desc: getConditionExplanation('Incapacitated'),
+        isSevere: true
+      }
+    ];
+    summary = 'Damage (Bruised > Dazed > Staggered > Incapacitated)';
+    resistanceGuide = `Target makes Toughness check vs DC ${dc} (DC 15 + Rank ${effect.ranks || (dc - 15)})`;
+  } else if (baseEffect === 'Weaken') {
+    const trait = cfg.traitName || cfg.trait || 'Targeted Trait';
+    degrees = [
+      {
+        degree: 'All',
+        label: 'Per Degree of Failure',
+        margin: 'Per Point Failed',
+        conditions: ['Weakened'],
+        desc: `Reduces target ${trait} by 1 rank per point of failure against DC ${dc}`,
+        isSevere: false
+      }
+    ];
+    summary = `Weaken (-1 rank ${trait} per point of failure)`;
+    resistanceGuide = `Target makes ${res} check vs DC ${dc}`;
+  } else if (baseEffect === 'Nullify') {
+    const descText = cfg.descriptor || 'Target Descriptor';
+    degrees = [
+      {
+        degree: 'Check',
+        label: 'Opposed Check',
+        margin: 'Opposed Result',
+        conditions: ['Nullified'],
+        desc: `Counters and shuts down active ${descText} effect if attacker wins opposed check`,
+        isSevere: false
+      }
+    ];
+    summary = `Nullify: Counter & nullify active ${descText}`;
+    resistanceGuide = `Attacker makes opposed check vs target Will or Power Rank`;
+  } else if (baseEffect === 'Move Object') {
+    summary = 'Move Object (Grab, Trip, Disarm, Throw)';
+    degrees = [
+      {
+        degree: 'Check',
+        label: 'Maneuver',
+        margin: 'Opposed Check',
+        conditions: ['Grabbed / Tripped / Disarmed'],
+        desc: 'Performs remote combat maneuvers using Move Object rank as effective Strength',
+        isSevere: false
+      }
+    ];
+  } else {
+    summary = `${baseEffect} (DC ${dc} vs ${res})`;
+  }
+
+  return {
+    baseEffect,
+    summary,
+    resistanceGuide,
+    degrees,
+    tacticalModifiers
+  };
+}
 
 /**
  * Mutants & Masterminds 3e Combat Attacks Generator
@@ -71,6 +336,13 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
 
       const effectType = atk.effectType || (res === 'Toughness' ? 'Damage' : 'Affliction');
       const effectRank = atk.ranks || (dcNum > 15 && effectType === 'Damage' ? dcNum - 15 : dcNum - 10);
+      const explicitBreakdown = buildEffectBreakdown(
+        effectType,
+        { ranks: effectRank, extras: (atk.descriptors || []).map(d => ({ name: d })) },
+        dcNum,
+        res,
+        { slotName: atk.name }
+      );
 
       attacks.push({
         id: atk.id || `atk_explicit_${idx}`,
@@ -92,18 +364,11 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
         isPowerDisabled: false,
         isActive: true,
         slotId: 'main',
-        degrees: Array.isArray(atk.degrees) ? atk.degrees : (
-          res === 'Toughness' ? [
-            { degree: '1st', label: 'Bruise (-1 Toughness penalty)' },
-            { degree: '2nd', label: 'Dazed + Bruise' },
-            { degree: '3rd', label: 'Staggered + Bruise' },
-            { degree: '4th', label: 'Incapacitated' }
-          ] : [
-            { degree: '1st', label: 'Hindered / Dazed' },
-            { degree: '2nd', label: 'Immobilized / Stunned' },
-            { degree: '3rd', label: 'Incapacitated' }
-          ]
-        ),
+        effectBreakdown: explicitBreakdown,
+        summaryText: explicitBreakdown.summary,
+        degrees: Array.isArray(atk.degrees) && atk.degrees.length > 0 ? atk.degrees : explicitBreakdown.degrees,
+        tacticalModifiers: explicitBreakdown.tacticalModifiers,
+        resistanceGuide: explicitBreakdown.resistanceGuide,
         tags: Array.isArray(atk.descriptors) ? atk.descriptors : []
       });
     });
@@ -115,6 +380,7 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
   const unarmedContext = { name: 'Unarmed Strike', range: 'Close' };
   const unarmedSkillBonus = getCombatSkillBonus(character.skills || [], unarmedContext, false);
   const unarmedBonus = fgt + unarmedSkillBonus + closeAttackBonus;
+  const unarmedBreakdown = buildEffectBreakdown('Damage', { ranks: str }, 15 + str, 'Toughness', { slotName: 'Unarmed Strike' });
 
   attacks.push({
     id: 'unarmed_attack',
@@ -132,6 +398,11 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     crit: defaultCrit,
     isStandby: false,
     isActive: true,
+    effectBreakdown: unarmedBreakdown,
+    summaryText: unarmedBreakdown.summary,
+    degrees: unarmedBreakdown.degrees,
+    tacticalModifiers: unarmedBreakdown.tacticalModifiers,
+    resistanceGuide: unarmedBreakdown.resistanceGuide,
     tags: ['Close Combat', 'Bludgeoning']
   });
 
@@ -213,6 +484,8 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     if ((effect.flaws || []).some(f => f.name === 'Limited Degree')) tags.push('Limited Degree');
     if ((effect.flaws || []).some(f => f.name === 'Instant Recovery')) tags.push('Instant Recovery');
 
+    const effectBreakdown = buildEffectBreakdown(baseEffect, effect, dc, res, opt);
+
     return {
       id: opt.id || ('atk_' + power.id + '_' + (opt.slotId || 'main')),
       type: 'power',
@@ -239,6 +512,11 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       slotId: opt.slotId || 'main',
       isSubPower: Boolean(opt.isSubPower),
       devSubIdx: opt.devSubIdx,
+      effectBreakdown,
+      summaryText: effectBreakdown.summary,
+      degrees: effectBreakdown.degrees,
+      tacticalModifiers: effectBreakdown.tacticalModifiers,
+      resistanceGuide: effectBreakdown.resistanceGuide,
       tags
     };
   }
@@ -417,11 +695,15 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
               dc: subAtk ? subAtk.dc : 15,
               resistance: subAtk ? subAtk.resistance : 'Toughness',
               dcDescription: subAtk ? subAtk.dcDescription : '',
-              degrees: subAtk ? subAtk.degrees : []
+              degrees: subAtk ? subAtk.degrees : [],
+              effectBreakdown: subAtk ? subAtk.effectBreakdown : null,
+              summaryText: subAtk ? subAtk.summaryText : '',
+              tacticalModifiers: subAtk ? subAtk.tacticalModifiers : []
             };
           });
 
           baseAtk.dcDescription = baseAtk.linkedTargets.map(t => t.dcDescription).join(' & ');
+          baseAtk.summaryText = baseAtk.linkedTargets.map(t => t.summaryText || t.name).join(' + ');
           attacks.push(baseAtk);
         }
 
@@ -573,6 +855,14 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       if (mCrit) weaponCrit = mCrit[1];
     }
 
+    const weaponBreakdown = buildEffectBreakdown(
+      isAffliction ? 'Affliction' : 'Damage',
+      { ranks: effectiveDmg, extras: (w.traits || []).map(t => ({ name: t })) },
+      dc,
+      resistance,
+      { slotName: r.name }
+    );
+
     attacks.push({
       id: `atk_res_${r.id || r.name}`,
       type: 'equipment',
@@ -591,6 +881,11 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       isPerception: false,
       isStandby: false,
       isActive: true,
+      effectBreakdown: weaponBreakdown,
+      summaryText: weaponBreakdown.summary,
+      degrees: weaponBreakdown.degrees,
+      tacticalModifiers: weaponBreakdown.tacticalModifiers,
+      resistanceGuide: weaponBreakdown.resistanceGuide,
       tags: [isRanged ? 'Ranged Weapon' : 'Melee Weapon', ...(w.traits || [])]
     });
   }
