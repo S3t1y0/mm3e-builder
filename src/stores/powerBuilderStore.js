@@ -215,6 +215,24 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
       return Array.isArray(owner?.linkedEffects) ? owner.linkedEffects : [];
     },
 
+    isEditingLinkedEffect(state) {
+      return ['linked', 'slot_linked', 'compound_linked', 'compound_slot_linked'].includes(state.activeTargetType);
+    },
+
+    currentLinkedParentEffect(state) {
+      if (!this.isEditingLinkedEffect) return null;
+      const owner = this.currentLinkedOwner;
+      if (!owner) return null;
+      if (owner.mainEffect) return owner.mainEffect;
+      if (owner.effect) {
+        return {
+          ...owner.effect,
+          name: owner.name || owner.effect.name || owner.effect.baseEffect
+        };
+      }
+      return owner;
+    },
+
     // Active slot context for capacity warnings & meters
     activeSlotContext(state) {
       if (state.power.type === 'compound') {
@@ -818,9 +836,40 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
       const newLinked = createEmptyEffect(baseName);
       newLinked.name = `${baseName} (Linked)`;
 
-      // If explicit parentEffect provided and has linkedEffects array
       if (parentEffect && Array.isArray(parentEffect.linkedEffects)) {
         parentEffect.linkedEffects.push(newLinked);
+        const newIdx = parentEffect.linkedEffects.length - 1;
+        this.activeLinkedIndex = newIdx;
+
+        // Auto-select target type based on parentEffect identity
+        if (this.power.type === 'compound') {
+          const compIdx = (this.power.compoundEffects || []).indexOf(parentEffect);
+          if (compIdx !== -1) {
+            this.activeCompoundIndex = compIdx;
+            this.activeTargetType = 'compound_linked';
+          } else {
+            // Target is an alternate slot within a compound effect
+            this.activeTargetType = 'compound_slot_linked';
+          }
+        } else if (this.power.type === 'device') {
+          const devIdx = (this.power.devicePowers || []).indexOf(parentEffect);
+          if (devIdx !== -1) {
+            this.activeSubPowerIndex = devIdx;
+            this.activeTargetType = 'linked';
+          } else {
+            this.activeTargetType = 'slot_linked';
+          }
+        } else {
+          const slotIdx = (this.power.alternateEffects || []).indexOf(parentEffect);
+          if (slotIdx !== -1) {
+            this.activeSlotIndex = slotIdx;
+            this.activeTargetType = 'slot_linked';
+          } else {
+            this.activeTargetType = 'linked';
+          }
+        }
+
+        this.power = normalizePower(this.power);
         return;
       }
 
@@ -879,47 +928,25 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
     },
 
     removeLinkedEffect(parentEffect = null, index = 0) {
-      if (parentEffect && Array.isArray(parentEffect.linkedEffects)) {
-        if (parentEffect.linkedEffects[index]) {
-          parentEffect.linkedEffects.splice(index, 1);
-        }
-        return;
-      }
-
-      const removeFromArray = (arr, fallbackTarget) => {
-        if (Array.isArray(arr) && arr[index]) {
-          arr.splice(index, 1);
-          if (this.activeLinkedIndex >= arr.length) {
-            this.activeLinkedIndex = Math.max(0, arr.length - 1);
+      const targetParent = parentEffect || this.currentLinkedOwner;
+      if (targetParent && Array.isArray(targetParent.linkedEffects)) {
+        if (targetParent.linkedEffects[index] !== undefined) {
+          targetParent.linkedEffects.splice(index, 1);
+          if (this.activeLinkedIndex >= targetParent.linkedEffects.length) {
+            this.activeLinkedIndex = Math.max(0, targetParent.linkedEffects.length - 1);
           }
-          if (arr.length === 0) {
-            this.activeTargetType = fallbackTarget;
+          if (targetParent.linkedEffects.length === 0 || this.isEditingLinkedEffect) {
+            // Safely revert active target back to parent
+            if (this.activeTargetType === 'compound_slot_linked') {
+              this.activeTargetType = 'compound_slot';
+            } else if (this.activeTargetType === 'compound_linked') {
+              this.activeTargetType = 'compound';
+            } else if (this.activeTargetType === 'slot_linked') {
+              this.activeTargetType = 'slot';
+            } else {
+              this.activeTargetType = 'main';
+            }
           }
-        }
-      };
-
-      if (this.power.type === 'device') {
-        const sub = this.activeSubPower;
-        if (this.activeTargetType === 'slot_linked' || this.activeTargetType === 'slot') {
-          const slot = sub?.alternateEffects?.[this.activeSlotIndex];
-          removeFromArray(slot?.linkedEffects, 'slot');
-        } else {
-          removeFromArray(sub?.linkedEffects, 'main');
-        }
-      } else if (this.power.type === 'compound') {
-        const comp = this.activeCompoundEffect;
-        if (this.activeTargetType === 'compound_slot_linked' || this.activeTargetType === 'compound_slot') {
-          const slot = comp?.alternateEffects?.[this.activeSlotIndex];
-          removeFromArray(slot?.linkedEffects, 'compound_slot');
-        } else {
-          removeFromArray(comp?.linkedEffects, 'compound');
-        }
-      } else {
-        if (this.activeTargetType === 'slot_linked' || this.activeTargetType === 'slot') {
-          const slot = this.power.alternateEffects?.[this.activeSlotIndex];
-          removeFromArray(slot?.linkedEffects, 'slot');
-        } else {
-          removeFromArray(this.power.linkedEffects, 'main');
         }
       }
       this.power = normalizePower(this.power);

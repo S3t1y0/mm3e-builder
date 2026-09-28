@@ -117,6 +117,16 @@
                 </div>
                 <div class="rail-item-sub-row">
                   <span class="rail-item-subtitle">{{ builderStore.power.mainEffect?.baseEffect }} Rank {{ builderStore.power.mainEffect?.ranks }}</span>
+                  <div class="rail-item-actions">
+                    <button
+                      type="button"
+                      class="btn-rail-link-mini"
+                      title="Add Linked Effect (Simultaneous Action)"
+                      @click.stop="builderStore.addLinkedEffect(builderStore.power, 'Affliction')"
+                    >
+                      <i class="ri-links-line"></i>
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
@@ -320,6 +330,14 @@
                     <div class="rail-item-sub-row">
                       <span class="rail-item-subtitle">{{ sub.effect?.baseEffect }} Rank {{ sub.effect?.ranks }}</span>
                       <div class="rail-item-actions">
+                        <button
+                          type="button"
+                          class="btn-rail-link-mini"
+                          title="Add Linked Effect (Simultaneous Action)"
+                          @click.stop="builderStore.addLinkedEffect(sub, 'Affliction')"
+                        >
+                          <i class="ri-links-line"></i>
+                        </button>
                         <button
                           type="button"
                           class="btn-rail-stunt-mini"
@@ -529,6 +547,14 @@
                     <div class="rail-item-sub-row">
                       <span class="rail-item-subtitle">{{ sub.effect?.baseEffect }} Rank {{ sub.effect?.ranks }}</span>
                       <div class="rail-item-actions">
+                        <button
+                          type="button"
+                          class="btn-rail-link-mini"
+                          title="Add Linked Effect (Simultaneous Action)"
+                          @click.stop="builderStore.addLinkedEffect(sub, 'Affliction')"
+                        >
+                          <i class="ri-links-line"></i>
+                        </button>
                         <button
                           type="button"
                           class="btn-rail-stunt-mini"
@@ -1255,6 +1281,49 @@ function handleSave() {
   align-items: center;
   gap: 0.2rem;
   flex-shrink: 0;
+}
+
+.btn-rail-link-mini,
+.btn-rail-stunt-mini {
+  position: relative;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--text-muted);
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  font-size: 0.85rem;
+  cursor: pointer;
+  border-radius: var(--radius-xs);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--trans-fast);
+}
+
+.btn-rail-link-mini::after,
+.btn-rail-stunt-mini::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  min-width: 44px;
+  min-height: 44px;
+  width: 100%;
+  height: 100%;
+}
+
+.btn-rail-link-mini:hover {
+  color: #2dd4bf;
+  background: rgba(20, 184, 166, 0.15);
+  border-color: rgba(20, 184, 166, 0.35);
+}
+
+.btn-rail-stunt-mini:hover {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.15);
+  border-color: rgba(245, 158, 11, 0.35);
 }
 
 .btn-rail-remove {
