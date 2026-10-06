@@ -4,16 +4,100 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mutants & Masterminds 3e - Character Sheet & Builder</title>
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Mutants & Masterminds 3e Character Builder & Sheet | M&M 3E Hero Studio</title>
+    <meta name="title" content="Mutants & Masterminds 3e Character Builder & Sheet | M&M 3E Hero Studio" />
+    <meta name="description" content="Free online character builder, tactical character sheet, and power construction studio for Mutants & Masterminds 3rd Edition (M&M 3e). Automated PP bookkeeping, PL validation, and Roll20 VTT integration." />
+    <meta name="keywords" content="mutants and masterminds, mm3e, mutants & masterminds 3e, character builder, character sheet, power studio, tabletop rpg, d20 hero system, roll20 vtt, superhero rpg character generator, m&m 3e builder" />
+    <meta name="author" content="Mutants & Masterminds Community" />
+    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#0d1117" />
     <meta name="application-name" content="mm3e-builder-vue" />
     <meta name="mm3e-framework" content="vue3" />
-    <meta name="description" content="Interactive character builder and sheet for Mutants & Masterminds 3rd Edition." />
+
+    <!-- Canonical URL (Replace with your custom domain or vercel domain) -->
+    <link rel="canonical" href="https://mm3e-builder.vercel.app/" />
+
+    <!-- Open Graph / Facebook / Discord / Reddit -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://mm3e-builder.vercel.app/" />
+    <meta property="og:site_name" content="M&M 3e Character Builder" />
+    <meta property="og:title" content="Mutants & Masterminds 3e Character Builder & Sheet" />
+    <meta property="og:description" content="Build, calculate, and play superheroes with an automated power point calculator, PL validation, and Roll20 VTT companion bridge for M&M 3rd Edition." />
+    <meta property="og:image" content="https://mm3e-builder.vercel.app/og-image.jpg" />
+    <meta property="og:image:secure_url" content="https://mm3e-builder.vercel.app/og-image.jpg" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Mutants & Masterminds 3e Character Builder & Tactical Sheet Interface" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content="https://mm3e-builder.vercel.app/" />
+    <meta name="twitter:title" content="Mutants & Masterminds 3e Character Builder & Sheet" />
+    <meta name="twitter:description" content="Free online superhero character creator and tactical sheet for Mutants & Masterminds 3e. Automated PP bookkeeping and Roll20 VTT integration." />
+    <meta name="twitter:image" content="https://mm3e-builder.vercel.app/og-image.jpg" />
+
+    <!-- Structured Data (JSON-LD Schema) for Google Rich Snippets -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "Mutants & Masterminds 3e Character Builder",
+      "url": "https://mm3e-builder.vercel.app/",
+      "description": "Interactive character builder, tactical character sheet, and power construction workspace for Mutants & Masterminds 3rd Edition tabletop roleplaying game.",
+      "applicationCategory": "GameApplication",
+      "genre": "Tabletop RPG",
+      "operatingSystem": "All",
+      "browserRequirements": "Requires JavaScript. Requires HTML5.",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+      },
+      "featureList": [
+        "Automated Power Point (PP) bookkeeping and budgeting",
+        "Power Level (PL) cap calculation and validation",
+        "Power Studio with fractional costs, arrays, and alternate effects",
+        "Interactive tactical character sheet with one-click d20 rolls",
+        "Roll20 VTT Chrome extension bridge and print export"
+      ]
+    }
+    </script>
+
+    <!-- Google Fonts Optimization -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Geist+Mono:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap" rel="stylesheet" />
   </head>
   <body>
-    <div id="app"></div>
+    <!-- Pre-hydration Content: Crawlers and search engine bots parse this semantic content immediately before Vue mounts -->
+    <div id="app">
+      <main style="display:none;" aria-hidden="true">
+        <h1>Mutants & Masterminds 3e Character Builder & Tactical Sheet</h1>
+        <p>A digital character builder, tactical character sheet, and power construction workspace for the Mutants & Masterminds 3rd Edition (M&M 3e / D20 Hero System) tabletop roleplaying game.</p>
+        <section>
+          <h2>Key Features</h2>
+          <ul>
+            <li>Tactical character sheet with dynamic defense, ability, and combat calculations</li>
+            <li>Guided Character Creation Wizard with pre-configured archetypes</li>
+            <li>Power Studio: Custom superpower builder with alternate effect arrays, flaws, and extras</li>
+            <li>Equipment and vehicle budgeting</li>
+            <li>Roll20 Virtual Tabletop (VTT) companion integration</li>
+          </ul>
+        </section>
+      </main>
+    </div>
+
+    <noscript>
+      <div style="padding: 2rem; font-family: sans-serif; background: #0f172a; color: #f8fafc; text-align: center;">
+        <h1>Mutants & Masterminds 3e Character Builder</h1>
+        <p>This web application requires JavaScript to be enabled in order to run the interactive character builder, power studio, and dice mechanics.</p>
+        <p>Please enable JavaScript in your browser settings to continue.</p>
+      </div>
+    </noscript>
+
     <script type="module" src="/src/main.js"></script>
   </body>
 </html>
