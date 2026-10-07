@@ -630,6 +630,112 @@
       </div>
     </div>
 
+    <!-- SUB-EDITOR: CONCEALMENT (concealment_multiselect_library) -->
+    <div v-else-if="cfg.type === 'concealment_multiselect_library'" class="config-body config-library">
+      <!-- Active Concealed Senses Ribbon -->
+      <div v-if="selectedConcealmentList.length > 0" class="selected-senses-ribbon">
+        <div class="ribbon-title">
+          <i class="ri-checkbox-circle-fill text-emerald"></i>
+          <span>Active Concealment ({{ totalConcealmentRanks }} {{ totalConcealmentRanks > 1 ? 'Ranks' : 'Rank' }} • {{ totalConcealmentRanks * 2 }} PP):</span>
+        </div>
+        <div class="ribbon-pills-row">
+          <button
+            v-for="opt in selectedConcealmentList"
+            :key="opt.id"
+            type="button"
+            class="sense-active-pill"
+            :disabled="selectedConcealmentList.length <= 1"
+            @click="toggleConcealment(opt.id)"
+            :title="selectedConcealmentList.length <= 1 ? 'At least one concealment sense is required' : 'Click to remove'"
+          >
+            <i :class="opt.icon || 'ri-eye-close-line'"></i>
+            <span class="pill-name">{{ opt.name }}</span>
+            <span class="pill-pts">+{{ opt.ranks }} R ({{ opt.ranks * 2 }} PP)</span>
+            <i v-if="selectedConcealmentList.length > 1" class="ri-close-line pill-close"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- SRD Reference Rule Banner -->
+      <div class="srd-notice-banner">
+        <div class="srd-notice-icon">
+          <i class="ri-book-open-line"></i>
+        </div>
+        <div class="srd-notice-content">
+          <div class="srd-notice-title">M&M 3e SRD Sensory Concealment Rules</div>
+          <div class="srd-notice-text">
+            <strong>Visual senses cost double</strong> (2 Ranks for single sense, 4 Ranks for all visual). 
+            <strong>Non-visual senses</strong> cost 1 Rank each (2 Ranks for entire sense type). 
+            <strong>Tactile senses are excluded</strong> (requires <em>Insubstantial</em>). 
+            <strong>All senses (non-tactile)</strong> costs 10 Ranks.
+          </div>
+        </div>
+      </div>
+
+      <!-- Library Filters Bar -->
+      <div class="library-filter-bar">
+        <div class="library-tabs">
+          <button
+            v-for="cat in cfg.categories"
+            :key="cat.id"
+            type="button"
+            class="lib-tab-btn"
+            :class="{ active: selectedConcealmentCategory === cat.id }"
+            @click="selectedConcealmentCategory = cat.id"
+          >
+            {{ cat.label }}
+            <span class="tab-count">
+              {{ getConcealmentCountForCat(cat.id) }}
+            </span>
+          </button>
+        </div>
+
+        <div class="lib-search-box">
+          <i class="ri-search-line"></i>
+          <input
+            v-model="concealmentSearch"
+            type="text"
+            class="lib-search-input"
+            placeholder="Search sense (e.g. Normal Vision, Hearing, Radar, Invisibility)..."
+          />
+          <button v-if="concealmentSearch" type="button" class="clear-search-btn" @click="concealmentSearch = ''">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Concealment Cards Grid -->
+      <div class="library-cards-grid" data-seamless-scroll>
+        <div
+          v-for="item in filteredConcealments"
+          :key="item.id"
+          class="lib-item-card"
+          :class="{ selected: isConcealmentSelected(item.id) }"
+          @click="toggleConcealment(item.id)"
+        >
+          <div class="card-top">
+            <div class="card-icon-title">
+              <i :class="item.icon || 'ri-eye-close-line'"></i>
+              <div class="card-title-group">
+                <span class="card-title">{{ item.name }}</span>
+                <span v-if="item.scopeLabel" class="card-scope-tag">{{ item.scopeLabel }}</span>
+              </div>
+            </div>
+            <div class="card-pts-badge immunity-badge">
+              {{ item.ranks }} {{ item.ranks > 1 ? 'Ranks' : 'Rank' }} ({{ item.ranks * 2 }} PP)
+            </div>
+          </div>
+          <p class="card-desc">{{ item.desc }}</p>
+          <div class="card-footer">
+            <span class="selection-status">
+              <i :class="isConcealmentSelected(item.id) ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'"></i>
+              {{ isConcealmentSelected(item.id) ? 'Active (' + item.ranks + ' R • ' + (item.ranks * 2) + ' PP)' : 'Click to Add' }}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- SUB-EDITOR: IMMUNITY (immunity_multiselect_library) -->
     <div v-else-if="cfg.type === 'immunity_multiselect_library'" class="config-body config-library">
       <div class="library-filter-bar">
@@ -998,6 +1104,7 @@ const getConfigIcon = computed(() => {
     case 'Senses': return 'ri-eye-2-line';
     case 'Affliction': return 'ri-virus-line';
     case 'Illusion': return 'ri-ghost-line';
+    case 'Concealment': return 'ri-eye-close-line';
     case 'Immunity': return 'ri-shield-star-line';
     case 'Movement': return 'ri-walk-line';
     case 'Morph': return 'ri-user-shared-line';
@@ -1025,6 +1132,10 @@ const getConfigSummaryText = computed(() => {
     case 'Senses': {
       const count = (c.selectedFaculties || []).length;
       return `${count} sensory faculties selected • ${props.effect.ranks} Ranks`;
+    }
+    case 'Concealment': {
+      const count = (c.selectedSenses || []).length;
+      return `${count} concealment sense${count !== 1 ? 's' : ''} active • ${props.effect.ranks} Ranks (${props.effect.ranks * 2} PP)`;
     }
     case 'Affliction': {
       let degs = [];
@@ -1091,7 +1202,7 @@ const statBadge = computed(() => {
       text: currentCategoryObj.value?.costDisplay || `${props.effect.baseCost} PP / Rank`
     };
   }
-  if (base === 'Senses' || base === 'Immunity' || base === 'Movement' || base === 'Comprehend') {
+  if (base === 'Senses' || base === 'Immunity' || base === 'Movement' || base === 'Comprehend' || base === 'Concealment') {
     return {
       type: 'badge-ranks',
       icon: 'ri-medal-line',
@@ -1546,7 +1657,111 @@ function toggleImmunity(id) {
 }
 
 /* =========================================================================
-   6. MOVEMENT
+   6. CONCEALMENT (Concealment Library)
+   ========================================================================= */
+const selectedConcealmentCategory = ref('all');
+const concealmentSearch = ref('');
+
+const selectedConcealmentList = computed(() => {
+  if (!cfg.value?.options) return [];
+  const sel = props.effect?.config?.selectedSenses || [];
+  return cfg.value.options.filter(opt => sel.includes(opt.id));
+});
+
+const totalConcealmentRanks = computed(() => {
+  if (typeof cfg.value?.computeRanks === 'function') {
+    return cfg.value.computeRanks(props.effect?.config);
+  }
+  return props.effect?.ranks || 1;
+});
+
+function getConcealmentCountForCat(catId) {
+  if (!cfg.value?.options) return 0;
+  if (catId === 'all') return cfg.value.options.length;
+  return cfg.value.options.filter(o => o.category === catId).length;
+}
+
+const filteredConcealments = computed(() => {
+  if (!cfg.value?.options) return [];
+  return cfg.value.options.filter(item => {
+    const matchCat = selectedConcealmentCategory.value === 'all' || item.category === selectedConcealmentCategory.value;
+    if (!matchCat) return false;
+    if (!concealmentSearch.value.trim()) return true;
+    const q = concealmentSearch.value.toLowerCase();
+    return item.name.toLowerCase().includes(q) 
+      || (item.desc && item.desc.toLowerCase().includes(q))
+      || (item.scopeLabel && item.scopeLabel.toLowerCase().includes(q));
+  });
+});
+
+function isConcealmentSelected(id) {
+  const sel = props.effect?.config?.selectedSenses;
+  return Array.isArray(sel) && sel.includes(id);
+}
+
+function toggleConcealment(id) {
+  props.effect.config = props.effect.config || {};
+  let list = Array.isArray(props.effect.config.selectedSenses)
+    ? [...props.effect.config.selectedSenses]
+    : [];
+
+  if (list.includes(id)) {
+    if (list.length > 1) {
+      list = list.filter(i => i !== id);
+    }
+  } else {
+    if (id === 'all_senses') {
+      list = ['all_senses'];
+    } else {
+      list = list.filter(i => i !== 'all_senses');
+
+      // Smart SRD Subsumption: Entire Sense Type replaces individual senses
+      if (id === 'visual_all') {
+        list = list.filter(i => !['visual_normal', 'visual_infra', 'visual_ultra'].includes(i));
+      } else if (['visual_normal', 'visual_infra', 'visual_ultra'].includes(id)) {
+        list = list.filter(i => i !== 'visual_all');
+      }
+
+      if (id === 'auditory_all') {
+        list = list.filter(i => !['auditory_normal', 'auditory_ultra'].includes(i));
+      } else if (['auditory_normal', 'auditory_ultra'].includes(id)) {
+        list = list.filter(i => i !== 'auditory_all');
+      }
+
+      if (id === 'olfactory_all') {
+        list = list.filter(i => i !== 'olfactory_normal');
+      } else if (id === 'olfactory_normal') {
+        list = list.filter(i => i !== 'olfactory_all');
+      }
+
+      if (id === 'radio_all') {
+        list = list.filter(i => !['radio_normal', 'radio_radar'].includes(i));
+      } else if (['radio_normal', 'radio_radar'].includes(id)) {
+        list = list.filter(i => i !== 'radio_all');
+      }
+
+      if (id === 'mental_all') {
+        list = list.filter(i => i !== 'mental_normal');
+      } else if (id === 'mental_normal') {
+        list = list.filter(i => i !== 'mental_all');
+      }
+
+      if (id === 'exotic_all') {
+        list = list.filter(i => i !== 'exotic_mystic');
+      } else if (id === 'exotic_mystic') {
+        list = list.filter(i => i !== 'exotic_all');
+      }
+
+      list.push(id);
+    }
+  }
+
+  props.effect.config.selectedSenses = list;
+  updateConfig();
+}
+
+/* =========================================================================
+   7. MOVEMENT
    ========================================================================= */
 function isMovementModeActive(modeId) {
   const sel = props.effect?.config?.selectedModes;
@@ -2307,10 +2522,78 @@ function selectVariableTheme(theme) {
   transition: all 0.15s ease;
 }
 
-.horizontal-sense-card.selected .sense-card-right .selection-status {
+/* SRD Reference Notice Banner */
+.srd-notice-banner {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  border-radius: 8px;
+  padding: 0.65rem 0.85rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.srd-notice-icon {
+  color: #60a5fa;
+  font-size: 1.25rem;
+  line-height: 1;
+  flex-shrink: 0;
+  margin-top: 0.1rem;
+}
+
+.srd-notice-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.srd-notice-title {
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #93c5fd;
+  margin-bottom: 0.2rem;
+}
+
+.srd-notice-text {
+  font-size: 0.74rem;
+  line-height: 1.45;
+  color: #cbd5e1;
+}
+
+.srd-notice-text strong {
+  color: #ffffff;
+}
+
+.srd-notice-text em {
   color: #38ef7d;
-  background: rgba(56, 239, 125, 0.12);
-  border-color: rgba(56, 239, 125, 0.3);
+  font-style: normal;
+  font-weight: 600;
+}
+
+.card-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.card-scope-tag {
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 0.05rem 0.35rem;
+  border-radius: 3px;
+  width: fit-content;
+}
+
+.lib-item-card.selected .card-scope-tag {
+  color: #a7f3d0;
+  background: rgba(56, 239, 125, 0.15);
 }
 
 .library-cards-grid {

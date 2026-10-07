@@ -804,22 +804,43 @@ function calculateModSubtotal(mod, isFlaw = false) {
 .btn-catalog-trigger {
   display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0.35rem 0.65rem;
-  font-size: 0.74rem;
+  gap: 0.4rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
   font-weight: 600;
-  background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  background: rgba(0, 111, 184, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.4);
   border-radius: var(--radius-xs);
-  color: var(--text-secondary);
+  color: #e0f2fe;
   cursor: pointer;
   transition: all var(--trans-fast);
+  user-select: none;
+}
+
+.btn-catalog-trigger i {
+  color: #38bdf8;
+  font-size: 0.85rem;
+  transition: transform var(--trans-fast);
 }
 
 .btn-catalog-trigger:hover {
-  background: var(--bg-card-hover);
-  color: var(--text-primary);
-  border-color: var(--border-color);
+  background: rgba(0, 111, 184, 0.28);
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 10px rgba(0, 111, 184, 0.35);
+}
+
+.btn-catalog-trigger:hover i {
+  transform: scale(1.1);
+}
+
+.btn-catalog-trigger:active {
+  transform: translateY(1px);
+}
+
+.btn-catalog-trigger:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
 }
 
 .hero-right {
@@ -868,9 +889,9 @@ function calculateModSubtotal(mod, isFlaw = false) {
   font-size: 0.72rem;
   font-weight: 600;
   background: var(--bg-surface);
-  border: 1px solid var(--border-subtle);
+  border: 1px solid var(--border-color);
   border-radius: var(--radius-xs);
-  color: var(--text-secondary);
+  color: var(--text-muted);
   cursor: pointer;
   transition: all var(--trans-fast);
 }
@@ -880,6 +901,11 @@ function calculateModSubtotal(mod, isFlaw = false) {
   background: rgba(0, 111, 184, 0.15);
   border-color: rgba(0, 111, 184, 0.4);
   color: var(--accent-secondary);
+}
+
+.btn-toggle-rules:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
 }
 
 /* Rules Drawer */

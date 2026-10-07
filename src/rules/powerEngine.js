@@ -73,7 +73,7 @@ export const BASE_EFFECTS = [
   { name: 'Burrowing', category: 'Movement', cost: 1, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You can burrow through the ground, leaving a tunnel behind if you choose. You move through soil and sand at a speed rank equal to your Burrowing rank, minus 5. So Burrowing 8, for example, lets you move through the ground at speed rank 3 (around 16 MPH). Burrowing through hard clay and packed earth reduces speed one additional rank. Burrowing through solid rock reduces it by two additional ranks. The tunnel you leave behind is either permanent or collapses behind you immediately (your choice when you begin burrowing each new tunnel). Note that Burrowing differs from the Permeate effect of Movement, which allows you to pass through an obstacle like the ground at your normal speed without disturbing it at all.' },
   { name: 'Communication', category: 'Sensory', cost: 4, range: 'Rank', action: 'Free', duration: 'Sustained', desc: 'You can communicate over a distance using a medium other than your normal voice (such as mental telepathy, radio frequencies, mystical sendings, or ultrasonic signals) across distances determined by your rank on the Measurements Table.' },
   { name: 'Comprehend', category: 'Sensory', cost: 2, range: 'Personal', action: 'None', duration: 'Continuous', desc: 'You can comprehend different sorts of communication. Each rank in this effect allows you to understand, speak, or read foreign languages, communicate with animals, plants, machines, or spirits, or understand all spoken concepts.' },
-  { name: 'Concealment', category: 'Sensory', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You gain total concealment from a particular sense while this effect is active, making you undetectable to that sense and providing total concealment (+5 circumstance bonus to active defense against attacks relying on that sense). Two ranks grant concealment for an entire sense type.' },
+  { name: 'Concealment', category: 'Sensory', cost: 2, range: 'Personal', action: 'Free', duration: 'Sustained', desc: 'You gain total concealment from a particular sense while this effect is active, making you undetectable to that sense (+5 circumstance bonus to active defense vs attacks relying on that sense). Visual senses cost double (2 ranks for one sense, 4 ranks for all visual). Non-visual senses cost 1 rank each (2 ranks for entire sense type). Tactile senses cannot be concealed per SRD (requires Insubstantial). All non-tactile senses cost 10 ranks.' },
   { name: 'Create', category: 'Control', cost: 2, range: 'Ranged', action: 'Standard', duration: 'Sustained', desc: 'You can form solid objects essentially out of nowhere. They may be made of solidified energy, “hardened” water or air, transmuted bulk matter, ice, stone, or some other medium, depending on the effect’s descriptors. You can form any simple geometric shape or common object (such as a cube, sphere, dome, hammer, lens, disk, etc.). The GM has final say on whether or not a particular object is too complex for this effect. Generally, your objects can’t have any moving parts more complex than a hinge. They can be solid or hollow, opaque or transparent, as you choose when you use the effect, limited by your descriptors and the Gamemaster’s judgment.' },
   { name: 'Damage', category: 'Attack', cost: 1, range: 'Close', action: 'Standard', duration: 'Instant', resistance: 'Toughness', desc: 'You can inflict damage on a target by making a close attack. The exact nature of your Damage is up to you (from powerful kinetic impacts to razor claws, fire, or energy fields). The target resists with a Toughness check against DC 15 + Damage rank to resist bruised penalties (-1 to further checks), dazed, staggered, and incapacitated conditions.' },
   { name: 'Deflect', category: 'Defense', cost: 1, range: 'Ranged', action: 'Standard', duration: 'Instant', desc: 'You can actively defend for characters other than yourself, deflecting or diverting ranged attacks directed at allies within range using active defense checks with a d20 roll, and may be able to more effectively defend yourself depending on your rank.' },
@@ -197,7 +197,7 @@ export const CONFIGURABLE_EFFECTS = {
 
   'Movement': {
     type: 'movement_multiselect_library',
-    label: 'Movement Modes Library',
+    label: 'Movement Library',
     modes: [
       { id: 'wall_crawling', name: 'Wall-crawling', maxRanks: 2, ranks: 1, desc: 'Climb walls and ceilings at -1 speed rank (Rank 1) or full speed (Rank 2)', icon: 'ri-footprint-line' },
       { id: 'safe_fall', name: 'Safe Fall', maxRanks: 1, ranks: 1, desc: 'Fall any distance without suffering damage or injury', icon: 'ri-parachute-line' },
@@ -227,7 +227,7 @@ export const CONFIGURABLE_EFFECTS = {
 
   'Immunity': {
     type: 'immunity_multiselect_library',
-    label: 'Immunity Scope Library',
+    label: 'Immunity Library',
     categories: [
       { id: 'all', label: 'All' },
       { id: 'survival', label: 'Survival & Env (1-2 R)' },
@@ -315,7 +315,7 @@ export const CONFIGURABLE_EFFECTS = {
 
   'Comprehend': {
     type: 'comprehend_multiselect_library',
-    label: 'Comprehension Modes Library',
+    label: 'Comprehend Library',
     modes: [
       { id: 'languages_understand', name: 'Languages: Understand Spoken', ranks: 1, desc: 'Understand all spoken languages spoken to you', icon: 'ri-hearing-line' },
       { id: 'languages_speak', name: 'Languages: Speak Any One', ranks: 1, desc: 'Speak any language, one language at a time', icon: 'ri-voiceprint-line' },
@@ -343,7 +343,7 @@ export const CONFIGURABLE_EFFECTS = {
 
   'Environment': {
     type: 'environment_multiselect_library',
-    label: 'Environmental Hazards Library',
+    label: 'Environment Library',
     elements: [
       { id: 'cold_1', name: 'Intense Cold', cost: 1, desc: 'Extreme low temperature exposure hazard checks', icon: 'ri-temp-cold-line' },
       { id: 'cold_2', name: 'Extreme Cold', cost: 2, desc: 'Severe freezing and frostbite hazard checks', icon: 'ri-snowflake-line' },
@@ -371,7 +371,7 @@ export const CONFIGURABLE_EFFECTS = {
 
   'Senses': {
     type: 'senses_multiselect_library',
-    label: 'Sensory Faculty Superhuman Expansion',
+    label: 'Senses Library',
     categories: [
       { id: 'all', label: 'All' },
       { id: 'visual', label: 'Visual' },
@@ -424,6 +424,123 @@ export const CONFIGURABLE_EFFECTS = {
         sum += (dict[id] || 1);
       });
       return Math.max(1, sum);
+    }
+  },
+
+  'Concealment': {
+    type: 'concealment_multiselect_library',
+    label: 'Concealment Library',
+    srdNotice: 'Visual senses cost double (2 Ranks for single, 4 Ranks for all visual). Non-visual senses cost 1 Rank each (2 Ranks for entire sense type). Tactile senses cannot be concealed per SRD rules (requires Insubstantial). All non-tactile senses = 10 Ranks.',
+    categories: [
+      { id: 'all', label: 'All Senses' },
+      { id: 'visual', label: 'Visual (Costs Double)' },
+      { id: 'auditory', label: 'Auditory' },
+      { id: 'olfactory', label: 'Olfactory' },
+      { id: 'radio', label: 'Radio' },
+      { id: 'mental_exotic', label: 'Mental & Exotic' }
+    ],
+    options: [
+      // VISUAL SENSES (SRD: costs double - 2 ranks for single visual sense, 4 ranks for all visual senses)
+      { id: 'visual_normal', name: 'Normal Vision', ranks: 2, category: 'visual', scope: 'single', scopeLabel: 'Single Visual Sense', desc: 'Invisible to normal optical sight (+5 circumstance bonus to active defense vs visual attacks). Standard invisibility.', icon: 'ri-eye-off-line' },
+      { id: 'visual_infra', name: 'Infravision', ranks: 2, category: 'visual', scope: 'single', scopeLabel: 'Single Visual Sense', desc: 'Undetectable by infrared vision, thermal imaging scopes, and heat signatures.', icon: 'ri-fire-line' },
+      { id: 'visual_ultra', name: 'Ultravision', ranks: 2, category: 'visual', scope: 'single', scopeLabel: 'Single Visual Sense', desc: 'Undetectable by ultraviolet light perception, blacklight scanners, and UV cameras.', icon: 'ri-sun-line' },
+      { id: 'visual_all', name: 'All Visual Senses', ranks: 4, category: 'visual', scope: 'type', scopeLabel: 'Entire Sense Type', desc: 'Total concealment from the entire visual sense type (normal sight, infravision, ultravision, low-light vision). Complete optical invisibility.', icon: 'ri-eye-close-line' },
+
+      // AUDITORY SENSES (SRD: 1 rank for single sense, 2 ranks for entire sense type)
+      { id: 'auditory_normal', name: 'Normal Hearing', ranks: 1, category: 'auditory', scope: 'single', scopeLabel: 'Single Sense', desc: 'Completely silent to normal hearing: emit no acoustic footsteps, vocal sounds, or equipment noise.', icon: 'ri-volume-mute-line' },
+      { id: 'auditory_ultra', name: 'Ultra-Hearing', ranks: 1, category: 'auditory', scope: 'single', scopeLabel: 'Single Sense', desc: 'Undetectable by ultrasonic sound sensors, dog whistles, high/low frequency acoustics, and sonar.', icon: 'ri-sound-module-line' },
+      { id: 'auditory_all', name: 'All Auditory Senses', ranks: 2, category: 'auditory', scope: 'type', scopeLabel: 'Entire Sense Type', desc: 'Total concealment from the entire auditory sense type (normal hearing, ultra-hearing, and acoustic echolocation). Complete acoustic void.', icon: 'ri-volume-off-vibrate-line' },
+
+      // OLFACTORY SENSES (SRD: 1 rank for single sense, 2 ranks for entire sense type)
+      { id: 'olfactory_normal', name: 'Normal Scent', ranks: 1, category: 'olfactory', scope: 'single', scopeLabel: 'Single Sense', desc: 'Completely odorless: immune to scent hounds, natural tracking by smell, and basic odor detection.', icon: 'ri-drop-line' },
+      { id: 'olfactory_all', name: 'All Olfactory Senses', ranks: 2, category: 'olfactory', scope: 'type', scopeLabel: 'Entire Sense Type', desc: 'Total concealment from the entire olfactory & gustatory sense type (smell and taste, including acute scent and chemical analyzers).', icon: 'ri-flask-line' },
+
+      // RADIO SENSES (SRD: 1 rank for single sense, 2 ranks for entire sense type)
+      { id: 'radio_normal', name: 'Radio Frequency', ranks: 1, category: 'radio', scope: 'single', scopeLabel: 'Single Sense', desc: 'Undetectable by standard radio receivers, wireless signals, cellular sniffers, and RF scanners.', icon: 'ri-broadcast-line' },
+      { id: 'radio_radar', name: 'Radar', ranks: 1, category: 'radio', scope: 'single', scopeLabel: 'Single Sense', desc: 'Radar-absorbent stealth: undetectable by active microwave radar dishes and tracking radar.', icon: 'ri-radar-line' },
+      { id: 'radio_all', name: 'All Radio Senses', ranks: 2, category: 'radio', scope: 'type', scopeLabel: 'Entire Sense Type', desc: 'Total concealment from the entire radio sense type (radio broadcasts, radar, microwave pulses, and electronic communications).', icon: 'ri-signal-wifi-off-line' },
+
+      // MENTAL & EXOTIC SENSES (SRD: 1 rank for single sense, 2 ranks for entire sense type)
+      { id: 'mental_normal', name: 'Mental Awareness', ranks: 1, category: 'mental_exotic', scope: 'single', scopeLabel: 'Single Sense', desc: 'Telepathic mind blank: telepaths, psionic detectors, and mental awareness cannot locate your mind.', icon: 'ri-brain-line' },
+      { id: 'mental_all', name: 'All Mental Senses', ranks: 2, category: 'mental_exotic', scope: 'type', scopeLabel: 'Entire Sense Type', desc: 'Total concealment from the entire mental sense type (telepathic scans, mind reading, psychic tracking, and empathic awareness).', icon: 'ri-mind-map' },
+      { id: 'exotic_mystic', name: 'Mystical Awareness', ranks: 1, category: 'mental_exotic', scope: 'single', scopeLabel: 'Single Sense', desc: 'Cloaked from magical divination, aura reading, arcane detection, and witch-sight.', icon: 'ri-sparkling-line' },
+      { id: 'exotic_all', name: 'Other Exotic Sense Type', ranks: 2, category: 'mental_exotic', scope: 'type', scopeLabel: 'Entire Sense Type', desc: 'Total concealment from an entire exotic sense type (e.g. Cosmic Awareness, Divine Awareness, or Dimensional Awareness).', icon: 'ri-compass-3-line' },
+
+      // ALL SENSES (SRD: 10 ranks for all sense types other than tactile)
+      { id: 'all_senses', name: 'All Senses (Non-Tactile)', ranks: 10, category: 'all', scope: 'universal', scopeLabel: 'Universal (All Types)', desc: 'Total concealment from all sense types other than tactile (visual, auditory, olfactory, radio, mental, and exotic). The ultimate cloak.', icon: 'ri-shield-star-line' }
+    ],
+    defaultSenses: ['visual_normal'],
+    computeRanks: (config) => {
+      const senses = Array.isArray(config?.selectedSenses) && config.selectedSenses.length > 0
+        ? config.selectedSenses
+        : ['visual_normal'];
+
+      if (senses.includes('all_senses')) return 10;
+
+      let ranks = 0;
+
+      // Visual senses (SRD: 2 for single, 4 for all visual)
+      if (senses.includes('visual_all')) {
+        ranks += 4;
+      } else {
+        const visualCount = ['visual_normal', 'visual_infra', 'visual_ultra'].filter(id => senses.includes(id)).length;
+        ranks += Math.min(4, visualCount * 2);
+      }
+
+      // Auditory senses (SRD: 1 for single, 2 for entire sense type)
+      if (senses.includes('auditory_all')) {
+        ranks += 2;
+      } else {
+        const audCount = ['auditory_normal', 'auditory_ultra'].filter(id => senses.includes(id)).length;
+        ranks += Math.min(2, audCount * 1);
+      }
+
+      // Olfactory senses (SRD: 1 for single, 2 for entire sense type)
+      if (senses.includes('olfactory_all')) {
+        ranks += 2;
+      } else if (senses.includes('olfactory_normal')) {
+        ranks += 1;
+      }
+
+      // Radio senses (SRD: 1 for single, 2 for entire sense type)
+      if (senses.includes('radio_all')) {
+        ranks += 2;
+      } else {
+        const radioCount = ['radio_normal', 'radio_radar'].filter(id => senses.includes(id)).length;
+        ranks += Math.min(2, radioCount * 1);
+      }
+
+      // Mental senses (SRD: 1 for single, 2 for entire sense type)
+      if (senses.includes('mental_all')) {
+        ranks += 2;
+      } else if (senses.includes('mental_normal')) {
+        ranks += 1;
+      }
+
+      // Exotic senses (SRD: 1 for single, 2 for entire sense type)
+      if (senses.includes('exotic_all')) {
+        ranks += 2;
+      } else if (senses.includes('exotic_mystic')) {
+        ranks += 1;
+      }
+
+      // Unmapped / fallback senses
+      const mapped = new Set([
+        'visual_normal', 'visual_infra', 'visual_ultra', 'visual_all',
+        'auditory_normal', 'auditory_ultra', 'auditory_all',
+        'olfactory_normal', 'olfactory_all',
+        'radio_normal', 'radio_radar', 'radio_all',
+        'mental_normal', 'mental_all',
+        'exotic_mystic', 'exotic_all',
+        'all_senses'
+      ]);
+      senses.forEach(id => {
+        if (!mapped.has(id)) {
+          ranks += 1;
+        }
+      });
+
+      return Math.min(10, Math.max(1, ranks));
     }
   },
 
@@ -3393,6 +3510,45 @@ export function normalizeEffect(rawEffect) {
       }
       if (!Array.isArray(eff.config.selectedFaculties) || eff.config.selectedFaculties.length === 0) {
         eff.config.selectedFaculties = [...(cfg.defaultFaculties || ['darkvision'])];
+      }
+      if (typeof cfg.computeRanks === 'function') {
+        eff.ranks = cfg.computeRanks(eff.config);
+      }
+    } else if (cfg.type === 'concealment_multiselect_library' || cfg.type === 'concealment_picker') {
+      if (eff.config.sense && !eff.config.selectedSenses) {
+        eff.config.selectedSenses = [eff.config.sense];
+      }
+      if (!Array.isArray(eff.config.selectedSenses) || eff.config.selectedSenses.length === 0) {
+        eff.config.selectedSenses = [...(cfg.defaultSenses || ['visual_normal'])];
+      } else {
+        // Map legacy IDs to official SRD IDs and exclude tactile senses (strictly forbidden in SRD)
+        const legacyMap = {
+          normal_vision_total: 'visual_normal',
+          normal_vision_partial: 'visual_normal',
+          infravision: 'visual_infra',
+          ultravision: 'visual_ultra',
+          all_visual: 'visual_all',
+          auditory_total: 'auditory_normal',
+          auditory_partial: 'auditory_normal',
+          ultrasonic: 'auditory_ultra',
+          olfactory_total: 'olfactory_normal',
+          olfactory_partial: 'olfactory_normal',
+          radio_total: 'radio_all',
+          radio_partial: 'radio_normal',
+          mental_total: 'mental_all',
+          mental_partial: 'mental_normal',
+          mystic_awareness: 'exotic_mystic',
+          all_senses: 'all_senses'
+        };
+        const migrated = [];
+        eff.config.selectedSenses.forEach(id => {
+          if (id === 'tactile_total' || id === 'tactile_partial') return; // Excluded by SRD rules
+          const target = legacyMap[id] || id;
+          if (!migrated.includes(target)) {
+            migrated.push(target);
+          }
+        });
+        eff.config.selectedSenses = migrated.length > 0 ? migrated : [...(cfg.defaultSenses || ['visual_normal'])];
       }
       if (typeof cfg.computeRanks === 'function') {
         eff.ranks = cfg.computeRanks(eff.config);

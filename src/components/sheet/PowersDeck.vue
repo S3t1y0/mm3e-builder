@@ -1743,6 +1743,43 @@ function getEffectConfigDetails(eff) {
     };
   }
 
+  if (base === 'Concealment') {
+    const options = cfg?.options || [];
+    const selected = Array.isArray(c.selectedSenses) && c.selectedSenses.length > 0
+      ? c.selectedSenses
+      : (cfg?.defaultSenses || ['visual_normal']);
+
+    const items = selected.map(id => {
+      const match = options.find(o => o.id === id);
+      if (match) {
+        return {
+          id: match.id,
+          name: match.name,
+          ranks: match.ranks,
+          category: match.category,
+          scopeLabel: match.scopeLabel,
+          desc: match.desc,
+          icon: match.icon || 'ri-eye-close-line'
+        };
+      }
+      return {
+        id,
+        name: id,
+        ranks: 2,
+        desc: 'Concealment from specified sensory faculty.',
+        icon: 'ri-eye-close-line'
+      };
+    });
+
+    return {
+      type: 'concealment',
+      title: 'Configured Concealment',
+      badge: `${items.length} Senses • ${eff.ranks || 1} Ranks (${(eff.ranks || 1) * 2} PP)`,
+      quickText: items.map(i => i.name).join(', '),
+      items
+    };
+  }
+
   if (base === 'Affliction') {
     const limDegree = (eff.flaws || []).find(f => f.name === 'Limited Degree');
     const limRanks = limDegree ? (Number(limDegree.ranks) || 1) : 0;

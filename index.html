@@ -16,7 +16,8 @@
   <meta name="author" content="Mutants & Masterminds Community" />
   <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
   <meta name="theme-color" content="#0d1117" />
-  <meta name="application-name" content="mm3e-builder-vue" />
+  <meta name="application-name" content="MM3E Character Builder" />
+  <meta name="apple-mobile-web-app-title" content="MM3E Builder" />
   <meta name="mm3e-framework" content="vue3" />
   <meta name="google-site-verification" content="dg6aZHEmbIWdxUXyquZac7YbqnaYQlul2FM9oBl5px4" />
 
@@ -26,7 +27,7 @@
   <!-- Open Graph / Facebook / Discord / Reddit -->
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://mm3e-builder.vercel.app/" />
-  <meta property="og:site_name" content="M&M 3e Character Builder" />
+  <meta property="og:site_name" content="MM3E Character Builder" />
   <meta property="og:title" content="Mutants & Masterminds 3e Character Builder & Sheet" />
   <meta property="og:description"
     content="Build, calculate, and play superheroes with an automated power point calculator, PL validation, and Roll20 VTT companion bridge for M&M 3rd Edition." />
@@ -45,32 +46,49 @@
     content="Free online superhero character creator and tactical sheet for Mutants & Masterminds 3e. Automated PP bookkeeping and Roll20 VTT integration." />
   <meta name="twitter:image" content="https://mm3e-builder.vercel.app/og-image.jpg" />
 
-  <!-- Structured Data (JSON-LD Schema) for Google Rich Snippets -->
+  <!-- Structured Data (JSON-LD Schema) for Google Site Names & Rich Snippets -->
   <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Mutants & Masterminds 3e Character Builder",
-      "url": "https://mm3e-builder.vercel.app/",
-      "description": "Interactive character builder, tactical character sheet, and power construction workspace for Mutants & Masterminds 3rd Edition tabletop roleplaying game.",
-      "applicationCategory": "GameApplication",
-      "genre": "Tabletop RPG",
-      "operatingSystem": "All",
-      "browserRequirements": "Requires JavaScript. Requires HTML5.",
-      "offers": {
-        "@type": "Offer",
-        "price": "0",
-        "priceCurrency": "USD"
-      },
-      "featureList": [
-        "Automated Power Point (PP) bookkeeping and budgeting",
-        "Power Level (PL) cap calculation and validation",
-        "Power Studio with fractional costs, arrays, and alternate effects",
-        "Interactive tactical character sheet with one-click d20 rolls",
-        "Roll20 VTT Chrome extension bridge and print export"
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://mm3e-builder.vercel.app/#website",
+          "url": "https://mm3e-builder.vercel.app/",
+          "name": "MM3E Character Builder",
+          "alternateName": [
+            "M&M 3e Character Builder",
+            "Mutants & Masterminds 3e Builder",
+            "MM3E Builder"
+          ],
+          "description": "Free online character builder, tactical character sheet, and power construction studio for Mutants & Masterminds 3rd Edition."
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://mm3e-builder.vercel.app/#webapp",
+          "name": "Mutants & Masterminds 3e Character Builder",
+          "url": "https://mm3e-builder.vercel.app/",
+          "description": "Interactive character builder, tactical character sheet, and power construction workspace for Mutants & Masterminds 3rd Edition tabletop roleplaying game.",
+          "applicationCategory": "GameApplication",
+          "genre": "Tabletop RPG",
+          "operatingSystem": "All",
+          "browserRequirements": "Requires JavaScript. Requires HTML5.",
+          "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+          },
+          "featureList": [
+            "Automated Power Point (PP) bookkeeping and budgeting",
+            "Power Level (PL) cap calculation and validation",
+            "Power Studio with fractional costs, arrays, and alternate effects",
+            "Interactive tactical character sheet with one-click d20 rolls",
+            "Roll20 VTT Chrome extension bridge and print export"
+          ]
+        }
       ]
     }
-    </script>
+  </script>
 
   <!-- Google Fonts Optimization -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
