@@ -115,15 +115,26 @@
             </button>
 
             <div class="dropdown-divider"></div>
-            <div class="dropdown-section-label">Presets</div>
+            <div class="dropdown-section-label">Roll20 VTT Extension</div>
 
-            <button class="dropdown-item" @click="handleToolAction('sample')">
-              <i class="ri-user-shared-line icon-amber"></i>
+            <a
+              href="https://drive.google.com/drive/folders/1tflkEmJ_PO4pA3uryxj_2uIo3ROJYfQ4?usp=drive_link"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="dropdown-item"
+              @click="isToolsOpen = false"
+              title="Download Roll20 companion extension from Google Drive"
+            >
+              <i class="ri-download-cloud-2-line icon-amber"></i>
               <div class="dropdown-item-text">
-                <strong>Sample Hero</strong>
-                <span>Load PL 10 Aegis Valkyrie</span>
+                <div style="display: flex; align-items: center; gap: 0.35rem;">
+                  <strong>Download Extension</strong>
+                  <i class="ri-external-link-line" style="font-size: 0.72rem; opacity: 0.65;"></i>
+                </div>
+                <span>Chrome bridge for live Roll20 rolls</span>
               </div>
-            </button>
+            </a>
+
 
             <div class="dropdown-divider"></div>
             <div class="dropdown-section-label danger">Danger Zone</div>
@@ -229,7 +240,6 @@ import { ref, watch, onMounted, onBeforeUnmount, onErrorCaptured } from 'vue';
 import { useHeroStore } from './stores/heroStore.js';
 import { useUiStore } from './stores/uiStore.js';
 import { usePowerBuilderStore } from './stores/powerBuilderStore.js';
-import { createEmptyPower, createEmptyEffect } from './rules/powerEngine.js';
 import { parseSharedCharacterFromHash } from './services/shareService.js';
 import { isEmbedMode, getEmbedType, initEmbedBridge } from './services/embedBridge.js';
 
@@ -318,8 +328,6 @@ function handleToolAction(action) {
     uiStore.openExportImport('export');
   } else if (action === 'roll20') {
     uiStore.openModal('roll20');
-  } else if (action === 'sample') {
-    loadSampleHero();
   } else if (action === 'reset') {
     if (window.confirm('Reset this character sheet? All current hero stats and powers will be cleared.')) {
       heroStore.resetCharacter();
@@ -428,126 +436,6 @@ onBeforeUnmount(() => {
     window.removeEventListener('keydown', handleKeyDown);
   }
 });
-
-function loadSampleHero() {
-  heroStore.character.name = 'Aegis Valkyrie';
-  heroStore.character.player = 'Campaign Player';
-  heroStore.character.identity = 'Elena Ward';
-  heroStore.character.powerLevel = 10;
-
-  // Abilities
-  heroStore.character.abilities = {
-    STR: 4, STA: 4, AGL: 2, DEX: 2,
-    FGT: 6, INT: 2, AWE: 2, PRE: 2
-  };
-
-  // Defenses
-  heroStore.character.defensesBought = {
-    DODGE: 4, PARRY: 2, FORTITUDE: 4, WILL: 4, TOUGHNESS: 0
-  };
-
-  // Skills
-  heroStore.character.skills = [
-    { id: 'sk_1', name: 'Close Combat', subtype: 'Unarmed', ranks: 4 },
-    { id: 'sk_2', name: 'Ranged Combat', subtype: 'Battlesuit', ranks: 4 },
-    { id: 'sk_3', name: 'Athletics', subtype: '', ranks: 4 },
-    { id: 'sk_4', name: 'Perception', subtype: '', ranks: 4 },
-    { id: 'sk_5', name: 'Technology', subtype: '', ranks: 4 },
-    { id: 'sk_6', name: 'Expertise', subtype: 'Tactics', ranks: 4 }
-  ];
-
-  // Advantages
-  heroStore.character.advantages = [
-    { id: 'adv_1', name: 'Power Attack', ranks: 1 },
-    { id: 'adv_2', name: 'All-out Attack', ranks: 1 },
-    { id: 'adv_3', name: 'Improved Initiative', ranks: 1 },
-    { id: 'adv_4', name: 'Evasion', ranks: 1 },
-    { id: 'adv_5', name: 'Defensive Roll', ranks: 2 }
-  ];
-
-  // Powers
-  const p1 = createEmptyPower();
-  p1.name = 'Solar Blast';
-  p1.type = 'standard';
-  p1.mainEffect = createEmptyEffect('Damage');
-  p1.mainEffect.ranks = 8;
-  p1.mainEffect.range = 'Ranged';
-
-  const p1Linked = createEmptyEffect('Affliction');
-  p1Linked.name = 'Secondary Thermal Flash';
-  p1Linked.ranks = 6;
-  p1Linked.range = 'Ranged';
-  p1.linkedEffects = [p1Linked];
-
-  const p2 = createEmptyPower();
-  p2.name = 'Apex Battlesuit';
-  p2.type = 'device';
-  p2.deviceConfig = { type: 'removable', descriptor: 'High-Tech Exosuit', toughness: 10 };
-
-  const sub1 = {
-    id: 'sub_flight',
-    name: 'Micro-Thrusters',
-    effect: createEmptyEffect('Flight'),
-    linkedEffects: [],
-    alternateEffects: []
-  };
-  sub1.effect.ranks = 6;
-
-  const sub2 = {
-    id: 'sub_cannon',
-    name: 'Particle Cannon',
-    activeSlotId: 'main',
-    effect: {
-      ...createEmptyEffect('Damage'),
-      name: 'Heavy Particle Blast',
-      ranks: 10,
-      range: 'Ranged',
-      extras: [{ name: 'Multiattack', cost: 1, type: 'per_rank', ranks: 1, desc: 'Multiple targets or rapid burst' }],
-      flaws: [{ name: 'Distracting', cost: -1, type: 'per_rank', ranks: 1, desc: 'Vulnerable while firing' }]
-    },
-    linkedEffects: [
-      {
-        id: 'lnk_burn',
-        name: 'Thermal Singe',
-        baseEffect: 'Weaken',
-        ranks: 6,
-        action: 'Standard',
-        range: 'Ranged',
-        duration: 'Instant',
-        resistance: 'Fortitude',
-        extras: [],
-        flaws: []
-      }
-    ],
-    alternateEffects: [
-      {
-        id: 'alt_stun',
-        name: 'Neural Stun Pulse',
-        cost: 1,
-        effect: {
-          ...createEmptyEffect('Affliction'),
-          name: 'Neural Stun Pulse',
-          baseEffect: 'Affliction',
-          ranks: 8,
-          range: 'Ranged',
-          action: 'Standard',
-          duration: 'Instant',
-          resistance: 'Fortitude',
-          extras: [],
-          flaws: []
-        },
-        linkedEffects: []
-      }
-    ]
-  };
-
-  p2.devicePowers = [sub1, sub2];
-
-  heroStore.character.powers = [p1, p2];
-  heroStore.pushHistory();
-
-  uiStore.showToast('Loaded complete sample hero "Aegis Valkyrie" (PL 10)!', 'success');
-}
 </script>
 
 <style scoped>
@@ -935,6 +823,8 @@ function loadSampleHero() {
   text-align: left;
   width: 100%;
   color: var(--text-primary);
+  text-decoration: none;
+  box-sizing: border-box;
   transition: background-color var(--trans-fast);
 }
 
