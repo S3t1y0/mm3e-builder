@@ -1,6 +1,5 @@
 # Mutants & Masterminds 3e Character Builder - Design System
 
-Based on the **Demiplane** tabletop gaming interface specification ([demiplane.com-design.md](file:///c:/Users/Caniago/Downloads/Tes/mm3e-builder-vue/demiplane.com-design.md)).
 
 ## 1. Dials & Tone
 - **Dial:** `ENERGY 2 (Balanced) / RHYTHM 2 (Consistent with functional breaks) / MOTION 1 (Restrained)`
