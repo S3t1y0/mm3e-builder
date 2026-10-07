@@ -63,7 +63,7 @@
         <table class="table-custom">
           <thead>
             <tr>
-              <th style="width: 34%;">Skill Name & Formula</th>
+              <th style="width: 34%;">Skill Name</th>
               <th style="width: 14%; text-align: center;">Ability</th>
               <th style="width: 14%; text-align: center;">Abil Mod</th>
               <th style="width: 22%; text-align: center;">Bought Ranks</th>
@@ -137,17 +137,11 @@
                           <i class="ri-corner-down-right-line spec-branch-icon"></i>
                           <div class="spec-child-name-block">
                             <div class="spec-name-tag-row">
-                              <span class="spec-subtype-name">{{ inst.subtype || 'General' }}</span>
+                              <span 
+                                class="spec-subtype-name"
+                                :title="`${inst.subtype || 'General'}: Base ${ruleSkill.ability} (${heroStore.effectiveAbilities[ruleSkill.ability] || 0}) + ${inst.ranks || 0} Rk${getEnhancedRanks(ruleSkill.name, inst.subtype) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name, inst.subtype) + 'p' : ''}${getAdvantageBonusForSkill(ruleSkill.name) > 0 ? ' +' + getAdvantageBonusForSkill(ruleSkill.name) + ' Adv' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))}`"
+                              >{{ inst.subtype || 'General' }}</span>
                             </div>
-                            <span class="spec-math-subtext">
-                              {{ ruleSkill.ability }} {{ heroStore.effectiveAbilities[ruleSkill.ability] || 0 }} + Rk {{ inst.ranks || 0 }}
-                              <span v-if="getEnhancedRanks(ruleSkill.name, inst.subtype) > 0" class="enh-math">
-                                +{{ getEnhancedRanks(ruleSkill.name, inst.subtype) }}p
-                              </span>
-                              <span v-if="getAdvantageBonusForSkill(ruleSkill.name) > 0" class="enh-math" style="color: #fbbf24; font-weight: 700;">
-                                +{{ getAdvantageBonusForSkill(ruleSkill.name) }} Adv
-                              </span>
-                            </span>
                           </div>
                         </div>
                       </td>
@@ -215,13 +209,10 @@
                   >
                     <td>
                       <div class="skill-name-block">
-                        <span class="skill-title">{{ ruleSkill.name }}</span>
-                        <span class="spec-math-subtext">
-                          {{ ruleSkill.ability }} {{ heroStore.effectiveAbilities[ruleSkill.ability] || 0 }} + Rk {{ getStandardRanks(ruleSkill.name) }}
-                          <span v-if="getEnhancedRanks(ruleSkill.name) > 0" class="enh-math">
-                            +{{ getEnhancedRanks(ruleSkill.name) }}p
-                          </span>
-                        </span>
+                        <span 
+                          class="skill-title"
+                          :title="`${ruleSkill.name}: Base ${ruleSkill.ability} (${heroStore.effectiveAbilities[ruleSkill.ability] || 0}) + ${getStandardRanks(ruleSkill.name)} Rk${getEnhancedRanks(ruleSkill.name) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name) + 'p' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)))}`"
+                        >{{ ruleSkill.name }}</span>
                       </div>
                     </td>
                     <td style="text-align: center;">

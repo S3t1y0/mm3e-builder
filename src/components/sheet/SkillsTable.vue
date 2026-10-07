@@ -179,7 +179,7 @@
     <!-- 4-Column Table Header (Zero Truncation Layout) -->
     <div class="sheet-skills-table-header">
       <span class="th-abil">Abil</span>
-      <span class="th-name">Skill Name & Formula</span>
+      <span class="th-name">Skill Name</span>
       <span class="th-rank">Rank</span>
       <span class="th-roll">Roll</span>
     </div>
@@ -226,14 +226,6 @@
                       +{{ getAdvantageBonusForSkill(ruleSkill.name) }} {{ getAdvantageNameForSkill(ruleSkill.name) }}
                     </span>
                   </div>
-                  <div class="sheet-skill-math">
-                    <span v-if="getSubtypeInstances(ruleSkill.name).length === 0" class="math-base-quiet">
-                      Requires specialization (e.g. {{ ruleSkill.name === 'Close Combat' ? 'Unarmed, Swords' : (ruleSkill.name === 'Ranged Combat' ? 'Firearms, Bows' : 'Science, Magic') }})
-                    </span>
-                    <span v-else class="math-base-quiet">
-                      {{ getSubtypeInstances(ruleSkill.name).length }} specialization{{ getSubtypeInstances(ruleSkill.name).length > 1 ? 's' : '' }} • Base {{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}
-                    </span>
-                  </div>
                 </div>
 
                 <!-- Action: Quick Add Specialization -->
@@ -266,29 +258,13 @@
                     <i class="ri-corner-down-right-line"></i>
                   </div>
 
-                  <!-- Name & Formula Breakdown (Zero Truncation) -->
+                  <!-- Name (Zero Truncation) -->
                   <div class="sheet-skill-info spec-child-info">
                     <div class="sheet-skill-title-row">
-                      <span class="spec-subtype-name" :title="inst.subtype || 'General'">{{ inst.subtype || 'General' }}</span>
-                    </div>
-                    <div class="sheet-skill-math">
-                      <span>{{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}</span>
-                      <span class="math-operator">+</span>
-                      <span class="math-rk">{{ inst.ranks || 0 }} Rk</span>
                       <span 
-                        v-if="getEnhancedRanks(ruleSkill.name, inst.subtype) > 0" 
-                        class="enh-math-tag"
-                        :title="`+${getEnhancedRanks(ruleSkill.name, inst.subtype)} from Power`"
-                      >
-                        +{{ getEnhancedRanks(ruleSkill.name, inst.subtype) }}p
-                      </span>
-                      <span
-                        v-if="getAdvantageBonusForSkill(ruleSkill.name) > 0"
-                        class="enh-math-tag adv"
-                        :title="`+${getAdvantageBonusForSkill(ruleSkill.name)} from ${getAdvantageNameForSkill(ruleSkill.name)} Advantage`"
-                      >
-                        +{{ getAdvantageBonusForSkill(ruleSkill.name) }} Adv
-                      </span>
+                        class="spec-subtype-name" 
+                        :title="`${inst.subtype || 'General'}: Base ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0}) + ${inst.ranks || 0} Rk${getEnhancedRanks(ruleSkill.name, inst.subtype) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name, inst.subtype) + 'p' : ''}${getAdvantageBonusForSkill(ruleSkill.name) > 0 ? ' +' + getAdvantageBonusForSkill(ruleSkill.name) + ' Adv' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))}`"
+                      >{{ inst.subtype || 'General' }}</span>
                     </div>
                   </div>
 
@@ -368,27 +344,13 @@
                 {{ ruleSkill.ability }}
               </span>
 
-              <!-- Name & Math Formula Breakdown -->
+              <!-- Name -->
               <div class="sheet-skill-info">
                 <div class="sheet-skill-title-row">
-                  <span class="sheet-skill-name">{{ ruleSkill.name }}</span>
-                </div>
-                <div class="sheet-skill-math">
-                  <template v-if="getStandardRanks(ruleSkill.name) > 0 || getEnhancedRanks(ruleSkill.name) > 0">
-                    <span>{{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}</span>
-                    <span class="math-operator">+</span>
-                    <span class="math-rk">{{ getStandardRanks(ruleSkill.name) }} Rk</span>
-                    <span 
-                      v-if="getEnhancedRanks(ruleSkill.name) > 0" 
-                      class="enh-math-tag"
-                      :title="`+${getEnhancedRanks(ruleSkill.name)} from Power`"
-                    >
-                      +{{ getEnhancedRanks(ruleSkill.name) }}p
-                    </span>
-                  </template>
-                  <template v-else>
-                    <span class="math-base-quiet">Base {{ ruleSkill.ability }} {{ heroStore.effectiveAbilities?.[ruleSkill.ability] || 0 }}</span>
-                  </template>
+                  <span 
+                    class="sheet-skill-name"
+                    :title="`${ruleSkill.name}: Base ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0}) + ${getStandardRanks(ruleSkill.name)} Rk${getEnhancedRanks(ruleSkill.name) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name) + 'p' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)))}`"
+                  >{{ ruleSkill.name }}</span>
                 </div>
               </div>
 
