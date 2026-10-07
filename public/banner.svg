@@ -1,193 +1,105 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
   <defs>
-    <!-- Background Gradients -->
-    <radialGradient id="bgGlow" cx="50%" cy="45%" r="65%">
-      <stop offset="0%" stop-color="#006fb8" stop-opacity="0.32" />
-      <stop offset="55%" stop-color="#08142b" stop-opacity="0.85" />
+    <!-- Background Radial Glow -->
+    <radialGradient id="bgGlow" cx="50%" cy="50%" r="65%">
+      <stop offset="0%" stop-color="#006fb8" stop-opacity="0.38" />
+      <stop offset="50%" stop-color="#08142b" stop-opacity="0.88" />
       <stop offset="100%" stop-color="#080d1a" stop-opacity="1" />
     </radialGradient>
 
-    <!-- Icon Box Gradients & Filters -->
+    <!-- Logo Icon Box Gradients -->
     <linearGradient id="iconBoxBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#006fb8" stop-opacity="0.28" />
-      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.10" />
+      <stop offset="0%" stop-color="#006fb8" stop-opacity="0.32" />
+      <stop offset="100%" stop-color="#0284c7" stop-opacity="0.12" />
     </linearGradient>
 
     <linearGradient id="iconBoxBorder" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.85" />
-      <stop offset="50%" stop-color="#006fb8" stop-opacity="0.5" />
-      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.3" />
+      <stop offset="0%" stop-color="#38bdf8" stop-opacity="0.95" />
+      <stop offset="50%" stop-color="#006fb8" stop-opacity="0.6" />
+      <stop offset="100%" stop-color="#38bdf8" stop-opacity="0.4" />
     </linearGradient>
 
+    <!-- Shield Flash Icon Gradient -->
     <linearGradient id="flashGrad" x1="0%" y1="0%" x2="0%" y2="100%">
       <stop offset="0%" stop-color="#ffffff" />
       <stop offset="35%" stop-color="#38bdf8" />
       <stop offset="100%" stop-color="#0284c7" />
     </linearGradient>
 
-    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#ffffff" />
-      <stop offset="85%" stop-color="#f0f9ff" />
-      <stop offset="100%" stop-color="#bae6fd" />
-    </linearGradient>
-
     <!-- Tactical Grid Pattern -->
     <pattern id="tacticalGrid" width="40" height="40" patternUnits="userSpaceOnUse">
-      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.045" />
-      <circle cx="40" cy="40" r="1" fill="#38bdf8" fill-opacity="0.1" />
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.04" />
+      <circle cx="40" cy="40" r="1" fill="#38bdf8" fill-opacity="0.08" />
     </pattern>
 
-    <!-- Glow Filters -->
-    <filter id="neonGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feGaussianBlur stdDeviation="16" result="blur" />
-      <feComposite in="SourceGraphic" in2="blur" operator="over" />
-    </filter>
-
+    <!-- Filters -->
     <filter id="boxGlow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="0" stdDeviation="18" flood-color="#006fb8" flood-opacity="0.45" />
-      <feDropShadow dx="0" dy="8" stdDeviation="24" flood-color="#000000" flood-opacity="0.6" />
+      <feDropShadow dx="0" dy="0" stdDeviation="24" flood-color="#006fb8" flood-opacity="0.5" />
+      <feDropShadow dx="0" dy="12" stdDeviation="32" flood-color="#000000" flood-opacity="0.7" />
     </filter>
 
     <filter id="shieldGlow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="#38bdf8" flood-opacity="0.6" />
+      <feDropShadow dx="0" dy="0" stdDeviation="12" flood-color="#38bdf8" flood-opacity="0.75" />
     </filter>
   </defs>
-
-  <style>
-    .font-barlow {
-      font-family: 'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-    .font-mono {
-      font-family: 'Geist Mono', 'SF Mono', Consolas, monospace;
-    }
-    .font-sans {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-    }
-  </style>
 
   <!-- Background Base -->
   <rect width="1200" height="630" fill="#080d1a" />
   <rect width="1200" height="630" fill="url(#bgGlow)" />
   <rect width="1200" height="630" fill="url(#tacticalGrid)" />
 
-  <!-- Ambient Ambient Glowing Hex / HUD Rings -->
-  <g opacity="0.35">
-    <circle cx="600" cy="275" r="320" fill="none" stroke="#006fb8" stroke-width="1" stroke-dasharray="8 8" opacity="0.4" />
-    <circle cx="600" cy="275" r="230" fill="none" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.2" />
-    <circle cx="600" cy="275" r="410" fill="none" stroke="#006fb8" stroke-width="1.5" stroke-dasharray="4 24" opacity="0.25" />
+  <!-- Ambient Glowing Concentric Tactical Rings & Hex Reticles (No Text) -->
+  <g opacity="0.45">
+    <circle cx="600" cy="315" r="180" fill="none" stroke="#38bdf8" stroke-width="1" stroke-opacity="0.25" />
+    <circle cx="600" cy="315" r="240" fill="none" stroke="#006fb8" stroke-width="1.5" stroke-dasharray="6 12" stroke-opacity="0.35" />
+    <circle cx="600" cy="315" r="320" fill="none" stroke="#38bdf8" stroke-width="1" stroke-dasharray="16 16" stroke-opacity="0.2" />
+    <circle cx="600" cy="315" r="410" fill="none" stroke="#006fb8" stroke-width="1.5" stroke-dasharray="8 24" stroke-opacity="0.22" />
+    <circle cx="600" cy="315" r="490" fill="none" stroke="#38bdf8" stroke-width="1" stroke-dasharray="4 32" stroke-opacity="0.15" />
   </g>
 
-  <!-- Corner Tactical Brackets -->
-  <g stroke="#38bdf8" stroke-width="2" fill="none" opacity="0.45">
+  <!-- Tactical Reticle Axis Ticks (No Text) -->
+  <g stroke="#38bdf8" stroke-width="1.5" opacity="0.35">
+    <!-- Top & Bottom Axis -->
+    <line x1="600" y1="80" x2="600" y2="120" />
+    <circle cx="600" cy="72" r="3" fill="#38bdf8" />
+    <line x1="600" y1="510" x2="600" y2="550" />
+    <circle cx="600" cy="558" r="3" fill="#38bdf8" />
+
+    <!-- Left & Right Axis -->
+    <line x1="280" y1="315" x2="320" y2="315" />
+    <circle cx="272" cy="315" r="3" fill="#38bdf8" />
+    <line x1="880" y1="315" x2="920" y2="315" />
+    <circle cx="928" cy="315" r="3" fill="#38bdf8" />
+  </g>
+
+  <!-- Corner Tactical Brackets (No Text) -->
+  <g stroke="#38bdf8" stroke-width="2" fill="none" opacity="0.5">
     <!-- Top Left -->
-    <path d="M 40 70 L 40 40 L 70 40" />
-    <circle cx="40" cy="40" r="2.5" fill="#38bdf8" />
+    <path d="M 45 80 L 45 45 L 80 45" />
+    <circle cx="45" cy="45" r="3" fill="#38bdf8" />
     <!-- Top Right -->
-    <path d="M 1130 40 L 1160 40 L 1160 70" />
-    <circle cx="1160" cy="40" r="2.5" fill="#38bdf8" />
+    <path d="M 1120 45 L 1155 45 L 1155 80" />
+    <circle cx="1155" cy="45" r="3" fill="#38bdf8" />
     <!-- Bottom Left -->
-    <path d="M 40 560 L 40 590 L 70 590" />
-    <circle cx="40" cy="590" r="2.5" fill="#38bdf8" />
+    <path d="M 45 550 L 45 585 L 80 585" />
+    <circle cx="45" cy="585" r="3" fill="#38bdf8" />
     <!-- Bottom Right -->
-    <path d="M 1130 590 L 1160 590 L 1160 560" />
-    <circle cx="1160" cy="590" r="2.5" fill="#38bdf8" />
+    <path d="M 1120 585 L 1155 585 L 1155 550" />
+    <circle cx="1155" cy="585" r="3" fill="#38bdf8" />
   </g>
 
-  <!-- Top Eyebrow: Tabletop RPG Specification Tag -->
-  <g transform="translate(600, 130)">
-    <rect x="-190" y="-18" width="380" height="36" rx="18" fill="rgba(0, 111, 184, 0.18)" stroke="rgba(56, 189, 248, 0.35)" stroke-width="1.2" />
-    <!-- Mini d20 geometric diamond icon -->
-    <path d="M -165 0 L -158 -7 L -151 0 L -158 7 Z" fill="#38bdf8" opacity="0.85" />
-    <text x="-140" y="5" class="font-mono" font-size="13" font-weight="600" fill="#38bdf8" letter-spacing="2.8">
-      MUTANTS &amp; MASTERMINDS 3E
-    </text>
-    <path d="M 151 0 L 158 -7 L 165 0 L 158 7 Z" fill="#38bdf8" opacity="0.85" />
-  </g>
+  <!-- CENTERPIECE: The Official App SVG Logo (Shield Flash Icon Box, Centered, No Text) -->
+  <g transform="translate(600, 315)" filter="url(#boxGlow)">
+    <!-- 1. Outer Box (.logo-icon-box) scaled to 260px × 260px -->
+    <rect x="-130" y="-130" width="260" height="260" rx="52" fill="url(#iconBoxBg)" stroke="url(#iconBoxBorder)" stroke-width="3.5" />
 
-  <!-- MAIN HERO LOGO SECTION: Exact App Logo Structure -->
-  <g transform="translate(245, 200)" filter="url(#boxGlow)">
-    <!-- 1. The Logo Icon Box (.logo-icon-box) -->
-    <g transform="translate(0, 0)">
-      <!-- Outer Box -->
-      <rect x="0" y="0" width="140" height="140" rx="28" fill="url(#iconBoxBg)" stroke="url(#iconBoxBorder)" stroke-width="2.5" />
-      
-      <!-- Inner Subtle Border Accent -->
-      <rect x="6" y="6" width="128" height="128" rx="22" fill="none" stroke="rgba(255, 255, 255, 0.08)" stroke-width="1" />
+    <!-- 2. Inner Subtle Border Accent -->
+    <rect x="-118" y="-118" width="236" height="236" rx="42" fill="none" stroke="rgba(255, 255, 255, 0.12)" stroke-width="1.5" />
 
-      <!-- Exact RemixIcon: ri-shield-flash-line (viewBox 0 0 24 24, scaled to 90px centered) -->
-      <g transform="translate(25, 25) scale(3.75)" filter="url(#shieldGlow)">
-        <path d="M3.78307 2.82598L12 1L20.2169 2.82598C20.6745 2.92766 21 3.33347 21 3.80217V13.7889C21 15.795 19.9974 17.6684 18.3282 18.7812L12 23L5.6718 18.7812C4.00261 17.6684 3 15.795 3 13.7889V3.80217C3 3.33347 3.32553 2.92766 3.78307 2.82598ZM5 4.60434V13.7889C5 15.1263 5.6684 16.3752 6.7812 17.1171L12 20.5963L17.2188 17.1171C18.3316 16.3752 19 15.1263 19 13.7889V4.60434L12 3.04879L5 4.60434ZM13 10H16L11 17V12H8L13 5V10Z"
-              fill="url(#flashGrad)" />
-      </g>
+    <!-- 3. Exact RemixIcon: ri-shield-flash-line (viewBox 0 0 24 24, scaled to 170px centered) -->
+    <g transform="translate(-85, -85) scale(7.083)" filter="url(#shieldGlow)">
+      <path d="M3.78307 2.82598L12 1L20.2169 2.82598C20.6745 2.92766 21 3.33347 21 3.80217V13.7889C21 15.795 19.9974 17.6684 18.3282 18.7812L12 23L5.6718 18.7812C4.00261 17.6684 3 15.795 3 13.7889V3.80217C3 3.33347 3.32553 2.92766 3.78307 2.82598ZM5 4.60434V13.7889C5 15.1263 5.6684 16.3752 6.7812 17.1171L12 20.5963L17.2188 17.1171C18.3316 16.3752 19 15.1263 19 13.7889V4.60434L12 3.04879L5 4.60434ZM13 10H16L11 17V12H8L13 5V10Z"
+            fill="url(#flashGrad)" />
     </g>
-
-    <!-- 2. Logo Text Wrap (.logo-text-wrap) -->
-    <g transform="translate(175, 45)">
-      <!-- App Title (.app-title) -->
-      <text x="0" y="55" class="font-barlow font-sans" font-size="68" font-weight="800" fill="url(#textGrad)" letter-spacing="-1">
-        M&amp;M 3e Builder
-      </text>
-
-      <!-- Logo Badge (.logo-badge) -->
-      <g transform="translate(505, 12)">
-        <rect x="0" y="0" width="68" height="34" rx="8" fill="rgba(0, 111, 184, 0.22)" stroke="rgba(0, 111, 184, 0.55)" stroke-width="1.5" />
-        <text x="34" y="23" text-anchor="middle" class="font-sans" font-size="16" font-weight="800" fill="#60a5fa" letter-spacing="0.5">
-          v1.0
-        </text>
-      </g>
-
-      <!-- App Subtitle -->
-      <text x="4" y="98" class="font-sans" font-size="20" font-weight="500" fill="#94a3b8" letter-spacing="0.3">
-        Character Studio &amp; Tactical Sheet for Tabletop RPG
-      </text>
-    </g>
-  </g>
-
-  <!-- Divider Line with Glow Center -->
-  <g transform="translate(200, 415)">
-    <line x1="0" y1="0" x2="800" y2="0" stroke="url(#iconBoxBorder)" stroke-width="1" opacity="0.3" />
-    <circle cx="400" cy="0" r="4" fill="#38bdf8" filter="url(#shieldGlow)" />
-  </g>
-
-  <!-- Key Feature Badges Row -->
-  <g transform="translate(600, 480)" text-anchor="middle">
-    <!-- Feature 1: Tactical Sheet -->
-    <g transform="translate(-360, 0)">
-      <rect x="-105" y="-18" width="210" height="36" rx="8" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(0, 111, 184, 0.35)" stroke-width="1" />
-      <text x="0" y="6" class="font-sans" font-size="14" font-weight="600" fill="#e2e8f0">
-        ⚡ Tactical Sheet
-      </text>
-    </g>
-
-    <!-- Feature 2: Character Wizard -->
-    <g transform="translate(-120, 0)">
-      <rect x="-105" y="-18" width="210" height="36" rx="8" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(0, 111, 184, 0.35)" stroke-width="1" />
-      <text x="0" y="6" class="font-sans" font-size="14" font-weight="600" fill="#e2e8f0">
-        🧭 9-Step Hero Wizard
-      </text>
-    </g>
-
-    <!-- Feature 3: Power Studio -->
-    <g transform="translate(120, 0)">
-      <rect x="-105" y="-18" width="210" height="36" rx="8" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(0, 111, 184, 0.35)" stroke-width="1" />
-      <text x="0" y="6" class="font-sans" font-size="14" font-weight="600" fill="#e2e8f0">
-        ✨ Power Studio
-      </text>
-    </g>
-
-    <!-- Feature 4: Roll20 Bridge -->
-    <g transform="translate(360, 0)">
-      <rect x="-105" y="-18" width="210" height="36" rx="8" fill="rgba(15, 23, 42, 0.75)" stroke="rgba(0, 111, 184, 0.35)" stroke-width="1" />
-      <text x="0" y="6" class="font-sans" font-size="14" font-weight="600" fill="#e2e8f0">
-        🎲 Roll20 VTT Bridge
-      </text>
-    </g>
-  </g>
-
-  <!-- Bottom Tabletop Meta Info -->
-  <g transform="translate(600, 560)" text-anchor="middle">
-    <text class="font-mono" font-size="12" font-weight="500" fill="#475569" letter-spacing="1.5">
-      D20 HERO SYSTEM • AUTOMATED PP CALCULATOR • PL CAP COMPLIANCE
-    </text>
   </g>
 </svg>
