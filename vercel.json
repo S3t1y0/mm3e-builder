@@ -34,7 +34,7 @@
       ]
     },
     {
-      "source": "/(banner.svg|og-image.svg|og-image.jpg|og-image.png|favicon.svg|icons.svg|robots.txt|sitemap.xml)",
+      "source": "/(banner.svg|banner.jpg|banner.png|og-image.svg|og-image.jpg|og-image.png|favicon.svg|icons.svg|robots.txt|sitemap.xml)",
       "headers": [
         {
           "key": "Cache-Control",
