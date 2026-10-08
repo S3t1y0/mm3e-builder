@@ -4,9 +4,11 @@
     <header v-if="!isEmbed" class="top-menubar">
       <div class="menubar-left">
         <div class="app-logo">
-          <img src="/mm-logo.png" alt="Mutants &amp; Masterminds" class="app-logo-img" />
+          <div class="logo-icon-box">
+            <i class="ri-shield-flash-line"></i>
+          </div>
           <div class="logo-text-wrap">
-            <span class="app-title">3e Builder</span>
+            <span class="app-title">M&M 3e Builder</span>
             <span class="logo-badge">v1.0</span>
           </div>
         </div>
@@ -101,7 +103,7 @@
               <div class="dropdown-item-text">
                 <strong>Export / Import JSON</strong>
                 <span>Backup or load hero JSON file</span>
-              </div>
+              </div> 
             </button>
 
             <button class="dropdown-item" @click="handleToolAction('printOfficial')">
@@ -502,18 +504,6 @@ onBeforeUnmount(() => {
   font-size: 1.1rem;
   box-shadow: 0 0 10px rgba(0, 111, 184, 0.25);
   transition: transform var(--trans-fast), box-shadow var(--trans-fast);
-}
-
-.app-logo-img {
-  height: 28px;
-  max-width: 140px;
-  object-fit: contain;
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
-  transition: transform var(--trans-fast);
-}
-
-.app-logo:hover .app-logo-img {
-  transform: scale(1.05);
 }
 
 .logo-icon-box:hover {
