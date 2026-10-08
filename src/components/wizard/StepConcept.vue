@@ -48,6 +48,61 @@
             placeholder="e.g. Freedom City, Orbit Station"
           />
         </div>
+        <div class="form-group">
+          <label class="form-label">Group Affiliation</label>
+          <input
+            v-model="heroStore.character.groupAffiliation"
+            type="text"
+            class="form-control"
+            placeholder="e.g. The Freedom League, Next-Gen"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Identity Status</label>
+          <div style="display: flex; gap: 1rem; align-items: center; margin-top: 0.35rem;">
+            <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer; font-size: 0.85rem; color: var(--text-primary);">
+              <input type="radio" :value="true" v-model="heroStore.character.isSecretIdentity" />
+              Secret Identity
+            </label>
+            <label style="display: flex; align-items: center; gap: 0.35rem; cursor: pointer; font-size: 0.85rem; color: var(--text-primary);">
+              <input type="radio" :value="false" v-model="heroStore.character.isSecretIdentity" />
+              Public Identity
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHYSICAL TRAITS SECTION -->
+      <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
+        <h5 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
+          Physical Appearance &amp; Official Sheet Details
+        </h5>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.75rem;">
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.75rem;">Gender</label>
+            <input v-model="heroStore.character.gender" type="text" class="form-control input-sm" placeholder="e.g. Female" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.75rem;">Age</label>
+            <input v-model="heroStore.character.age" type="text" class="form-control input-sm" placeholder="e.g. 28" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.75rem;">Height</label>
+            <input v-model="heroStore.character.height" type="text" class="form-control input-sm" placeholder="e.g. 5'10\"" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.75rem;">Weight</label>
+            <input v-model="heroStore.character.weight" type="text" class="form-control input-sm" placeholder="e.g. 155 lbs" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.75rem;">Eyes</label>
+            <input v-model="heroStore.character.eyes" type="text" class="form-control input-sm" placeholder="e.g. Blue" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="font-size: 0.75rem;">Hair</label>
+            <input v-model="heroStore.character.hair" type="text" class="form-control input-sm" placeholder="e.g. Auburn" />
+          </div>
+        </div>
       </div>
 
       <!-- POWER LEVEL CONTROLLER -->

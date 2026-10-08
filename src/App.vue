@@ -106,11 +106,19 @@
               </div>
             </button>
 
-            <button class="dropdown-item" @click="handleToolAction('roll20')">
+            <button class="dropdown-item" @click="handleToolAction('printOfficial')">
               <i class="ri-printer-line icon-sapphire"></i>
               <div class="dropdown-item-text">
-                <strong>Print / Roll20 Sheet</strong>
-                <span>Print sheet & Roll20 macros</span>
+                <strong>Print Official Sheet (PDF)</strong>
+                <span>Official Green Ronin character sheet</span>
+              </div>
+            </button>
+
+            <button class="dropdown-item" @click="handleToolAction('roll20')">
+              <i class="ri-terminal-box-line icon-teal"></i>
+              <div class="dropdown-item-text">
+                <strong>Roll20 Sheet &amp; Macros</strong>
+                <span>Tabletop macros &amp; text export</span>
               </div>
             </button>
 
@@ -213,6 +221,7 @@
     <!-- MODALS -->
     <ExportImportModal />
     <ShareModal />
+    <GreenRoninPrintModal />
     <Roll20PrintModal />
     <AdvantageLibraryModal />
     <ConditionPickerModal />
@@ -249,6 +258,7 @@ import RulesReference from './components/rules/RulesReference.vue';
 import PowerStudioWorkspace from './components/power-studio/PowerStudioWorkspace.vue';
 import ExportImportModal from './components/modals/ExportImportModal.vue';
 import ShareModal from './components/modals/ShareModal.vue';
+import GreenRoninPrintModal from './components/modals/GreenRoninPrintModal.vue';
 import Roll20PrintModal from './components/modals/Roll20PrintModal.vue';
 import AdvantageLibraryModal from './components/modals/AdvantageLibraryModal.vue';
 import ConditionPickerModal from './components/modals/ConditionPickerModal.vue';
@@ -326,6 +336,8 @@ function handleToolAction(action) {
     uiStore.openExportImport('storage');
   } else if (action === 'exportImport') {
     uiStore.openExportImport('export');
+  } else if (action === 'printOfficial') {
+    uiStore.openModal('printOfficial');
   } else if (action === 'roll20') {
     uiStore.openModal('roll20');
   } else if (action === 'reset') {

@@ -48,6 +48,57 @@
             placeholder="Base of Operations"
             @change="heroStore.pushHistory()"
           />
+          <button
+            type="button"
+            class="btn-bio-drawer-toggle"
+            :class="{ active: showBioDrawer }"
+            @click="showBioDrawer = !showBioDrawer"
+            title="Edit Physical Traits &amp; Group Affiliation for Green Ronin Official Sheet"
+          >
+            <i class="ri-user-settings-line"></i>
+            <span>Bio &amp; Traits</span>
+          </button>
+        </div>
+
+        <!-- EXPANDABLE PHYSICAL TRAITS & BIO DRAWER -->
+        <div v-if="showBioDrawer" class="dndb-bio-drawer">
+          <div class="bio-drawer-grid">
+            <div class="bio-input-group" style="grid-column: span 2;">
+              <label>Group Affiliation</label>
+              <input v-model="heroStore.character.groupAffiliation" placeholder="e.g. Freedom League, Sentinels" @change="heroStore.pushHistory()" />
+            </div>
+            <div class="bio-input-group">
+              <label>Identity Status</label>
+              <select v-model="heroStore.character.isSecretIdentity" @change="heroStore.pushHistory()">
+                <option :value="true">Secret Identity</option>
+                <option :value="false">Public Identity</option>
+              </select>
+            </div>
+            <div class="bio-input-group">
+              <label>Gender</label>
+              <input v-model="heroStore.character.gender" placeholder="e.g. Female" @change="heroStore.pushHistory()" />
+            </div>
+            <div class="bio-input-group">
+              <label>Age</label>
+              <input v-model="heroStore.character.age" placeholder="e.g. 28" @change="heroStore.pushHistory()" />
+            </div>
+            <div class="bio-input-group">
+              <label>Height</label>
+              <input v-model="heroStore.character.height" placeholder="e.g. 5'10&quot;" @change="heroStore.pushHistory()" />
+            </div>
+            <div class="bio-input-group">
+              <label>Weight</label>
+              <input v-model="heroStore.character.weight" placeholder="e.g. 155 lbs" @change="heroStore.pushHistory()" />
+            </div>
+            <div class="bio-input-group">
+              <label>Eyes</label>
+              <input v-model="heroStore.character.eyes" placeholder="e.g. Blue" @change="heroStore.pushHistory()" />
+            </div>
+            <div class="bio-input-group">
+              <label>Hair</label>
+              <input v-model="heroStore.character.hair" placeholder="e.g. Auburn" @change="heroStore.pushHistory()" />
+            </div>
+          </div>
         </div>
 
         <!-- INTEGRATED COMBAT CONDITIONS STRIP (OPTION 1) -->
@@ -257,9 +308,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
+
+const showBioDrawer = ref(false);
 import {
   BASIC_CONDITIONS,
   COMBINED_CONDITIONS,
@@ -345,6 +398,77 @@ function rollInitiative() {
   background: rgba(16, 185, 129, 0.15);
   border: 1px solid rgba(16, 185, 129, 0.4);
   color: #a7f3d0;
+}
+
+.btn-bio-drawer-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: var(--radius-xs, 4px);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.btn-bio-drawer-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.btn-bio-drawer-toggle.active {
+  background: #0284c7;
+  color: #fff;
+  border-color: #38bdf8;
+}
+
+.dndb-bio-drawer {
+  background: rgba(15, 23, 42, 0.95);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.bio-drawer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.5rem;
+}
+
+.bio-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.bio-input-group label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.bio-input-group input,
+.bio-input-group select {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.45rem;
+}
+
+.bio-input-group input:focus,
+.bio-input-group select:focus {
+  border-color: #38bdf8;
+  outline: none;
 }
 </style>
 

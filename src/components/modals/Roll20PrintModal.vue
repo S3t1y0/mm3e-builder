@@ -6,7 +6,7 @@
         <div style="display: flex; align-items: center; gap: 1rem;">
           <div class="r20-modal-title">
             <i class="ri-printer-fill" style="margin-right: 0.35rem;"></i>
-            ROLL20 CHARACTER SHEET & EXPORT
+            ROLL20 CHARACTER SHEET &amp; EXPORT
           </div>
           <div class="r20-tab-pills">
             <button
@@ -580,6 +580,51 @@ async function copyTextExport() {
   background: var(--r20-yellow);
   color: #2a2522;
   border-color: var(--r20-yellow);
+}
+
+.r20-template-selector {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: rgba(0, 0, 0, 0.45);
+  padding: 4px 10px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.template-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.r20-template-btn {
+  background: transparent;
+  border: 1px solid transparent;
+  color: #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: all 0.2s ease;
+}
+
+.r20-template-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.r20-template-btn.active {
+  background: #0284c7;
+  color: #fff;
+  border-color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
 }
 
 .r20-preview-scroll {

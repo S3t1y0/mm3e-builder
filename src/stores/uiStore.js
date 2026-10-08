@@ -13,7 +13,8 @@ export const useUiStore = defineStore('ui', {
       roll20: false,
       share: false,
       conditions: false,
-      exportImport: false
+      exportImport: false,
+      printOfficial: false
     },
     exportImportInitialTab: 'export',
     toasts: []

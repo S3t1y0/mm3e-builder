@@ -8,6 +8,7 @@ import './styles/sheet.css';
 import './styles/builder.css';
 import './styles/wizard.css';
 import './styles/roll20-print.css';
+import './styles/green-ronin-sheet.css';
 
 import App from './App.vue';
 import { initSeamlessScroll } from './utils/seamlessScroll.js';

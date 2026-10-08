@@ -47,6 +47,13 @@ export function createDefaultCharacter() {
     identity: '',
     isSecretIdentity: true,
     baseOfOperations: '',
+    gender: '',
+    age: '',
+    height: '',
+    weight: '',
+    eyes: '',
+    hair: '',
+    groupAffiliation: '',
     powerLevel: 10,
     heroPoints: 1,
     abilities: {
