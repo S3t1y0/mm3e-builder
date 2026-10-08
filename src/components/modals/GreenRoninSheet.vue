@@ -5,7 +5,7 @@
       <!-- 1. TOP HEADER BANNER -->
       <header class="gr-card gr-header">
         <div class="gr-logo-wrap">
-          <img src="/mm-logo-vector.svg" alt="Mutants &amp; Masterminds" class="gr-logo-img" />
+          <img src="/mm-logo.png" alt="Mutants &amp; Masterminds" class="gr-logo-img" />
         </div>
 
         <div class="gr-meta-grid">
@@ -318,7 +318,7 @@
       <!-- Page 2 Header -->
       <header class="gr-card gr-page-2-header">
         <div style="display: flex; align-items: center; gap: 10px;">
-          <img src="/mm-logo-vector.svg" alt="Mutants &amp; Masterminds" style="height: 30px; object-fit: contain;" />
+          <img src="/mm-logo.png" alt="Mutants &amp; Masterminds" style="height: 30px; object-fit: contain;" />
           <span class="gr-page-2-title">OFFICIAL CHARACTER SHEET — PAGE 2</span>
         </div>
         <div style="font-size: 10.5px; font-weight: 900; color: #0f172a;">
