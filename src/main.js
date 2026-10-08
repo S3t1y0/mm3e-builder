@@ -13,6 +13,10 @@ import './styles/green-ronin-sheet.css';
 import App from './App.vue';
 import { initSeamlessScroll } from './utils/seamlessScroll.js';
 import { vDragScroll } from './utils/dragScroll.js';
+import { inject as injectAnalytics } from '@vercel/analytics';
+
+// Initialize Vercel Web Analytics tracking
+injectAnalytics();
 
 const app = createApp(App);
 const pinia = createPinia();
