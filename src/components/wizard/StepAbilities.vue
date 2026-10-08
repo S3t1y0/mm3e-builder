@@ -9,12 +9,12 @@
     </div>
 
     <!-- PP SUMMARY STRIP -->
-    <div class="card mb-3" style="padding: 0.85rem 1.25rem; display: flex; justify-content: space-between; align-items: center; background: rgba(59, 130, 246, 0.05); border-color: rgba(59, 130, 246, 0.25);">
-      <div style="font-size: 0.85rem; color: #fff; font-weight: 700;">
-        Abilities Point Total: <span class="tabular-nums" style="color: var(--accent-primary); font-size: 1.05rem;">{{ heroStore.abilitiesCost }} PP</span>
+    <div class="card abilities-budget-strip mb-3">
+      <div class="budget-strip-spent">
+        Abilities Point Total: <span class="tabular-nums budget-val">{{ heroStore.abilitiesCost }} PP</span>
       </div>
-      <div style="font-size: 0.78rem; color: var(--text-secondary);">
-        Remaining Character Budget: <strong class="tabular-nums" :style="{ color: heroStore.remainingPP < 0 ? '#ef4444' : '#10b981' }">{{ heroStore.remainingPP }} PP</strong>
+      <div class="budget-strip-remaining">
+        Remaining Character Budget: <strong class="tabular-nums" :class="heroStore.remainingPP < 0 ? 'budget-danger' : 'budget-ok'">{{ heroStore.remainingPP }} PP</strong>
       </div>
     </div>
 
@@ -23,46 +23,66 @@
       <div
         v-for="ability in abilitiesList"
         :key="ability.key"
-        class="card ability-card"
-        style="padding: 1rem;"
+        class="card wizard-ability-card"
       >
-        <div class="ability-card-top">
-          <div>
-            <div class="ability-short">{{ ability.key }}</div>
-            <div class="ability-full">{{ ability.name }}</div>
+        <!-- Card Header: Code, Full Name, and PP Cost Tag -->
+        <div class="ability-card-header">
+          <div class="ability-title-group">
+            <span class="ability-code">{{ ability.key }}</span>
+            <span class="ability-name">{{ ability.name }}</span>
           </div>
-          <div class="ability-cost-tag tabular-nums">
+          <div class="ability-cost-tag tabular-nums" title="Cost: 2 PP per rank">
             {{ (heroStore.character.abilities[ability.key] || 0) * 2 }} PP
           </div>
         </div>
 
-        <p class="ability-desc">{{ ability.desc }}</p>
+        <!-- Prominent Ability Rank & Proportional Stepper Control -->
+        <div class="ability-rank-box">
+          <div class="rank-eyebrow">Ability Rank</div>
+          <div class="rank-stepper-row">
+            <button
+              type="button"
+              class="stepper-action-btn"
+              :disabled="(heroStore.character.abilities[ability.key] || 0) <= -5"
+              @click="setAbilityRank(ability.key, (heroStore.character.abilities[ability.key] || 0) - 1)"
+              :aria-label="`Decrease ${ability.name} rank`"
+              title="Decrease Rank"
+            >
+              <i class="ri-subtract-line"></i>
+            </button>
 
-        <div class="ability-stepper-row">
-          <button
-            class="btn btn-secondary btn-sm stepper-btn"
-            :disabled="(heroStore.character.abilities[ability.key] || 0) <= -5"
-            @click="setAbilityRank(ability.key, (heroStore.character.abilities[ability.key] || 0) - 1)"
-          >
-            -
-          </button>
+            <div class="rank-val-container">
+              <span
+                class="rank-val tabular-nums"
+                :class="{
+                  'is-positive': (heroStore.character.abilities[ability.key] || 0) > 0,
+                  'is-negative': (heroStore.character.abilities[ability.key] || 0) < 0
+                }"
+              >
+                {{ formatMod(heroStore.character.abilities[ability.key] || 0) }}
+              </span>
+            </div>
 
-          <div class="ability-rank-display">
-            <span class="rank-value tabular-nums">{{ formatMod(heroStore.character.abilities[ability.key] || 0) }}</span>
+            <button
+              type="button"
+              class="stepper-action-btn"
+              :disabled="(heroStore.character.abilities[ability.key] || 0) >= 20"
+              @click="setAbilityRank(ability.key, (heroStore.character.abilities[ability.key] || 0) + 1)"
+              :aria-label="`Increase ${ability.name} rank`"
+              title="Increase Rank"
+            >
+              <i class="ri-add-line"></i>
+            </button>
           </div>
-
-          <button
-            class="btn btn-secondary btn-sm stepper-btn"
-            :disabled="(heroStore.character.abilities[ability.key] || 0) >= 20"
-            @click="setAbilityRank(ability.key, (heroStore.character.abilities[ability.key] || 0) + 1)"
-          >
-            +
-          </button>
         </div>
 
-        <!-- DERIVED BENEFIT HINT -->
-        <div class="derived-hint">
-          <i class="ri-corner-down-right-line"></i> {{ ability.affects }}
+        <!-- Description -->
+        <p class="ability-desc">{{ ability.desc }}</p>
+
+        <!-- Derived Benefit Hint -->
+        <div class="ability-derived-box">
+          <i class="ri-corner-down-right-line derived-icon"></i>
+          <span class="derived-text">{{ ability.affects }}</span>
         </div>
       </div>
     </div>
@@ -156,6 +176,7 @@ function formatMod(val) {
   justify-content: center;
   font-size: 1.3rem;
   color: #f87171;
+  flex-shrink: 0;
 }
 
 .step-title {
@@ -172,118 +193,239 @@ function formatMod(val) {
   line-height: 1.45;
 }
 
+/* PP Summary Strip */
+.abilities-budget-strip {
+  padding: 0.85rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(59, 130, 246, 0.05);
+  border: 1px solid rgba(59, 130, 246, 0.25);
+  border-radius: var(--radius-md);
+}
+
+.budget-strip-spent {
+  font-size: 0.85rem;
+  color: #fff;
+  font-weight: 700;
+}
+
+.budget-val {
+  color: var(--accent-secondary, #38bdf8);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+
+.budget-strip-remaining {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+}
+
+.budget-ok {
+  color: #10b981;
+}
+
+.budget-danger {
+  color: #ef4444;
+}
+
+/* Grid & Cards */
 .abilities-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 1rem;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 1280px) {
   .abilities-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 600px) {
+@media (max-width: 640px) {
   .abilities-grid {
     grid-template-columns: 1fr;
   }
 }
 
-.ability-card {
-  background: rgba(15, 23, 42, 0.6);
+.wizard-ability-card {
+  background: rgba(15, 23, 42, 0.65);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
+  padding: 1.1rem;
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
+  align-items: stretch;
+  width: 100%;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
 }
 
-.ability-card-top {
+.wizard-ability-card:hover {
+  border-color: rgba(59, 130, 246, 0.35);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+}
+
+/* Card Header */
+.ability-card-header {
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.85rem;
+  width: 100%;
 }
 
-.ability-short {
+.ability-title-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.ability-code {
   font-size: 1.25rem;
   font-weight: 900;
   color: #fff;
   letter-spacing: 0.05em;
+  line-height: 1.1;
 }
 
-.ability-full {
+.ability-name {
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--text-secondary);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
 }
 
 .ability-cost-tag {
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   color: #60a5fa;
-  background: rgba(59, 130, 246, 0.15);
-  padding: 0.15rem 0.45rem;
+  background: rgba(59, 130, 246, 0.12);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--radius-xs);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  white-space: nowrap;
+}
+
+/* Hero Rank & Stepper Section */
+.ability-rank-box {
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: var(--radius-sm);
-  border: 1px solid rgba(59, 130, 246, 0.3);
-}
-
-.ability-desc {
-  font-size: 0.76rem;
-  color: var(--text-secondary);
-  line-height: 1.5;
+  padding: 0.65rem 0.75rem;
   margin-bottom: 0.85rem;
-  min-height: 42px;
-}
-
-.ability-stepper-row {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: space-between;
-  background: var(--bg-card);
-  padding: 0.35rem 0.5rem;
-  border-radius: 8px;
-  border: 1px solid var(--border-subtle);
-  margin-bottom: 0.65rem;
+  width: 100%;
 }
 
-.stepper-btn {
-  width: 28px;
-  height: 28px;
-  padding: 0;
+.rank-eyebrow {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.rank-stepper-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 800;
-  border-radius: 4px;
+  gap: 0.85rem;
+  width: 100%;
 }
 
-.ability-rank-display {
-  display: flex;
-  align-items: baseline;
-  gap: 0.4rem;
+.stepper-action-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: var(--text-secondary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  flex-shrink: 0;
+  padding: 0;
 }
 
-.rank-value {
-  font-size: 1.15rem;
-  font-weight: 800;
+.stepper-action-btn:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: rgba(59, 130, 246, 0.4);
   color: #fff;
 }
 
-.mod-value {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: var(--text-secondary);
+.stepper-action-btn:active:not(:disabled) {
+  transform: scale(0.92);
 }
 
-.derived-hint {
-  font-size: 0.7rem;
-  color: #94a3b8;
+.stepper-action-btn:disabled {
+  opacity: 0.2;
+  cursor: not-allowed;
+  border-color: transparent;
+}
+
+.rank-val-container {
+  min-width: 3.2rem;
+  text-align: center;
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
+}
+
+.rank-val {
+  font-size: 1.45rem;
+  font-weight: 900;
+  color: #fff;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  transition: color var(--trans-fast);
+}
+
+.rank-val.is-positive {
+  color: var(--accent-secondary, #38bdf8);
+}
+
+.rank-val.is-negative {
+  color: #f87171;
+}
+
+/* Description */
+.ability-desc {
+  font-size: 0.76rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin-bottom: 0.85rem;
+  flex-grow: 1;
+  min-height: 42px;
+}
+
+/* Derived Benefit Hint */
+.ability-derived-box {
+  font-size: 0.72rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding-top: 0.65rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  line-height: 1.35;
+  margin-top: auto;
+}
+
+.derived-icon {
+  font-size: 0.85rem;
+  color: var(--accent-secondary, #38bdf8);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.derived-text {
+  color: var(--text-muted);
 }
 </style>
+
