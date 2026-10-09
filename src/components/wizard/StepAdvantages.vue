@@ -257,22 +257,11 @@
             >
               <!-- Card Header -->
               <div class="catalog-card-header">
-                <div class="card-title-group">
-                  <span class="adv-cat-tag" :class="(item.category || 'general').toLowerCase()">
-                    <i :class="getCategoryIconClass(item.category)"></i>
-                    {{ item.category || 'General' }}
-                  </span>
-                  <strong class="catalog-card-name">{{ item.name }}</strong>
-                </div>
+                <strong class="catalog-card-name">{{ item.name }}</strong>
 
-                <div class="header-badges-row">
-                  <span v-if="item.requiresSpecification" class="badge-spec-tag" title="Requires subtype / specification">
-                    <i class="ri-equalizer-line"></i> Subtype
-                  </span>
-                  <span v-if="item.ranked" class="badge-ranked-tag" title="Can be taken multiple times">
-                    <i class="ri-star-fill"></i> Ranked
-                  </span>
-                </div>
+                <span v-if="item.ranked" class="badge-ranked-tag" title="Can be taken multiple times">
+                  <i class="ri-star-fill"></i> Ranked
+                </span>
               </div>
 
               <!-- Card Rules Description -->
@@ -1598,40 +1587,18 @@ function removeAdvantage(idOrName) {
 
 .catalog-card-header {
   display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 0.45rem;
-}
-
-.card-title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.adv-cat-tag {
-  font-size: 0.62rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 0.1rem 0.4rem;
-  border-radius: 3px;
-  width: fit-content;
-  display: inline-flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: space-between;
+  gap: 0.5rem;
+  min-height: 24px;
 }
-
-.adv-cat-tag.combat { background: rgba(239, 68, 68, 0.18); color: #fca5a5; }
-.adv-cat-tag.fortune { background: rgba(16, 185, 129, 0.18); color: #6ee7b7; }
-.adv-cat-tag.skill { background: rgba(56, 189, 248, 0.18); color: #7dd3fc; }
-.adv-cat-tag.general { background: rgba(168, 85, 247, 0.18); color: #d8b4fe; }
 
 .catalog-card-name {
-  font-size: 0.92rem;
+  font-size: 0.94rem;
   font-weight: 800;
   color: #fff;
   line-height: 1.25;
+  letter-spacing: -0.01em;
 }
 
 .badge-ranked-tag {
@@ -1895,28 +1862,6 @@ function removeAdvantage(idOrName) {
   letter-spacing: 0.04em;
 }
 
-.header-badges-row {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  flex-wrap: wrap;
-}
-
-.badge-spec-tag {
-  font-size: 0.62rem;
-  font-weight: 800;
-  background: rgba(56, 189, 248, 0.18);
-  color: #7dd3fc;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  padding: 0.1rem 0.38rem;
-  border-radius: 3px;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-}
 
 .catalog-subtypes-tray {
   display: flex;
