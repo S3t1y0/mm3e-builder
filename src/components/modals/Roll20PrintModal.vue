@@ -1,40 +1,41 @@
 <template>
-  <div v-if="uiStore.modals.roll20" class="r20-modal-overlay" @click.self="uiStore.closeModal('roll20')">
-    <div id="roll20-bridge" class="r20-modal-container">
-      <!-- TOP ACTION BAR -->
-      <div class="r20-modal-bar">
-        <div style="display: flex; align-items: center; gap: 1rem;">
-          <div class="r20-modal-title">
-            <i class="ri-printer-fill" style="margin-right: 0.35rem;"></i>
-            ROLL20 CHARACTER SHEET &amp; MACROS
+  <Teleport to="body">
+    <div v-if="uiStore.modals.roll20" class="r20-modal-overlay" @click.self="uiStore.closeModal('roll20')">
+      <div id="roll20-bridge" class="r20-modal-container">
+        <!-- TOP ACTION BAR -->
+        <div class="r20-modal-bar">
+          <div style="display: flex; align-items: center; gap: 1rem;">
+            <div class="r20-modal-title">
+              <i class="ri-printer-fill" style="margin-right: 0.35rem;"></i>
+              ROLL20 CHARACTER SHEET &amp; MACROS
+            </div>
+            <div class="r20-tab-pills">
+              <button
+                class="r20-tab-pill"
+                :class="{ active: currentTab === 'preview' }"
+                @click="currentTab = 'preview'"
+              >
+                <i class="ri-newspaper-line"></i> Sheet Preview
+              </button>
+              <button
+                class="r20-tab-pill"
+                :class="{ active: currentTab === 'macros' }"
+                @click="currentTab = 'macros'"
+              >
+                <i class="ri-terminal-box-line"></i> Roll20 Macros
+              </button>
+            </div>
           </div>
-          <div class="r20-tab-pills">
-            <button
-              class="r20-tab-pill"
-              :class="{ active: currentTab === 'preview' }"
-              @click="currentTab = 'preview'"
-            >
-              <i class="ri-newspaper-line"></i> Sheet Preview
-            </button>
-            <button
-              class="r20-tab-pill"
-              :class="{ active: currentTab === 'macros' }"
-              @click="currentTab = 'macros'"
-            >
-              <i class="ri-terminal-box-line"></i> Roll20 Macros
-            </button>
-          </div>
-        </div>
 
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-          <button v-if="currentTab === 'preview'" class="btn btn-primary btn-sm" @click="handlePrint">
-            <i class="ri-printer-line"></i> Print / Save PDF
-          </button>
-          <button class="btn btn-secondary btn-sm" @click="uiStore.closeModal('roll20')">
-            <i class="ri-close-line"></i> Close
-          </button>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button v-if="currentTab === 'preview'" class="btn btn-primary btn-sm" @click="handlePrint">
+              <i class="ri-printer-line"></i> Print / Save PDF
+            </button>
+            <button class="btn btn-secondary btn-sm" @click="uiStore.closeModal('roll20')">
+              <i class="ri-close-line"></i> Close
+            </button>
+          </div>
         </div>
-      </div>
 
       <!-- TAB 1: SHEET PREVIEW -->
       <div v-if="currentTab === 'preview'" class="r20-preview-scroll">
@@ -358,6 +359,7 @@
       </div>
     </div>
   </div>
+  </Teleport>
 </template>
 
 <script setup>

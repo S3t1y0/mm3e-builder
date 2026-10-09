@@ -1,32 +1,34 @@
 <template>
-  <div v-if="uiStore.modals.printOfficial" class="gr-modal-overlay" @click.self="uiStore.closeModal('printOfficial')">
-    <div id="official-print" class="gr-modal-container">
-      <!-- TOP ACTION BAR -->
-      <div class="gr-modal-bar">
-        <div style="display: flex; align-items: center; gap: 0.75rem;">
-          <div class="gr-modal-title">
-            <i class="ri-printer-fill" style="margin-right: 0.4rem; color: #38bdf8;"></i>
-            OFFICIAL CHARACTER SHEET (PDF)
+  <Teleport to="body">
+    <div v-if="uiStore.modals.printOfficial" class="gr-modal-overlay" @click.self="uiStore.closeModal('printOfficial')">
+      <div id="official-print" class="gr-modal-container">
+        <!-- TOP ACTION BAR -->
+        <div class="gr-modal-bar">
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div class="gr-modal-title">
+              <i class="ri-printer-fill" style="margin-right: 0.4rem; color: #38bdf8;"></i>
+              OFFICIAL CHARACTER SHEET (PDF)
+            </div>
+            <span class="gr-modal-badge">Green Ronin 3E Format</span>
           </div>
-          <span class="gr-modal-badge">Green Ronin 3E Format</span>
+
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button class="btn btn-primary btn-sm" @click="handlePrint">
+              <i class="ri-printer-line"></i> Print / Save PDF
+            </button>
+            <button class="btn btn-secondary btn-sm" @click="uiStore.closeModal('printOfficial')">
+              <i class="ri-close-line"></i> Close
+            </button>
+          </div>
         </div>
 
-        <div style="display: flex; gap: 0.5rem; align-items: center;">
-          <button class="btn btn-primary btn-sm" @click="handlePrint">
-            <i class="ri-printer-line"></i> Print / Save PDF
-          </button>
-          <button class="btn btn-secondary btn-sm" @click="uiStore.closeModal('printOfficial')">
-            <i class="ri-close-line"></i> Close
-          </button>
+        <!-- PREVIEW CONTAINER -->
+        <div class="gr-preview-scroll">
+          <GreenRoninSheet />
         </div>
-      </div>
-
-      <!-- PREVIEW CONTAINER -->
-      <div class="gr-preview-scroll">
-        <GreenRoninSheet />
       </div>
     </div>
-  </div>
+  </Teleport>
 </template>
 
 <script setup>

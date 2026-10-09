@@ -761,50 +761,76 @@
     margin: 0 !important;
   }
 
-  body {
-    background: #ffffff !important;
-    padding: 0 !important;
-    margin: 0 !important;
+  *, *::before, *::after {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
 
-  /* Hide app navigation and modal chrome */
+  html, body {
+    background: #ffffff !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    overflow: visible !important;
+  }
+
+  /* Hide the underlying app when printing official sheet */
+  #app,
   .app-container,
+  .top-menubar,
+  .main-content,
   .menubar,
-  .modal-overlay,
-  .r20-modal-bar,
   .gr-modal-bar,
+  .r20-modal-bar,
   #toast-container,
-  .r20-modal-container > .r20-modal-bar,
-  .gr-modal-container > .gr-modal-bar {
+  .dice-roll-hud {
     display: none !important;
   }
 
-  /* Container setup */
-  .r20-modal-overlay,
+  /* Container setup for Teleported Official Sheet */
   .gr-modal-overlay {
     position: static !important;
+    inset: auto !important;
     background: transparent !important;
+    backdrop-filter: none !important;
     padding: 0 !important;
     margin: 0 !important;
     display: block !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    z-index: auto !important;
   }
 
-  .r20-modal-container,
   .gr-modal-container {
     max-width: 100% !important;
+    width: 100% !important;
     padding: 0 !important;
     margin: 0 !important;
+    display: block !important;
+    overflow: visible !important;
+  }
+
+  .gr-preview-scroll {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
   }
 
   .green-ronin-sheet-wrapper {
     display: block !important;
     width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
     gap: 0 !important;
   }
 
   .gr-page {
+    box-sizing: border-box !important;
     box-shadow: none !important;
     border-radius: 0 !important;
     margin: 0 auto !important;
