@@ -87,6 +87,7 @@ import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { buildMarkdownSheet, buildBBCodeSheet, buildPlainTextSheet } from '../../utils/exporters.js';
+import { trackEvent } from '../../utils/analytics.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -108,6 +109,11 @@ async function copyTextExport() {
   try {
     await navigator.clipboard.writeText(activeTextContent.value);
     copied.value = true;
+    trackEvent('export_markdown', {
+      format: textFormat.value,
+      action: 'clipboard',
+      pl: heroStore.character?.powerLevel || 10
+    });
     const label = textFormat.value === 'plain' ? 'Plain Text' : textFormat.value.toUpperCase();
     uiStore.showToast(`${label} sheet copied to clipboard!`, 'success');
     setTimeout(() => {
@@ -131,6 +137,11 @@ function downloadTextFile() {
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
+  trackEvent('export_markdown', {
+    format: textFormat.value,
+    action: 'download',
+    pl: heroStore.character?.powerLevel || 10
+  });
   uiStore.showToast(`Downloaded ${filename}`, 'success');
 }
 </script>

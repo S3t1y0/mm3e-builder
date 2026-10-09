@@ -132,7 +132,7 @@
               target="_blank"
               rel="noopener noreferrer"
               class="dropdown-item"
-              @click="isToolsOpen = false"
+              @click="handleExtensionDownload"
               title="Download Roll20 companion extension from Google Drive"
             >
               <i class="ri-download-cloud-2-line icon-amber"></i>
@@ -258,6 +258,7 @@ import { useUiStore } from './stores/uiStore.js';
 import { usePowerBuilderStore } from './stores/powerBuilderStore.js';
 import { parseSharedCharacterFromHash } from './services/shareService.js';
 import { isEmbedMode, getEmbedType, initEmbedBridge } from './services/embedBridge.js';
+import { trackEvent } from './utils/analytics.js';
 
 import TacticalCharacterSheet from './components/sheet/TacticalCharacterSheet.vue';
 import CharacterWizard from './components/wizard/CharacterWizard.vue';
@@ -338,6 +339,11 @@ function handleKeyDown(event) {
   }
 }
 
+function handleExtensionDownload() {
+  trackEvent('click_download_extension', { source: 'tools_menu' });
+  isToolsOpen.value = false;
+}
+
 function handleToolAction(action) {
   isToolsOpen.value = false;
   if (action === 'storage') {
@@ -372,6 +378,10 @@ async function loadFromHash() {
     const sharedChar = await parseSharedCharacterFromHash(hash);
     if (sharedChar && (sharedChar.name || sharedChar.abilities)) {
       heroStore.loadCharacter(sharedChar);
+      trackEvent('open_shared_hero', {
+        pl: sharedChar.powerLevel || 10,
+        isCloud: isKvLink
+      });
       uiStore.showToast(
         `Loaded "${sharedChar.name || 'Hero'}" (PL ${sharedChar.powerLevel || 10})`,
         'success',

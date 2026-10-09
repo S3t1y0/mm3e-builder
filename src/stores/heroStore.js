@@ -7,6 +7,7 @@ import { sendRollToVTT, syncActiveHero } from '../services/vttBridge.js';
 import { isEmbedMode, sendCharacterUpdate, sendDiceRoll } from '../services/embedBridge.js';
 import { rollD20, isCryptoAvailable } from '../utils/diceRoller.js';
 import { getAdvantageRule } from '../rules/advantages.js';
+import { trackEvent } from '../utils/analytics.js';
 
 const STORAGE_KEY = 'mm3e_builder_character_data';
 const ROSTER_STORAGE_KEY = 'mm3e_saved_heroes_roster';
@@ -1151,6 +1152,10 @@ export const useHeroStore = defineStore('hero', {
       };
 
       this.lastRoll = rollData;
+      trackEvent('d20_roll_action', {
+        category: category || 'General',
+        isCrit: Boolean(isCrit)
+      });
       if (!Array.isArray(this.rollHistory)) this.rollHistory = [];
       this.rollHistory.unshift(rollData);
       if (this.rollHistory.length > 20) this.rollHistory.pop();

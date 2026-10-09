@@ -327,6 +327,7 @@ import { ref, computed, watch } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { downloadCharacterJson } from '../../utils/exporters.js';
+import { trackEvent } from '../../utils/analytics.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -385,6 +386,11 @@ function handleSaveSnapshot() {
   const heroName = heroStore.character.name?.trim() || 'Hero Name';
   const res = heroStore.saveCurrentToRoster(heroName);
   if (res) {
+    trackEvent('save_to_vault', {
+      pl: heroStore.character.powerLevel || 10,
+      totalPP: heroStore.totalSpentPP || 0,
+      slotCount: heroStore.savedRoster?.length || 1
+    });
     uiStore.showToast(`Snapshot "${heroName}" saved to Vault!`, 'success');
   } else {
     uiStore.showToast('Failed to save snapshot to Vault.', 'error');
@@ -396,6 +402,9 @@ function handleLoadSlot(slot) {
   if (confirm(`Load hero "${slot.name || 'Hero'}" into active sheet? Any unsaved changes will be overwritten.`)) {
     const success = heroStore.loadFromRoster(slot.id);
     if (success) {
+      trackEvent('load_from_vault', {
+        pl: slot.character?.powerLevel || 10
+      });
       uiStore.showToast(`Hero "${slot.name || 'Hero'}" loaded into sheet!`, 'success');
       uiStore.closeModal('exportImport');
     } else {
@@ -427,6 +436,11 @@ function handleClearAllVault() {
 
 function handleDownload() {
   downloadCharacterJson(heroStore.character);
+  trackEvent('export_hero_json', {
+    pl: heroStore.character.powerLevel || 10,
+    totalPP: heroStore.totalSpentPP || 0,
+    format: 'download'
+  });
   uiStore.showToast(`Downloaded "${heroStore.character.name || 'Hero'}" JSON file!`, 'success');
 }
 
@@ -434,6 +448,11 @@ async function handleCopyExport() {
   try {
     await navigator.clipboard.writeText(exportJsonString.value);
     copied.value = true;
+    trackEvent('export_hero_json', {
+      pl: heroStore.character.powerLevel || 10,
+      totalPP: heroStore.totalSpentPP || 0,
+      format: 'clipboard'
+    });
     uiStore.showToast('Character JSON copied to clipboard!', 'success');
     setTimeout(() => { copied.value = false; }, 2500);
   } catch (err) {
@@ -498,6 +517,10 @@ function validateImportJson() {
 function applyImport() {
   if (!parsedPreview.value) return;
   heroStore.loadCharacter(parsedPreview.value);
+  trackEvent('import_hero_json', {
+    pl: parsedPreview.value.powerLevel || 10,
+    status: 'success'
+  });
   uiStore.showToast(`Loaded character "${parsedPreview.value.name || 'Hero'}" successfully!`, 'success');
   uiStore.closeModal('exportImport');
   rawImportText.value = '';

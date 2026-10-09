@@ -127,6 +127,7 @@ import { ref, watch, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { generateShareUrl } from '../../services/shareService.js';
+import { trackEvent } from '../../utils/analytics.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -223,6 +224,11 @@ async function copyLink() {
   try {
     await navigator.clipboard.writeText(shareData.value.url);
     copied.value = true;
+    trackEvent('share_hero_copied', {
+      pl: heroStore.character?.powerLevel || 10,
+      totalPP: heroStore.totalSpentPP || 0,
+      shareType: shareData.value.type || 'hash'
+    });
     uiStore.showToast('Link copied to clipboard.', 'success');
     setTimeout(() => { copied.value = false; }, 2000);
   } catch (err) {
