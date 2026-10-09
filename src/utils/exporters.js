@@ -427,12 +427,36 @@ function formatEffectDetails(eff) {
 
   if (eff.config) {
     const cfg = eff.config;
+    const customs = Array.isArray(cfg.customItems) ? cfg.customItems : [];
     if (Array.isArray(cfg.selectedFaculties) && cfg.selectedFaculties.length) {
-      parts.push(`Faculties: ${cfg.selectedFaculties.join(', ')}`);
+      const names = cfg.selectedFaculties.map(id => {
+        const custom = customs.find(c => c.id === id);
+        return custom ? custom.name : id;
+      });
+      parts.push(`Faculties: ${names.join(', ')}`);
     } else if (Array.isArray(cfg.selectedElements) && cfg.selectedElements.length) {
-      parts.push(`Elements: ${cfg.selectedElements.join(', ')}`);
+      const names = cfg.selectedElements.map(id => {
+        const custom = customs.find(c => c.id === id);
+        return custom ? custom.name : id;
+      });
+      parts.push(`Elements: ${names.join(', ')}`);
+    } else if (Array.isArray(cfg.selectedPresets) && cfg.selectedPresets.length) {
+      const names = cfg.selectedPresets.map(id => {
+        const custom = customs.find(c => c.id === id);
+        return custom ? custom.name : id;
+      });
+      parts.push(`Immunities: ${names.join(', ')}`);
+    } else if (Array.isArray(cfg.selectedModes) && cfg.selectedModes.length) {
+      const names = cfg.selectedModes.map(m => {
+        const id = typeof m === 'object' ? (m.id || m.name) : m;
+        const custom = customs.find(c => c.id === id);
+        return custom ? custom.name : (typeof m === 'object' ? (m.name || m.id) : m);
+      });
+      parts.push(`Modes: ${names.join(', ')}`);
     } else if (Array.isArray(cfg.senses) && cfg.senses.length) {
       parts.push(`Senses: ${cfg.senses.join(', ')}`);
+    } else if (Array.isArray(cfg.selectedTraits) && cfg.selectedTraits.length) {
+      parts.push(`Targets: ${cfg.selectedTraits.join(', ')}`);
     } else if (cfg.traitName || cfg.trait) {
       parts.push(`Target: ${cfg.traitName || cfg.trait}`);
     }
@@ -689,10 +713,11 @@ export function buildMarkdownSheet(character, heroStore) {
     md += `|:---|:---:|:---|\n`;
     advs.forEach(a => {
       const rnk = a.ranks || 1;
+      const title = a.displayName || (a.specification ? `${a.name} (${a.specification})` : a.name);
       const notes = a.isPowerGranted
         ? 'Granted by Power / Enhanced Trait'
         : (a.hasPowerBonus ? `Base ${a.naturalRanks} + ${a.enhancedRanks} from Power` : 'Purchased');
-      md += `| **${a.name}** | ${rnk} | ${notes} |\n`;
+      md += `| **${title}** | ${rnk} | ${notes} |\n`;
     });
     md += `\n`;
   }
@@ -999,10 +1024,11 @@ export function buildBBCodeSheet(character, heroStore) {
     advs.forEach(a => {
       const rnk = a.ranks || 1;
       const rnkStr = rnk > 1 ? ` ${rnk}` : '';
+      const title = a.displayName || (a.specification ? `${a.name} (${a.specification})` : a.name);
       const notes = a.isPowerGranted
         ? ' [i](Enhanced from Power)[/i]'
         : (a.hasPowerBonus ? ` [i](Base ${a.naturalRanks} + ${a.enhancedRanks} from Power)[/i]` : '');
-      bb += `• [b]${a.name}${rnkStr}[/b]${notes}\n`;
+      bb += `• [b]${title}${rnkStr}[/b]${notes}\n`;
     });
     bb += `\n`;
   }
@@ -1319,10 +1345,11 @@ export function buildPlainTextSheet(character, heroStore) {
     advs.forEach(a => {
       const rnk = a.ranks || 1;
       const rnkStr = rnk > 1 ? ` ${rnk}` : '';
+      const title = a.displayName || (a.specification ? `${a.name} (${a.specification})` : a.name);
       const notes = a.isPowerGranted
         ? ' (Enhanced from Power)'
         : (a.hasPowerBonus ? ` (Base ${a.naturalRanks} + ${a.enhancedRanks} from Power)` : '');
-      txt += `- ${a.name}${rnkStr}${notes}\n`;
+      txt += `- ${title}${rnkStr}${notes}\n`;
     });
     txt += `\n`;
   }

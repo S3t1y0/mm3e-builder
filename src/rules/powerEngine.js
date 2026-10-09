@@ -168,12 +168,23 @@ export const CONFIGURABLE_EFFECTS = {
     },
     defaultCategory: 'abilities',
     defaultTrait: 'Strength',
+    defaultTraits: ['Strength'],
     computeCost: (config) => {
       const cat = config?.traitCategory || 'abilities';
-      if (cat === 'defenses') return 1;
-      if (cat === 'advantages') return 1;
-      if (cat === 'skills') return 0.5;
-      return 2; // abilities
+      const targets = Array.isArray(config?.selectedTraits) && config.selectedTraits.length > 0
+        ? config.selectedTraits
+        : [config?.traitName || 'Strength'];
+      let total = 0;
+      const defaultCategoryCost = cat === 'defenses' ? 1 : (cat === 'advantages' ? 1 : (cat === 'skills' ? 0.5 : 2));
+      targets.forEach(t => {
+        const custom = (config?.customItems || []).find(c => c.id === t || c.name === t);
+        if (custom && (custom.cost !== undefined || custom.pts !== undefined)) {
+          total += Number(custom.cost ?? custom.pts);
+        } else {
+          total += defaultCategoryCost;
+        }
+      });
+      return Math.max(0.5, total);
     }
   },
 
@@ -218,7 +229,8 @@ export const CONFIGURABLE_EFFECTS = {
         if (typeof m === 'object' && m !== null) {
           sum += (Number(m.ranks) || 1);
         } else if (typeof m === 'string') {
-          sum += 1;
+          const custom = (config?.customItems || []).find(c => c.id === m || c.name === m);
+          sum += custom ? (Number(custom.ranks || custom.pts) || 1) : 1;
         }
       });
       return Math.max(1, sum);
@@ -274,6 +286,11 @@ export const CONFIGURABLE_EFFECTS = {
       const presets = Array.isArray(config?.selectedPresets) ? config.selectedPresets : ['life_support'];
       const dict = {};
       CONFIGURABLE_EFFECTS.Immunity.presets.forEach(p => { dict[p.id] = p.ranks; });
+      (config?.customItems || []).forEach(c => {
+        const val = Number(c.ranks || c.pts) || 1;
+        dict[c.id] = val;
+        dict[c.name] = val;
+      });
       presets.forEach(id => {
         sum += (dict[id] || 1);
       });
@@ -334,6 +351,11 @@ export const CONFIGURABLE_EFFECTS = {
       const modes = Array.isArray(config?.selectedModes) ? config.selectedModes : ['languages_understand'];
       const dict = {};
       CONFIGURABLE_EFFECTS.Comprehend.modes.forEach(m => { dict[m.id] = m.ranks; dict[m.name] = m.ranks; });
+      (config?.customItems || []).forEach(c => {
+        const val = Number(c.ranks || c.pts) || 1;
+        dict[c.id] = val;
+        dict[c.name] = val;
+      });
       modes.forEach(id => {
         sum += (dict[id] || 1);
       });
@@ -362,6 +384,11 @@ export const CONFIGURABLE_EFFECTS = {
       const elements = Array.isArray(config?.selectedElements) ? config.selectedElements : ['cold_1'];
       const dict = {};
       CONFIGURABLE_EFFECTS.Environment.elements.forEach(e => { dict[e.id] = e.cost; });
+      (config?.customItems || []).forEach(c => {
+        const val = Number(c.cost || c.pts || c.ranks) || 1;
+        dict[c.id] = val;
+        dict[c.name] = val;
+      });
       elements.forEach(id => {
         sum += (dict[id] || 1);
       });
@@ -420,6 +447,11 @@ export const CONFIGURABLE_EFFECTS = {
       const faculties = Array.isArray(config?.selectedFaculties) ? config.selectedFaculties : ['darkvision'];
       const dict = {};
       CONFIGURABLE_EFFECTS.Senses.faculties.forEach(f => { dict[f.id] = f.pts; dict[f.name] = f.pts; });
+      (config?.customItems || []).forEach(c => {
+        const val = Number(c.pts || c.ranks) || 1;
+        dict[c.id] = val;
+        dict[c.name] = val;
+      });
       faculties.forEach(id => {
         sum += (dict[id] || 1);
       });
@@ -524,7 +556,7 @@ export const CONFIGURABLE_EFFECTS = {
         ranks += 1;
       }
 
-      // Unmapped / fallback senses
+      // Unmapped / fallback senses or custom items
       const mapped = new Set([
         'visual_normal', 'visual_infra', 'visual_ultra', 'visual_all',
         'auditory_normal', 'auditory_ultra', 'auditory_all',
@@ -536,7 +568,8 @@ export const CONFIGURABLE_EFFECTS = {
       ]);
       senses.forEach(id => {
         if (!mapped.has(id)) {
-          ranks += 1;
+          const custom = (config?.customItems || []).find(c => c.id === id || c.name === id);
+          ranks += custom ? (Number(custom.ranks || custom.pts) || 1) : 1;
         }
       });
 
@@ -3436,7 +3469,10 @@ export function normalizeEffect(rawEffect) {
       }
     } else if (cfg.type === 'trait_picker') {
       eff.config.traitCategory = eff.config.traitCategory || cfg.defaultCategory || 'abilities';
-      eff.config.traitName = eff.config.traitName || cfg.defaultTrait || 'Strength';
+      if (!Array.isArray(eff.config.selectedTraits) || eff.config.selectedTraits.length === 0) {
+        eff.config.selectedTraits = eff.config.traitName ? [eff.config.traitName] : [cfg.defaultTrait || 'Strength'];
+      }
+      eff.config.traitName = eff.config.selectedTraits[0] || cfg.defaultTrait || 'Strength';
     } else if (cfg.type === 'affliction_builder') {
       eff.config.resistance = eff.config.resistance || cfg.defaultResistance || 'Fortitude';
       eff.config.preset = eff.config.preset || 'stun';
@@ -3720,14 +3756,20 @@ export function calculateEffectCost(effect, activationCost = 0) {
   let basePointCost = 0;
   let divisor = null;
 
-  // Enhanced Trait (Skills) rule: 1 PP per 2 ranks (0.5 PP/Rank)
+  // Enhanced Trait (Skills) rule: 1 PP per 2 ranks (0.5 PP/Rank per skill)
   if (norm.baseEffect === 'Enhanced Trait' && norm.config?.traitCategory === 'skills') {
+    const targets = Array.isArray(norm.config?.selectedTraits) && norm.config.selectedTraits.length > 0
+      ? norm.config.selectedTraits
+      : [norm.config?.traitName || 'Acrobatics'];
+    const skillCount = targets.length;
+    const basePerRank = 0.5 * skillCount;
+    const effectivePerRank = basePerRank + perRankModifier;
     if (perRankModifier === 0) {
-      divisor = 2;
-      basePointCost = Math.ceil(norm.ranks / 2);
+      basePointCost = Math.ceil(basePerRank * norm.ranks);
     } else {
-      const effectivePerRank = 0.5 + perRankModifier;
       if (effectivePerRank >= 1) {
+        basePointCost = Math.ceil(effectivePerRank * norm.ranks);
+      } else if (effectivePerRank > 0) {
         basePointCost = Math.ceil(effectivePerRank * norm.ranks);
       } else {
         divisor = Math.max(2, Math.round(2 - effectivePerRank));

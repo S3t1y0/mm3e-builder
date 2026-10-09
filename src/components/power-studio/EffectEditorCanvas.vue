@@ -91,13 +91,13 @@
         <div class="sub-name-group">
           <label class="sub-name-label">
             <i class="ri-shuffle-line"></i>
-            <span>{{ isCompoundSlot ? 'Compound Stunt Name' : 'Alternate Stunt Name' }}</span>
+            <span>{{ isCompoundSlot ? 'Compound Alternate Effect Name' : 'Alternate Effect Name' }}</span>
           </label>
           <input
             v-model="currentSlotRef.name"
             type="text"
             class="sub-name-input"
-            placeholder="e.g. Heat Wave, Stun Burst..."
+            placeholder="e.g. Heat Wave, Dazzle Flash..."
           />
         </div>
 
@@ -553,7 +553,7 @@ const currentHeaderName = computed(() => {
     return builderStore.activeCompoundEffect.name || builderStore.activeCompoundEffect.effect?.baseEffect || 'Component Effect';
   }
   if (currentSlotRef.value) {
-    return currentSlotRef.value.name || currentSlotRef.value.effect?.baseEffect || 'Alternate Stunt';
+    return currentSlotRef.value.name || currentSlotRef.value.effect?.baseEffect || 'Alternate Effect';
   }
   return props.effect?.name || props.effect?.baseEffect || 'Effect';
 });

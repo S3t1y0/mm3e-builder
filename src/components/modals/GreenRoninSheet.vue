@@ -222,7 +222,7 @@
           <span class="gr-card-title">ADVANTAGES</span>
           <div v-if="heroStore.character.advantages?.length" class="gr-advantages-prose">
             <span v-for="(adv, aIdx) in heroStore.character.advantages" :key="adv.id || adv.name">
-              <span class="gr-adv-name">{{ adv.name }}</span>
+              <span class="gr-adv-name">{{ adv.name }}{{ adv.specification ? ` (${adv.specification})` : '' }}</span>
               <strong v-if="(adv.ranks || 1) > 1" class="gr-adv-rank"> {{ adv.ranks }}</strong>{{ aIdx < heroStore.character.advantages.length - 1 ? ', ' : '.' }}
             </span>
           </div>

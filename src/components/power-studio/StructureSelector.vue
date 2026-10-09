@@ -9,7 +9,7 @@
         :class="{ active: builderStore.power.type === 'standard' || builderStore.power.type === 'array' }"
         :aria-selected="builderStore.power.type === 'standard' || builderStore.power.type === 'array'"
         @click="builderStore.setStructureType('standard')"
-        title="Standard Power: Single effect with optional alternate stunt array"
+        title="Standard Power: Single effect with optional alternate effects array"
       >
         <i class="ri-flashlight-line"></i>
         <span>Standard</span>

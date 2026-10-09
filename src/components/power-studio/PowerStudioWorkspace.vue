@@ -86,7 +86,7 @@
 
         <!-- 2. ARCHITECTURE-SPECIFIC EFFECT / SLOT MASTER LIST -->
 
-        <!-- STANDARD POWER: Primary Effect + Array Stunts -->
+        <!-- STANDARD POWER: Primary Effect + Alternate Effects Array -->
         <template v-if="builderStore.power.type === 'standard'">
           <!-- Primary Effect Card -->
           <div class="rail-section">
@@ -166,10 +166,10 @@
             </div>
           </div>
 
-          <!-- Alternate Effects / Array Stunts -->
+          <!-- Alternate Effects Array -->
           <div class="rail-section">
             <div class="rail-section-header">
-              <span>Alternate Stunts</span>
+              <span>Alternate Effects</span>
               <button
                 type="button"
                 class="btn-rail-add"
@@ -177,21 +177,21 @@
                 title="Add Alternate Effect (1 PP slot cost)"
               >
                 <i class="ri-add-line"></i>
-                <span>Add Stunt</span>
+                <span>Add Alternate</span>
               </button>
             </div>
 
-            <!-- Empty Stunts Notice -->
+            <!-- Empty Alternate Effects Notice -->
             <div
               v-if="!builderStore.power.alternateEffects?.length"
               class="rail-empty-hint"
               @click="builderStore.addArraySlot(false)"
             >
               <i class="ri-shuffle-line"></i>
-              <span>No Alternate Stunts. Click to add a 1 PP switch (e.g. alternate weapon or spell).</span>
+              <span>No Alternate Effects. Click to add a 1 PP switch (e.g. alternate weapon or spell).</span>
             </div>
 
-            <!-- Stunts List -->
+            <!-- Alternate Effects List -->
             <div v-else class="rail-items-list">
               <div
                 v-for="(slot, sIdx) in builderStore.power.alternateEffects"
@@ -209,7 +209,7 @@
 
                   <div class="rail-item-main">
                     <div class="rail-item-header-row">
-                      <span class="rail-item-title">{{ slot.name || slot.effect?.baseEffect || ('Stunt #' + (sIdx + 1)) }}</span>
+                      <span class="rail-item-title">{{ slot.name || slot.effect?.baseEffect || ('Alternate #' + (sIdx + 1)) }}</span>
                       <span class="rail-item-cost-badge">{{ slot.isDynamic ? '2 PP' : '1 PP' }}</span>
                     </div>
                     <div class="rail-item-sub-row">
@@ -221,7 +221,7 @@
                           class="btn-slot-dynamic-toggle"
                           :class="{ dynamic: slot.isDynamic }"
                           @click.stop="builderStore.toggleSlotDynamic(false, sIdx)"
-                          :title="slot.isDynamic ? 'Dynamic Stunt (2 PP, share points concurrently)' : 'Standard Alternate (1 PP, exclusive)'"
+                          :title="slot.isDynamic ? 'Dynamic Alternate Effect (2 PP, share points concurrently)' : 'Standard Alternate Effect (1 PP, exclusive)'"
                         >
                           {{ slot.isDynamic ? 'Dyn' : 'Alt' }}
                         </button>
@@ -229,7 +229,7 @@
                         <button
                           type="button"
                           class="btn-rail-link-mini"
-                          title="Add Linked Effect to this Stunt"
+                          title="Add Linked Effect to this Alternate Effect"
                           @click.stop="builderStore.selectSlotForEditing(false, sIdx); builderStore.addLinkedEffect(slot, 'Affliction')"
                         >
                           <i class="ri-links-line"></i>
@@ -238,7 +238,7 @@
                         <button
                           type="button"
                           class="btn-rail-remove"
-                          title="Remove this alternate stunt"
+                          title="Remove this alternate effect"
                           @click.stop="builderStore.removeArraySlot(false, sIdx)"
                         >
                           <i class="ri-close-line"></i>
@@ -271,7 +271,7 @@
                           <button
                             type="button"
                             class="btn-rail-remove"
-                            title="Remove linked effect from stunt"
+                            title="Remove linked effect from alternate effect"
                             @click.stop="builderStore.removeLinkedEffect(slot, slIdx)"
                           >
                             <i class="ri-close-line"></i>
@@ -341,7 +341,7 @@
                         <button
                           type="button"
                           class="btn-rail-stunt-mini"
-                          title="Add Alternate Stunt to this sub-effect"
+                          title="Add Alternate Effect to this sub-effect"
                           @click.stop="builderStore.addCompoundArraySlot(cIdx)"
                         >
                           <i class="ri-shuffle-line"></i>
@@ -414,7 +414,7 @@
                   </div>
                 </div>
 
-                <!-- Sub-effect's Alternate Stunts Array (Nested) -->
+                <!-- Sub-effect's Alternate Effects Array (Nested) -->
                 <div v-if="sub.alternateEffects?.length" class="rail-nested-items-block">
                   <div
                     v-for="(cSlot, csIdx) in sub.alternateEffects"
@@ -431,7 +431,7 @@
                       </div>
                       <div class="rail-item-main">
                         <div class="rail-item-header-row">
-                          <span class="rail-item-title">{{ cSlot.name || cSlot.effect?.baseEffect || ('Stunt #' + (csIdx + 1)) }}</span>
+                          <span class="rail-item-title">{{ cSlot.name || cSlot.effect?.baseEffect || ('Alternate #' + (csIdx + 1)) }}</span>
                           <span class="rail-item-cost-badge">{{ cSlot.isDynamic ? '2 PP' : '1 PP' }}</span>
                         </div>
                         <div class="rail-item-sub-row">
@@ -442,14 +442,14 @@
                               class="btn-slot-dynamic-toggle"
                               :class="{ dynamic: cSlot.isDynamic }"
                               @click.stop="builderStore.toggleCompoundSlotDynamic(cIdx, csIdx)"
-                              :title="cSlot.isDynamic ? 'Dynamic Stunt (2 PP)' : 'Alternate Stunt (1 PP)'"
+                              :title="cSlot.isDynamic ? 'Dynamic Alternate Effect (2 PP)' : 'Alternate Effect (1 PP)'"
                             >
                               {{ cSlot.isDynamic ? 'Dyn' : 'Alt' }}
                             </button>
                             <button
                               type="button"
                               class="btn-rail-link-mini"
-                              title="Add Linked Effect to this Stunt"
+                              title="Add Linked Effect to this Alternate Effect"
                               @click.stop="builderStore.activeCompoundIndex = cIdx; builderStore.selectSlotForEditing(false, csIdx, true); builderStore.addLinkedEffect(cSlot, 'Affliction')"
                             >
                               <i class="ri-links-line"></i>
@@ -457,7 +457,7 @@
                             <button
                               type="button"
                               class="btn-rail-remove"
-                              title="Remove stunt"
+                              title="Remove alternate effect"
                               @click.stop="builderStore.removeCompoundArraySlot(cIdx, csIdx)"
                             >
                               <i class="ri-close-line"></i>
@@ -467,7 +467,7 @@
                       </div>
                     </div>
 
-                    <!-- Compound Stunt's Linked Effects (Nested deeper) -->
+                    <!-- Compound Alternate Effect's Linked Effects (Nested deeper) -->
                     <div v-if="cSlot.linkedEffects?.length" class="rail-deeply-nested-block">
                       <div
                         v-for="(csLnk, cslIdx) in cSlot.linkedEffects"
@@ -490,7 +490,7 @@
                               <button
                                 type="button"
                                 class="btn-rail-remove"
-                                title="Remove linked effect from stunt"
+                                title="Remove linked effect from alternate effect"
                                 @click.stop="builderStore.removeLinkedEffect(cSlot, cslIdx)"
                               >
                                 <i class="ri-close-line"></i>
@@ -558,7 +558,7 @@
                         <button
                           type="button"
                           class="btn-rail-stunt-mini"
-                          title="Add Alternate Stunt to this Power"
+                          title="Add Alternate Effect to this Power"
                           @click.stop="builderStore.activeSubPowerIndex = dIdx; builderStore.addArraySlot(true)"
                         >
                           <i class="ri-shuffle-line"></i>
@@ -611,7 +611,7 @@
                   </div>
                 </div>
 
-                <!-- Sub-power's Alternate Stunts -->
+                <!-- Sub-power's Alternate Effects -->
                 <div v-if="sub.alternateEffects?.length" class="rail-nested-items-block">
                   <div
                     v-for="(dSlot, dsIdx) in sub.alternateEffects"
@@ -628,7 +628,7 @@
                       </div>
                       <div class="rail-item-main">
                         <div class="rail-item-header-row">
-                          <span class="rail-item-title">{{ dSlot.name || dSlot.effect?.baseEffect || ('Stunt #' + (dsIdx + 1)) }}</span>
+                          <span class="rail-item-title">{{ dSlot.name || dSlot.effect?.baseEffect || ('Alternate #' + (dsIdx + 1)) }}</span>
                           <span class="rail-item-cost-badge">{{ dSlot.isDynamic ? '2 PP' : '1 PP' }}</span>
                         </div>
                         <div class="rail-item-sub-row">
@@ -639,14 +639,14 @@
                               class="btn-slot-dynamic-toggle"
                               :class="{ dynamic: dSlot.isDynamic }"
                               @click.stop="builderStore.toggleSlotDynamic(true, dsIdx)"
-                              :title="dSlot.isDynamic ? 'Dynamic Stunt (2 PP)' : 'Alternate Stunt (1 PP)'"
+                              :title="dSlot.isDynamic ? 'Dynamic Alternate Effect (2 PP)' : 'Alternate Effect (1 PP)'"
                             >
                               {{ dSlot.isDynamic ? 'Dyn' : 'Alt' }}
                             </button>
                             <button
                               type="button"
                               class="btn-rail-link-mini"
-                              title="Add Linked Effect to this Stunt"
+                              title="Add Linked Effect to this Alternate Effect"
                               @click.stop="builderStore.activeSubPowerIndex = dIdx; builderStore.selectSlotForEditing(true, dsIdx); builderStore.addLinkedEffect(dSlot, 'Affliction')"
                             >
                               <i class="ri-links-line"></i>
@@ -654,7 +654,7 @@
                             <button
                               type="button"
                               class="btn-rail-remove"
-                              title="Remove stunt"
+                              title="Remove alternate effect"
                               @click.stop="builderStore.removeArraySlot(true, dsIdx)"
                             >
                               <i class="ri-close-line"></i>
@@ -664,7 +664,7 @@
                       </div>
                     </div>
 
-                    <!-- Sub-power Stunt's Linked Effects -->
+                    <!-- Sub-power Alternate Effect's Linked Effects -->
                     <div v-if="dSlot.linkedEffects?.length" class="rail-deeply-nested-block">
                       <div
                         v-for="(dslLnk, dslIdx) in dSlot.linkedEffects"
@@ -687,7 +687,7 @@
                               <button
                                 type="button"
                                 class="btn-rail-remove"
-                                title="Remove linked effect from stunt"
+                                title="Remove linked effect from alternate effect"
                                 @click.stop="builderStore.removeLinkedEffect(dSlot, dslIdx)"
                               >
                                 <i class="ri-close-line"></i>
@@ -755,10 +755,10 @@ const canvasKey = computed(() => {
 const canvasTitle = computed(() => {
   if (builderStore.power.type === 'compound') {
     if (builderStore.activeTargetType === 'compound_slot_linked') {
-      return 'Compound Stunt Linked';
+      return 'Compound Alternate Linked';
     }
     if (builderStore.activeTargetType === 'compound_slot') {
-      return 'Compound Stunt';
+      return 'Compound Alternate Effect';
     }
     if (builderStore.activeTargetType === 'compound_linked') {
       return 'Compound Linked Effect';
@@ -767,10 +767,10 @@ const canvasTitle = computed(() => {
   }
   if (builderStore.power.type === 'device') {
     if (builderStore.activeTargetType === 'slot_linked') {
-      return 'Stunt Linked Effect';
+      return 'Alternate Linked Effect';
     }
     if (builderStore.activeTargetType === 'slot') {
-      return 'Alternate Stunt';
+      return 'Alternate Effect';
     }
     if (builderStore.activeTargetType === 'linked') {
       return 'Linked Effect';
@@ -778,10 +778,10 @@ const canvasTitle = computed(() => {
     return 'Device Sub-Power';
   }
   if (builderStore.activeTargetType === 'slot_linked') {
-    return 'Stunt Linked Effect';
+    return 'Alternate Linked Effect';
   }
   if (builderStore.activeTargetType === 'slot') {
-    return 'Alternate Stunt';
+    return 'Alternate Effect';
   }
   if (builderStore.activeTargetType === 'linked') {
     return 'Linked Effect';

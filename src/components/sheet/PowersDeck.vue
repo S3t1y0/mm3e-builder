@@ -809,7 +809,7 @@
                 </div>
               </div>
 
-              <!-- Sub-Effect Alternate Modes Switcher (if alternate stunts exist) -->
+              <!-- Sub-Effect Alternate Modes Switcher (if alternate effects exist) -->
               <div
                 v-if="sub.alternateEffects?.length > 0"
                 class="array-glance-switcher sub-array-switcher"
@@ -1602,7 +1602,7 @@ function getEffectConfigDetails(eff) {
   const base = eff.baseEffect;
 
   if (base === 'Senses') {
-    const faculties = cfg?.faculties || [];
+    const faculties = [...(cfg?.faculties || []), ...(c.customItems || [])];
     const selected = Array.isArray(c.selectedFaculties) && c.selectedFaculties.length > 0
       ? c.selectedFaculties
       : (cfg?.defaultFaculties || ['darkvision']);
@@ -1616,7 +1616,8 @@ function getEffectConfigDetails(eff) {
           pts: match.pts,
           desc: match.desc,
           category: match.category,
-          icon: match.icon || 'ri-eye-line'
+          icon: match.icon || 'ri-eye-line',
+          isCustom: match.isCustom || false
         };
       }
       return {
@@ -1640,13 +1641,15 @@ function getEffectConfigDetails(eff) {
 
   if (base === 'Enhanced Trait') {
     const cat = c.traitCategory || 'abilities';
-    const trait = c.traitName || 'Strength';
+    const targets = Array.isArray(c.selectedTraits) && c.selectedTraits.length > 0
+      ? c.selectedTraits
+      : [c.traitName || 'Strength'];
     const ranks = eff.ranks || 1;
     const catLabels = {
-      abilities: 'Ability Score',
-      defenses: 'Defense Trait',
-      skills: 'Skill Bonus',
-      advantages: 'Combat Advantage'
+      abilities: 'Ability Scores',
+      defenses: 'Defense Traits',
+      skills: 'Skill Bonuses',
+      advantages: 'Combat Advantages'
     };
     const catIcons = {
       abilities: 'ri-bicep-line',
@@ -1657,21 +1660,25 @@ function getEffectConfigDetails(eff) {
 
     return {
       type: 'enhanced_trait',
-      title: 'Enhanced Trait Target',
-      badge: `${catLabels[cat] || 'Trait'} (+${ranks})`,
-      quickText: `${trait} +${ranks}`,
-      items: [{
-        name: trait,
-        ranks: ranks,
-        category: catLabels[cat] || cat,
-        desc: `Superhumanly enhances ${trait} by +${ranks} rank${ranks > 1 ? 's' : ''}, applying to all associated checks and rolls.`,
-        icon: catIcons[cat] || 'ri-magic-line'
-      }]
+      title: targets.length > 1 ? 'Enhanced Trait Targets' : 'Enhanced Trait Target',
+      badge: `${catLabels[cat] || 'Traits'} (+${ranks})`,
+      quickText: targets.map(t => `${t} +${ranks}`).join(', '),
+      items: targets.map(t => {
+        const custom = (c.customItems || []).find(ci => ci.name === t || ci.id === t);
+        return {
+          name: t,
+          ranks: ranks,
+          category: custom?.category || catLabels[cat] || cat,
+          desc: custom?.desc || `Superhumanly enhances ${t} by +${ranks} rank${ranks > 1 ? 's' : ''}, applying to all associated checks and rolls.`,
+          icon: custom?.icon || catIcons[cat] || 'ri-magic-line',
+          isCustom: custom?.isCustom || false
+        };
+      })
     };
   }
 
   if (base === 'Movement') {
-    const modes = cfg?.modes || [];
+    const modes = [...(cfg?.modes || []), ...(c.customItems || [])];
     const selected = Array.isArray(c.selectedModes) && c.selectedModes.length > 0
       ? c.selectedModes
       : (cfg?.defaultModes || ['wall_crawling']);
@@ -1679,14 +1686,15 @@ function getEffectConfigDetails(eff) {
     const items = selected.map(selItem => {
       const modeId = typeof selItem === 'object' && selItem ? selItem.id : selItem;
       const rankNum = typeof selItem === 'object' && selItem ? (selItem.ranks || 1) : 1;
-      const match = modes.find(m => m.id === modeId);
+      const match = modes.find(m => m.id === modeId || m.name === modeId);
       if (match) {
         return {
           id: match.id,
           name: match.name,
           ranks: rankNum,
           desc: match.desc,
-          icon: match.icon || 'ri-footprint-line'
+          icon: match.icon || 'ri-footprint-line',
+          isCustom: match.isCustom || false
         };
       }
       return {
@@ -1708,13 +1716,13 @@ function getEffectConfigDetails(eff) {
   }
 
   if (base === 'Immunity') {
-    const presets = cfg?.presets || [];
+    const presets = [...(cfg?.presets || []), ...(c.customItems || [])];
     const selected = Array.isArray(c.selectedPresets) && c.selectedPresets.length > 0
       ? c.selectedPresets
       : (cfg?.defaultPresets || ['life_support']);
 
     const items = selected.map(id => {
-      const match = presets.find(p => p.id === id);
+      const match = presets.find(p => p.id === id || p.name === id);
       if (match) {
         return {
           id: match.id,
@@ -1722,7 +1730,8 @@ function getEffectConfigDetails(eff) {
           ranks: match.ranks,
           category: match.category,
           desc: match.desc,
-          icon: match.icon || 'ri-shield-check-line'
+          icon: match.icon || 'ri-shield-check-line',
+          isCustom: match.isCustom || false
         };
       }
       return {
@@ -1744,13 +1753,13 @@ function getEffectConfigDetails(eff) {
   }
 
   if (base === 'Concealment') {
-    const options = cfg?.options || [];
+    const options = [...(cfg?.options || []), ...(c.customItems || [])];
     const selected = Array.isArray(c.selectedSenses) && c.selectedSenses.length > 0
       ? c.selectedSenses
       : (cfg?.defaultSenses || ['visual_normal']);
 
     const items = selected.map(id => {
-      const match = options.find(o => o.id === id);
+      const match = options.find(o => o.id === id || o.name === id);
       if (match) {
         return {
           id: match.id,
@@ -1759,7 +1768,8 @@ function getEffectConfigDetails(eff) {
           category: match.category,
           scopeLabel: match.scopeLabel,
           desc: match.desc,
-          icon: match.icon || 'ri-eye-close-line'
+          icon: match.icon || 'ri-eye-close-line',
+          isCustom: match.isCustom || false
         };
       }
       return {
@@ -1775,6 +1785,78 @@ function getEffectConfigDetails(eff) {
       type: 'concealment',
       title: 'Configured Concealment',
       badge: `${items.length} Senses • ${eff.ranks || 1} Ranks (${(eff.ranks || 1) * 2} PP)`,
+      quickText: items.map(i => i.name).join(', '),
+      items
+    };
+  }
+
+  if (base === 'Comprehend') {
+    const modes = [...(cfg?.modes || []), ...(c.customItems || [])];
+    const selected = Array.isArray(c.selectedModes) && c.selectedModes.length > 0
+      ? c.selectedModes
+      : (cfg?.defaultModes || ['languages_understand']);
+
+    const items = selected.map(id => {
+      const match = modes.find(m => m.id === id || m.name === id);
+      if (match) {
+        return {
+          id: match.id,
+          name: match.name,
+          ranks: match.ranks || 1,
+          desc: match.desc,
+          icon: match.icon || 'ri-translate-2',
+          isCustom: match.isCustom || false
+        };
+      }
+      return {
+        id,
+        name: id,
+        ranks: 1,
+        desc: 'Superhuman language/communication faculty.',
+        icon: 'ri-translate-2'
+      };
+    });
+
+    return {
+      type: 'comprehend',
+      title: 'Configured Comprehend Modes',
+      badge: `${items.length} Modes • ${eff.ranks || 1} Ranks`,
+      quickText: items.map(i => i.name).join(', '),
+      items
+    };
+  }
+
+  if (base === 'Environment') {
+    const elements = [...(cfg?.elements || []), ...(c.customItems || [])];
+    const selected = Array.isArray(c.selectedElements) && c.selectedElements.length > 0
+      ? c.selectedElements
+      : (cfg?.defaultElements || ['cold_1']);
+
+    const items = selected.map(id => {
+      const match = elements.find(e => e.id === id || e.name === id);
+      if (match) {
+        return {
+          id: match.id,
+          name: match.name,
+          cost: match.cost || 1,
+          desc: match.desc,
+          icon: match.icon || 'ri-earth-line',
+          isCustom: match.isCustom || false
+        };
+      }
+      return {
+        id,
+        name: id,
+        cost: 1,
+        desc: 'Environmental alteration hazard.',
+        icon: 'ri-earth-line'
+      };
+    });
+
+    return {
+      type: 'environment',
+      title: 'Configured Environmental Hazards',
+      badge: `${items.length} Elements (${eff.baseCost || 1} PP/R)`,
       quickText: items.map(i => i.name).join(', '),
       items
     };
@@ -1941,9 +2023,9 @@ function broadcastPower(pow) {
   if (isArray) {
     if (pow.activeSlotId && pow.activeSlotId !== 'main') {
       const activeAlt = (pow.alternateEffects || []).find(a => a.id === pow.activeSlotId);
-      activeStuntName = activeAlt?.name || 'Alternate Stunt';
+      activeStuntName = activeAlt?.name || 'Alternate Effect';
     } else {
-      activeStuntName = pow.mainEffect?.name || pow.name || 'Primary Stunt';
+      activeStuntName = pow.mainEffect?.name || pow.name || 'Primary Effect';
     }
 
     const stuntsList = [];

@@ -222,8 +222,8 @@
                 <div v-if="!heroStore.character.advantages?.length" style="color: #777; padding: 6px; font-style: italic;">
                   No advantages purchased.
                 </div>
-                <div v-for="adv in heroStore.character.advantages" :key="adv.name" class="r20-adv-item">
-                  <span class="r20-adv-name">{{ adv.name }}</span>
+                <div v-for="adv in heroStore.character.advantages" :key="adv.id || adv.name" class="r20-adv-item">
+                  <span class="r20-adv-name">{{ adv.name }}{{ adv.specification ? ` (${adv.specification})` : '' }}</span>
                   <span class="r20-adv-rank">{{ adv.ranks || 1 }}</span>
                 </div>
               </div>

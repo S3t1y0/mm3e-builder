@@ -121,7 +121,7 @@
           </div>
 
           <div v-if="(builderStore.power.alternateEffects || []).length > 0" class="math-line">
-            <span class="line-label">Alternate Stunts ({{ builderStore.power.alternateEffects.length }}):</span>
+            <span class="line-label">Alternate Effects ({{ builderStore.power.alternateEffects.length }}):</span>
             <span class="line-val">+{{ (builderStore.power.alternateEffects || []).reduce((s, a) => s + (a.isDynamic ? 2 : 1), 0) }} PP</span>
           </div>
 
@@ -352,7 +352,7 @@ const structureText = computed(() => {
   } else if (t === 'compound') {
     base = `Compound Power (${builderStore.power.compoundEffects?.length || 0} Sub-Effects)`;
   } else if (builderStore.power.alternateEffects?.length > 0) {
-    base = `Standard Power with Array (${builderStore.power.alternateEffects.length} Stunts)`;
+    base = `Standard Power with Array (${builderStore.power.alternateEffects.length} Alternate Effects)`;
   } else {
     base = 'Standard Independent Power';
   }

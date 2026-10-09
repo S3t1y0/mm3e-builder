@@ -92,6 +92,7 @@
               <div class="active-feat-top">
                 <div class="active-feat-identity">
                   <strong class="active-feat-name">{{ adv.name }}</strong>
+                  <span v-if="adv.specification" class="active-feat-spec">: {{ adv.specification }}</span>
                 </div>
 
                 <span class="active-pp-cost tabular-nums">
@@ -101,13 +102,13 @@
 
               <!-- Card Description Snippet -->
               <p class="active-feat-desc">
-                {{ getAdvantageMeta(adv.name).desc }}
+                {{ adv.desc || getAdvantageMeta(adv.name).desc }}
               </p>
 
               <!-- Card Bottom Controls -->
               <div class="active-feat-controls">
                 <!-- If Ranked: Stepper controls -->
-                <div v-if="getAdvantageMeta(adv.name).ranked" class="stepper-group">
+                <div v-if="getAdvantageMeta(adv.name).ranked || adv.isCustom" class="stepper-group">
                   <span class="stepper-label">
                     Rank:
                     <span v-if="getAdvantageMeta(adv.name).maxRanks" class="max-rank-hint">
@@ -119,7 +120,7 @@
                       type="button"
                       class="step-btn"
                       :disabled="Number(adv.ranks || 1) <= 1"
-                      @click="stepAdvantage(adv.name, -1)"
+                      @click="stepAdvantage(adv.id || adv.name, -1)"
                       title="Decrease Rank"
                     >-</button>
                     <span class="step-value tabular-nums">{{ adv.ranks || 1 }}</span>
@@ -127,7 +128,7 @@
                       type="button"
                       class="step-btn"
                       :disabled="getAdvantageMeta(adv.name).maxRanks && Number(adv.ranks || 1) >= getAdvantageMeta(adv.name).maxRanks"
-                      @click="stepAdvantage(adv.name, 1)"
+                      @click="stepAdvantage(adv.id || adv.name, 1)"
                       title="Increase Rank"
                     >+</button>
                   </div>
@@ -142,7 +143,7 @@
                 <button
                   type="button"
                   class="btn-remove-active"
-                  @click="removeAdvantage(adv.name)"
+                  @click="removeAdvantage(adv.id || adv.name)"
                   title="Remove from sheet"
                 >
                   <i class="ri-delete-bin-line"></i>
@@ -417,29 +418,39 @@ function getAdvantageCost(adv) {
 }
 
 function addAdvantage(name) {
+  const meta = getAdvantageMeta(name);
+  if (meta?.requiresSpecification) {
+    uiStore.openModal('advantage');
+    uiStore.showToast(`Choose a subtype for ${name}`, 'info');
+    return;
+  }
   heroStore.addAdvantage(name, 1);
   uiStore.showToast(`Added ${name} to Advantages!`, 'success');
 }
 
-function stepAdvantage(name, delta) {
+function stepAdvantage(idOrName, delta) {
   const advs = heroStore.character.advantages || [];
-  const idx = advs.findIndex(a => a.name.toLowerCase() === name.toLowerCase());
-  if (idx !== -1) {
-    const cur = Number(advs[idx].ranks ?? advs[idx].rank) || 1;
-    const meta = getAdvantageMeta(name);
+  const found = typeof idOrName === 'string'
+    ? (advs.find(a => a.id === idOrName) || advs.find(a => a.name.toLowerCase() === idOrName.toLowerCase()))
+    : advs[idOrName];
+  if (found) {
+    const cur = Number(found.ranks ?? found.rank) || 1;
+    const meta = getAdvantageMeta(found.name);
     let next = cur + delta;
     if (next < 1) next = 1;
     if (meta?.maxRanks && next > meta.maxRanks) next = meta.maxRanks;
-    heroStore.setAdvantageRank(idx, next);
+    heroStore.setAdvantageRank(found.id, next);
   }
 }
 
-function removeAdvantage(name) {
+function removeAdvantage(idOrName) {
   const advs = heroStore.character.advantages || [];
-  const idx = advs.findIndex(a => a.name.toLowerCase() === name.toLowerCase());
-  if (idx !== -1) {
-    heroStore.removeAdvantage(idx);
-    uiStore.showToast(`Removed ${name} from Advantages`, 'info');
+  const found = typeof idOrName === 'string'
+    ? (advs.find(a => a.id === idOrName) || advs.find(a => a.name.toLowerCase() === idOrName.toLowerCase()))
+    : advs[idOrName];
+  if (found) {
+    heroStore.removeAdvantage(found.id);
+    uiStore.showToast(`Removed advantage from sheet`, 'info');
   }
 }
 </script>

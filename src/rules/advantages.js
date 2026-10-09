@@ -8,7 +8,16 @@ export const ADVANTAGES = [
   { name: 'Assessment', category: 'Skill', desc: 'Use Insight to gauge an opponent\'s combat capabilities.' },
   { name: 'Attractive', category: 'Skill', desc: '+2 circumstance bonus per rank on Deception and Persuasion to those finding your looks appealing.', ranked: true, maxRanks: 2 },
   { name: 'Beginner\'s Luck', category: 'Fortune', desc: 'Spend a hero point to gain 5 temporary ranks in a skill of choice for the scene.' },
-  { name: 'Benefit', category: 'General', desc: 'Social advantage, wealth, alternate identity, or official status.', ranked: true },
+  {
+    name: 'Benefit',
+    category: 'General',
+    desc: 'Social advantage, wealth, alternate identity, or official status.',
+    ranked: true,
+    requiresSpecification: true,
+    allowMultiple: true,
+    specificationLabel: 'Benefit Type',
+    specificationSuggestions: ['Wealth', 'Cipher', 'Status', 'Alternate Identity', 'Ambidexterity', 'Diplomatic Immunity', 'Security Clearance']
+  },
   { name: 'Chokehold', category: 'Combat', desc: 'Suffocate an opponent you have pinned or grabbed.' },
   { name: 'Close Attack', category: 'Combat', desc: '+1 bonus to all close attack checks per rank.', ranked: true },
   { name: 'Connected', category: 'Skill', desc: 'Call in assistance, resources, or favors from contacts using a Persuasion check.' },
@@ -21,11 +30,37 @@ export const ADVANTAGES = [
   { name: 'Equipment', category: 'General', desc: '5 Equipment Points (EP) per rank for gear and weapons.', ranked: true },
   { name: 'Evasion', category: 'Combat', desc: '+2 circumstance bonus to active defense vs. area effects per rank (max 2).', ranked: true, maxRanks: 2 },
   { name: 'Extraordinary Effort', category: 'Fortune', desc: 'Gain two benefits when spending a hero point for extra effort.' },
-  { name: 'Fascinate', category: 'Skill', desc: 'Entrall an audience using a chosen interaction skill or performance.', ranked: true },
+  {
+    name: 'Fascinate',
+    category: 'Skill',
+    desc: 'Entrall an audience using a chosen interaction skill or performance.',
+    ranked: true,
+    requiresSpecification: true,
+    allowMultiple: true,
+    specificationLabel: 'Interaction Skill',
+    specificationSuggestions: ['Persuasion', 'Deception', 'Intimidation', 'Expertise: Performance']
+  },
   { name: 'Fast Feint', category: 'Combat', desc: 'Feint as a move action with no penalty.' },
   { name: 'Fast Grab', category: 'Combat', desc: 'Make a grab check as a free action immediately following a hit with an unarmed attack.' },
-  { name: 'Favored Environment', category: 'Combat', desc: '+2 bonus to attack checks or active defense in chosen environment.' },
-  { name: 'Favored Foe', category: 'Skill', desc: '+2 circumstance bonus to checks involving chosen creature type or organization.', ranked: true },
+  {
+    name: 'Favored Environment',
+    category: 'Combat',
+    desc: '+2 bonus to attack checks or active defense in chosen environment.',
+    requiresSpecification: true,
+    allowMultiple: true,
+    specificationLabel: 'Environment',
+    specificationSuggestions: ['Airborne / Flight', 'Underwater / Aquatic', 'Zero-G / Space', 'Urban / Rooftops', 'Darkness / Shadows', 'Forest / Jungle', 'Cold / Arctic']
+  },
+  {
+    name: 'Favored Foe',
+    category: 'Skill',
+    desc: '+2 circumstance bonus to checks involving chosen creature type or organization.',
+    ranked: true,
+    requiresSpecification: true,
+    allowMultiple: true,
+    specificationLabel: 'Foe Type / Organization',
+    specificationSuggestions: ['Aliens', 'Undead', 'Robots / Synthetics', 'Demons', 'Mutants', 'Ninjas', 'Mob / Organized Crime', 'Secret Societies']
+  },
   { name: 'Fearless', category: 'General', desc: 'Immune to all fear effects.' },
   { name: 'Grab Fighting', category: 'Combat', desc: 'Maintain a grab with one arm and retain full defense.' },
   { name: 'Grabbing Finesse', category: 'Combat', desc: 'Use Dexterity instead of Strength when making grab checks; retain full active defense while grabbing.' },
@@ -47,7 +82,16 @@ export const ADVANTAGES = [
   { name: 'Interpose', category: 'Combat', desc: 'Move between an ally and an attack to take the hit for them.' },
   { name: 'Inventor', category: 'Skill', desc: 'Use Technology skill to design and create temporary inventions and devices.' },
   { name: 'Jack-of-all-trades', category: 'Skill', desc: 'Use any skill untrained without penalty.' },
-  { name: 'Languages', category: 'Skill', desc: 'Speak and understand additional languages (1 at rank 1, doubling per rank thereafter).', ranked: true },
+  {
+    name: 'Languages',
+    category: 'Skill',
+    desc: 'Speak and understand additional languages (1 at rank 1, doubling per rank thereafter).',
+    ranked: true,
+    requiresSpecification: true,
+    allowMultiple: false,
+    specificationLabel: 'Languages Spoken',
+    specificationSuggestions: ['Japanese', 'Mandarin', 'Spanish', 'French', 'Russian', 'Arabic', 'German', 'Ancient Latin', 'Atlantean']
+  },
   { name: 'Leadership', category: 'Fortune', desc: 'Spend a hero point to remove a condition or fatigue from an ally.' },
   { name: 'Luck', category: 'Fortune', desc: 'Reroll one check per rank per session (max ranks = 1/2 PL).', ranked: true },
   { name: 'Minion', category: 'General', desc: 'Gain a loyal follower or minion with 15 Character Points per rank.', ranked: true },
@@ -59,11 +103,29 @@ export const ADVANTAGES = [
   { name: 'Ranged Attack', category: 'Combat', desc: '+1 bonus to all ranged attack checks per rank.', ranked: true },
   { name: 'Redirect', category: 'Combat', desc: 'Trick an opponent into striking another target on a failed attack.' },
   { name: 'Ritualist', category: 'Skill', desc: 'Use Expertise: Magic to create and cast magical rituals without innate power.' },
-  { name: 'Second Chance', category: 'General', desc: 'Reroll a failed check against a chosen hazard or specific skill once per encounter.', ranked: true },
+  {
+    name: 'Second Chance',
+    category: 'General',
+    desc: 'Reroll a failed check against a chosen hazard or specific skill once per encounter.',
+    ranked: true,
+    requiresSpecification: true,
+    allowMultiple: true,
+    specificationLabel: 'Hazard / Check',
+    specificationSuggestions: ['Mind Control', 'Traps / Hazards', 'Falling', 'Poison / Toxins', 'Radiation', 'Drowning / Suffocation']
+  },
   { name: 'Seize Initiative', category: 'Fortune', desc: 'Spend a hero point to automatically act first in initiative.' },
   { name: 'Set-up', category: 'Combat', desc: 'Transfer bonus from feint or demoralize to an ally.', ranked: true },
   { name: 'Sidekick', category: 'General', desc: 'Gain a loyal superhero partner/aide with 5 Character Points per rank.', ranked: true },
-  { name: 'Skill Mastery', category: 'Skill', desc: 'Make routine checks with chosen skills even under pressure.', ranked: true },
+  {
+    name: 'Skill Mastery',
+    category: 'Skill',
+    desc: 'Make routine checks with chosen skills even under pressure.',
+    ranked: true,
+    requiresSpecification: true,
+    allowMultiple: true,
+    specificationLabel: 'Chosen Skill',
+    specificationSuggestions: ['Acrobatics', 'Athletics', 'Deception', 'Insight', 'Intimidation', 'Investigation', 'Perception', 'Persuasion', 'Sleight of Hand', 'Stealth', 'Technology', 'Treatment', 'Vehicles']
+  },
   { name: 'Startle', category: 'Combat', desc: 'Use Intimidation to feint in combat as a standard action.' },
   { name: 'Takedown', category: 'Combat', desc: 'Gain an immediate free attack against another minion after defeating one.', ranked: true, maxRanks: 2 },
   { name: 'Taunt', category: 'Combat', desc: 'Use Deception to demoralize an opponent in combat.' },
@@ -71,7 +133,15 @@ export const ADVANTAGES = [
   { name: 'Throwing Mastery', category: 'Combat', desc: '+1 damage rank to thrown weapons per rank.', ranked: true },
   { name: 'Tracking', category: 'Skill', desc: 'Use Perception to follow visual and non-visual tracks.' },
   { name: 'Trance', category: 'General', desc: 'Enter a meditative state that lowers metabolism and vital signs.' },
-  { name: 'Ultimate Effort', category: 'Fortune', desc: 'Spend a hero point to automatically treat check result as 20 on chosen roll.' },
+  {
+    name: 'Ultimate Effort',
+    category: 'Fortune',
+    desc: 'Spend a hero point to automatically treat check result as 20 on chosen roll.',
+    requiresSpecification: true,
+    allowMultiple: true,
+    specificationLabel: 'Chosen Check',
+    specificationSuggestions: ['Toughness Saves', 'Aim / Attack Check', 'Strength Check', 'Will Saves', 'Fortitude Saves', 'Technology Check']
+  },
   { name: 'Uncanny Dodge', category: 'Combat', desc: 'Retain active defense even while surprised or vulnerable.' },
   { name: 'Weapon Bind', category: 'Combat', desc: 'Free disarm attempt as a reaction when you actively defend against a close weapon attack.' },
   { name: 'Weapon Break', category: 'Combat', desc: 'Free smash attack against the attacker\'s weapon as a reaction when you actively defend.' },
@@ -82,3 +152,26 @@ export const ADVANTAGE_CATEGORIES = ['All', 'Combat', 'Fortune', 'General', 'Ski
 
 export const ADVANTAGE_COST_PER_RANK = 1;
 export const ADVANTAGES_CATALOG = ADVANTAGES;
+
+/**
+ * Format advantage name with its specification if present
+ * e.g., Benefit (Wealth), Favored Foe (Undead)
+ */
+export function formatAdvantageDisplayName(adv) {
+  if (!adv) return '';
+  const name = typeof adv === 'string' ? adv : (adv.name || '');
+  const spec = typeof adv === 'object' ? (adv.specification || '').trim() : '';
+  if (spec) {
+    return `${name} (${spec})`;
+  }
+  return name;
+}
+
+/**
+ * Find rule definition by advantage name
+ */
+export function getAdvantageRule(name) {
+  if (!name) return null;
+  const lower = name.toLowerCase().trim();
+  return ADVANTAGES.find(a => a.name.toLowerCase() === lower) || null;
+}

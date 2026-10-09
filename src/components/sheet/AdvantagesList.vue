@@ -77,17 +77,25 @@
     <div v-else-if="filteredAdvantages.length > 0" class="sheet-advantages-grid">
       <article
         v-for="adv in filteredAdvantages"
-        :key="adv.name"
+        :key="adv.id || adv.name"
         class="sheet-adv-card"
         :class="{
-          'is-power-granted': adv.isPowerGranted
+          'is-power-granted': adv.isPowerGranted,
+          'is-custom': adv.isCustom
         }"
       >
         <!-- Card Top Bar: Title & Actions -->
         <div class="adv-card-header">
           <div class="adv-card-title-group">
-            <i :class="[getCategoryIcon(adv.name), 'adv-card-icon', getAdvCategory(adv.name).toLowerCase()]"></i>
-            <h4 class="adv-card-name" :title="adv.name">{{ adv.name }}</h4>
+            <i :class="[getCategoryIcon(adv), 'adv-card-icon', getAdvCategory(adv).toLowerCase()]"></i>
+            <div class="adv-card-titles">
+              <h4 class="adv-card-name" :title="adv.displayName || adv.name">
+                {{ adv.name }}
+              </h4>
+              <span v-if="adv.specification" class="adv-spec-badge" :title="`Subtype: ${adv.specification}`">
+                {{ adv.specification }}
+              </span>
+            </div>
           </div>
 
           <div class="adv-action-cluster">
@@ -95,10 +103,20 @@
               type="button"
               class="adv-act-btn btn-broadcast"
               @click="broadcastAdvantage(adv)"
-              :title="`Broadcast ${adv.name} to Roll20`"
+              :title="`Broadcast ${adv.displayName || adv.name} to Roll20`"
               aria-label="Broadcast to Roll20"
             >
               <i class="ri-broadcast-line"></i>
+            </button>
+            <button
+              v-if="!adv.isPowerGranted"
+              type="button"
+              class="adv-act-btn btn-edit"
+              @click="openEditModal(adv)"
+              :title="`Edit ${adv.displayName || adv.name}`"
+              aria-label="Edit advantage"
+            >
+              <i class="ri-edit-line"></i>
             </button>
             <button
               v-if="adv.isPowerGranted"
@@ -115,7 +133,7 @@
               type="button"
               class="adv-act-btn btn-delete"
               @click="deleteAdvantage(adv)"
-              :title="`Remove ${adv.name} from sheet`"
+              :title="`Remove ${adv.displayName || adv.name} from sheet`"
               aria-label="Remove advantage"
             >
               <i class="ri-delete-bin-line"></i>
@@ -126,11 +144,14 @@
         <!-- Meta Bar: Category, Cost & Compact Rank Stepper -->
         <div class="adv-card-meta">
           <div class="adv-meta-tags">
-            <span v-if="adv.isPowerGranted" class="adv-cat-tag power">
+            <span v-if="adv.isCustom" class="adv-cat-tag custom">
+              <i class="ri-sparkling-fill"></i> Custom
+            </span>
+            <span v-else-if="adv.isPowerGranted" class="adv-cat-tag power">
               <i class="ri-flashlight-line"></i> Power Buff
             </span>
-            <span v-else class="adv-cat-tag" :class="getAdvCategory(adv.name).toLowerCase()">
-              {{ getAdvCategory(adv.name) }}
+            <span v-else class="adv-cat-tag" :class="getAdvCategory(adv).toLowerCase()">
+              {{ getAdvCategory(adv) }}
             </span>
             <span class="adv-cost-tag">
               {{ adv.naturalRanks }} PP{{ adv.hasPowerBonus ? ` (+${adv.enhancedRanks}p)` : '' }}
@@ -138,7 +159,7 @@
           </div>
 
           <!-- Compact Rank Stepper for Ranked Traits -->
-          <div v-if="isAdvRanked(adv.name) && !adv.isPowerGranted" class="adv-card-stepper">
+          <div v-if="(isAdvRanked(adv.name) || adv.isCustom) && !adv.isPowerGranted" class="adv-card-stepper">
             <button
               type="button"
               class="adv-step-btn"
@@ -164,7 +185,7 @@
         </div>
 
         <!-- Rules Description (Proportional & Clean) -->
-        <p class="adv-card-desc">{{ getAdvDesc(adv.name) }}</p>
+        <p class="adv-card-desc">{{ adv.desc || getAdvDesc(adv.name) }}</p>
       </article>
     </div>
 
@@ -176,6 +197,118 @@
         Reset Filter
       </button>
     </div>
+
+    <!-- EDIT ADVANTAGE MODAL -->
+    <transition name="fade">
+      <div
+        v-if="editingAdv"
+        class="spec-picker-overlay"
+        @click.self="editingAdv = null"
+      >
+        <div class="spec-picker-box">
+          <div class="spec-picker-header">
+            <div class="spec-picker-title-row">
+              <i class="ri-edit-line"></i>
+              <h4>Edit Advantage: {{ editingAdv.name }}</h4>
+            </div>
+            <button
+              type="button"
+              class="del-btn-tiny"
+              @click="editingAdv = null"
+              title="Cancel"
+            >
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <!-- NAME (IF CUSTOM) -->
+          <div v-if="editingAdv.isCustom" class="spec-field-group">
+            <label class="spec-field-label">Advantage Name:</label>
+            <input v-model="editForm.name" type="text" class="spec-text-input" />
+          </div>
+
+          <!-- PRESETS SUGGESTIONS IF AVAILABLE -->
+          <div v-if="getAdvRule(editingAdv.name)?.specificationSuggestions?.length" class="spec-suggestions-block">
+            <span class="spec-sugg-title"><i class="ri-magic-line"></i> Common RAW Subtypes:</span>
+            <div class="spec-sugg-chips">
+              <button
+                v-for="sugg in getAdvRule(editingAdv.name).specificationSuggestions"
+                :key="sugg"
+                type="button"
+                class="spec-sugg-chip"
+                :class="{ selected: editForm.specification.trim().toLowerCase() === sugg.toLowerCase() }"
+                @click="editForm.specification = sugg"
+              >
+                {{ sugg }}
+              </button>
+            </div>
+          </div>
+
+          <!-- SPECIFICATION / SUBTYPE INPUT -->
+          <div class="spec-field-group">
+            <label class="spec-field-label">
+              {{ getAdvRule(editingAdv.name)?.specificationLabel || 'Specification / Subtype' }}:
+            </label>
+            <input
+              v-model="editForm.specification"
+              type="text"
+              class="spec-text-input"
+              placeholder="e.g. Wealth, Undead, Technology"
+            />
+          </div>
+
+          <!-- RANKS STEPPER -->
+          <div v-if="isAdvRanked(editingAdv.name) || editingAdv.isCustom" class="spec-field-group">
+            <label class="spec-field-label">Ranks:</label>
+            <div class="spec-rank-stepper-wrap">
+              <div class="stepper-compact">
+                <button
+                  type="button"
+                  class="step-btn-xs"
+                  :disabled="editForm.ranks <= 1"
+                  @click="editForm.ranks = Math.max(1, editForm.ranks - 1)"
+                >-</button>
+                <span class="step-val-xs">{{ editForm.ranks }}</span>
+                <button
+                  type="button"
+                  class="step-btn-xs"
+                  @click="editForm.ranks++"
+                >+</button>
+              </div>
+              <span class="spec-cost-indicator">{{ editForm.ranks }} PP</span>
+            </div>
+          </div>
+
+          <!-- DESCRIPTION / CUSTOM NOTES -->
+          <div class="spec-field-group">
+            <label class="spec-field-label">Description / Notes:</label>
+            <textarea
+              v-model="editForm.desc"
+              class="spec-textarea-input"
+              rows="3"
+              placeholder="Custom description or mechanical notes..."
+            ></textarea>
+          </div>
+
+          <div class="spec-picker-actions">
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              @click="editingAdv = null"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn btn-primary btn-sm"
+              @click="saveAdvantageEdit"
+            >
+              <i class="ri-check-line"></i> Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -183,7 +316,7 @@
 import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
-import { ADVANTAGES } from '../../rules/advantages.js';
+import { ADVANTAGES, formatAdvantageDisplayName } from '../../rules/advantages.js';
 import { sendFeatureToVTT } from '../../services/vttBridge.js';
 
 const heroStore = useHeroStore();
@@ -191,6 +324,15 @@ const uiStore = useUiStore();
 
 const selectedCategory = ref('all');
 const searchQuery = ref('');
+
+// Editing modal state
+const editingAdv = ref(null);
+const editForm = ref({
+  name: '',
+  specification: '',
+  ranks: 1,
+  desc: ''
+});
 
 const effectiveAdvantages = computed(() => {
   return heroStore.effectiveAdvantages || [];
@@ -200,7 +342,7 @@ const availableCategories = computed(() => {
   const all = effectiveAdvantages.value;
   const counts = { all: all.length, combat: 0, skill: 0, fortune: 0, general: 0 };
   all.forEach(adv => {
-    const cat = getAdvCategory(adv.name).toLowerCase();
+    const cat = getAdvCategory(adv).toLowerCase();
     if (counts[cat] !== undefined) {
       counts[cat]++;
     } else {
@@ -219,14 +361,15 @@ const availableCategories = computed(() => {
 const filteredAdvantages = computed(() => {
   return effectiveAdvantages.value.filter(adv => {
     if (selectedCategory.value !== 'all') {
-      const cat = getAdvCategory(adv.name).toLowerCase();
+      const cat = getAdvCategory(adv).toLowerCase();
       if (cat !== selectedCategory.value) return false;
     }
     if (searchQuery.value.trim()) {
       const q = searchQuery.value.trim().toLowerCase();
-      const name = adv.name.toLowerCase();
-      const desc = getAdvDesc(adv.name).toLowerCase();
-      if (!name.includes(q) && !desc.includes(q)) return false;
+      const name = (adv.name || '').toLowerCase();
+      const spec = (adv.specification || '').toLowerCase();
+      const desc = (adv.desc || getAdvDesc(adv.name)).toLowerCase();
+      if (!name.includes(q) && !spec.includes(q) && !desc.includes(q)) return false;
     }
     return true;
   });
@@ -241,13 +384,15 @@ function getAdvRule(name) {
   return ADVANTAGES.find(r => r.name.toLowerCase() === (name || '').toLowerCase());
 }
 
-function getAdvCategory(name) {
+function getAdvCategory(adv) {
+  const name = typeof adv === 'string' ? adv : (adv?.name || '');
+  if (typeof adv === 'object' && adv.isCustom && adv.category) return adv.category;
   const rule = getAdvRule(name);
   return rule?.category || 'General';
 }
 
-function getCategoryIcon(name) {
-  const cat = getAdvCategory(name);
+function getCategoryIcon(adv) {
+  const cat = getAdvCategory(adv);
   switch (cat) {
     case 'Combat': return 'ri-sword-line';
     case 'Fortune': return 'ri-dice-line';
@@ -273,37 +418,63 @@ function getMaxRanks(name) {
 }
 
 function stepRank(adv, delta) {
-  if (adv.storeIndex === -1) return;
+  if (adv.isPowerGranted) return;
   const cur = adv.naturalRanks;
   const next = Math.max(1, cur + delta);
-  heroStore.setAdvantageRank(adv.storeIndex, next);
+  heroStore.setAdvantageRank(adv.id, next);
 }
 
 function deleteAdvantage(adv) {
-  if (adv.storeIndex === -1) return;
-  heroStore.removeAdvantage(adv.storeIndex);
-  uiStore.showToast(`Removed ${adv.name} from Advantages`, 'info');
+  if (adv.isPowerGranted) return;
+  heroStore.removeAdvantage(adv.id);
+  uiStore.showToast(`Removed ${adv.displayName || adv.name} from Advantages`, 'info');
+}
+
+function openEditModal(adv) {
+  editingAdv.value = adv;
+  editForm.value = {
+    name: adv.name,
+    specification: adv.specification || '',
+    ranks: adv.naturalRanks || 1,
+    desc: adv.desc || ''
+  };
+}
+
+function saveAdvantageEdit() {
+  if (!editingAdv.value) return;
+  heroStore.updateAdvantage(editingAdv.value.id, {
+    name: editForm.value.name,
+    specification: editForm.value.specification,
+    ranks: editForm.value.ranks,
+    desc: editForm.value.desc
+  });
+  const disp = editForm.value.specification.trim()
+    ? `${editForm.value.name} (${editForm.value.specification})`
+    : editForm.value.name;
+  uiStore.showToast(`Updated "${disp}"!`, 'success');
+  editingAdv.value = null;
 }
 
 function broadcastAdvantage(adv) {
-  const desc = getAdvDesc(adv.name);
-  const text = `**${adv.name}** [Rank ${adv.ranks}]\n${desc}`;
+  const title = adv.displayName || adv.name;
+  const desc = adv.desc || getAdvDesc(adv.name);
+  const text = `**${title}** [Rank ${adv.ranks}]\n${desc}`;
 
   sendFeatureToVTT({
-    name: adv.name,
+    name: title,
     category: 'advantage',
     type: 'Advantage',
-    subtype: getAdvCategory(adv.name),
+    subtype: adv.specification ? `${getAdvCategory(adv)} (${adv.specification})` : getAdvCategory(adv),
     ranks: adv.ranks || 1,
     description: desc,
-    details: `${getAdvCategory(adv.name)} Advantage • Rank ${adv.ranks}`
+    details: `${getAdvCategory(adv)} Advantage • Rank ${adv.ranks}`
   }, heroStore.character);
 
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text);
-    uiStore.showToast(`Broadcasted "${adv.name}" to Roll20 and copied to clipboard!`, 'info');
+    uiStore.showToast(`Broadcasted "${title}" to Roll20 and copied to clipboard!`, 'info');
   } else {
-    uiStore.showToast(`Broadcasted "${adv.name}" to Roll20!`, 'info');
+    uiStore.showToast(`Broadcasted "${title}" to Roll20!`, 'info');
   }
 }
 </script>
@@ -756,5 +927,246 @@ function broadcastAdvantage(adv) {
 
 .btn-clear-filter:hover {
   background: rgba(255, 255, 255, 0.12);
+}
+
+.adv-card-titles {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.adv-spec-badge {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #c084fc;
+  background: rgba(168, 85, 247, 0.14);
+  border: 1px solid rgba(168, 85, 247, 0.3);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  display: inline-block;
+  align-self: flex-start;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.adv-act-btn.btn-edit:hover {
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.45);
+}
+
+.adv-cat-tag.custom {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+/* EDIT MODAL STYLES */
+.spec-picker-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 5, 10, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+}
+
+.spec-picker-box {
+  background: #111420;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow: 0 20px 45px rgba(0, 0, 0, 0.65);
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  animation: modalPopIn 0.18s ease-out;
+}
+
+@keyframes modalPopIn {
+  from { opacity: 0; transform: scale(0.96) translateY(8px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.spec-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: 0.65rem;
+}
+
+.spec-picker-title-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+}
+
+.spec-picker-title-row i {
+  font-size: 1.2rem;
+  color: #3b82f6;
+}
+
+.spec-picker-title-row h4 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+}
+
+.spec-suggestions-block {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.spec-sugg-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--text-muted, #64748b);
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.spec-sugg-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  max-height: 120px;
+  overflow-y: auto;
+  padding: 0.1rem 0;
+}
+
+.spec-sugg-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-secondary, #cbd5e1);
+  padding: 0.22rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.73rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.spec-sugg-chip:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: #fff;
+}
+
+.spec-sugg-chip.selected {
+  background: #2563eb;
+  border-color: #60a5fa;
+  color: #fff;
+}
+
+.spec-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.spec-field-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: var(--text-secondary, #cbd5e1);
+}
+
+.spec-text-input,
+.spec-textarea-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 6px;
+  color: #fff;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.spec-text-input:focus,
+.spec-textarea-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.spec-rank-stepper-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.spec-cost-indicator {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #10b981;
+}
+
+.spec-picker-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.del-btn-tiny {
+  width: 20px;
+  height: 20px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  transition: all var(--trans-fast);
+}
+
+.del-btn-tiny:hover {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.step-btn-xs {
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.step-btn-xs:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.step-val-xs {
+  font-size: 0.8rem;
+  font-weight: 700;
+  min-width: 16px;
+  text-align: center;
+  color: #fff;
 }
 </style>

@@ -634,7 +634,7 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
         comp.alternateEffects = [];
       }
       const slotNum = comp.alternateEffects.length + 1;
-      const slotName = name || `${comp.name || 'Component'} Stunt #${slotNum}`;
+      const slotName = name || `${comp.name || 'Component'} Alternate #${slotNum}`;
       const newSlot = normalizeAlternateSlot({
         name: slotName,
         isDynamic: false,

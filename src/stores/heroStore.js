@@ -6,6 +6,7 @@ import { calculateConditionModifiers, resolveActiveConditionSet, evaluateDyingFo
 import { sendRollToVTT, syncActiveHero } from '../services/vttBridge.js';
 import { isEmbedMode, sendCharacterUpdate, sendDiceRoll } from '../services/embedBridge.js';
 import { rollD20, isCryptoAvailable } from '../utils/diceRoller.js';
+import { getAdvantageRule } from '../rules/advantages.js';
 
 const STORAGE_KEY = 'mm3e_builder_character_data';
 const ROSTER_STORAGE_KEY = 'mm3e_saved_heroes_roster';
@@ -176,26 +177,33 @@ export const useHeroStore = defineStore('hero', {
         if (!isEnhanced) continue;
 
         const category = (eff.config?.traitCategory || 'abilities').toLowerCase();
-        const rawTraitName = (eff.config?.traitName || eff.config?.trait || 'Strength').trim();
+        const targets = Array.isArray(eff.config?.selectedTraits) && eff.config.selectedTraits.length > 0
+          ? eff.config.selectedTraits
+          : [(eff.config?.traitName || eff.config?.trait || 'Strength')];
         const ranks = parseInt(eff.ranks, 10) || 0;
         if (ranks <= 0) continue;
 
-        if (category === 'abilities') {
-          const code = abilityMap[rawTraitName.toLowerCase()] || rawTraitName.toUpperCase();
-          if (activeTraits.abilities[code] !== undefined) {
-            activeTraits.abilities[code] += ranks;
+        for (const rawTraitName of targets) {
+          const tName = (rawTraitName || '').trim();
+          if (!tName) continue;
+
+          if (category === 'abilities') {
+            const code = abilityMap[tName.toLowerCase()] || tName.toUpperCase();
+            if (activeTraits.abilities[code] !== undefined) {
+              activeTraits.abilities[code] += ranks;
+            }
+          } else if (category === 'defenses') {
+            const code = defenseMap[tName.toLowerCase()] || tName.toUpperCase();
+            if (activeTraits.defenses[code] !== undefined) {
+              activeTraits.defenses[code] += ranks;
+            }
+          } else if (category === 'skills') {
+            const skillKey = tName.toLowerCase();
+            activeTraits.skills[skillKey] = (activeTraits.skills[skillKey] || 0) + ranks;
+          } else if (category === 'advantages') {
+            const advKey = tName.toLowerCase();
+            activeTraits.advantages[advKey] = (activeTraits.advantages[advKey] || 0) + ranks;
           }
-        } else if (category === 'defenses') {
-          const code = defenseMap[rawTraitName.toLowerCase()] || rawTraitName.toUpperCase();
-          if (activeTraits.defenses[code] !== undefined) {
-            activeTraits.defenses[code] += ranks;
-          }
-        } else if (category === 'skills') {
-          const skillKey = rawTraitName.toLowerCase();
-          activeTraits.skills[skillKey] = (activeTraits.skills[skillKey] || 0) + ranks;
-        } else if (category === 'advantages') {
-          const advKey = rawTraitName.toLowerCase();
-          activeTraits.advantages[advKey] = (activeTraits.advantages[advKey] || 0) + ranks;
         }
       }
 
@@ -318,9 +326,17 @@ export const useHeroStore = defineStore('hero', {
       bought.forEach((a, idx) => {
         const key = (a.name || '').toLowerCase();
         const powerBonus = Number(powerTraits[key]) || 0;
+        const spec = (a.specification || '').trim();
+        const displayName = spec ? `${a.name} (${spec})` : a.name;
+
         list.push({
           id: a.id || ('adv_' + idx),
           name: a.name,
+          specification: spec,
+          displayName,
+          desc: a.desc || '',
+          isCustom: !!a.isCustom,
+          category: a.category || '',
           naturalRanks: Number(a.ranks ?? a.rank) || 1,
           enhancedRanks: powerBonus,
           ranks: (Number(a.ranks ?? a.rank) || 1) + powerBonus,
@@ -337,6 +353,11 @@ export const useHeroStore = defineStore('hero', {
           list.push({
             id: 'pow_adv_' + rawKey,
             name: formattedName,
+            specification: '',
+            displayName: formattedName,
+            desc: '',
+            isCustom: false,
+            category: '',
             naturalRanks: 0,
             enhancedRanks: Number(ranks) || 0,
             ranks: Number(ranks) || 0,
@@ -478,13 +499,21 @@ export const useHeroStore = defineStore('hero', {
     },
 
     getAdvantageRanks() {
-      return (advName) => {
+      return (advName, specification = null) => {
         if (!advName) return 0;
         const target = advName.trim().toLowerCase();
-        const found = (this.effectiveAdvantages || []).find(
-          a => (a.name || '').trim().toLowerCase() === target
-        );
-        return found ? (Number(found.ranks) || 0) : 0;
+        const list = this.effectiveAdvantages || [];
+        if (specification !== null && specification !== undefined && String(specification).trim() !== '') {
+          const targetSpec = String(specification).trim().toLowerCase();
+          const found = list.find(
+            a => (a.name || '').trim().toLowerCase() === target &&
+                 (a.specification || '').trim().toLowerCase() === targetSpec
+          );
+          return found ? (Number(found.ranks) || 0) : 0;
+        }
+        const matches = list.filter(a => (a.name || '').trim().toLowerCase() === target);
+        if (matches.length === 0) return 0;
+        return matches.reduce((sum, m) => sum + (Number(m.ranks) || 0), 0);
       };
     },
 
@@ -959,32 +988,96 @@ export const useHeroStore = defineStore('hero', {
       }
     },
 
-    addAdvantage(name, rank = 1) {
+    addAdvantage(name, rank = 1, specification = '', customMeta = null) {
       if (!Array.isArray(this.character.advantages)) this.character.advantages = [];
-      const existing = this.character.advantages.find(a => a.name === name);
+      const trimmedName = (name || '').trim();
+      const trimmedSpec = (specification || '').trim();
+      const targetRank = Math.max(1, Number(rank) || 1);
+
+      if (customMeta && customMeta.isCustom) {
+        this.character.advantages.push({
+          id: 'adv_' + Date.now() + Math.random().toString(36).substr(2, 4),
+          name: trimmedName,
+          specification: trimmedSpec,
+          ranks: targetRank,
+          desc: (customMeta.desc || '').trim(),
+          isCustom: true,
+          category: customMeta.category || 'General'
+        });
+        this.pushHistory();
+        return;
+      }
+
+      const rule = getAdvantageRule(trimmedName);
+      const isMulti = rule?.allowMultiple || !!trimmedSpec;
+
+      // Find existing: if multi, match both name and specification; if not, match name
+      const existing = this.character.advantages.find(a => {
+        const sameName = (a.name || '').trim().toLowerCase() === trimmedName.toLowerCase();
+        if (!sameName) return false;
+        if (isMulti) {
+          return (a.specification || '').trim().toLowerCase() === trimmedSpec.toLowerCase();
+        }
+        return true;
+      });
+
       if (existing) {
         existing.ranks = (Number(existing.ranks) || 1) + 1;
       } else {
         this.character.advantages.push({
           id: 'adv_' + Date.now() + Math.random().toString(36).substr(2, 4),
-          name,
-          ranks: Number(rank) || 1
+          name: trimmedName,
+          specification: trimmedSpec,
+          ranks: targetRank,
+          desc: rule?.desc || '',
+          isCustom: false,
+          category: rule?.category || 'General'
         });
       }
       this.pushHistory();
     },
 
-    setAdvantageRank(index, ranks) {
-      if (this.character.advantages?.[index]) {
-        this.character.advantages[index].ranks = Math.max(1, Number(ranks) || 1);
+    setAdvantageRank(idOrIndex, ranks) {
+      if (!Array.isArray(this.character.advantages)) return;
+      const target = typeof idOrIndex === 'number'
+        ? this.character.advantages[idOrIndex]
+        : this.character.advantages.find(a => a.id === idOrIndex);
+
+      if (target) {
+        target.ranks = Math.max(1, Number(ranks) || 1);
         this.pushHistory();
       }
     },
 
-    removeAdvantage(index) {
-      if (this.character.advantages?.[index]) {
-        this.character.advantages.splice(index, 1);
+    updateAdvantage(idOrIndex, updates = {}) {
+      if (!Array.isArray(this.character.advantages)) return;
+      const target = typeof idOrIndex === 'number'
+        ? this.character.advantages[idOrIndex]
+        : this.character.advantages.find(a => a.id === idOrIndex);
+
+      if (target) {
+        if (updates.name !== undefined) target.name = (updates.name || '').trim();
+        if (updates.specification !== undefined) target.specification = (updates.specification || '').trim();
+        if (updates.ranks !== undefined) target.ranks = Math.max(1, Number(updates.ranks) || 1);
+        if (updates.desc !== undefined) target.desc = updates.desc;
+        if (updates.category !== undefined) target.category = updates.category;
         this.pushHistory();
+      }
+    },
+
+    removeAdvantage(idOrIndex) {
+      if (!Array.isArray(this.character.advantages)) return;
+      if (typeof idOrIndex === 'number') {
+        if (this.character.advantages[idOrIndex]) {
+          this.character.advantages.splice(idOrIndex, 1);
+          this.pushHistory();
+        }
+      } else {
+        const idx = this.character.advantages.findIndex(a => a.id === idOrIndex);
+        if (idx !== -1) {
+          this.character.advantages.splice(idx, 1);
+          this.pushHistory();
+        }
       }
     },
 

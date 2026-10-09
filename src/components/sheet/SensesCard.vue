@@ -47,6 +47,7 @@
 import { computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
+import { CONFIGURABLE_EFFECTS } from '../../rules/powerEngine.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -73,14 +74,19 @@ const activePerceptionMod = computed(() => {
 
 const specialSenses = computed(() => {
   const list = [];
+  const standardFaculties = CONFIGURABLE_EFFECTS?.Senses?.faculties || [];
   for (const eff of heroStore.activeEffects) {
     const base = (eff.baseEffect || eff.effectType || eff.name || '').toLowerCase();
     if (base === 'senses') {
       const faculties = eff.config?.selectedFaculties || eff.config?.faculties || [];
+      const customItems = eff.config?.customItems || [];
+      const allFaculties = [...standardFaculties, ...customItems];
       if (Array.isArray(faculties)) {
         faculties.forEach(f => {
-          const name = typeof f === 'object' ? (f.name || f.id || f.label) : f;
-          if (name && !list.includes(name)) list.push(name);
+          const rawIdOrName = typeof f === 'object' ? (f.name || f.id || f.label) : f;
+          const match = allFaculties.find(item => item.id === rawIdOrName || item.name === rawIdOrName);
+          const displayName = match ? match.name : rawIdOrName;
+          if (displayName && !list.includes(displayName)) list.push(displayName);
         });
       } else if (typeof faculties === 'string' && faculties) {
         list.push(faculties);

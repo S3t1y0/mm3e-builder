@@ -26,6 +26,30 @@
 
     <!-- SUB-EDITOR: ENHANCED TRAIT (trait_picker) -->
     <div v-if="cfg.type === 'trait_picker'" class="config-body config-trait-picker">
+      <!-- Active Selected Targets Horizontal Ribbon -->
+      <div v-if="selectedTraitsList.length > 0" class="selected-traits-ribbon">
+        <div class="ribbon-title">
+          <i class="ri-checkbox-circle-fill text-blue"></i>
+          <span>Active Targets ({{ selectedTraitsList.length }}):</span>
+        </div>
+        <div class="ribbon-pills-row">
+          <button
+            v-for="trait in selectedTraitsList"
+            :key="trait"
+            type="button"
+            class="trait-active-pill"
+            :disabled="selectedTraitsList.length <= 1"
+            @click="toggleTrait(trait)"
+            :title="selectedTraitsList.length <= 1 ? 'At least one target is required' : 'Click to remove'"
+          >
+            <i class="ri-check-line"></i>
+            <span class="pill-name">{{ trait }}</span>
+            <span class="pill-bonus">+{{ effect.ranks }}</span>
+            <i v-if="selectedTraitsList.length > 1" class="ri-close-line pill-close"></i>
+          </button>
+        </div>
+      </div>
+
       <div class="trait-picker-horizontal-layout">
         <!-- Left Column: Trait Category Sidebar -->
         <div class="trait-category-sidebar">
@@ -56,42 +80,86 @@
           <div class="selector-header">
             <span class="selector-prompt">
               <i class="ri-focus-3-line"></i>
-              <span>2. Choose Target {{ currentCategoryObj?.label.split(' (')[0] || 'Trait' }}:</span>
+              <span>2. Choose Target {{ currentCategoryObj?.label.split(' (')[0] || 'Traits' }} (Multi-Select):</span>
             </span>
 
-            <!-- Search filter for advantages / skills -->
-            <div v-if="currentTraitCategory === 'advantages' || currentTraitCategory === 'skills'" class="trait-search-wrapper">
-              <i class="ri-search-line"></i>
-              <input
-                v-model="traitSearch"
-                type="text"
-                class="trait-search-input"
-                :placeholder="`Filter ${currentCategoryObj?.label.split(' (')[0]}...`"
-              />
+            <div class="selector-header-actions">
+              <!-- Search filter for traits -->
+              <div class="trait-search-wrapper">
+                <i class="ri-search-line"></i>
+                <input
+                  v-model="traitSearch"
+                  type="text"
+                  class="trait-search-input"
+                  :placeholder="`Filter ${currentCategoryObj?.label.split(' (')[0]}...`"
+                />
+                <button
+                  v-if="traitSearch"
+                  type="button"
+                  class="clear-search-btn"
+                  @click="traitSearch = ''"
+                >
+                  <i class="ri-close-line"></i>
+                </button>
+              </div>
+
+              <!-- Create Custom Trait Button -->
               <button
-                v-if="traitSearch"
                 type="button"
-                class="clear-search-btn"
-                @click="traitSearch = ''"
+                class="btn-custom-sub-target"
+                @click="openCustomSubModal('Enhanced Trait')"
               >
-                <i class="ri-close-line"></i>
+                <i class="ri-add-line"></i>
+                <span>Custom Target</span>
               </button>
             </div>
           </div>
 
+          <!-- Quick Presets Strip -->
+          <div v-if="currentTraitCategory === 'abilities' || currentTraitCategory === 'defenses'" class="trait-presets-strip">
+            <span class="presets-label"><i class="ri-flashlight-line"></i> Presets:</span>
+            <template v-if="currentTraitCategory === 'abilities'">
+              <button type="button" class="preset-pill-btn" @click="applyTraitPreset(['Strength', 'Agility', 'Stamina'])">
+                Physical (STR, AGI, STA)
+              </button>
+              <button type="button" class="preset-pill-btn" @click="applyTraitPreset(['Fighting', 'Dexterity'])">
+                Combat (FGT, DEX)
+              </button>
+              <button type="button" class="preset-pill-btn" @click="applyTraitPreset(['Intellect', 'Awareness', 'Presence'])">
+                Mental (INT, AWE, PRE)
+              </button>
+            </template>
+            <template v-else-if="currentTraitCategory === 'defenses'">
+              <button type="button" class="preset-pill-btn" @click="applyTraitPreset(['Dodge', 'Parry'])">
+                Active Defenses (Dodge, Parry)
+              </button>
+              <button type="button" class="preset-pill-btn" @click="applyTraitPreset(['Fortitude', 'Will'])">
+                Resistances (Fort, Will)
+              </button>
+            </template>
+          </div>
+
           <!-- Chips Grid for Traits (Horizontal Wrap) -->
           <div class="trait-chips-grid" :class="{ 'scrollable-grid': currentTraitCategory === 'advantages' }" data-seamless-scroll>
-            <button
+            <div
               v-for="trait in filteredTraits"
               :key="trait"
-              type="button"
               class="trait-chip"
-              :class="{ active: effect.config?.traitName === trait }"
-              @click="selectTrait(trait)"
+              :class="{ active: isTraitSelected(trait), 'custom-trait-chip': isCustomTrait(trait) }"
+              @click="toggleTrait(trait)"
             >
-              <i v-if="effect.config?.traitName === trait" class="ri-check-line chip-check"></i>
+              <i :class="isTraitSelected(trait) ? 'ri-checkbox-circle-fill chip-check' : 'ri-checkbox-blank-circle-line chip-uncheck'"></i>
               <span>{{ trait }}</span>
-            </button>
+              <span v-if="isCustomTrait(trait)" class="custom-badge-pill-micro">CUSTOM</span>
+              <div v-if="isCustomTrait(trait)" class="custom-chip-actions" @click.stop>
+                <button type="button" class="btn-micro-action edit" title="Edit" @click="editCustomTrait(trait)">
+                  <i class="ri-edit-line"></i>
+                </button>
+                <button type="button" class="btn-micro-action delete" title="Delete" @click="deleteCustomTrait(trait)">
+                  <i class="ri-close-line"></i>
+                </button>
+              </div>
+            </div>
             <div v-if="filteredTraits.length === 0" class="no-results-msg">
               No traits found matching "{{ traitSearch }}"
             </div>
@@ -103,10 +171,10 @@
       <div class="config-summary-bar">
         <i class="ri-information-line"></i>
         <span>
-          Enhancing: <strong>{{ effect.config?.traitName || 'Trait' }}</strong>
-          ({{ currentCategoryObj?.label }}) &bull;
-          Ranks: <strong>Rank {{ effect.ranks }}</strong> &bull;
-          Calculated Base Cost: <strong>{{ currentCategoryObj?.costDisplay || effect.baseCost + ' PP/R' }}</strong>
+          Enhancing ({{ selectedTraitsList.length }}): <strong>{{ selectedTraitsDisplay }}</strong>
+          &bull; Ranks: <strong>+{{ effect.ranks }} to each</strong>
+          &bull; Base Cost: <strong>{{ calculatedBaseCostDisplay }}</strong>
+          &bull; Total: <strong>{{ calculatedTotalPPDisplay }}</strong>
         </span>
       </div>
     </div>
@@ -155,16 +223,27 @@
           </button>
         </div>
 
-        <div class="lib-search-box">
-          <i class="ri-search-line"></i>
-          <input
-            v-model="sensesSearch"
-            type="text"
-            class="lib-search-input"
-            placeholder="Search sensory faculties (e.g. Darkvision, Danger Sense)..."
-          />
-          <button v-if="sensesSearch" type="button" class="clear-search-btn" @click="sensesSearch = ''">
-            <i class="ri-close-line"></i>
+        <div class="lib-actions-row">
+          <div class="lib-search-box">
+            <i class="ri-search-line"></i>
+            <input
+              v-model="sensesSearch"
+              type="text"
+              class="lib-search-input"
+              placeholder="Search sensory faculties (e.g. Darkvision, Danger Sense)..."
+            />
+            <button v-if="sensesSearch" type="button" class="clear-search-btn" @click="sensesSearch = ''">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="btn-custom-sub-target"
+            @click="openCustomSubModal('Senses')"
+          >
+            <i class="ri-add-line"></i>
+            <span>Custom Sense</span>
           </button>
         </div>
       </div>
@@ -175,7 +254,7 @@
           v-for="fac in filteredFaculties"
           :key="fac.id"
           class="lib-item-card horizontal-sense-card"
-          :class="{ selected: isFacultySelected(fac.id) }"
+          :class="{ selected: isFacultySelected(fac.id), 'custom-item-card': fac.isCustom }"
           @click="toggleFaculty(fac.id)"
         >
           <div class="sense-card-left">
@@ -184,6 +263,7 @@
               <div class="sense-text-meta">
                 <div class="sense-name-row">
                   <span class="card-title">{{ fac.name }}</span>
+                  <span v-if="fac.isCustom" class="custom-badge-pill">CUSTOM</span>
                   <span class="card-pts-badge">+{{ fac.pts }} {{ fac.pts > 1 ? 'Ranks' : 'Rank' }}</span>
                 </div>
                 <p class="card-desc">{{ fac.desc }}</p>
@@ -191,6 +271,14 @@
             </div>
           </div>
           <div class="sense-card-right">
+            <div v-if="fac.isCustom" class="custom-item-actions" @click.stop>
+              <button type="button" class="btn-custom-action edit" title="Edit Custom Sense" @click="editCustomSubItem(fac)">
+                <i class="ri-edit-line"></i>
+              </button>
+              <button type="button" class="btn-custom-action delete" title="Delete Custom Sense" @click="deleteCustomSubItem(fac.id)">
+                <i class="ri-delete-bin-line"></i>
+              </button>
+            </div>
             <span class="selection-status">
               <i :class="isFacultySelected(fac.id) ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'"></i>
               <span class="status-label">{{ isFacultySelected(fac.id) ? 'Active' : 'Add' }}</span>
@@ -690,16 +778,27 @@
           </button>
         </div>
 
-        <div class="lib-search-box">
-          <i class="ri-search-line"></i>
-          <input
-            v-model="concealmentSearch"
-            type="text"
-            class="lib-search-input"
-            placeholder="Search sense (e.g. Normal Vision, Hearing, Radar, Invisibility)..."
-          />
-          <button v-if="concealmentSearch" type="button" class="clear-search-btn" @click="concealmentSearch = ''">
-            <i class="ri-close-line"></i>
+        <div class="lib-actions-row">
+          <div class="lib-search-box">
+            <i class="ri-search-line"></i>
+            <input
+              v-model="concealmentSearch"
+              type="text"
+              class="lib-search-input"
+              placeholder="Search sense (e.g. Normal Vision, Hearing, Radar, Invisibility)..."
+            />
+            <button v-if="concealmentSearch" type="button" class="clear-search-btn" @click="concealmentSearch = ''">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="btn-custom-sub-target"
+            @click="openCustomSubModal('Concealment')"
+          >
+            <i class="ri-add-line"></i>
+            <span>Custom Sense</span>
           </button>
         </div>
       </div>
@@ -710,7 +809,7 @@
           v-for="item in filteredConcealments"
           :key="item.id"
           class="lib-item-card"
-          :class="{ selected: isConcealmentSelected(item.id) }"
+          :class="{ selected: isConcealmentSelected(item.id), 'custom-item-card': item.isCustom }"
           @click="toggleConcealment(item.id)"
         >
           <div class="card-top">
@@ -718,11 +817,22 @@
               <i :class="item.icon || 'ri-eye-close-line'"></i>
               <div class="card-title-group">
                 <span class="card-title">{{ item.name }}</span>
+                <span v-if="item.isCustom" class="custom-badge-pill">CUSTOM</span>
                 <span v-if="item.scopeLabel" class="card-scope-tag">{{ item.scopeLabel }}</span>
               </div>
             </div>
-            <div class="card-pts-badge immunity-badge">
-              {{ item.ranks }} {{ item.ranks > 1 ? 'Ranks' : 'Rank' }} ({{ item.ranks * 2 }} PP)
+            <div class="card-top-right">
+              <div v-if="item.isCustom" class="custom-item-actions" @click.stop>
+                <button type="button" class="btn-custom-action edit" title="Edit" @click="editCustomSubItem(item)">
+                  <i class="ri-edit-line"></i>
+                </button>
+                <button type="button" class="btn-custom-action delete" title="Delete" @click="deleteCustomSubItem(item.id)">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+              <div class="card-pts-badge immunity-badge">
+                {{ item.ranks }} {{ item.ranks > 1 ? 'Ranks' : 'Rank' }} ({{ item.ranks * 2 }} PP)
+              </div>
             </div>
           </div>
           <p class="card-desc">{{ item.desc }}</p>
@@ -755,16 +865,27 @@
           </button>
         </div>
 
-        <div class="lib-search-box">
-          <i class="ri-search-line"></i>
-          <input
-            v-model="immunitySearch"
-            type="text"
-            class="lib-search-input"
-            placeholder="Search immunities (e.g. Life Support, Fire, Aging)..."
-          />
-          <button v-if="immunitySearch" type="button" class="clear-search-btn" @click="immunitySearch = ''">
-            <i class="ri-close-line"></i>
+        <div class="lib-actions-row">
+          <div class="lib-search-box">
+            <i class="ri-search-line"></i>
+            <input
+              v-model="immunitySearch"
+              type="text"
+              class="lib-search-input"
+              placeholder="Search immunities (e.g. Life Support, Fire, Aging)..."
+            />
+            <button v-if="immunitySearch" type="button" class="clear-search-btn" @click="immunitySearch = ''">
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <button
+            type="button"
+            class="btn-custom-sub-target"
+            @click="openCustomSubModal('Immunity')"
+          >
+            <i class="ri-add-line"></i>
+            <span>Custom Immunity</span>
           </button>
         </div>
       </div>
@@ -774,16 +895,27 @@
           v-for="item in filteredImmunities"
           :key="item.id"
           class="lib-item-card"
-          :class="{ selected: isImmunitySelected(item.id) }"
+          :class="{ selected: isImmunitySelected(item.id), 'custom-item-card': item.isCustom }"
           @click="toggleImmunity(item.id)"
         >
           <div class="card-top">
             <div class="card-icon-title">
               <i :class="item.icon || 'ri-shield-line'"></i>
               <span class="card-title">{{ item.name }}</span>
+              <span v-if="item.isCustom" class="custom-badge-pill">CUSTOM</span>
             </div>
-            <div class="card-pts-badge immunity-badge">
-              {{ item.ranks }} {{ item.ranks > 1 ? 'Ranks' : 'Rank' }}
+            <div class="card-top-right">
+              <div v-if="item.isCustom" class="custom-item-actions" @click.stop>
+                <button type="button" class="btn-custom-action edit" title="Edit" @click="editCustomSubItem(item)">
+                  <i class="ri-edit-line"></i>
+                </button>
+                <button type="button" class="btn-custom-action delete" title="Delete" @click="deleteCustomSubItem(item.id)">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+              <div class="card-pts-badge immunity-badge">
+                {{ item.ranks }} {{ item.ranks > 1 ? 'Ranks' : 'Rank' }}
+              </div>
             </div>
           </div>
           <p class="card-desc">{{ item.desc }}</p>
@@ -799,20 +931,43 @@
 
     <!-- SUB-EDITOR: MOVEMENT (movement_multiselect_library) -->
     <div v-else-if="cfg.type === 'movement_multiselect_library'" class="config-body config-movement">
+      <div class="library-filter-bar movement-filter-bar">
+        <span class="movement-strip-label"><i class="ri-route-line"></i> Movement Modes:</span>
+        <button
+          type="button"
+          class="btn-custom-sub-target"
+          @click="openCustomSubModal('Movement')"
+        >
+          <i class="ri-add-line"></i>
+          <span>Custom Movement</span>
+        </button>
+      </div>
+
       <div class="movement-grid">
         <div
-          v-for="mode in cfg.modes"
+          v-for="mode in allMovementModes"
           :key="mode.id"
           class="movement-mode-card"
-          :class="{ active: isMovementModeActive(mode.id) }"
+          :class="{ active: isMovementModeActive(mode.id), 'custom-item-card': mode.isCustom }"
         >
           <div class="mode-header" @click="toggleMovementMode(mode.id)">
             <div class="mode-identity">
               <i :class="mode.icon || 'ri-footprint-line'"></i>
               <span class="mode-name">{{ mode.name }}</span>
+              <span v-if="mode.isCustom" class="custom-badge-pill">CUSTOM</span>
             </div>
-            <div class="mode-check">
-              <i :class="isMovementModeActive(mode.id) ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'"></i>
+            <div class="mode-right-header">
+              <div v-if="mode.isCustom" class="custom-item-actions" @click.stop>
+                <button type="button" class="btn-custom-action edit" title="Edit" @click="editCustomSubItem(mode)">
+                  <i class="ri-edit-line"></i>
+                </button>
+                <button type="button" class="btn-custom-action delete" title="Delete" @click="deleteCustomSubItem(mode.id)">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+              <div class="mode-check">
+                <i :class="isMovementModeActive(mode.id) ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'"></i>
+              </div>
             </div>
           </div>
 
@@ -827,11 +982,11 @@
                 :disabled="getMovementModeRanks(mode.id) <= 1"
                 @click="stepMovementMode(mode.id, -1)"
               >-</button>
-              <span class="step-value">Rank {{ getMovementModeRanks(mode.id) }} / {{ mode.maxRanks }}</span>
+              <span class="step-value">Rank {{ getMovementModeRanks(mode.id) }} / {{ mode.maxRanks || 5 }}</span>
               <button
                 type="button"
                 class="step-btn"
-                :disabled="getMovementModeRanks(mode.id) >= mode.maxRanks"
+                :disabled="getMovementModeRanks(mode.id) >= (mode.maxRanks || 5)"
                 @click="stepMovementMode(mode.id, 1)"
               >+</button>
             </div>
@@ -960,21 +1115,44 @@
 
     <!-- SUB-EDITOR: COMPREHEND (comprehend_multiselect_library) -->
     <div v-else-if="cfg.type === 'comprehend_multiselect_library'" class="config-body config-library">
+      <div class="library-filter-bar">
+        <span class="library-title-label"><i class="ri-translate-2"></i> Comprehend Communication Modes:</span>
+        <button
+          type="button"
+          class="btn-custom-sub-target"
+          @click="openCustomSubModal('Comprehend')"
+        >
+          <i class="ri-add-line"></i>
+          <span>Custom Mode</span>
+        </button>
+      </div>
+
       <div class="library-cards-grid" data-seamless-scroll>
         <div
-          v-for="mode in cfg.modes"
+          v-for="mode in allComprehendModes"
           :key="mode.id"
           class="lib-item-card"
-          :class="{ selected: isComprehendSelected(mode.id) }"
+          :class="{ selected: isComprehendSelected(mode.id), 'custom-item-card': mode.isCustom }"
           @click="toggleComprehend(mode.id)"
         >
           <div class="card-top">
             <div class="card-icon-title">
               <i :class="mode.icon || 'ri-translate-2'"></i>
               <span class="card-title">{{ mode.name }}</span>
+              <span v-if="mode.isCustom" class="custom-badge-pill">CUSTOM</span>
             </div>
-            <div class="card-pts-badge">
-              {{ mode.ranks }} {{ mode.ranks > 1 ? 'Ranks' : 'Rank' }}
+            <div class="card-top-right">
+              <div v-if="mode.isCustom" class="custom-item-actions" @click.stop>
+                <button type="button" class="btn-custom-action edit" title="Edit" @click="editCustomSubItem(mode)">
+                  <i class="ri-edit-line"></i>
+                </button>
+                <button type="button" class="btn-custom-action delete" title="Delete" @click="deleteCustomSubItem(mode.id)">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+              <div class="card-pts-badge">
+                {{ mode.ranks }} {{ mode.ranks > 1 ? 'Ranks' : 'Rank' }}
+              </div>
             </div>
           </div>
           <p class="card-desc">{{ mode.desc }}</p>
@@ -990,21 +1168,44 @@
 
     <!-- SUB-EDITOR: ENVIRONMENT (environment_multiselect_library) -->
     <div v-else-if="cfg.type === 'environment_multiselect_library'" class="config-body config-library">
+      <div class="library-filter-bar">
+        <span class="library-title-label"><i class="ri-earth-line"></i> Environmental Hazards & Ambient Effects:</span>
+        <button
+          type="button"
+          class="btn-custom-sub-target"
+          @click="openCustomSubModal('Environment')"
+        >
+          <i class="ri-add-line"></i>
+          <span>Custom Element</span>
+        </button>
+      </div>
+
       <div class="library-cards-grid" data-seamless-scroll>
         <div
-          v-for="el in cfg.elements"
+          v-for="el in allEnvironmentElements"
           :key="el.id"
           class="lib-item-card"
-          :class="{ selected: isEnvironmentSelected(el.id) }"
+          :class="{ selected: isEnvironmentSelected(el.id), 'custom-item-card': el.isCustom }"
           @click="toggleEnvironment(el.id)"
         >
           <div class="card-top">
             <div class="card-icon-title">
               <i :class="el.icon || 'ri-earth-line'"></i>
               <span class="card-title">{{ el.name }}</span>
+              <span v-if="el.isCustom" class="custom-badge-pill">CUSTOM</span>
             </div>
-            <div class="card-pts-badge">
-              +{{ el.cost }} PP/R
+            <div class="card-top-right">
+              <div v-if="el.isCustom" class="custom-item-actions" @click.stop>
+                <button type="button" class="btn-custom-action edit" title="Edit" @click="editCustomSubItem(el)">
+                  <i class="ri-edit-line"></i>
+                </button>
+                <button type="button" class="btn-custom-action delete" title="Delete" @click="deleteCustomSubItem(el.id)">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+              <div class="card-pts-badge">
+                +{{ el.cost }} PP/R
+              </div>
             </div>
           </div>
           <p class="card-desc">{{ el.desc }}</p>
@@ -1048,12 +1249,156 @@
         />
       </div>
     </div>
+
+    <!-- =========================================================================
+         CUSTOM SUB-TARGET / SUB-EFFECT MODAL (Cyber-Tactical Dark HUD)
+         ========================================================================= -->
+    <div v-if="showCustomSubModal" class="custom-sub-modal-backdrop" @click.self="closeCustomSubModal">
+      <div class="custom-sub-modal-dialog">
+        <!-- Modal Header -->
+        <div class="modal-dialog-header">
+          <div class="header-info">
+            <div class="header-icon-badge">
+              <i :class="customForm.icon || 'ri-sparkling-fill'"></i>
+            </div>
+            <div class="header-title-col">
+              <h3 class="modal-title">
+                {{ editingCustomId ? 'Edit Custom Target / Sub-Effect' : 'New Custom Target / Sub-Effect' }}
+              </h3>
+              <span class="modal-subtitle">
+                Configure custom parameter for {{ customSubModalTargetEffect }}
+              </span>
+            </div>
+          </div>
+          <button type="button" class="modal-close-btn" @click="closeCustomSubModal">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+
+        <!-- Modal Form Body -->
+        <div class="modal-dialog-body" data-seamless-scroll>
+          <!-- 1. Name & Cost/Ranks in a 2-col Grid -->
+          <div class="form-row-grid">
+            <div class="form-field-group">
+              <label class="form-label">
+                <i class="ri-edit-line"></i> Target / Sub-Effect Name <span class="req">*</span>
+              </label>
+              <input
+                v-model="customForm.name"
+                type="text"
+                class="form-input"
+                :placeholder="getCustomNamePlaceholder"
+                autofocus
+              />
+            </div>
+
+            <!-- Cost / Ranks Stepper -->
+            <div class="form-field-group">
+              <label class="form-label">
+                <i class="ri-coins-line"></i> {{ getCustomCostLabel }}
+              </label>
+              <div class="custom-stepper-wrap">
+                <button
+                  type="button"
+                  class="stepper-btn"
+                  :disabled="customForm.pts <= 1"
+                  @click="customForm.pts = Math.max(1, Number(customForm.pts || 1) - 1)"
+                >-</button>
+                <input
+                  v-model.number="customForm.pts"
+                  type="number"
+                  min="1"
+                  max="30"
+                  class="stepper-input"
+                />
+                <button
+                  type="button"
+                  class="stepper-btn"
+                  :disabled="customForm.pts >= 30"
+                  @click="customForm.pts = Math.min(30, Number(customForm.pts || 1) + 1)"
+                >+</button>
+                <span class="stepper-unit-label">{{ getCustomCostUnit }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Category Selection (if effect has categories) -->
+          <div v-if="customCategoryOptions.length > 0" class="form-field-group">
+            <label class="form-label">
+              <i class="ri-folder-settings-line"></i> Category / Classification
+            </label>
+            <div class="category-chips-row">
+              <button
+                v-for="cat in customCategoryOptions"
+                :key="cat.id"
+                type="button"
+                class="cat-chip-btn"
+                :class="{ active: customForm.category === cat.id }"
+                @click="customForm.category = cat.id"
+              >
+                {{ cat.label }}
+              </button>
+            </div>
+          </div>
+
+
+
+          <!-- 4. Description -->
+          <div class="form-field-group">
+            <label class="form-label">
+              <i class="ri-file-text-line"></i> Description / Sensory Mechanics
+            </label>
+            <textarea
+              v-model="customForm.desc"
+              rows="3"
+              class="form-textarea"
+              placeholder="Detail how this target or sensory faculty functions during play..."
+            ></textarea>
+          </div>
+
+          <!-- 5. Icon Picker -->
+          <div class="form-field-group">
+            <label class="form-label">
+              <i class="ri-paint-brush-line"></i> Identifier Icon
+            </label>
+            <div class="icon-picker-grid">
+              <button
+                v-for="icon in AVAILABLE_CUSTOM_ICONS"
+                :key="icon"
+                type="button"
+                class="icon-picker-item"
+                :class="{ active: customForm.icon === icon }"
+                @click="customForm.icon = icon"
+              >
+                <i :class="icon"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modal Footer Actions -->
+        <div class="modal-dialog-footer">
+          <button type="button" class="btn-cancel" @click="closeCustomSubModal">
+            Cancel
+          </button>
+          <button
+            type="button"
+            class="btn-save-custom"
+            :disabled="!customForm.name.trim()"
+            @click="saveCustomSubItem"
+          >
+            <i class="ri-check-line"></i>
+            <span>{{ editingCustomId ? 'Update Target' : 'Add to Effect' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { computed, ref, watch, onMounted } from 'vue';
-import { CONFIGURABLE_EFFECTS, EXTRAS, FLAWS, normalizeEffect, normalizeModifier } from '../../rules/powerEngine.js';
+import { CONFIGURABLE_EFFECTS, EXTRAS, FLAWS, normalizeEffect, normalizeModifier, calculateEffectCost } from '../../rules/powerEngine.js';
 
 const props = defineProps({
   effect: {
@@ -1125,9 +1470,10 @@ const getConfigSummaryText = computed(() => {
   switch (base) {
     case 'Enhanced Trait': {
       const cat = c.traitCategory || 'abilities';
-      const trait = c.traitName || 'Strength';
-      const costStr = currentCategoryObj.value?.costDisplay || `${props.effect.baseCost} PP/R`;
-      return `Target: ${trait} (${cat}) • ${costStr}`;
+      const targets = selectedTraitsList.value;
+      const targetsStr = targets.length <= 2 ? targets.join(', ') : `${targets[0]}, ${targets[1]} +${targets.length - 2} more`;
+      const costStr = calculatedBaseCostDisplay.value;
+      return `Targets: ${targetsStr} (${cat}) • ${costStr}`;
     }
     case 'Senses': {
       const count = (c.selectedFaculties || []).length;
@@ -1240,7 +1586,13 @@ const currentCategoryObj = computed(() => {
 });
 
 const filteredTraits = computed(() => {
-  const list = currentCategoryObj.value?.traits || [];
+  const list = [...(currentCategoryObj.value?.traits || [])];
+  const customMatching = (props.effect?.config?.customItems || [])
+    .filter(c => !c.category || c.category === currentTraitCategory.value)
+    .map(c => c.name);
+  customMatching.forEach(cName => {
+    if (!list.includes(cName)) list.push(cName);
+  });
   if (!traitSearch.value.trim()) return list;
   const q = traitSearch.value.toLowerCase();
   return list.filter(t => t.toLowerCase().includes(q));
@@ -1259,21 +1611,79 @@ function getCategoryIcon(catKey) {
 function selectTraitCategory(catKey) {
   props.effect.config = props.effect.config || {};
   props.effect.config.traitCategory = catKey;
-  const catObj = cfg.value.categories[catKey];
+  const catObj = cfg.value?.categories?.[catKey];
   if (catObj && catObj.traits && catObj.traits.length > 0) {
-    // If current trait not in new category, pick first
-    if (!catObj.traits.includes(props.effect.config.traitName)) {
+    const currentSelected = props.effect.config.selectedTraits || [];
+    const validSelected = currentSelected.filter(t => catObj.traits.includes(t));
+    if (validSelected.length > 0) {
+      props.effect.config.selectedTraits = validSelected;
+      props.effect.config.traitName = validSelected[0];
+    } else {
+      props.effect.config.selectedTraits = [catObj.traits[0]];
       props.effect.config.traitName = catObj.traits[0];
     }
   }
   updateConfig();
 }
 
-function selectTrait(trait) {
+const selectedTraitsList = computed(() => {
+  const sel = props.effect?.config?.selectedTraits;
+  if (Array.isArray(sel) && sel.length > 0) return sel;
+  if (props.effect?.config?.traitName) return [props.effect.config.traitName];
+  return ['Strength'];
+});
+
+function isTraitSelected(trait) {
+  return selectedTraitsList.value.includes(trait);
+}
+
+function toggleTrait(trait) {
   props.effect.config = props.effect.config || {};
-  props.effect.config.traitName = trait;
+  let list = Array.isArray(props.effect.config.selectedTraits) && props.effect.config.selectedTraits.length > 0
+    ? [...props.effect.config.selectedTraits]
+    : [props.effect.config.traitName || 'Strength'];
+
+  if (list.includes(trait)) {
+    if (list.length <= 1) return; // Keep at least 1 trait
+    list = list.filter(t => t !== trait);
+  } else {
+    list.push(trait);
+  }
+  props.effect.config.selectedTraits = list;
+  props.effect.config.traitName = list[0] || trait;
   updateConfig();
 }
+
+function applyTraitPreset(presetTraits) {
+  props.effect.config = props.effect.config || {};
+  props.effect.config.selectedTraits = [...presetTraits];
+  props.effect.config.traitName = presetTraits[0] || 'Strength';
+  updateConfig();
+}
+
+const selectedTraitsDisplay = computed(() => {
+  const list = selectedTraitsList.value;
+  if (list.length <= 3) return list.join(', ');
+  return `${list.slice(0, 3).join(', ')} +${list.length - 3} more`;
+});
+
+const calculatedBaseCostDisplay = computed(() => {
+  const cat = currentTraitCategory.value;
+  const count = selectedTraitsList.value.length;
+  if (cat === 'abilities') return `${count * 2} PP/Rank (${count} × 2 PP)`;
+  if (cat === 'defenses') return `${count} PP/Rank (${count} × 1 PP)`;
+  if (cat === 'advantages') return `${count} PP/Rank (${count} × 1 PP)`;
+  if (cat === 'skills') {
+    const ppPerRank = count * 0.5;
+    return `${ppPerRank} PP/Rank (${count} skills @ 0.5 PP)`;
+  }
+  return `${props.effect.baseCost || 1} PP/Rank`;
+});
+
+const calculatedTotalPPDisplay = computed(() => {
+  const costObj = calculateEffectCost(props.effect);
+  return `${costObj.totalCost} PP`;
+});
 
 /* =========================================================================
    2. SENSES
@@ -1283,8 +1693,9 @@ const sensesSearch = ref('');
 
 const selectedFacultiesList = computed(() => {
   const sel = props.effect?.config?.selectedFaculties;
-  if (!Array.isArray(sel) || !cfg.value?.faculties) return [];
-  return cfg.value.faculties.filter(f => sel.includes(f.id));
+  if (!Array.isArray(sel)) return [];
+  const allFaculties = [...(cfg.value?.faculties || []), ...(props.effect?.config?.customItems || [])];
+  return allFaculties.filter(f => sel.includes(f.id));
 });
 
 const totalSensesRanks = computed(() => {
@@ -1292,14 +1703,14 @@ const totalSensesRanks = computed(() => {
 });
 
 function getSensesCountForCat(catId) {
-  if (!cfg.value?.faculties) return 0;
-  if (catId === 'all') return cfg.value.faculties.length;
-  return cfg.value.faculties.filter(f => f.category === catId).length;
+  const allFaculties = [...(cfg.value?.faculties || []), ...(props.effect?.config?.customItems || [])];
+  if (catId === 'all') return allFaculties.length;
+  return allFaculties.filter(f => f.category === catId).length;
 }
 
 const filteredFaculties = computed(() => {
-  if (!cfg.value?.faculties) return [];
-  return cfg.value.faculties.filter(f => {
+  const allFaculties = [...(cfg.value?.faculties || []), ...(props.effect?.config?.customItems || [])];
+  return allFaculties.filter(f => {
     const matchCat = selectedSensesCategory.value === 'all' || f.category === selectedSensesCategory.value;
     if (!matchCat) return false;
     if (!sensesSearch.value.trim()) return true;
@@ -1617,14 +2028,14 @@ const selectedImmunityCategory = ref('all');
 const immunitySearch = ref('');
 
 function getImmunityCountForCat(catId) {
-  if (!cfg.value?.presets) return 0;
-  if (catId === 'all') return cfg.value.presets.length;
-  return cfg.value.presets.filter(p => p.category === catId).length;
+  const allPresets = [...(cfg.value?.presets || []), ...(props.effect?.config?.customItems || [])];
+  if (catId === 'all') return allPresets.length;
+  return allPresets.filter(p => p.category === catId).length;
 }
 
 const filteredImmunities = computed(() => {
-  if (!cfg.value?.presets) return [];
-  return cfg.value.presets.filter(item => {
+  const allPresets = [...(cfg.value?.presets || []), ...(props.effect?.config?.customItems || [])];
+  return allPresets.filter(item => {
     const matchCat = selectedImmunityCategory.value === 'all' || item.category === selectedImmunityCategory.value;
     if (!matchCat) return false;
     if (!immunitySearch.value.trim()) return true;
@@ -1663,9 +2074,9 @@ const selectedConcealmentCategory = ref('all');
 const concealmentSearch = ref('');
 
 const selectedConcealmentList = computed(() => {
-  if (!cfg.value?.options) return [];
+  const allOptions = [...(cfg.value?.options || []), ...(props.effect?.config?.customItems || [])];
   const sel = props.effect?.config?.selectedSenses || [];
-  return cfg.value.options.filter(opt => sel.includes(opt.id));
+  return allOptions.filter(opt => sel.includes(opt.id));
 });
 
 const totalConcealmentRanks = computed(() => {
@@ -1676,14 +2087,14 @@ const totalConcealmentRanks = computed(() => {
 });
 
 function getConcealmentCountForCat(catId) {
-  if (!cfg.value?.options) return 0;
-  if (catId === 'all') return cfg.value.options.length;
-  return cfg.value.options.filter(o => o.category === catId).length;
+  const allOptions = [...(cfg.value?.options || []), ...(props.effect?.config?.customItems || [])];
+  if (catId === 'all') return allOptions.length;
+  return allOptions.filter(o => o.category === catId).length;
 }
 
 const filteredConcealments = computed(() => {
-  if (!cfg.value?.options) return [];
-  return cfg.value.options.filter(item => {
+  const allOptions = [...(cfg.value?.options || []), ...(props.effect?.config?.customItems || [])];
+  return allOptions.filter(item => {
     const matchCat = selectedConcealmentCategory.value === 'all' || item.category === selectedConcealmentCategory.value;
     if (!matchCat) return false;
     if (!concealmentSearch.value.trim()) return true;
@@ -1763,6 +2174,10 @@ function toggleConcealment(id) {
 /* =========================================================================
    7. MOVEMENT
    ========================================================================= */
+const allMovementModes = computed(() => {
+  return [...(cfg.value?.modes || []), ...(props.effect?.config?.customItems || [])];
+});
+
 function isMovementModeActive(modeId) {
   const sel = props.effect?.config?.selectedModes;
   if (!Array.isArray(sel)) return false;
@@ -1789,8 +2204,9 @@ function toggleMovementMode(modeId) {
       sel = sel.filter(m => (typeof m === 'object' ? m.id !== modeId : m !== modeId));
     }
   } else {
-    const modeDef = cfg.value.modes?.find(m => m.id === modeId);
-    sel.push({ id: modeId, name: modeDef?.name || modeId, ranks: 1 });
+    const allModes = allMovementModes.value;
+    const modeDef = allModes.find(m => m.id === modeId);
+    sel.push({ id: modeId, name: modeDef?.name || modeId, ranks: modeDef?.ranks || 1 });
   }
 
   props.effect.config.selectedModes = sel;
@@ -1805,8 +2221,9 @@ function stepMovementMode(modeId, delta) {
 
   const idx = sel.findIndex(m => (typeof m === 'object' ? m.id === modeId : m === modeId));
   if (idx >= 0) {
-    const modeDef = cfg.value.modes?.find(m => m.id === modeId);
-    const max = modeDef?.maxRanks || 3;
+    const allModes = allMovementModes.value;
+    const modeDef = allModes.find(m => m.id === modeId);
+    const max = modeDef?.maxRanks || 5;
     const currentRanks = typeof sel[idx] === 'object' ? (Number(sel[idx].ranks) || 1) : 1;
     const newRanks = Math.max(1, Math.min(max, currentRanks + delta));
 
@@ -1875,6 +2292,10 @@ function selectNullifyDescriptor(desc) {
 /* =========================================================================
    10. COMPREHEND
    ========================================================================= */
+const allComprehendModes = computed(() => {
+  return [...(cfg.value?.modes || []), ...(props.effect?.config?.customItems || [])];
+});
+
 function isComprehendSelected(modeId) {
   const sel = props.effect?.config?.selectedModes;
   return Array.isArray(sel) && sel.includes(modeId);
@@ -1901,6 +2322,10 @@ function toggleComprehend(modeId) {
 /* =========================================================================
    11. ENVIRONMENT
    ========================================================================= */
+const allEnvironmentElements = computed(() => {
+  return [...(cfg.value?.elements || []), ...(props.effect?.config?.customItems || [])];
+});
+
 function isEnvironmentSelected(elId) {
   const sel = props.effect?.config?.selectedElements;
   return Array.isArray(sel) && sel.includes(elId);
@@ -1930,6 +2355,294 @@ function toggleEnvironment(elId) {
 function selectVariableTheme(theme) {
   props.effect.config = props.effect.config || {};
   props.effect.config.theme = theme;
+  updateConfig();
+}
+
+/* =========================================================================
+   13. CUSTOM TARGET / SUB-EFFECT MODAL STATE & ACTIONS
+   ========================================================================= */
+const showCustomSubModal = ref(false);
+const customSubModalTargetEffect = ref('Senses');
+const editingCustomId = ref(null);
+
+const customForm = ref({
+  id: null,
+  name: '',
+  category: '',
+  pts: 1,
+  desc: '',
+  icon: 'ri-sparkling-fill',
+  appliedTraits: []
+});
+
+
+
+const AVAILABLE_CUSTOM_ICONS = [
+  'ri-eye-line', 'ri-eye-fill', 'ri-scan-line', 'ri-radar-line',
+  'ri-sparkling-fill', 'ri-shield-flash-line', 'ri-shield-check-line',
+  'ri-fire-fill', 'ri-snowflake-line', 'ri-temp-cold-line',
+  'ri-pulse-line', 'ri-brain-line', 'ri-earth-line',
+  'ri-flashlight-line', 'ri-speed-line', 'ri-footprint-line',
+  'ri-broadcast-line', 'ri-cpu-line', 'ri-magic-line', 'ri-drop-line'
+];
+
+const customCategoryOptions = computed(() => {
+  const base = customSubModalTargetEffect.value;
+  if (base === 'Senses') {
+    return [
+      { id: 'visual', label: 'Visual' },
+      { id: 'auditory', label: 'Auditory' },
+      { id: 'mental', label: 'Mental & Exotic' },
+      { id: 'tactile', label: 'Tactile & Olfactory' },
+      { id: 'spatial', label: 'Spatial & Utility' }
+    ];
+  }
+  if (base === 'Immunity') {
+    return [
+      { id: 'survival', label: 'Survival & Env' },
+      { id: 'biological', label: 'Biological & Sensory' },
+      { id: 'descriptors', label: 'Descriptors' },
+      { id: 'defenses', label: 'Defense Checks' }
+    ];
+  }
+  if (base === 'Concealment') {
+    return [
+      { id: 'visual', label: 'Visual' },
+      { id: 'auditory', label: 'Auditory' },
+      { id: 'olfactory', label: 'Olfactory' },
+      { id: 'radio', label: 'Radio' },
+      { id: 'mental_exotic', label: 'Mental & Exotic' }
+    ];
+  }
+  if (base === 'Enhanced Trait') {
+    return [
+      { id: 'abilities', label: 'Abilities' },
+      { id: 'defenses', label: 'Defenses' },
+      { id: 'skills', label: 'Skills' },
+      { id: 'advantages', label: 'Advantages' }
+    ];
+  }
+  return [];
+});
+
+const getCustomNamePlaceholder = computed(() => {
+  const base = customSubModalTargetEffect.value;
+  switch (base) {
+    case 'Senses': return 'e.g. Cosmic Energy Sight, Leyline Tracker...';
+    case 'Immunity': return 'e.g. Alien Radiation, Chrono-Displacement...';
+    case 'Movement': return 'e.g. Gravity Inversion, Shadow Stride...';
+    case 'Comprehend': return 'e.g. Alien Dialects, Quantum Frequencies...';
+    case 'Environment': return 'e.g. Temporal Distortion, Corrosive Atmosphere...';
+    case 'Concealment': return 'e.g. Quantum Obscurement, Astral Stealth...';
+    case 'Enhanced Trait': return 'e.g. Hyper-Intuition, Alien Reflexes...';
+    default: return 'Enter custom name...';
+  }
+});
+
+const getCustomCostLabel = computed(() => {
+  const base = customSubModalTargetEffect.value;
+  if (base === 'Environment') return 'Base Cost (PP/Rank)';
+  if (base === 'Enhanced Trait') return 'Cost (PP/Rank)';
+  return 'Ranks / Cost';
+});
+
+const getCustomCostUnit = computed(() => {
+  const base = customSubModalTargetEffect.value;
+  if (base === 'Environment' || base === 'Enhanced Trait') return 'PP/R';
+  return 'Ranks';
+});
+
+function openCustomSubModal(baseEffectName) {
+  customSubModalTargetEffect.value = baseEffectName || props.effect?.baseEffect || 'Senses';
+  editingCustomId.value = null;
+
+  const defaultCat = customCategoryOptions.value[0]?.id || '';
+  const defaultIcon = customSubModalTargetEffect.value === 'Senses' ? 'ri-eye-line'
+    : customSubModalTargetEffect.value === 'Immunity' ? 'ri-shield-line'
+    : customSubModalTargetEffect.value === 'Movement' ? 'ri-footprint-line'
+    : customSubModalTargetEffect.value === 'Environment' ? 'ri-earth-line'
+    : customSubModalTargetEffect.value === 'Enhanced Trait' ? 'ri-sparkling-fill'
+    : 'ri-sparkling-fill';
+
+  let defaultPts = 1;
+  if (customSubModalTargetEffect.value === 'Enhanced Trait') {
+    const cat = currentTraitCategory.value;
+    defaultPts = cat === 'defenses' ? 1 : (cat === 'advantages' ? 1 : (cat === 'skills' ? 0.5 : 2));
+  }
+
+  customForm.value = {
+    id: null,
+    name: '',
+    category: defaultCat,
+    pts: defaultPts,
+    desc: '',
+    icon: defaultIcon,
+    appliedTraits: []
+  };
+
+  showCustomSubModal.value = true;
+}
+
+function editCustomSubItem(item) {
+  customSubModalTargetEffect.value = props.effect?.baseEffect || 'Senses';
+  editingCustomId.value = item.id;
+  customForm.value = {
+    id: item.id,
+    name: item.name,
+    category: item.category || '',
+    pts: item.pts || item.ranks || item.cost || 1,
+    desc: item.desc || '',
+    icon: item.icon || 'ri-sparkling-fill',
+    appliedTraits: Array.isArray(item.appliedTraits) ? [...item.appliedTraits] : []
+  };
+  showCustomSubModal.value = true;
+}
+
+function closeCustomSubModal() {
+  showCustomSubModal.value = false;
+  editingCustomId.value = null;
+}
+
+
+
+function saveCustomSubItem() {
+  if (!customForm.value.name.trim() || !props.effect) return;
+  props.effect.config = props.effect.config || {};
+  if (!Array.isArray(props.effect.config.customItems)) {
+    props.effect.config.customItems = [];
+  }
+
+  const itemId = editingCustomId.value || ('custom_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4));
+  const ptsVal = Number(customForm.value.pts) || 1;
+
+  const customObj = {
+    id: itemId,
+    name: customForm.value.name.trim(),
+    pts: ptsVal,
+    ranks: ptsVal,
+    cost: ptsVal,
+    category: customForm.value.category,
+    desc: customForm.value.desc ? customForm.value.desc.trim() : `Custom ${customSubModalTargetEffect.value} trait`,
+    icon: customForm.value.icon || 'ri-sparkling-fill',
+    isCustom: true,
+    appliedTraits: [...customForm.value.appliedTraits]
+  };
+
+  const existingIdx = props.effect.config.customItems.findIndex(c => c.id === itemId);
+  if (existingIdx !== -1) {
+    props.effect.config.customItems[existingIdx] = customObj;
+  } else {
+    props.effect.config.customItems.push(customObj);
+  }
+
+  // Auto-select into active list if not already selected
+  const base = props.effect.baseEffect;
+  if (base === 'Senses') {
+    if (!Array.isArray(props.effect.config.selectedFaculties)) props.effect.config.selectedFaculties = [];
+    if (!props.effect.config.selectedFaculties.includes(itemId)) {
+      props.effect.config.selectedFaculties.push(itemId);
+    }
+  } else if (base === 'Immunity') {
+    if (!Array.isArray(props.effect.config.selectedPresets)) props.effect.config.selectedPresets = [];
+    if (!props.effect.config.selectedPresets.includes(itemId)) {
+      props.effect.config.selectedPresets.push(itemId);
+    }
+  } else if (base === 'Movement') {
+    if (!Array.isArray(props.effect.config.selectedModes)) props.effect.config.selectedModes = [];
+    if (!props.effect.config.selectedModes.some(m => (typeof m === 'object' ? m.id === itemId : m === itemId))) {
+      props.effect.config.selectedModes.push({ id: itemId, name: customObj.name, ranks: customObj.ranks });
+    }
+  } else if (base === 'Comprehend') {
+    if (!Array.isArray(props.effect.config.selectedModes)) props.effect.config.selectedModes = [];
+    if (!props.effect.config.selectedModes.includes(itemId)) {
+      props.effect.config.selectedModes.push(itemId);
+    }
+  } else if (base === 'Environment') {
+    if (!Array.isArray(props.effect.config.selectedElements)) props.effect.config.selectedElements = [];
+    if (!props.effect.config.selectedElements.includes(itemId)) {
+      props.effect.config.selectedElements.push(itemId);
+    }
+  } else if (base === 'Concealment') {
+    if (!Array.isArray(props.effect.config.selectedSenses)) props.effect.config.selectedSenses = [];
+    if (!props.effect.config.selectedSenses.includes(itemId)) {
+      props.effect.config.selectedSenses.push(itemId);
+    }
+  } else if (base === 'Enhanced Trait') {
+    if (!Array.isArray(props.effect.config.selectedTraits)) props.effect.config.selectedTraits = [];
+    if (!props.effect.config.selectedTraits.includes(customObj.name)) {
+      props.effect.config.selectedTraits.push(customObj.name);
+    }
+    props.effect.config.traitName = customObj.name;
+  }
+
+  updateConfig();
+  closeCustomSubModal();
+}
+
+function deleteCustomSubItem(itemId) {
+  if (!props.effect?.config?.customItems) return;
+  props.effect.config.customItems = props.effect.config.customItems.filter(c => c.id !== itemId);
+
+  const base = props.effect.baseEffect;
+  if (base === 'Senses' && Array.isArray(props.effect.config.selectedFaculties)) {
+    props.effect.config.selectedFaculties = props.effect.config.selectedFaculties.filter(id => id !== itemId);
+    if (props.effect.config.selectedFaculties.length === 0 && cfg.value?.defaultFaculties) {
+      props.effect.config.selectedFaculties = [...cfg.value.defaultFaculties];
+    }
+  } else if (base === 'Immunity' && Array.isArray(props.effect.config.selectedPresets)) {
+    props.effect.config.selectedPresets = props.effect.config.selectedPresets.filter(id => id !== itemId);
+    if (props.effect.config.selectedPresets.length === 0 && cfg.value?.defaultPresets) {
+      props.effect.config.selectedPresets = [...cfg.value.defaultPresets];
+    }
+  } else if (base === 'Movement' && Array.isArray(props.effect.config.selectedModes)) {
+    props.effect.config.selectedModes = props.effect.config.selectedModes.filter(m => (typeof m === 'object' ? m.id !== itemId : m !== itemId));
+    if (props.effect.config.selectedModes.length === 0 && cfg.value?.defaultModes) {
+      props.effect.config.selectedModes = [{ id: 'wall_crawling', name: 'Wall-crawling', ranks: 1 }];
+    }
+  } else if (base === 'Comprehend' && Array.isArray(props.effect.config.selectedModes)) {
+    props.effect.config.selectedModes = props.effect.config.selectedModes.filter(id => id !== itemId);
+    if (props.effect.config.selectedModes.length === 0 && cfg.value?.defaultModes) {
+      props.effect.config.selectedModes = [...cfg.value.defaultModes];
+    }
+  } else if (base === 'Environment' && Array.isArray(props.effect.config.selectedElements)) {
+    props.effect.config.selectedElements = props.effect.config.selectedElements.filter(id => id !== itemId);
+    if (props.effect.config.selectedElements.length === 0 && cfg.value?.defaultElements) {
+      props.effect.config.selectedElements = [...cfg.value.defaultElements];
+    }
+  } else if (base === 'Concealment' && Array.isArray(props.effect.config.selectedSenses)) {
+    props.effect.config.selectedSenses = props.effect.config.selectedSenses.filter(id => id !== itemId);
+    if (props.effect.config.selectedSenses.length === 0 && cfg.value?.defaultSenses) {
+      props.effect.config.selectedSenses = [...cfg.value.defaultSenses];
+    }
+  }
+
+  updateConfig();
+}
+
+function isCustomTrait(traitName) {
+  return (props.effect?.config?.customItems || []).some(c => c.name === traitName || c.id === traitName);
+}
+
+function editCustomTrait(traitName) {
+  const item = (props.effect?.config?.customItems || []).find(c => c.name === traitName || c.id === traitName);
+  if (item) {
+    editCustomSubItem(item);
+  }
+}
+
+function deleteCustomTrait(traitName) {
+  const item = (props.effect?.config?.customItems || []).find(c => c.name === traitName || c.id === traitName);
+  if (item) {
+    props.effect.config.customItems = props.effect.config.customItems.filter(c => c.id !== item.id);
+  }
+  if (Array.isArray(props.effect?.config?.selectedTraits)) {
+    props.effect.config.selectedTraits = props.effect.config.selectedTraits.filter(t => t !== traitName);
+    if (props.effect.config.selectedTraits.length === 0) {
+      const defaultT = cfg.value?.categories?.[currentTraitCategory.value]?.traits?.[0] || 'Strength';
+      props.effect.config.selectedTraits = [defaultT];
+      props.effect.config.traitName = defaultT;
+    }
+  }
   updateConfig();
 }
 </script>
@@ -2263,16 +2976,131 @@ function selectVariableTheme(theme) {
 }
 
 .trait-chip.active {
-  background: rgba(56, 239, 125, 0.18);
-  border-color: #38ef7d;
+  background: rgba(59, 130, 246, 0.18);
+  border-color: #3b82f6;
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 0 10px rgba(56, 239, 125, 0.25);
+  box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
 }
 
 .chip-check {
-  color: #38ef7d;
-  font-weight: bold;
+  color: #60a5fa;
+  font-size: 0.9rem;
+}
+
+.chip-uncheck {
+  color: rgba(255, 255, 255, 0.35);
+  font-size: 0.9rem;
+}
+
+/* Multi-Select Enhanced Trait Ribbon & Presets */
+.selected-traits-ribbon {
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.28);
+  border-radius: 8px;
+  padding: 0.6rem 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+
+.selected-traits-ribbon .ribbon-title {
+  color: #60a5fa;
+  font-size: 0.76rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.trait-active-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(59, 130, 246, 0.16);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  color: #f1f5f9;
+  border-radius: 999px;
+  padding: 0.22rem 0.6rem;
+  font-size: 0.76rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.trait-active-pill:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+}
+
+.trait-active-pill:disabled {
+  opacity: 0.75;
+  cursor: default;
+}
+
+.trait-active-pill .pill-bonus {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #93c5fd;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 0.05rem 0.35rem;
+  border-radius: 4px;
+}
+
+.trait-active-pill .pill-close {
+  font-size: 0.8rem;
+  color: #94a3b8;
+  margin-left: 0.1rem;
+}
+
+.trait-active-pill:hover:not(:disabled) .pill-close {
+  color: #fca5a5;
+}
+
+.trait-presets-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.65rem;
+  padding: 0.35rem 0.6rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.presets-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-transform: uppercase;
+}
+
+.preset-pill-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.preset-pill-btn:hover {
+  background: rgba(59, 130, 246, 0.2);
+  border-color: #3b82f6;
+  color: #fff;
 }
 
 .no-results-msg {
@@ -3645,5 +4473,456 @@ function selectVariableTheme(theme) {
 
 .text-input:focus {
   border-color: #38ef7d;
+}
+
+/* =========================================================================
+   8. Custom Sub-Target / Sub-Effect Styles & Cyber-Tactical Modal
+   ========================================================================= */
+.btn-custom-sub-target {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #38ef7d;
+  background: rgba(56, 239, 125, 0.08);
+  border: 1px dashed rgba(56, 239, 125, 0.4);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  white-space: nowrap;
+}
+
+.btn-custom-sub-target:hover {
+  background: rgba(56, 239, 125, 0.2);
+  border-color: #38ef7d;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(56, 239, 125, 0.15);
+}
+
+.selector-header-actions,
+.lib-actions-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.custom-badge-pill {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  padding: 0.1rem 0.4rem;
+  border-radius: 3px;
+  background: rgba(245, 158, 11, 0.2);
+  color: #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  text-transform: uppercase;
+}
+
+.custom-badge-pill-micro {
+  font-size: 0.55rem;
+  font-weight: 800;
+  padding: 0.05rem 0.3rem;
+  border-radius: 3px;
+  background: rgba(245, 158, 11, 0.25);
+  color: #fbbf24;
+  margin-left: 0.25rem;
+}
+
+.custom-item-card {
+  border-color: rgba(245, 158, 11, 0.3) !important;
+}
+
+.custom-item-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.btn-custom-action {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
+  padding: 0.2rem 0.35rem;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.btn-custom-action.edit:hover {
+  color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(56, 189, 248, 0.15);
+}
+
+.btn-custom-action.delete:hover {
+  color: #ef4444;
+  border-color: rgba(239, 68, 68, 0.5);
+  background: rgba(239, 68, 68, 0.15);
+}
+
+.custom-chip-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  margin-left: 0.3rem;
+}
+
+.btn-micro-action {
+  background: none;
+  border: none;
+  color: #94a3b8;
+  cursor: pointer;
+  font-size: 0.7rem;
+  padding: 0 0.15rem;
+  display: inline-flex;
+  align-items: center;
+}
+
+.btn-micro-action.edit:hover {
+  color: #38bdf8;
+}
+
+.btn-micro-action.delete:hover {
+  color: #ef4444;
+}
+
+.card-top-right,
+.mode-right-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.library-title-label,
+.movement-strip-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+/* Custom Sub-Effect Modal Dialog */
+.custom-sub-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: rgba(5, 10, 20, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+}
+
+.custom-sub-modal-dialog {
+  width: 100%;
+  max-width: 640px;
+  background: #0f172a;
+  border: 1px solid rgba(56, 239, 125, 0.25);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(56, 239, 125, 0.12);
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  max-height: 90vh;
+  animation: modalScaleIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes modalScaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.modal-dialog-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.5);
+}
+
+.modal-dialog-header .header-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.header-icon-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(56, 239, 125, 0.12);
+  border: 1px solid rgba(56, 239, 125, 0.3);
+  color: #38ef7d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+}
+
+.modal-title {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #f8fafc;
+  margin: 0;
+}
+
+.modal-subtitle {
+  font-size: 0.72rem;
+  color: #94a3b8;
+}
+
+.modal-close-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  font-size: 1.25rem;
+  cursor: pointer;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.15s;
+}
+
+.modal-close-btn:hover {
+  color: #f8fafc;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.modal-dialog-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  overflow-y: auto;
+}
+
+.form-row-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 1rem;
+  align-items: start;
+}
+
+.form-field-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.form-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.form-label .req {
+  color: #f43f5e;
+}
+
+.form-input,
+.form-textarea {
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 0.55rem 0.75rem;
+  color: #f8fafc;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+  border-color: #38ef7d;
+  box-shadow: 0 0 0 2px rgba(56, 239, 125, 0.15);
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 64px;
+}
+
+.custom-stepper-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(2, 6, 23, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 0.2rem 0.35rem;
+}
+
+.stepper-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #e2e8f0;
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stepper-btn:hover:not(:disabled) {
+  background: rgba(56, 239, 125, 0.2);
+  border-color: #38ef7d;
+  color: #38ef7d;
+}
+
+.stepper-btn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+.stepper-input {
+  width: 42px;
+  text-align: center;
+  background: transparent;
+  border: none;
+  color: #38ef7d;
+  font-size: 0.95rem;
+  font-weight: 800;
+  outline: none;
+}
+
+.stepper-unit-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #94a3b8;
+  padding-right: 0.35rem;
+}
+
+.category-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.cat-chip-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  border-radius: 5px;
+  padding: 0.3rem 0.65rem;
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.cat-chip-btn.active {
+  background: rgba(56, 239, 125, 0.15);
+  border-color: #38ef7d;
+  color: #38ef7d;
+  font-weight: 700;
+}
+
+
+
+/* Icon Picker */
+.icon-picker-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.icon-picker-item {
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.icon-picker-item:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f8fafc;
+}
+
+.icon-picker-item.active {
+  background: rgba(56, 239, 125, 0.15);
+  border-color: #38ef7d;
+  color: #38ef7d;
+  box-shadow: 0 0 10px rgba(56, 239, 125, 0.2);
+}
+
+.modal-dialog-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(2, 6, 23, 0.5);
+}
+
+.btn-cancel {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.btn-cancel:hover {
+  color: #f8fafc;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-save-custom {
+  background: #10b981;
+  border: 1px solid #34d399;
+  color: #022c22;
+  font-weight: 800;
+  border-radius: 6px;
+  padding: 0.5rem 1.1rem;
+  font-size: 0.82rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  transition: all 0.15s;
+}
+
+.btn-save-custom:hover:not(:disabled) {
+  background: #34d399;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+}
+
+.btn-save-custom:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>
