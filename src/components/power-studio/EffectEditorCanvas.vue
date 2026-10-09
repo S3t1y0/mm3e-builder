@@ -4,7 +4,7 @@
     <div class="canvas-header">
       <div class="canvas-title-group">
         <span v-if="title" class="canvas-badge">{{ title }}</span>
-        <h4 class="canvas-effect-name">{{ effect.name || effect.baseEffect }}</h4>
+        <h4 class="canvas-effect-name">{{ currentHeaderName }}</h4>
       </div>
       <div class="canvas-cost-pill">
         <span class="cost-calc-label">Cost:</span>
@@ -70,7 +70,23 @@
         </div>
       </div>
 
-      <!-- 2. Alternate Slot Name & Capacity Bar -->
+      <!-- 2. Device Sub-Power Identity Bar (When editing a Device Sub-Power) -->
+      <div v-else-if="builderStore.power.type === 'device' && builderStore.activeSubPower && !currentSlotRef && !builderStore.isEditingLinkedEffect" class="sub-effect-identity-bar span-full">
+        <div class="sub-name-group">
+          <label class="sub-name-label">
+            <i class="ri-shield-keyhole-line"></i>
+            <span>Device Sub-Power Name</span>
+          </label>
+          <input
+            v-model="builderStore.activeSubPower.name"
+            type="text"
+            class="sub-name-input"
+            placeholder="e.g. Chest Armor, Repulsor Cannon, Micro-Thrusters..."
+          />
+        </div>
+      </div>
+
+      <!-- 3. Alternate Slot Name & Capacity Bar -->
       <div v-else-if="currentSlotRef" class="sub-effect-identity-bar span-full slot-identity-container">
         <div class="sub-name-group">
           <label class="sub-name-label">
@@ -94,6 +110,38 @@
           <span v-if="builderStore.activeSlotContext.isOverflow" class="overflow-tag">
             +{{ builderStore.activeSlotContext.slotValue - builderStore.activeSlotContext.capacity }} Overflow!
           </span>
+        </div>
+      </div>
+
+      <!-- 4. Linked Effect Identity Bar (When editing a Linked Effect) -->
+      <div v-else-if="builderStore.isEditingLinkedEffect" class="sub-effect-identity-bar span-full linked-identity-bar">
+        <div class="sub-name-group">
+          <label class="sub-name-label">
+            <i class="ri-links-line"></i>
+            <span>Linked Effect Name</span>
+          </label>
+          <input
+            v-model="effect.name"
+            type="text"
+            class="sub-name-input"
+            placeholder="e.g. Secondary Neurotoxin, Knockdown Impact..."
+          />
+        </div>
+      </div>
+
+      <!-- 5. Standard Power Primary Effect Display Name (Optional) -->
+      <div v-else-if="builderStore.power.type === 'standard' && builderStore.activeTargetType === 'main' && !builderStore.isEditingLinkedEffect" class="sub-effect-identity-bar span-full">
+        <div class="sub-name-group">
+          <label class="sub-name-label">
+            <i class="ri-edit-line"></i>
+            <span>Effect Display Name (Optional)</span>
+          </label>
+          <input
+            v-model="effect.name"
+            type="text"
+            class="sub-name-input"
+            :placeholder="`e.g. Custom name for ${effect.baseEffect || 'Effect'}...`"
+          />
         </div>
       </div>
 
@@ -495,6 +543,19 @@ const currentSlotRef = computed(() => {
     return builderStore.activeCompoundEffect?.alternateEffects?.[builderStore.activeSlotIndex] || null;
   }
   return null;
+});
+
+const currentHeaderName = computed(() => {
+  if (builderStore.power.type === 'device' && builderStore.activeSubPower && !currentSlotRef.value && !builderStore.isEditingLinkedEffect) {
+    return builderStore.activeSubPower.name || builderStore.activeSubPower.effect?.baseEffect || 'Device Sub-Power';
+  }
+  if (builderStore.isCompoundMode && (builderStore.activeTargetType === 'compound' || builderStore.activeTargetType === 'compound_linked') && builderStore.activeCompoundEffect) {
+    return builderStore.activeCompoundEffect.name || builderStore.activeCompoundEffect.effect?.baseEffect || 'Component Effect';
+  }
+  if (currentSlotRef.value) {
+    return currentSlotRef.value.name || currentSlotRef.value.effect?.baseEffect || 'Alternate Stunt';
+  }
+  return props.effect?.name || props.effect?.baseEffect || 'Effect';
 });
 
 function getEffectIcon(baseEffect) {

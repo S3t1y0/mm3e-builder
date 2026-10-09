@@ -6,7 +6,7 @@
         <div style="display: flex; align-items: center; gap: 1rem;">
           <div class="r20-modal-title">
             <i class="ri-printer-fill" style="margin-right: 0.35rem;"></i>
-            ROLL20 CHARACTER SHEET &amp; EXPORT
+            ROLL20 CHARACTER SHEET &amp; MACROS
           </div>
           <div class="r20-tab-pills">
             <button
@@ -22,13 +22,6 @@
               @click="currentTab = 'macros'"
             >
               <i class="ri-terminal-box-line"></i> Roll20 Macros
-            </button>
-            <button
-              class="r20-tab-pill"
-              :class="{ active: currentTab === 'text' }"
-              @click="currentTab = 'text'"
-            >
-              <i class="ri-file-text-line"></i> Markdown & BBCode
             </button>
           </div>
         </div>
@@ -335,7 +328,7 @@
 
         <div class="macro-category-row mb-3">
           <button
-            v-for="cat in ['All', 'Attacks', 'Defenses', 'Abilities', 'Initiative']"
+            v-for="cat in ['All', 'Attacks', 'Defenses', 'Skills', 'Abilities', 'Initiative']"
             :key="cat"
             class="cat-filter-btn"
             :class="{ active: macroFilter === cat }"
@@ -363,38 +356,6 @@
           </div>
         </div>
       </div>
-
-      <!-- TAB 3: TEXT EXPORT (MARKDOWN & BBCODE) -->
-      <div v-else class="r20-tab-scroll">
-        <div class="text-format-switch mb-3">
-          <div style="display: flex; gap: 0.5rem;">
-            <button
-              class="modal-tab-btn"
-              :class="{ active: textFormat === 'markdown' }"
-              @click="textFormat = 'markdown'"
-            >
-              <i class="ri-markdown-line"></i> Markdown (Discord / GitHub / Obsidian)
-            </button>
-            <button
-              class="modal-tab-btn"
-              :class="{ active: textFormat === 'bbcode' }"
-              @click="textFormat = 'bbcode'"
-            >
-              <i class="ri-code-box-line"></i> BBCode (Classic RPG Forums)
-            </button>
-          </div>
-          <button class="btn btn-primary btn-sm" @click="copyTextExport">
-            <i class="ri-file-copy-line"></i> Copy {{ textFormat.toUpperCase() }}
-          </button>
-        </div>
-
-        <textarea
-          readonly
-          class="text-export-textarea"
-          :value="activeTextContent"
-          @click="$event.target.select()"
-        ></textarea>
-      </div>
     </div>
   </div>
 </template>
@@ -404,14 +365,13 @@ import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
-import { generateRoll20Macros, buildMarkdownSheet, buildBBCodeSheet } from '../../utils/exporters.js';
+import { generateRoll20Macros } from '../../utils/exporters.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
 
 const currentTab = ref('preview');
 const macroFilter = ref('All');
-const textFormat = ref('markdown');
 
 const basicConditions = [
   'Dazed', 'Defenseless', 'Disabled', 'Fatigued',
@@ -469,13 +429,6 @@ const filteredMacros = computed(() => {
   return macrosList.value.filter(m => m.category === macroFilter.value);
 });
 
-const activeTextContent = computed(() => {
-  if (textFormat.value === 'markdown') {
-    return buildMarkdownSheet(heroStore.character, heroStore);
-  }
-  return buildBBCodeSheet(heroStore.character, heroStore);
-});
-
 function handlePrint() {
   window.print();
 }
@@ -496,15 +449,6 @@ async function copyAllMacros() {
     uiStore.showToast('All macros copied to clipboard!', 'success');
   } catch (e) {
     uiStore.showToast('Failed to copy macros', 'error');
-  }
-}
-
-async function copyTextExport() {
-  try {
-    await navigator.clipboard.writeText(activeTextContent.value);
-    uiStore.showToast(`${textFormat.value.toUpperCase()} sheet copied to clipboard!`, 'success');
-  } catch (e) {
-    uiStore.showToast('Failed to copy text', 'error');
   }
 }
 </script>

@@ -14,7 +14,8 @@ export const useUiStore = defineStore('ui', {
       share: false,
       conditions: false,
       exportImport: false,
-      printOfficial: false
+      printOfficial: false,
+      markdown: false
     },
     exportImportInitialTab: 'export',
     toasts: []

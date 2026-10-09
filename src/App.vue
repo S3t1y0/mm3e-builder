@@ -94,7 +94,6 @@
               <i class="ri-hard-drive-2-line icon-teal"></i>
               <div class="dropdown-item-text">
                 <strong>Saved Heroes Vault</strong>
-                <span>Manage local character slots</span>
               </div>
             </button>
 
@@ -102,7 +101,6 @@
               <i class="ri-folder-transfer-line icon-teal"></i>
               <div class="dropdown-item-text">
                 <strong>Export / Import JSON</strong>
-                <span>Backup or load hero JSON file</span>
               </div> 
             </button>
 
@@ -110,15 +108,20 @@
               <i class="ri-printer-line icon-sapphire"></i>
               <div class="dropdown-item-text">
                 <strong>Print Official Sheet (PDF)</strong>
-                <span>Official Green Ronin character sheet</span>
+              </div>
+            </button>
+
+            <button class="dropdown-item" @click="handleToolAction('markdown')">
+              <i class="ri-markdown-line icon-teal"></i>
+              <div class="dropdown-item-text">
+                <strong>Export Markdown &amp; BBCode</strong>
               </div>
             </button>
 
             <button class="dropdown-item" @click="handleToolAction('roll20')">
-              <i class="ri-terminal-box-line icon-teal"></i>
+              <i class="ri-terminal-box-line icon-sapphire"></i>
               <div class="dropdown-item-text">
                 <strong>Roll20 Sheet &amp; Macros</strong>
-                <span>Tabletop macros &amp; text export</span>
               </div>
             </button>
 
@@ -223,6 +226,7 @@
     <ShareModal />
     <GreenRoninPrintModal />
     <Roll20PrintModal />
+    <MarkdownExportModal />
     <AdvantageLibraryModal />
     <ConditionPickerModal />
 
@@ -260,6 +264,7 @@ import ExportImportModal from './components/modals/ExportImportModal.vue';
 import ShareModal from './components/modals/ShareModal.vue';
 import GreenRoninPrintModal from './components/modals/GreenRoninPrintModal.vue';
 import Roll20PrintModal from './components/modals/Roll20PrintModal.vue';
+import MarkdownExportModal from './components/modals/MarkdownExportModal.vue';
 import AdvantageLibraryModal from './components/modals/AdvantageLibraryModal.vue';
 import ConditionPickerModal from './components/modals/ConditionPickerModal.vue';
 import DiceRollHud from './components/sheet/DiceRollHud.vue';
@@ -338,6 +343,8 @@ function handleToolAction(action) {
     uiStore.openExportImport('export');
   } else if (action === 'printOfficial') {
     uiStore.openModal('printOfficial');
+  } else if (action === 'markdown') {
+    uiStore.openModal('markdown');
   } else if (action === 'roll20') {
     uiStore.openModal('roll20');
   } else if (action === 'reset') {
