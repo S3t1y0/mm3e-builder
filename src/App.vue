@@ -114,7 +114,7 @@
             <button class="dropdown-item" @click="handleToolAction('markdown')">
               <i class="ri-markdown-line icon-teal"></i>
               <div class="dropdown-item-text">
-                <strong>Export Markdown &amp; BBCode</strong>
+                <strong>Export Markdown &amp; Text</strong>
               </div>
             </button>
 
