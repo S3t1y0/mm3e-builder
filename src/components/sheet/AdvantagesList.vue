@@ -92,7 +92,7 @@
               <h4 class="adv-card-name" :title="adv.displayName || adv.name">
                 {{ adv.name }}
               </h4>
-              <span v-if="adv.specification" class="adv-spec-badge" :title="`Subtype: ${adv.specification}`">
+              <span v-if="adv.specification" class="adv-spec-badge" :title="`Specification: ${adv.specification}`">
                 {{ adv.specification }}
               </span>
             </div>
@@ -244,10 +244,10 @@
             </div>
           </div>
 
-          <!-- SPECIFICATION / SUBTYPE INPUT -->
+          <!-- SPECIFICATION / FOCUS INPUT -->
           <div class="spec-field-group">
             <label class="spec-field-label">
-              {{ getAdvRule(editingAdv.name)?.specificationLabel || 'Specification / Subtype' }}:
+              {{ getAdvRule(editingAdv.name)?.specificationLabel || 'Specification / Focus' }}:
             </label>
             <input
               v-model="editForm.specification"

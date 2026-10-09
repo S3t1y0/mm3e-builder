@@ -105,7 +105,7 @@
                     {{ adv.category || 'General' }}
                   </span>
                   <div class="adv-header-badges">
-                    <span v-if="adv.requiresSpecification" class="badge-spec" title="Requires subtype / specification">
+                    <span v-if="adv.requiresSpecification" class="badge-spec" title="Requires specific choice">
                       Specifiable
                     </span>
                     <span v-if="adv.ranked" class="badge-ranked" title="Can be taken for multiple ranks">
@@ -154,7 +154,7 @@
                           type="button"
                           class="del-btn-tiny"
                           @click="deleteInstance(inst.id)"
-                          title="Remove this subtype"
+                          title="Remove this choice"
                         >
                           <i class="ri-close-line"></i>
                         </button>
@@ -169,7 +169,7 @@
                     @click="openSpecModal(adv)"
                   >
                     <i class="ri-add-line"></i>
-                    <span>{{ getSheetInstances(adv.name).length > 0 ? 'Add Another Subtype' : 'Add with Subtype' }}</span>
+                    <span>{{ getSheetInstances(adv.name).length > 0 ? 'Add Another Choice' : 'Add with Specification' }}</span>
                   </button>
                 </template>
 
@@ -227,7 +227,7 @@
         <!-- MODAL FOOTER -->
         <div class="modal-footer">
           <span class="modal-footer-hint">
-            <i class="ri-lightbulb-line"></i> Use <strong>"Add with Subtype"</strong> for specialized advantages like Wealth, Favored Foe, or Skill Mastery.
+            <i class="ri-lightbulb-line"></i> Use <strong>"Add with Specification"</strong> for specialized advantages like Wealth, Favored Foe, or Skill Mastery.
           </span>
           <button
             type="button"
@@ -286,14 +286,14 @@
             <!-- TEXT INPUT -->
             <div class="spec-field-group">
               <label class="spec-field-label">
-                {{ activeSpecAdv.specificationLabel || 'Specification / Subtype' }}:
+                {{ activeSpecAdv.specificationLabel || 'Specification / Focus' }}:
               </label>
               <input
                 ref="specInputRef"
                 v-model="specInput"
                 type="text"
                 class="spec-text-input"
-                :placeholder="`e.g., ${activeSpecAdv.specificationSuggestions?.[0] || 'Type subtype...'}`"
+                :placeholder="`e.g., ${activeSpecAdv.specificationSuggestions?.[0] || 'Type specification...'}`"
                 @keyup.enter="confirmAddWithSpec"
               />
             </div>
@@ -390,7 +390,7 @@
 
               <div class="form-row">
                 <div class="form-col flex-2">
-                  <label class="spec-field-label">Subtype / Specification (Optional)</label>
+                  <label class="spec-field-label">Specification / Focus (Optional)</label>
                   <input
                     v-model="customForm.specification"
                     type="text"

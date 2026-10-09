@@ -113,7 +113,7 @@
                     type="button"
                     class="btn-edit-active"
                     @click="openEditSpecModal(adv)"
-                    title="Edit Subtype & Rank"
+                    title="Edit Choice & Rank"
                   >
                     <i class="ri-edit-line"></i>
                   </button>
@@ -306,7 +306,7 @@
                           type="button"
                           class="btn-edit-mini"
                           @click="openEditSpecModal(inst)"
-                          title="Edit Subtype"
+                          title="Edit Choice"
                         >
                           <i class="ri-edit-line"></i>
                         </button>
@@ -314,7 +314,7 @@
                           type="button"
                           class="btn-delete-mini"
                           @click="deleteInstance(inst.id)"
-                          title="Remove this subtype"
+                          title="Remove this choice"
                         >
                           <i class="ri-close-line"></i>
                         </button>
@@ -322,15 +322,16 @@
                     </div>
                   </div>
 
-                  <!-- Button to add new subtype -->
+                  <!-- Button to add new choice/specification -->
                   <button
                     v-if="item.allowMultiple !== false || getSheetInstances(item.name).length === 0"
                     type="button"
                     class="btn-add-feat"
+                    :class="{ 'btn-add-another': getSheetInstances(item.name).length > 0 }"
                     @click="openSpecModal(item)"
                   >
                     <i class="ri-add-line"></i>
-                    <span>{{ getSheetInstances(item.name).length > 0 ? 'Add Another Subtype' : 'Add with Subtype' }}</span>
+                    <span>{{ getSheetInstances(item.name).length > 0 ? 'Add Another Choice' : 'Add with Specification' }}</span>
                   </button>
                 </template>
 
@@ -443,11 +444,11 @@
               </div>
             </div>
 
-            <!-- Subtype / Focus Input Field -->
+            <!-- Specification / Focus Input Field -->
             <div class="form-group">
               <div class="label-with-hint">
                 <label class="form-label">
-                  {{ activeSpecAdv.specificationLabel || 'Specification / Subtype' }}
+                  {{ activeSpecAdv.specificationLabel || 'Specification / Focus' }}
                 </label>
                 <span class="spec-label-hint">Required</span>
               </div>
@@ -456,7 +457,7 @@
                 v-model="specInput"
                 type="text"
                 class="form-control spec-input"
-                :placeholder="`e.g., ${activeSpecAdv.specificationSuggestions?.[0] || 'Type subtype...'}`"
+                :placeholder="`e.g., ${activeSpecAdv.specificationSuggestions?.[0] || 'Type specification...'}`"
                 @keyup.enter="confirmAddWithSpec"
               />
             </div>
@@ -568,7 +569,7 @@
 
             <div class="form-row-grid">
               <div class="form-group flex-2">
-                <label class="form-label">Subtype / Specification (Optional)</label>
+                <label class="form-label">Specification / Focus (Optional)</label>
                 <input
                   v-model="customForm.specification"
                   type="text"
@@ -1628,8 +1629,9 @@ function removeAdvantage(idOrName) {
 
 .catalog-card-footer {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 0.45rem;
+  width: 100%;
   padding-top: 0.55rem;
   border-top: 1px solid rgba(255, 255, 255, 0.06);
 }
@@ -1642,12 +1644,13 @@ function removeAdvantage(idOrName) {
   color: #fff;
   font-size: 0.78rem;
   font-weight: 700;
-  padding: 0.35rem 0.65rem;
+  padding: 0.4rem 0.65rem;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.35rem;
+  white-space: nowrap;
   transition: all var(--trans-fast);
 }
 
@@ -1659,7 +1662,24 @@ function removeAdvantage(idOrName) {
 }
 
 .btn-add-feat:active {
-  transform: scale(0.96);
+  transform: scale(0.98);
+}
+
+.btn-add-feat.btn-add-another {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px dashed rgba(255, 255, 255, 0.2);
+  color: var(--text-secondary, #cbd5e1);
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+}
+
+.btn-add-feat.btn-add-another:hover {
+  background: rgba(0, 111, 184, 0.16);
+  border-color: var(--accent-primary, #006fb8);
+  border-style: solid;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(0, 111, 184, 0.25);
 }
 
 .card-added-controls {
@@ -1868,36 +1888,42 @@ function removeAdvantage(idOrName) {
   flex-direction: column;
   gap: 0.35rem;
   width: 100%;
-  margin-bottom: 0.45rem;
+  margin-bottom: 0.25rem;
+  max-height: 130px;
+  overflow-y: auto;
+  scrollbar-width: thin;
 }
 
 .catalog-subtype-chip {
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.045);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 4px;
-  padding: 0.25rem 0.45rem;
+  padding: 0.3rem 0.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 0.4rem;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .subtype-info {
   display: flex;
   align-items: center;
   gap: 0.35rem;
-  font-size: 0.75rem;
+  font-size: 0.76rem;
   font-weight: 700;
   color: #fff;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  flex: 1;
 }
 
 .subtype-info i {
-  color: #34d399;
-  font-size: 0.82rem;
+  color: #10b981;
+  font-size: 0.85rem;
   flex-shrink: 0;
 }
 
