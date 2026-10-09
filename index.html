@@ -102,34 +102,89 @@
   <link
     href="https://fonts.googleapis.com/css2?family=Barlow:wght@600;700;800&family=Geist+Mono:wght@400;500;600;700&family=Roboto:wght@400;500;700&display=swap"
     rel="stylesheet" />
+  <style>
+    /* Clean pre-hydration style: elegant dark theme before Vue mounts */
+    .seo-crawler-content {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 2.5rem 1.5rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      color: #94a3b8;
+      line-height: 1.6;
+    }
+    .seo-crawler-content h1 { color: #38bdf8; font-size: 1.85rem; font-weight: 800; margin-bottom: 0.75rem; }
+    .seo-crawler-content h2 { color: #f1f5f9; font-size: 1.25rem; font-weight: 700; margin-top: 1.75rem; margin-bottom: 0.5rem; border-bottom: 1px solid rgba(255,255,255,0.08); padding-bottom: 0.35rem; }
+    .seo-crawler-content p { color: #94a3b8; margin-bottom: 0.75rem; font-size: 0.95rem; }
+    .seo-crawler-content ul { color: #cbd5e1; margin-bottom: 1rem; padding-left: 1.35rem; }
+    .seo-crawler-content li { margin-bottom: 0.45rem; }
+    .seo-crawler-content a { color: #38bdf8; text-decoration: underline; text-underline-offset: 3px; }
+    .seo-crawler-content a:hover { color: #7dd3fc; }
+  </style>
 </head>
 
 <body>
   <!-- Pre-hydration Content: Crawlers and search engine bots parse this semantic content immediately before Vue mounts -->
   <div id="app">
-    <main style="display:none;" aria-hidden="true">
-      <h1>Mutants & Masterminds 3e Character Builder & Tactical Sheet</h1>
-      <p>A digital character builder, tactical character sheet, and power construction workspace for the Mutants &
-        Masterminds 3rd Edition (M&M 3e / D20 Hero System) tabletop roleplaying game.</p>
-      <section>
-        <h2>Key Features</h2>
+    <main class="seo-crawler-content">
+      <header>
+        <h1>Mutants &amp; Masterminds 3e Character Builder &amp; Sheet</h1>
+        <p>Welcome to the free digital character builder, tactical character sheet, and power construction studio for the Mutants &amp; Masterminds 3rd Edition (M&amp;M 3e / D20 Hero System) tabletop roleplaying game.</p>
+      </header>
+
+      <nav aria-label="Quick Feature Navigation">
+        <h2>Quick Feature Navigation</h2>
         <ul>
-          <li>Tactical character sheet with dynamic defense, ability, and combat calculations</li>
-          <li>Guided Character Creation Wizard with pre-configured archetypes</li>
-          <li>Power Studio: Custom superpower builder with alternate effect arrays, flaws, and extras</li>
-          <li>Equipment and vehicle budgeting</li>
-          <li>Roll20 Virtual Tabletop (VTT) companion integration</li>
+          <li><a href="#character-sheet">Interactive Tactical Character Sheet</a></li>
+          <li><a href="#creation-wizard">Guided Character Creation Wizard</a></li>
+          <li><a href="#power-studio">Advanced Superpower Studio &amp; Array Builder</a></li>
+          <li><a href="#official-print">Official Green Ronin Sheet PDF Print Format</a></li>
+          <li><a href="#roll20-bridge">Roll20 VTT Companion Extension &amp; Macros</a></li>
+        </ul>
+      </nav>
+
+      <section id="automated-rules">
+        <h2>Automated Power Point Bookkeeping &amp; PL Validation</h2>
+        <p>Building superhero characters in the D20 Hero System requires careful mathematical budgeting. This application automates all Power Point (PP) bookkeeping, ability modifiers, and Power Level (PL) cap calculations.</p>
+        <p>The builder dynamically verifies offensive caps (Attack Bonus + Effect Rank) and defensive caps (Dodge/Parry + Toughness, Fortitude + Will) in accordance with official Mutants &amp; Masterminds 3rd Edition rules.</p>
+      </section>
+
+      <section id="core-capabilities">
+        <h2>Core Features for Superhero Tabletop RPG Campaigns</h2>
+        <ul>
+          <li id="character-sheet"><strong>Tactical Character Sheet:</strong> Manage active conditions, dynamic defenses, attack maneuvers, initiative rolls, and hero point reserves during live play.</li>
+          <li id="creation-wizard"><strong>Creation Wizard:</strong> Build heroes from the ground up or select pre-configured archetypes such as Battlesuit, Speedster, Mystic, Paragon, and Martial Artist.</li>
+          <li id="power-studio"><strong>Superpower Studio:</strong> Design custom superpowers with dynamic extras, flat modifiers, flaws, and alternate effect arrays with automated cost-per-rank calculations.</li>
+          <li id="official-print"><strong>Official Sheet Print (PDF):</strong> Export clean, authentic two-page Green Ronin style character sheets optimized for A4 and Letter print formats.</li>
+          <li id="roll20-bridge"><strong>Roll20 VTT Integration:</strong> Generate one-click Roll20 chat macros, markdown summaries, BBCode forum sheets, and connect with our companion browser extension.</li>
+        </ul>
+      </section>
+
+      <section id="hero-creation-guide">
+        <h2>Step-by-Step Character Creation Guide</h2>
+        <p>First, choose your campaign Power Level. Standard superhero games start at Power Level 10 with a starting budget of 150 Power Points.</p>
+        <p>Next, allocate your primary ability scores across Strength, Agility, Fighting, Awareness, Stamina, Dexterity, Intellect, and Presence.</p>
+        <p>Then, craft your superpowers using base effect types like Damage, Affliction, Movement, and Protection. Apply modifiers to fit your superhero origin story.</p>
+        <p>Finally, balance your defensive caps and select essential combat advantages and skills to complete your hero profile.</p>
+      </section>
+
+      <section id="tabletop-resources">
+        <h2>Tabletop Roleplaying Game Resources</h2>
+        <p>Explore official rules, character concepts, and virtual tabletop tools across the superhero gaming community:</p>
+        <ul>
+          <li><a href="https://greenronin.com/" target="_blank" rel="noopener noreferrer">Green Ronin Publishing</a> &mdash; Official publisher of Mutants &amp; Masterminds.</li>
+          <li><a href="https://www.d20herosrd.com/" target="_blank" rel="noopener noreferrer">D20 Hero SRD</a> &mdash; Open Gaming License rules reference and character creation guide.</li>
+          <li><a href="https://roll20.net/" target="_blank" rel="noopener noreferrer">Roll20 Virtual Tabletop</a> &mdash; Virtual tabletop platform for online superhero campaigns.</li>
+          <li><a href="https://github.com/S3t1y0/mm3e-builder" target="_blank" rel="noopener noreferrer">MM3E Builder GitHub Repository</a> &mdash; Open-source codebase, community feedback, and release notes.</li>
         </ul>
       </section>
     </main>
   </div>
 
   <noscript>
-    <div style="padding: 2rem; font-family: sans-serif; background: #0f172a; color: #f8fafc; text-align: center;">
-      <h1>Mutants & Masterminds 3e Character Builder</h1>
-      <p>This web application requires JavaScript to be enabled in order to run the interactive character builder, power
-        studio, and dice mechanics.</p>
-      <p>Please enable JavaScript in your browser settings to continue.</p>
+    <div style="padding: 2.5rem 1.5rem; font-family: sans-serif; background: #0f172a; color: #f8fafc; max-width: 800px; margin: 0 auto; text-align: left; line-height: 1.6;">
+      <h1>Mutants &amp; Masterminds 3e Character Builder</h1>
+      <p>This web application requires JavaScript to run the interactive character sheet, power calculations, and dice mechanics.</p>
+      <p>Please enable JavaScript in your browser settings to access the full hero builder workspace.</p>
     </div>
   </noscript>
 
