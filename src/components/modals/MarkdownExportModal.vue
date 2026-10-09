@@ -313,6 +313,11 @@ function downloadTextFile() {
   box-shadow: 0 0 0 1px var(--accent-secondary, #2a8fd6);
 }
 
+.text-export-textarea:focus-visible {
+  outline: 2px solid var(--accent-secondary, #2a8fd6);
+  outline-offset: 2px;
+}
+
 @media (max-width: 640px) {
   .text-format-switch {
     flex-direction: column;

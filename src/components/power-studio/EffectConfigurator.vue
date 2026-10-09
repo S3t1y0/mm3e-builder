@@ -657,7 +657,7 @@
             <i class="ri-shield-line"></i> Resistance Defense Check:
           </label>
           <span v-if="altResistanceMod" class="alt-res-badge">
-            <i class="ri-magic-line"></i> Alternate Resistance Active
+            <i class="ri-shield-cross-line"></i> Alternate Resistance Active
           </span>
         </div>
         <div class="res-toggle-group">
@@ -2850,7 +2850,7 @@ function deleteCustomTrait(traitName) {
   background: rgba(79, 143, 247, 0.15);
   border-color: #3b82f6;
   color: #ffffff;
-  box-shadow: 0 0 12px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .cat-btn-left {
@@ -2978,7 +2978,7 @@ function deleteCustomTrait(traitName) {
   border-color: #3b82f6;
   color: #ffffff;
   font-weight: 700;
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .chip-check {
@@ -3570,7 +3570,7 @@ function deleteCustomTrait(traitName) {
 .preset-chip-btn.active {
   background: rgba(168, 85, 247, 0.15);
   border-color: #a855f7;
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .preset-name {
@@ -3656,14 +3656,14 @@ function deleteCustomTrait(traitName) {
   background: rgba(59, 130, 246, 0.2);
   border-color: #3b82f6;
   color: #93c5fd;
-  box-shadow: 0 0 8px rgba(59, 130, 246, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .mod-toggle-chip.flaw.active {
   background: rgba(239, 68, 68, 0.18);
   border-color: #ef4444;
   color: #fca5a5;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .chip-rank-badge {
@@ -3731,13 +3731,13 @@ function deleteCustomTrait(traitName) {
 .affliction-progression-ribbon.progressive {
   background: linear-gradient(90deg, rgba(6, 182, 212, 0.12) 0%, rgba(59, 130, 246, 0.08) 100%);
   border-color: rgba(6, 182, 212, 0.3);
-  box-shadow: 0 0 12px rgba(6, 182, 212, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .affliction-progression-ribbon.cumulative {
   background: linear-gradient(90deg, rgba(168, 85, 247, 0.12) 0%, rgba(99, 102, 241, 0.08) 100%);
   border-color: rgba(168, 85, 247, 0.3);
-  box-shadow: 0 0 12px rgba(168, 85, 247, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .progression-ribbon-left {
@@ -4620,7 +4620,7 @@ function deleteCustomTrait(traitName) {
   max-width: 640px;
   background: #0f172a;
   border: 1px solid rgba(56, 239, 125, 0.25);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), 0 0 24px rgba(56, 239, 125, 0.12);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
   border-radius: 12px;
   display: flex;
   flex-direction: column;
@@ -4865,7 +4865,7 @@ function deleteCustomTrait(traitName) {
   background: rgba(56, 239, 125, 0.15);
   border-color: #38ef7d;
   color: #38ef7d;
-  box-shadow: 0 0 10px rgba(56, 239, 125, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .modal-dialog-footer {

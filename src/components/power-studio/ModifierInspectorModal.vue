@@ -395,7 +395,7 @@ watch([activeCategory, searchQuery, filterCompatibleOnly], () => {
 function getCategoryIcon(cat) {
   switch (cat) {
     case 'all': return 'ri-apps-line';
-    case 'suggested': return 'ri-magic-line';
+    case 'suggested': return 'ri-lightbulb-line';
     case 'Combat': return 'ri-sword-line';
     case 'Duration & Action': return 'ri-time-line';
     case 'Action & Activation': return 'ri-flashlight-line';

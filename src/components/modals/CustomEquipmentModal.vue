@@ -1916,7 +1916,7 @@ function saveEquipmentItem() {
 .cat-select-card.selected {
   background: rgba(56, 189, 248, 0.1);
   border-color: #38bdf8;
-  box-shadow: 0 0 15px rgba(56, 189, 248, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .cat-card-icon {
@@ -2007,6 +2007,13 @@ function saveEquipmentItem() {
   outline: none;
   background: rgba(15, 23, 42, 0.6);
   box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.eq-text-input:focus-visible,
+.eq-select:focus-visible,
+.eq-textarea:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
 }
 
 .preset-name-suggestions {

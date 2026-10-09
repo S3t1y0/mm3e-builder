@@ -108,7 +108,7 @@
                   @click="toggleStatus(item.id)"
                   title="Click to cycle status (Equipped -> In Bag -> Stored)"
                 >
-                  <i v-if="item.status === 'equipped' || !item.status" class="ri-checkbox-circle-fill pulse"></i>
+                  <i v-if="item.status === 'equipped' || !item.status" class="ri-checkbox-circle-fill"></i>
                   <i v-else-if="item.status === 'carried'" class="ri-inbox-line"></i>
                   <i v-else class="ri-archive-line"></i>
                   <span>{{ formatStatus(item.status) }}</span>
@@ -1161,13 +1161,4 @@ function exportRoll20(item) {
   color: #38bdf8;
 }
 
-.pulse {
-  animation: pulse 1.5s infinite;
-}
-
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.15); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
-}
 </style>

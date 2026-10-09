@@ -1659,7 +1659,6 @@
   font-weight: 900;
   color: #f87171;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 8px rgba(220, 38, 38, 0.4);
 }
 
 .pb-studio-body {
@@ -4263,7 +4262,6 @@
   color: #f87171;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  text-shadow: 0 0 16px rgba(220, 38, 38, 0.4);
 }
 
 .cost-unit {

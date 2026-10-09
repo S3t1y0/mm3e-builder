@@ -824,18 +824,18 @@ function confirmCreateCustomAdv() {
   border-color: rgba(96, 165, 250, 0.45);
   background: rgba(22, 28, 44, 0.88);
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(59, 130, 246, 0.14);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .adv-catalog-card.added {
   border-color: rgba(16, 185, 129, 0.45);
   background: rgba(16, 185, 129, 0.04);
-  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .adv-catalog-card.added:hover {
   border-color: rgba(16, 185, 129, 0.65);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4), 0 0 16px rgba(16, 185, 129, 0.18);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
 }
 
 .adv-card-header {
@@ -1323,6 +1323,13 @@ function confirmCreateCustomAdv() {
 .spec-textarea-input:focus {
   border-color: #3b82f6;
   box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
+}
+
+.spec-text-input:focus-visible,
+.spec-select-input:focus-visible,
+.spec-textarea-input:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
 }
 
 .spec-rank-stepper-wrap {

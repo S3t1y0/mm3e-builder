@@ -856,7 +856,6 @@
 
 .injury-count-val.wounded {
   color: #f87171;
-  text-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
 }
 
 .injury-quick-actions {
@@ -4421,7 +4420,6 @@
 
 .dndb-vital-box.damage-box .dndb-vital-val.wounded {
   color: #f87171;
-  text-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
 }
 
 .dndb-injury-status-row {
@@ -5692,7 +5690,7 @@
   margin-top: 0.35rem;
   padding: 0.4rem 0.65rem;
   background: rgba(15, 23, 42, 0.45);
-  border-left: 2px solid #38bdf8;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
   border-radius: var(--radius-xs);
   transition: all var(--trans-fast);
 }
@@ -5887,7 +5885,7 @@
   margin-top: 0.35rem;
   padding: 0.4rem 0.65rem;
   background: rgba(15, 23, 42, 0.45);
-  border-left: 2px solid #38bdf8;
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
   border-radius: var(--radius-xs);
   transition: all var(--trans-fast);
 }

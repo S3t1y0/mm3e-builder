@@ -1100,7 +1100,7 @@ function broadcastComplication(item) {
 }
 
 .card-motivation {
-  border-left: 3px solid #a855f7;
+  border: 1px solid rgba(168, 85, 247, 0.25);
 }
 
 .card-motivation:hover {
@@ -1109,7 +1109,7 @@ function broadcastComplication(item) {
 }
 
 .card-complication {
-  border-left: 3px solid #f43f5e;
+  border: 1px solid rgba(244, 63, 94, 0.25);
 }
 
 .card-complication:hover {
@@ -1211,11 +1211,13 @@ function broadcastComplication(item) {
 }
 
 .quote-mot {
-  border-left: 2px solid rgba(168, 85, 247, 0.4);
+  border: 1px solid rgba(168, 85, 247, 0.2);
+  border-radius: var(--radius-sm);
 }
 
 .quote-comp {
-  border-left: 2px solid rgba(244, 63, 94, 0.4);
+  border: 1px solid rgba(244, 63, 94, 0.2);
+  border-radius: var(--radius-sm);
 }
 
 .comp-desc {

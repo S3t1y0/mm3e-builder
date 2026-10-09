@@ -22,8 +22,7 @@
   position: sticky;
   top: 3.75rem; /* just below top menubar */
   z-index: 40;
-  backdrop-filter: blur(8px);
-  background: rgba(15, 23, 42, 0.92);
+  background: #0f172a;
 }
 
 .wizard-stepper {
@@ -446,8 +445,7 @@
 }
 
 .wizard-skill-item.is-specialization {
-  border-left: 3px solid var(--accent-secondary);
-  background: linear-gradient(90deg, rgba(56, 189, 248, 0.04) 0%, var(--bg-card) 100%);
+  border-color: rgba(56, 189, 248, 0.4);
 }
 
 .wizard-skill-meta {
@@ -947,7 +945,7 @@
   font-size: 0.8rem;
   line-height: 1.45;
   color: var(--text-secondary);
-  border-left: 3px solid var(--accent-secondary);
+  border: 1px solid var(--border-color);
 }
 
 /* 14. PERSISTENT FLOATING WIZARD DOCK (BOTTOM BAR) */
@@ -956,8 +954,7 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: rgba(15, 23, 42, 0.95);
-  backdrop-filter: blur(16px);
+  background: #0f172a;
   border-top: 1px solid var(--border-color);
   box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.5);
   z-index: 50;

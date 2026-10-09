@@ -824,6 +824,11 @@ function rollSkill(skillTitle, bonus) {
   width: 100%;
 }
 
+.skills-search-input:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
 .skills-search-input::placeholder {
   color: rgba(255, 255, 255, 0.3);
 }
@@ -1498,6 +1503,11 @@ function rollSkill(skillTitle, bonus) {
 .spec-select:focus, .spec-input:focus {
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 3px rgba(0, 111, 184, 0.25);
+}
+
+.spec-select:focus-visible, .spec-input:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
 }
 
 .spec-chips-section {

@@ -14,15 +14,26 @@
           Select specialized talents, combat maneuvers, and heroic perks (<strong>1 PP per Rank</strong>).
         </p>
       </div>
-      <button
-        type="button"
-        class="btn btn-secondary btn-sm btn-open-modal"
-        @click="uiStore.openModal('advantage')"
-        title="Open Full Advantage Library"
-      >
-        <i class="ri-book-open-line"></i>
-        <span>Browse Advantage Library</span>
-      </button>
+      <div class="banner-actions">
+        <button
+          type="button"
+          class="btn btn-primary btn-sm btn-custom-adv"
+          @click="openCustomModal"
+          title="Create Custom / Homebrew Advantage"
+        >
+          <i class="ri-add-line"></i>
+          <span>Custom Advantage</span>
+        </button>
+        <button
+          type="button"
+          class="btn btn-secondary btn-sm btn-open-modal"
+          @click="uiStore.openModal('advantage')"
+          title="Open Full Advantage Library"
+        >
+          <i class="ri-book-open-line"></i>
+          <span>Browse Library</span>
+        </button>
+      </div>
     </div>
 
     <!-- MAIN COCKPIT: DUAL PANEL LAYOUT -->
@@ -93,11 +104,23 @@
                 <div class="active-feat-identity">
                   <strong class="active-feat-name">{{ adv.name }}</strong>
                   <span v-if="adv.specification" class="active-feat-spec">: {{ adv.specification }}</span>
+                  <span v-if="adv.isCustom" class="badge-custom-tag">Custom</span>
                 </div>
 
-                <span class="active-pp-cost tabular-nums">
-                  {{ getAdvantageCost(adv) }} PP
-                </span>
+                <div class="active-feat-top-actions">
+                  <button
+                    v-if="getAdvantageMeta(adv.name).requiresSpecification || adv.isCustom"
+                    type="button"
+                    class="btn-edit-active"
+                    @click="openEditSpecModal(adv)"
+                    title="Edit Subtype & Rank"
+                  >
+                    <i class="ri-edit-line"></i>
+                  </button>
+                  <span class="active-pp-cost tabular-nums">
+                    {{ getAdvantageCost(adv) }} PP
+                  </span>
+                </div>
               </div>
 
               <!-- Card Description Snippet -->
@@ -120,7 +143,7 @@
                       type="button"
                       class="step-btn"
                       :disabled="Number(adv.ranks || 1) <= 1"
-                      @click="stepAdvantage(adv.id || adv.name, -1)"
+                      @click="stepAdvantage(adv.id, -1)"
                       title="Decrease Rank"
                     >-</button>
                     <span class="step-value tabular-nums">{{ adv.ranks || 1 }}</span>
@@ -128,7 +151,7 @@
                       type="button"
                       class="step-btn"
                       :disabled="getAdvantageMeta(adv.name).maxRanks && Number(adv.ranks || 1) >= getAdvantageMeta(adv.name).maxRanks"
-                      @click="stepAdvantage(adv.id || adv.name, 1)"
+                      @click="stepAdvantage(adv.id, 1)"
                       title="Increase Rank"
                     >+</button>
                   </div>
@@ -143,7 +166,7 @@
                 <button
                   type="button"
                   class="btn-remove-active"
-                  @click="removeAdvantage(adv.id || adv.name)"
+                  @click="removeAdvantage(adv.id)"
                   title="Remove from sheet"
                 >
                   <i class="ri-delete-bin-line"></i>
@@ -235,12 +258,21 @@
               <!-- Card Header -->
               <div class="catalog-card-header">
                 <div class="card-title-group">
+                  <span class="adv-cat-tag" :class="(item.category || 'general').toLowerCase()">
+                    <i :class="getCategoryIconClass(item.category)"></i>
+                    {{ item.category || 'General' }}
+                  </span>
                   <strong class="catalog-card-name">{{ item.name }}</strong>
                 </div>
 
-                <span v-if="item.ranked" class="badge-ranked-tag" title="Can be taken multiple times">
-                  <i class="ri-star-fill"></i> Ranked
-                </span>
+                <div class="header-badges-row">
+                  <span v-if="item.requiresSpecification" class="badge-spec-tag" title="Requires subtype / specification">
+                    <i class="ri-equalizer-line"></i> Subtype
+                  </span>
+                  <span v-if="item.ranked" class="badge-ranked-tag" title="Can be taken multiple times">
+                    <i class="ri-star-fill"></i> Ranked
+                  </span>
+                </div>
               </div>
 
               <!-- Card Rules Description -->
@@ -250,61 +282,370 @@
 
               <!-- Card Action Footer -->
               <div class="catalog-card-footer">
-                <!-- If already added: Show Active Status + Inline Stepper + Quick Delete -->
-                <div v-if="isAdvantageActive(item.name)" class="card-added-controls">
-                  <span class="badge-added-status">
-                    <i class="ri-checkbox-circle-fill"></i>
-                    <span>On Sheet ({{ getAdvantageRanks(item.name) }} Rk)</span>
-                  </span>
-
-                  <div class="inline-actions-wrap">
-                    <!-- Inline Stepper for Ranked Feats -->
-                    <div v-if="item.ranked" class="stepper-mini">
-                      <button
-                        type="button"
-                        class="step-btn-mini"
-                        :disabled="getAdvantageRanks(item.name) <= 1"
-                        @click="stepAdvantage(item.name, -1)"
-                        title="Decrease Rank"
-                      >-</button>
-                      <span class="step-val-mini tabular-nums">{{ getAdvantageRanks(item.name) }}</span>
-                      <button
-                        type="button"
-                        class="step-btn-mini"
-                        :disabled="item.maxRanks && getAdvantageRanks(item.name) >= item.maxRanks"
-                        @click="stepAdvantage(item.name, 1)"
-                        title="Increase Rank"
-                      >+</button>
-                    </div>
-
-                    <!-- Quick Delete Button -->
-                    <button
-                      type="button"
-                      class="btn-delete-mini"
-                      @click="removeAdvantage(item.name)"
-                      title="Remove from Sheet"
+                <!-- A. IF ADVANTAGE REQUIRES SPECIFICATION (e.g. Skill Mastery, Benefit, Favored Foe) -->
+                <template v-if="item.requiresSpecification">
+                  <!-- Active Subtypes Tray on Sheet -->
+                  <div v-if="getSheetInstances(item.name).length > 0" class="catalog-subtypes-tray">
+                    <div
+                      v-for="inst in getSheetInstances(item.name)"
+                      :key="inst.id"
+                      class="catalog-subtype-chip"
                     >
-                      <i class="ri-close-line"></i>
-                    </button>
+                      <div class="subtype-info" :title="inst.specification || 'Default'">
+                        <i class="ri-checkbox-circle-fill"></i>
+                        <span class="subtype-name">{{ inst.specification || 'Default' }}</span>
+                      </div>
+                      <div class="subtype-controls">
+                        <div class="stepper-mini">
+                          <button
+                            type="button"
+                            class="step-btn-mini"
+                            :disabled="Number(inst.ranks || 1) <= 1"
+                            @click="stepInstance(inst.id, -1)"
+                            title="Decrease Rank"
+                          >-</button>
+                          <span class="step-val-mini tabular-nums">{{ inst.ranks || 1 }}</span>
+                          <button
+                            type="button"
+                            class="step-btn-mini"
+                            :disabled="item.maxRanks && Number(inst.ranks || 1) >= item.maxRanks"
+                            @click="stepInstance(inst.id, 1)"
+                            title="Increase Rank"
+                          >+</button>
+                        </div>
+                        <button
+                          type="button"
+                          class="btn-edit-mini"
+                          @click="openEditSpecModal(inst)"
+                          title="Edit Subtype"
+                        >
+                          <i class="ri-edit-line"></i>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-delete-mini"
+                          @click="deleteInstance(inst.id)"
+                          title="Remove this subtype"
+                        >
+                          <i class="ri-close-line"></i>
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
 
-                <!-- If not on sheet: Add Button -->
-                <button
-                  v-else
-                  type="button"
-                  class="btn-add-feat"
-                  @click="addAdvantage(item.name)"
-                >
-                  <i class="ri-add-line"></i>
-                  <span>Add ({{ item.ranked ? '1 Rank' : '1 PP' }})</span>
-                </button>
+                  <!-- Button to add new subtype -->
+                  <button
+                    v-if="item.allowMultiple !== false || getSheetInstances(item.name).length === 0"
+                    type="button"
+                    class="btn-add-feat"
+                    @click="openSpecModal(item)"
+                  >
+                    <i class="ri-add-line"></i>
+                    <span>{{ getSheetInstances(item.name).length > 0 ? 'Add Another Subtype' : 'Add with Subtype' }}</span>
+                  </button>
+                </template>
+
+                <!-- B. STANDARD ADVANTAGES (NO SPECIFICATION NEEDED) -->
+                <template v-else>
+                  <!-- If already added: Show Active Status + Inline Stepper + Quick Delete -->
+                  <div v-if="isAdvantageActive(item.name)" class="card-added-controls">
+                    <span class="badge-added-status">
+                      <i class="ri-checkbox-circle-fill"></i>
+                      <span>On Sheet ({{ getAdvantageRanks(item.name) }} Rk)</span>
+                    </span>
+
+                    <div class="inline-actions-wrap">
+                      <!-- Inline Stepper for Ranked Feats -->
+                      <div v-if="item.ranked" class="stepper-mini">
+                        <button
+                          type="button"
+                          class="step-btn-mini"
+                          :disabled="getAdvantageRanks(item.name) <= 1"
+                          @click="stepAdvantage(item.name, -1)"
+                          title="Decrease Rank"
+                        >-</button>
+                        <span class="step-val-mini tabular-nums">{{ getAdvantageRanks(item.name) }}</span>
+                        <button
+                          type="button"
+                          class="step-btn-mini"
+                          :disabled="item.maxRanks && getAdvantageRanks(item.name) >= item.maxRanks"
+                          @click="stepAdvantage(item.name, 1)"
+                          title="Increase Rank"
+                        >+</button>
+                      </div>
+
+                      <!-- Quick Delete Button -->
+                      <button
+                        type="button"
+                        class="btn-delete-mini"
+                        @click="removeAdvantage(item.name)"
+                        title="Remove from Sheet"
+                      >
+                        <i class="ri-close-line"></i>
+                      </button>
+                    </div>
+                  </div>
+
+                  <!-- If not on sheet: Add Button -->
+                  <button
+                    v-else
+                    type="button"
+                    class="btn-add-feat"
+                    @click="addAdvantage(item.name)"
+                  >
+                    <i class="ri-add-line"></i>
+                    <span>Add ({{ item.ranked ? '1 Rank' : '1 PP' }})</span>
+                  </button>
+                </template>
               </div>
             </div>
           </div>
         </div>
       </div>
     </div>
+
+    <!-- SPECIFICATION PICKER MODAL -->
+    <transition name="modal-pop">
+      <div
+        v-if="activeSpecAdv"
+        class="modal-overlay"
+        @click.self="closeSpecModal"
+      >
+        <div class="modal-content spec-modal-card">
+          <!-- Modal Header -->
+          <div class="spec-modal-header">
+            <h4>
+              <i class="ri-equalizer-line"></i>
+              <span>{{ activeSpecAdv.isEdit ? 'Edit' : 'Define' }} {{ activeSpecAdv.name }}</span>
+            </h4>
+            <button
+              type="button"
+              class="spec-modal-close"
+              @click="closeSpecModal"
+              title="Close"
+            >
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="spec-modal-body">
+            <p class="spec-picker-desc">{{ activeSpecAdv.desc }}</p>
+
+            <!-- Preset Suggestions Chips -->
+            <div
+              v-if="activeSpecAdv.specificationSuggestions?.length"
+              class="spec-chips-section"
+            >
+              <span class="spec-chips-title">
+                <i class="ri-list-check-2"></i> Common RAW Options:
+              </span>
+              <div class="spec-chips-grid">
+                <button
+                  v-for="sugg in activeSpecAdv.specificationSuggestions"
+                  :key="sugg"
+                  type="button"
+                  class="spec-chip-btn"
+                  :class="{ active: specInput.trim().toLowerCase() === sugg.toLowerCase() }"
+                  @click="specInput = sugg"
+                >
+                  {{ sugg }}
+                </button>
+              </div>
+            </div>
+
+            <!-- Subtype / Focus Input Field -->
+            <div class="form-group">
+              <div class="label-with-hint">
+                <label class="form-label">
+                  {{ activeSpecAdv.specificationLabel || 'Specification / Subtype' }}
+                </label>
+                <span class="spec-label-hint">Required</span>
+              </div>
+              <input
+                ref="specInputRef"
+                v-model="specInput"
+                type="text"
+                class="form-control spec-input"
+                :placeholder="`e.g., ${activeSpecAdv.specificationSuggestions?.[0] || 'Type subtype...'}`"
+                @keyup.enter="confirmAddWithSpec"
+              />
+            </div>
+
+            <!-- Rank Stepper (if ranked) -->
+            <div v-if="activeSpecAdv.ranked" class="form-group">
+              <div class="label-with-hint">
+                <label class="form-label">Rank</label>
+                <span class="spec-label-hint">
+                  {{ specRank }} PP Cost
+                  <span v-if="activeSpecAdv.maxRanks">(Max {{ activeSpecAdv.maxRanks }})</span>
+                </span>
+              </div>
+              <div class="spec-custom-rank-wrap">
+                <button
+                  type="button"
+                  class="rank-step-btn"
+                  :disabled="specRank <= 1"
+                  @click="specRank = Math.max(1, specRank - 1)"
+                  title="Decrease Rank"
+                >
+                  <i class="ri-subtract-line"></i>
+                </button>
+                <span class="spec-rank-display tabular-nums">{{ specRank }}</span>
+                <button
+                  type="button"
+                  class="rank-step-btn"
+                  :disabled="activeSpecAdv.maxRanks && specRank >= activeSpecAdv.maxRanks"
+                  @click="specRank++"
+                  title="Increase Rank"
+                >
+                  <i class="ri-add-line"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="spec-modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              @click="closeSpecModal"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn-modal-confirm"
+              :disabled="!specInput.trim()"
+              @click="confirmAddWithSpec"
+            >
+              <i class="ri-check-line"></i>
+              <span>{{ activeSpecAdv.isEdit ? 'Save Changes' : 'Add Advantage' }}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
+
+    <!-- CUSTOM HOMEBREW ADVANTAGE MODAL -->
+    <transition name="modal-pop">
+      <div
+        v-if="showCustomModal"
+        class="modal-overlay"
+        @click.self="showCustomModal = false"
+      >
+        <div class="modal-content spec-modal-card custom-adv-card">
+          <!-- Modal Header -->
+          <div class="spec-modal-header">
+            <h4>
+              <i class="ri-shield-star-line text-accent"></i>
+              <span>Create Custom Advantage</span>
+            </h4>
+            <button
+              type="button"
+              class="spec-modal-close"
+              @click="showCustomModal = false"
+              title="Close"
+            >
+              <i class="ri-close-line"></i>
+            </button>
+          </div>
+
+          <!-- Modal Body -->
+          <div class="spec-modal-body">
+            <div class="form-row-grid">
+              <div class="form-group flex-2">
+                <label class="form-label">Advantage Name *</label>
+                <input
+                  v-model="customForm.name"
+                  type="text"
+                  class="form-control spec-input"
+                  placeholder="e.g. Iron Will, Martial Arts Stance"
+                  @keyup.enter="confirmCreateCustomAdv"
+                />
+              </div>
+
+              <div class="form-group flex-1">
+                <label class="form-label">Category</label>
+                <select v-model="customForm.category" class="form-control spec-select">
+                  <option value="General">General</option>
+                  <option value="Combat">Combat</option>
+                  <option value="Skill">Skill</option>
+                  <option value="Fortune">Fortune</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row-grid">
+              <div class="form-group flex-2">
+                <label class="form-label">Subtype / Specification (Optional)</label>
+                <input
+                  v-model="customForm.specification"
+                  type="text"
+                  class="form-control spec-input"
+                  placeholder="e.g. Crane Style, High Magic"
+                />
+              </div>
+
+              <div class="form-group flex-1">
+                <label class="form-label">Initial Rank</label>
+                <div class="spec-custom-rank-wrap">
+                  <button
+                    type="button"
+                    class="rank-step-btn"
+                    :disabled="customForm.ranks <= 1"
+                    @click="customForm.ranks = Math.max(1, customForm.ranks - 1)"
+                    title="Decrease Rank"
+                  >
+                    <i class="ri-subtract-line"></i>
+                  </button>
+                  <span class="spec-rank-display tabular-nums">{{ customForm.ranks }}</span>
+                  <button
+                    type="button"
+                    class="rank-step-btn"
+                    @click="customForm.ranks++"
+                    title="Increase Rank"
+                  >
+                    <i class="ri-add-line"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Description / Mechanics</label>
+              <textarea
+                v-model="customForm.desc"
+                class="form-control spec-textarea"
+                rows="3"
+                placeholder="Describe how this advantage works and its game mechanics..."
+              ></textarea>
+            </div>
+          </div>
+
+          <!-- Modal Footer -->
+          <div class="spec-modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary btn-sm"
+              @click="showCustomModal = false"
+            >
+              Cancel
+            </button>
+            <button
+              type="button"
+              class="btn-modal-confirm"
+              :disabled="!customForm.name.trim()"
+              @click="confirmCreateCustomAdv"
+            >
+              <i class="ri-check-line"></i>
+              <span>Create & Add Advantage</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </transition>
   </div>
 </template>
 
@@ -417,11 +758,130 @@ function getAdvantageCost(adv) {
   return Number(adv.ranks ?? adv.rank) || 1;
 }
 
+// Specification modal state
+const activeSpecAdv = ref(null);
+const specInput = ref('');
+const specRank = ref(1);
+const specInputRef = ref(null);
+
+// Custom homebrew advantage modal state
+const showCustomModal = ref(false);
+const customForm = ref({
+  name: '',
+  category: 'General',
+  specification: '',
+  desc: '',
+  ranks: 1
+});
+
+function getSheetInstances(name) {
+  const advs = heroStore.character.advantages || [];
+  return advs.filter(a => (a.name || '').trim().toLowerCase() === (name || '').trim().toLowerCase());
+}
+
+function openSpecModal(adv) {
+  const meta = typeof adv === 'string' ? getAdvantageMeta(adv) : adv;
+  activeSpecAdv.value = {
+    ...meta,
+    isEdit: false
+  };
+  specInput.value = meta.specificationSuggestions?.[0] || '';
+  specRank.value = 1;
+  nextTick(() => {
+    specInputRef.value?.focus();
+    specInputRef.value?.select();
+  });
+}
+
+function openEditSpecModal(adv) {
+  const meta = getAdvantageMeta(adv.name);
+  activeSpecAdv.value = {
+    ...meta,
+    name: adv.name,
+    desc: adv.desc || meta.desc,
+    isEdit: true,
+    instanceId: adv.id
+  };
+  specInput.value = adv.specification || '';
+  specRank.value = Number(adv.ranks || 1);
+  nextTick(() => {
+    specInputRef.value?.focus();
+    specInputRef.value?.select();
+  });
+}
+
+function closeSpecModal() {
+  activeSpecAdv.value = null;
+}
+
+function confirmAddWithSpec() {
+  if (!activeSpecAdv.value || !specInput.value.trim()) return;
+  const target = activeSpecAdv.value;
+  const name = target.name;
+  const spec = specInput.value.trim();
+  const ranks = specRank.value || 1;
+
+  if (target.isEdit && target.instanceId) {
+    heroStore.updateAdvantage(target.instanceId, {
+      specification: spec,
+      ranks: ranks
+    });
+    uiStore.showToast(`Updated ${name} (${spec}) [Rank ${ranks}]`, 'success');
+  } else {
+    heroStore.addAdvantage(name, ranks, spec);
+    uiStore.showToast(`Added ${name} (${spec}) [Rank ${ranks}] to Advantages!`, 'success');
+  }
+  activeSpecAdv.value = null;
+}
+
+function openCustomModal() {
+  customForm.value = {
+    name: '',
+    category: 'General',
+    specification: '',
+    desc: '',
+    ranks: 1
+  };
+  showCustomModal.value = true;
+}
+
+function confirmCreateCustomAdv() {
+  if (!customForm.value.name.trim()) return;
+  const f = customForm.value;
+  heroStore.addAdvantage(f.name.trim(), f.ranks, f.specification.trim(), {
+    desc: f.desc.trim(),
+    category: f.category,
+    isCustom: true
+  });
+  uiStore.showToast(`Created custom advantage "${f.name.trim()}"!`, 'success');
+  showCustomModal.value = false;
+}
+
+function stepInstance(id, delta) {
+  const advs = heroStore.character.advantages || [];
+  const found = advs.find(a => a.id === id);
+  if (found) {
+    const cur = Number(found.ranks ?? found.rank) || 1;
+    const meta = getAdvantageMeta(found.name);
+    let next = cur + delta;
+    if (next < 1) next = 1;
+    if (meta?.maxRanks && next > meta.maxRanks) next = meta.maxRanks;
+    heroStore.setAdvantageRank(found.id, next);
+  }
+}
+
+function deleteInstance(id) {
+  const advs = heroStore.character.advantages || [];
+  const found = advs.find(a => a.id === id);
+  const title = found ? (found.specification ? `${found.name} (${found.specification})` : found.name) : 'Advantage';
+  heroStore.removeAdvantage(id);
+  uiStore.showToast(`Removed ${title} from Advantages`, 'info');
+}
+
 function addAdvantage(name) {
   const meta = getAdvantageMeta(name);
   if (meta?.requiresSpecification) {
-    uiStore.openModal('advantage');
-    uiStore.showToast(`Choose a subtype for ${name}`, 'info');
+    openSpecModal(meta);
     return;
   }
   heroStore.addAdvantage(name, 1);
@@ -449,8 +909,9 @@ function removeAdvantage(idOrName) {
     ? (advs.find(a => a.id === idOrName) || advs.find(a => a.name.toLowerCase() === idOrName.toLowerCase()))
     : advs[idOrName];
   if (found) {
+    const title = found.specification ? `${found.name} (${found.specification})` : found.name;
     heroStore.removeAdvantage(found.id);
-    uiStore.showToast(`Removed advantage from sheet`, 'info');
+    uiStore.showToast(`Removed ${title} from sheet`, 'info');
   }
 }
 </script>
@@ -1350,13 +1811,449 @@ function removeAdvantage(idOrName) {
     align-items: flex-start;
   }
 
-  .btn-open-modal {
+  .btn-open-modal,
+  .btn-custom-adv {
     width: 100%;
     justify-content: center;
+  }
+
+  .banner-actions {
+    width: 100%;
+    flex-direction: column;
   }
 
   .catalog-cards-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ==========================================================================
+   SPECIFICATION MODAL & TRAY ENHANCEMENTS
+   ========================================================================== */
+.banner-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.btn-custom-adv {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.5rem 0.95rem;
+  white-space: nowrap;
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  border: 1px solid rgba(244, 114, 182, 0.35);
+  color: #fff;
+  transition: all var(--trans-fast);
+}
+
+.btn-custom-adv:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+}
+
+.active-feat-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.btn-edit-active {
+  width: 22px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-size: 0.78rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--trans-fast);
+}
+
+.btn-edit-active:hover {
+  background: rgba(236, 72, 153, 0.2);
+  border-color: #ec4899;
+  color: #f472b6;
+}
+
+.badge-custom-tag {
+  font-size: 0.6rem;
+  font-weight: 800;
+  background: rgba(245, 158, 11, 0.2);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #fbbf24;
+  padding: 0.08rem 0.35rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.header-badges-row {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.badge-spec-tag {
+  font-size: 0.62rem;
+  font-weight: 800;
+  background: rgba(56, 189, 248, 0.18);
+  color: #7dd3fc;
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  padding: 0.1rem 0.38rem;
+  border-radius: 3px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.catalog-subtypes-tray {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  width: 100%;
+  margin-bottom: 0.45rem;
+}
+
+.catalog-subtype-chip {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  padding: 0.25rem 0.45rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+}
+
+.subtype-info {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #fff;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtype-info i {
+  color: #34d399;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.subtype-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.subtype-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.btn-edit-mini {
+  width: 18px;
+  height: 18px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 2px;
+  font-size: 0.75rem;
+  transition: all var(--trans-fast);
+}
+
+.btn-edit-mini:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: #38bdf8;
+}
+
+/* Modals */
+.spec-modal-card {
+  background: #12121a;
+  border: 1px solid rgba(236, 72, 153, 0.35);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0 !important;
+}
+
+.custom-adv-card {
+  max-width: 520px;
+}
+
+.modal-pop-enter-active,
+.modal-pop-leave-active {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.modal-pop-enter-from,
+.modal-pop-leave-to {
+  opacity: 0;
+  transform: scale(0.96) translateY(6px);
+}
+
+.spec-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.95rem 1.25rem;
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(15, 15, 22, 0.8) 100%);
+  border-bottom: 1px solid rgba(236, 72, 153, 0.2);
+}
+
+.spec-modal-header h4 {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.spec-modal-header h4 i {
+  color: #f472b6;
+}
+
+.spec-modal-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  transition: color var(--trans-fast);
+}
+
+.spec-modal-close:hover {
+  color: #fff;
+}
+
+.spec-modal-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.spec-picker-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  line-height: 1.45;
+  margin: 0;
+}
+
+.spec-chips-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.spec-chips-title {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.spec-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  max-height: 120px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.spec-chip-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 4px;
+  color: var(--text-secondary);
+  padding: 0.25rem 0.55rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.spec-chip-btn:hover {
+  background: rgba(236, 72, 153, 0.2);
+  border-color: #ec4899;
+  color: #fff;
+}
+
+.spec-chip-btn.active {
+  background: #db2777;
+  border-color: #f472b6;
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(219, 39, 119, 0.35);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-row-grid {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.flex-1 { flex: 1; }
+.flex-2 { flex: 2; }
+
+.label-with-hint {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.form-label {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.spec-label-hint {
+  font-size: 0.68rem;
+  color: #f472b6;
+  font-weight: 600;
+}
+
+.spec-input,
+.spec-select,
+.spec-textarea {
+  background: rgba(20, 20, 30, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  padding: 0.55rem 0.75rem;
+  font-size: 0.84rem;
+  outline: none;
+  font-family: inherit;
+  transition: border-color var(--trans-fast), box-shadow var(--trans-fast);
+}
+
+.spec-textarea {
+  resize: vertical;
+  min-height: 70px;
+}
+
+.spec-input:focus,
+.spec-select:focus,
+.spec-textarea:focus {
+  border-color: #ec4899;
+  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+}
+
+.spec-custom-rank-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.rank-step-btn {
+  width: 32px;
+  height: 32px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-weight: 800;
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--trans-fast);
+}
+
+.rank-step-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.18);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.rank-step-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.spec-rank-display {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+  min-width: 28px;
+  text-align: center;
+}
+
+.spec-modal-footer {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.65rem;
+  padding: 0.95rem 1.25rem;
+  background: rgba(10, 10, 15, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.btn-modal-confirm {
+  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
+  border: none;
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 0.84rem;
+  font-weight: 800;
+  padding: 0.55rem 1rem;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  transition: all var(--trans-fast);
+}
+
+.btn-modal-confirm:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+}
+
+.btn-modal-confirm:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 </style>

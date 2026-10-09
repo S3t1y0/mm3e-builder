@@ -395,6 +395,11 @@ async function copyLink() {
   border-color: var(--accent-primary);
 }
 
+.share-url-input:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
 .dynamic-share-panel {
   background: rgba(16, 185, 129, 0.05);
   border: 1px solid rgba(52, 211, 153, 0.25);

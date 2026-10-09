@@ -133,7 +133,7 @@
                   :class="{ 'btn-selected': isCurrentActive(eff.name) }"
                   @click="selectEffect(eff.name)"
                 >
-                  <i :class="isCurrentActive(eff.name) ? 'ri-check-line' : 'ri-magic-line'"></i>
+                  <i :class="isCurrentActive(eff.name) ? 'ri-check-line' : 'ri-add-line'"></i>
                   <span>{{ isCurrentActive(eff.name) ? 'Keep Effect' : 'Select Effect' }}</span>
                 </button>
               </div>

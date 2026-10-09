@@ -212,7 +212,7 @@
           @click="heroStore.stabilizeHero('Healing Power Effect')"
           title="Stabilize character via Healing power effect"
         >
-          <i class="ri-magic-line"></i>
+          <i class="ri-heart-pulse-line"></i>
           <span>Heal / Auto-Stabilize</span>
         </button>
 

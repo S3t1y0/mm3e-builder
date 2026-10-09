@@ -464,7 +464,7 @@ const capacityPercent = computed(() => {
 }
 
 .primary-tab {
-  border-left: 3px solid #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
 }
 
 .tab-icon-primary {

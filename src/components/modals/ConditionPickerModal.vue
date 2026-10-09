@@ -296,6 +296,11 @@ const filteredConditions = computed(() => {
   outline: none;
 }
 
+.cond-search-input:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
 .clear-search-btn {
   background: transparent;
   border: none;
@@ -378,13 +383,13 @@ const filteredConditions = computed(() => {
 .cond-select-card.active {
   background: rgba(244, 63, 94, 0.08);
   border-color: #f43f5e;
-  box-shadow: 0 0 12px rgba(244, 63, 94, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .cond-select-card.active.is-severe {
   background: rgba(239, 68, 68, 0.12);
   border-color: #ef4444;
-  box-shadow: 0 0 14px rgba(239, 68, 68, 0.22);
+  box-shadow: var(--shadow-sm);
 }
 
 .cond-select-card.active-inherited {

@@ -1670,7 +1670,7 @@ function getEffectConfigDetails(eff) {
           ranks: ranks,
           category: custom?.category || catLabels[cat] || cat,
           desc: custom?.desc || `Superhumanly enhances ${t} by +${ranks} rank${ranks > 1 ? 's' : ''}, applying to all associated checks and rolls.`,
-          icon: custom?.icon || catIcons[cat] || 'ri-magic-line',
+          icon: custom?.icon || catIcons[cat] || 'ri-shield-star-line',
           isCustom: custom?.isCustom || false
         };
       })
@@ -1981,7 +1981,7 @@ function getEffectConfigDetails(eff) {
       items: [{
         name: theme,
         desc: `Can allocate up to ${Number(eff.ranks || 1) * 5} PP to effects fitting the "${theme}" descriptor.`,
-        icon: 'ri-magic-line'
+        icon: 'ri-shape-line'
       }]
     };
   }

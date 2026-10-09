@@ -1042,6 +1042,11 @@ watch(() => uiStore.modals.exportImport, (open) => {
   border-color: var(--accent-primary);
 }
 
+.import-textarea:focus-visible {
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
 .parsed-hero-card {
   background: rgba(16, 185, 129, 0.08);
   border: 1px solid rgba(16, 185, 129, 0.3);
