@@ -194,8 +194,12 @@
             </div>
           </div>
           <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <button class="btn btn-secondary btn-sm" @click="uiStore.openModal('roll20')">
-              <i class="ri-printer-line"></i> Export Sheet
+            <button
+              class="btn btn-secondary btn-sm"
+              @click="uiStore.openModal('printOfficial')"
+              title="Print Official Character Sheet (PDF)"
+            >
+              <i class="ri-printer-line"></i> Print Sheet
             </button>
           </div>
         </div>
