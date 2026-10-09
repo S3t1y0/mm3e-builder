@@ -3,7 +3,7 @@
     <!-- Advantages Toolbar -->
     <div class="dndb-pane-toolbar">
       <div class="dndb-pane-info">
-        <span class="dndb-pane-title">Combat & General Feats</span>
+        <span class="dndb-pane-title">Combat & General Advantages</span>
         <span class="adv-pp-badge">{{ heroStore.totalAdvantagePP }} PP Total</span>
       </div>
       <div class="dndb-pane-actions">
@@ -41,9 +41,9 @@
         <input
           v-model="searchQuery"
           type="text"
-          placeholder="Filter feats..."
+          placeholder="Filter advantages..."
           class="adv-search-input"
-          aria-label="Filter feats"
+          aria-label="Filter advantages"
         />
         <button
           v-if="searchQuery"
@@ -148,7 +148,7 @@
               <i class="ri-medal-line"></i> Custom
             </span>
             <span v-else-if="adv.isPowerGranted" class="adv-cat-tag power">
-              <i class="ri-flashlight-line"></i> Power Buff
+              <i class="ri-flashlight-line"></i> Enhanced Trait
             </span>
             <span v-else class="adv-cat-tag" :class="getAdvCategory(adv).toLowerCase()">
               {{ getAdvCategory(adv) }}
@@ -229,7 +229,7 @@
 
           <!-- PRESETS SUGGESTIONS IF AVAILABLE -->
           <div v-if="getAdvRule(editingAdv.name)?.specificationSuggestions?.length" class="spec-suggestions-block">
-            <span class="spec-sugg-title"><i class="ri-list-check-2"></i> Common RAW Subtypes:</span>
+            <span class="spec-sugg-title"><i class="ri-list-check-2"></i> Common Options:</span>
             <div class="spec-sugg-chips">
               <button
                 v-for="sugg in getAdvRule(editingAdv.name).specificationSuggestions"

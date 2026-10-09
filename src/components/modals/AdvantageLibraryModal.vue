@@ -12,7 +12,7 @@
             <span class="icon"><i class="ri-star-line"></i></span>
             <div>
               <h3>M&M 3e Advantages Catalog</h3>
-              <p class="modal-subtitle">Talents, combat maneuvers, and special perks (1 PP / Rank)</p>
+              <p class="modal-subtitle">Talents, combat maneuvers, and situational benefits (1 PP / Rank)</p>
             </div>
           </div>
           <div class="modal-header-actions">
@@ -23,7 +23,7 @@
               title="Create Custom / Homebrew Advantage"
             >
               <i class="ri-add-circle-line"></i>
-              <span>+ Custom Feat</span>
+              <span>+ Custom Advantage</span>
             </button>
             <span class="badge badge-accent">
               Total: {{ selectedCount }} Selected ({{ totalAdvPP }} PP)
@@ -267,7 +267,7 @@
             <!-- PRESET SUGGESTION CHIPS -->
             <div v-if="activeSpecAdv.specificationSuggestions?.length" class="spec-suggestions-block">
               <span class="spec-sugg-title">
-                <i class="ri-list-check-2"></i> Common RAW Options:
+                <i class="ri-list-check-2"></i> Common Options:
               </span>
               <div class="spec-sugg-chips">
                 <button
@@ -444,7 +444,7 @@
                 :disabled="!customForm.name.trim()"
                 @click="confirmCreateCustomAdv"
               >
-                <i class="ri-check-line"></i> Create & Add Feat
+                <i class="ri-check-line"></i> Create & Add Advantage
               </button>
             </div>
           </div>

@@ -174,7 +174,7 @@
                 type="button"
                 class="btn-rail-add"
                 @click="builderStore.addArraySlot(false)"
-                title="Add Alternate Effect (1 PP slot cost)"
+                title="Add Alternate Effect (+1 PP or +2 PP Dynamic)"
               >
                 <i class="ri-add-line"></i>
                 <span>Add Alternate</span>

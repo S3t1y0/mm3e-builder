@@ -19,7 +19,7 @@
           @click="builderStore.addArraySlot(true, '', 'Blast')"
         >
           <i class="ri-add-line"></i>
-          <span>Add Alternate Slot</span>
+          <span>Add Alternate Effect</span>
         </button>
       </div>
     </div>
@@ -150,11 +150,11 @@
             <span>{{ builderStore.activeTargetType === 'slot' && builderStore.activeSlotIndex === idx ? 'Editing' : 'Configure' }}</span>
           </button>
 
-          <!-- Delete Slot Button -->
+          <!-- Delete Effect Button -->
           <button
             type="button"
             class="btn-del-slot"
-            title="Delete Alternate Slot"
+            title="Delete Alternate Effect"
             @click.stop="builderStore.removeArraySlot(true, idx)"
           >
             <i class="ri-delete-bin-line"></i>

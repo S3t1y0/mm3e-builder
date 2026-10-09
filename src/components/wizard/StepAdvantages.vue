@@ -11,7 +11,7 @@
           </span>
         </div>
         <p class="step-subtitle">
-          Select specialized talents, combat maneuvers, and heroic perks (<strong>1 PP per Rank</strong>).
+          Select specialized talents, combat maneuvers, and heroic advantages (<strong>1 PP per Rank</strong>).
         </p>
       </div>
       <div class="banner-actions">
@@ -428,7 +428,7 @@
               class="spec-chips-section"
             >
               <span class="spec-chips-title">
-                <i class="ri-list-check-2"></i> Common RAW Options:
+                <i class="ri-list-check-2"></i> Common Options:
               </span>
               <div class="spec-chips-grid">
                 <button

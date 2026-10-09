@@ -72,7 +72,7 @@
             <i class="ri-flashlight-fill"></i>
             <span class="seize-act-title">Seize Initiative</span>
           </div>
-          <span class="seize-act-cost">Spend 1 HP (Act 1st)</span>
+          <span class="seize-act-cost">Spend 1 Hero Point</span>
         </button>
       </div>
     </div>

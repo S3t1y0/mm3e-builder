@@ -31,7 +31,7 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'advantages' }"
         @click="activeTab = 'advantages'"
-        title="Combat feats, fortune, and general advantages"
+        title="Combat, fortune, and general advantages"
       >
         <i class="ri-medal-line"></i>
         <span>Advantages</span>

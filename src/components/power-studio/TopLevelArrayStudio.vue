@@ -51,7 +51,7 @@
           <!-- Rules Info Tooltip -->
           <span
             class="rules-hint-chip"
-            title="M&M 3E Array: Alternate slots cost +1 PP (Standard) or +2 PP (Dynamic) and share the Primary Effect's PP pool capacity."
+            title="M&M 3E Array: Alternate Effects cost +1 PP (Standard) or +2 PP (Dynamic) and share the Primary Effect's PP pool capacity."
           >
             <i class="ri-information-line"></i>
             <span>Rules</span>

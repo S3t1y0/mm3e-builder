@@ -63,7 +63,7 @@
 
             <div class="spec-form-group">
               <div class="spec-label-row">
-                <label>Specialization / Subtype</label>
+                <label>Specialty / Field</label>
                 <span class="spec-label-hint">Required for {{ selectedBaseSkill }}</span>
               </div>
               <input
@@ -78,7 +78,7 @@
 
             <!-- Dynamic Suggestions -->
             <div v-if="suggestedSubtypes.length > 0" class="spec-chips-section">
-              <span class="spec-chips-title">SUGGESTED SPECIALIZATIONS:</span>
+              <span class="spec-chips-title">SUGGESTED SPECIALTIES / FIELDS:</span>
               <div class="spec-chips-grid">
                 <button
                   v-for="chip in suggestedSubtypes"
@@ -593,13 +593,13 @@ function getPlaceholderForSkill(skillName) {
   if (skillName === 'Close Combat') return 'e.g. Unarmed, Swords, Knives, Claws...';
   if (skillName === 'Ranged Combat') return 'e.g. Firearms, Bows, Energy Blast, Thrown...';
   if (skillName === 'Expertise') return 'e.g. Science, Technology, Magic, Criminology...';
-  return 'Specialization name...';
+  return 'Specialty or field name...';
 }
 
 function confirmAddSpecialization() {
   const sub = specSubtypeInput.value.trim();
   if (!sub) {
-    uiStore.showToast('Please enter a specialization name (e.g. Unarmed, Swords)', 'error');
+    uiStore.showToast('Please enter a specialty or field name (e.g. Unarmed, Science)', 'error');
     return;
   }
   heroStore.setSkillRank(selectedBaseSkill.value, sub, initialRankInput.value);
