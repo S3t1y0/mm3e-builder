@@ -9,7 +9,6 @@
           </div>
           <div class="logo-text-wrap">
             <span class="app-title">M&M 3e Builder</span>
-            <span class="logo-badge">v1.0</span>
           </div>
         </div>
 
