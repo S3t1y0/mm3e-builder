@@ -430,7 +430,7 @@
   border: 1px solid var(--border-color);
   color: var(--text-secondary);
   padding: 0.25rem 0.7rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm, 6px);
   font-size: 0.75rem;
   font-weight: 600;
   cursor: pointer;
@@ -1626,7 +1626,7 @@
   padding: 0.25rem 0.65rem;
   font-size: 0.72rem;
   font-weight: 700;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm, 6px);
   background: rgba(30, 41, 59, 0.6);
   border: 1px solid var(--border-color);
   color: var(--text-muted);
@@ -3694,12 +3694,10 @@
 }
 
 .hud-card {
-  background: rgba(18, 18, 21, 0.92);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: var(--bg-card, #0f172a);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-glass);
+  box-shadow: var(--shadow-md);
   padding: 1rem 1.15rem;
   display: flex;
   flex-direction: column;
@@ -4031,28 +4029,29 @@
 }
 
 .dndb-avatar-crest {
-  width: 62px;
-  height: 62px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(0, 111, 184, 0.25) 0%, rgba(15, 23, 42, 0.95) 75%);
-  border: 2px solid rgba(0, 111, 184, 0.6);
+  width: 58px;
+  height: 58px;
+  border-radius: var(--radius-md, 8px);
+  background: var(--bg-card, #0f172a);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.12));
   box-shadow: var(--shadow-sm);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 2rem;
-  color: #38bdf8;
+  font-size: 1.6rem;
+  color: var(--accent-secondary, #2a8fd6);
   flex-shrink: 0;
   position: relative;
+  user-select: none;
 }
 
-.dndb-avatar-crest::after {
-  content: '';
-  position: absolute;
-  inset: -4px;
-  border-radius: 50%;
-  border: 1px dashed rgba(0, 111, 184, 0.35);
-  pointer-events: none;
+.dndb-avatar-crest .avatar-initials {
+  font-family: var(--font-heading, sans-serif);
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #f8fafc;
+  line-height: 1;
+  letter-spacing: -0.02em;
 }
 
 .dndb-name-block {

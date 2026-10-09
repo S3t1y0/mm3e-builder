@@ -343,9 +343,7 @@ onBeforeUnmount(() => {
 .tactical-roll-card {
   pointer-events: auto;
   width: 100%;
-  background: rgba(15, 23, 42, 0.94);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(15, 23, 42, 0.98);
   border: 1.5px solid rgba(255, 255, 255, 0.14);
   border-radius: var(--radius-md);
   box-shadow: 0 16px 40px rgba(0, 0, 0, 0.7), 0 0 1px rgba(255, 255, 255, 0.3);
@@ -380,7 +378,7 @@ onBeforeUnmount(() => {
 
 .roll-timer-bar-fill {
   height: 100%;
-  background: linear-gradient(90deg, #38bdf8, #818cf8);
+  background: linear-gradient(90deg, var(--accent-primary, #006fb8), var(--accent-secondary, #2a8fd6));
   transition: width 0.08s linear;
 }
 
@@ -552,12 +550,6 @@ onBeforeUnmount(() => {
   background: #fbbf24;
   color: #09090b;
   box-shadow: var(--shadow-sm);
-  animation: pulseCrit 1s infinite alternate;
-}
-
-@keyframes pulseCrit {
-  from { transform: scale(1); }
-  to { transform: scale(1.04); }
 }
 
 .fumble-badge {
@@ -647,17 +639,15 @@ onBeforeUnmount(() => {
 
 .score-number.score-gold {
   color: #fbbf24;
-  text-shadow: 0 0 16px rgba(251, 191, 36, 0.6);
+  text-shadow: 0 0 12px rgba(251, 191, 36, 0.4);
 }
 
 .score-number.score-red {
   color: #f87171;
-  text-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
 }
 
 .score-number.score-cyan {
   color: #38bdf8;
-  text-shadow: 0 0 16px rgba(56, 189, 248, 0.6);
 }
 
 /* 3. CARD SIDE ACTIONS */
@@ -742,9 +732,7 @@ onBeforeUnmount(() => {
 .history-drawer-panel {
   pointer-events: auto;
   width: 100%;
-  background: rgba(15, 23, 42, 0.97);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background: rgba(15, 23, 42, 0.98);
   border: 1.5px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);

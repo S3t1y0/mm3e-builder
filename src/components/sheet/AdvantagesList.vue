@@ -145,7 +145,7 @@
         <div class="adv-card-meta">
           <div class="adv-meta-tags">
             <span v-if="adv.isCustom" class="adv-cat-tag custom">
-              <i class="ri-sparkling-fill"></i> Custom
+              <i class="ri-medal-line"></i> Custom
             </span>
             <span v-else-if="adv.isPowerGranted" class="adv-cat-tag power">
               <i class="ri-flashlight-line"></i> Power Buff
@@ -229,7 +229,7 @@
 
           <!-- PRESETS SUGGESTIONS IF AVAILABLE -->
           <div v-if="getAdvRule(editingAdv.name)?.specificationSuggestions?.length" class="spec-suggestions-block">
-            <span class="spec-sugg-title"><i class="ri-magic-line"></i> Common RAW Subtypes:</span>
+            <span class="spec-sugg-title"><i class="ri-list-check-2"></i> Common RAW Subtypes:</span>
             <div class="spec-sugg-chips">
               <button
                 v-for="sugg in getAdvRule(editingAdv.name).specificationSuggestions"
@@ -1034,7 +1034,7 @@ function broadcastAdvantage(adv) {
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--text-muted, #64748b);
+  color: var(--text-secondary, #94a3b8);
   display: flex;
   align-items: center;
   gap: 0.3rem;

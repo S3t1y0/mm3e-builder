@@ -1259,7 +1259,7 @@
         <div class="modal-dialog-header">
           <div class="header-info">
             <div class="header-icon-badge">
-              <i :class="customForm.icon || 'ri-sparkling-fill'"></i>
+              <i :class="customForm.icon || 'ri-flashlight-line'"></i>
             </div>
             <div class="header-title-col">
               <h3 class="modal-title">
@@ -2371,19 +2371,17 @@ const customForm = ref({
   category: '',
   pts: 1,
   desc: '',
-  icon: 'ri-sparkling-fill',
+  icon: 'ri-flashlight-line',
   appliedTraits: []
 });
 
-
-
 const AVAILABLE_CUSTOM_ICONS = [
   'ri-eye-line', 'ri-eye-fill', 'ri-scan-line', 'ri-radar-line',
-  'ri-sparkling-fill', 'ri-shield-flash-line', 'ri-shield-check-line',
+  'ri-shield-star-line', 'ri-shield-flash-line', 'ri-shield-check-line',
   'ri-fire-fill', 'ri-snowflake-line', 'ri-temp-cold-line',
   'ri-pulse-line', 'ri-brain-line', 'ri-earth-line',
   'ri-flashlight-line', 'ri-speed-line', 'ri-footprint-line',
-  'ri-broadcast-line', 'ri-cpu-line', 'ri-magic-line', 'ri-drop-line'
+  'ri-broadcast-line', 'ri-cpu-line', 'ri-settings-4-line', 'ri-drop-line'
 ];
 
 const customCategoryOptions = computed(() => {
@@ -2461,8 +2459,8 @@ function openCustomSubModal(baseEffectName) {
     : customSubModalTargetEffect.value === 'Immunity' ? 'ri-shield-line'
     : customSubModalTargetEffect.value === 'Movement' ? 'ri-footprint-line'
     : customSubModalTargetEffect.value === 'Environment' ? 'ri-earth-line'
-    : customSubModalTargetEffect.value === 'Enhanced Trait' ? 'ri-sparkling-fill'
-    : 'ri-sparkling-fill';
+    : customSubModalTargetEffect.value === 'Enhanced Trait' ? 'ri-award-line'
+    : 'ri-flashlight-line';
 
   let defaultPts = 1;
   if (customSubModalTargetEffect.value === 'Enhanced Trait') {
@@ -2492,7 +2490,7 @@ function editCustomSubItem(item) {
     category: item.category || '',
     pts: item.pts || item.ranks || item.cost || 1,
     desc: item.desc || '',
-    icon: item.icon || 'ri-sparkling-fill',
+    icon: item.icon || 'ri-flashlight-line',
     appliedTraits: Array.isArray(item.appliedTraits) ? [...item.appliedTraits] : []
   };
   showCustomSubModal.value = true;
@@ -2523,7 +2521,7 @@ function saveCustomSubItem() {
     cost: ptsVal,
     category: customForm.value.category,
     desc: customForm.value.desc ? customForm.value.desc.trim() : `Custom ${customSubModalTargetEffect.value} trait`,
-    icon: customForm.value.icon || 'ri-sparkling-fill',
+    icon: customForm.value.icon || 'ri-flashlight-line',
     isCustom: true,
     appliedTraits: [...customForm.value.appliedTraits]
   };
@@ -3342,7 +3340,7 @@ function deleteCustomTrait(traitName) {
   gap: 0.35rem;
   font-size: 0.74rem;
   font-weight: 700;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   padding: 0.3rem 0.55rem;
   border-radius: 6px;
   background: rgba(0, 0, 0, 0.25);
@@ -3521,7 +3519,7 @@ function deleteCustomTrait(traitName) {
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .lib-item-card.selected .selection-status {
@@ -3807,7 +3805,7 @@ function deleteCustomTrait(traitName) {
 }
 
 .step-arrow {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   font-size: 0.85rem;
 }
 
@@ -3977,7 +3975,7 @@ function deleteCustomTrait(traitName) {
 
 .degree-note {
   font-size: 0.7rem;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   font-style: italic;
 }
 
@@ -4058,42 +4056,36 @@ function deleteCustomTrait(traitName) {
   background: rgba(16, 185, 129, 0.2);
   border-color: #10b981;
   color: #6ee7b7;
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
 }
 
 .res-btn.res-will.active {
   background: rgba(192, 132, 252, 0.2);
   border-color: #c084fc;
   color: #e9d5ff;
-  box-shadow: 0 0 10px rgba(192, 132, 252, 0.3);
 }
 
 .res-btn.res-dodge.active {
   background: rgba(56, 189, 248, 0.2);
   border-color: #38bdf8;
   color: #bae6fd;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
 }
 
 .res-btn.res-parry.active {
   background: rgba(129, 140, 248, 0.2);
   border-color: #818cf8;
   color: #c7d2fe;
-  box-shadow: 0 0 10px rgba(129, 140, 248, 0.3);
 }
 
 .res-btn.res-toughness.active {
   background: rgba(52, 211, 153, 0.2);
   border-color: #34d399;
   color: #a7f3d0;
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.3);
 }
 
 .res-btn.active {
   background: rgba(56, 189, 248, 0.2);
   border-color: #38bdf8;
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.3);
 }
 
 .res-help-text {
@@ -4241,7 +4233,7 @@ function deleteCustomTrait(traitName) {
 
 .sense-toggle-check {
   font-size: 1.1rem;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   flex-shrink: 0;
 }
 
@@ -4297,7 +4289,7 @@ function deleteCustomTrait(traitName) {
 
 .mode-check {
   font-size: 1.1rem;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .movement-mode-card.active .mode-check {
@@ -4432,7 +4424,7 @@ function deleteCustomTrait(traitName) {
   gap: 0.35rem;
   font-size: 0.72rem;
   font-weight: 600;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   padding-top: 0.4rem;
   border-top: 1px solid rgba(255, 255, 255, 0.05);
 }

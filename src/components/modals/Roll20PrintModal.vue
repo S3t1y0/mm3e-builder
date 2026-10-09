@@ -1,6 +1,6 @@
 <template>
   <div v-if="uiStore.modals.roll20" class="r20-modal-overlay" @click.self="uiStore.closeModal('roll20')">
-    <div class="r20-modal-container">
+    <div id="roll20-bridge" class="r20-modal-container">
       <!-- TOP ACTION BAR -->
       <div class="r20-modal-bar">
         <div style="display: flex; align-items: center; gap: 1rem;">

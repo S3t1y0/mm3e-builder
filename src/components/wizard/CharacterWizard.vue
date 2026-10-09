@@ -1,5 +1,5 @@
 <template>
-  <div class="wizard-page">
+  <div id="creation-wizard" class="wizard-page">
     <!-- STEPPER PROGRESS BAR -->
     <div class="card mb-4" style="padding: 0.85rem 1.25rem;">
       <div class="stepper-track">

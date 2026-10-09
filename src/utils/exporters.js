@@ -474,8 +474,8 @@ export function buildMarkdownSheet(character, heroStore) {
   const identity = character.identity || 'Secret Alter Ego';
   const isSecret = character.isSecretIdentity !== false;
   const identityType = isSecret ? 'Secret Identity' : 'Public Identity';
-  const player = character.player || '—';
-  const affiliation = character.groupAffiliation || '—';
+  const player = character.player || 'None';
+  const affiliation = character.groupAffiliation || 'None';
   const baseOfOps = character.baseOfOperations || 'Freedom City';
   const heroPoints = character.heroPoints ?? 1;
 
@@ -549,7 +549,7 @@ export function buildMarkdownSheet(character, heroStore) {
     const totalScore = effAbilities[abl.code] ?? (baseRank + enhRank);
     const modStr = formatMod(totalScore);
     const cost = baseRank * 2;
-    md += `| **${abl.name} (${abl.code})** | ${totalScore} | ${modStr} | ${baseRank} | ${enhRank > 0 ? '+' + enhRank : '—'} | ${cost} PP |\n`;
+    md += `| **${abl.name} (${abl.code})** | ${totalScore} | ${modStr} | ${baseRank} | ${enhRank > 0 ? '+' + enhRank : '-'} | ${cost} PP |\n`;
   });
   md += `\n---\n\n`;
 
@@ -620,7 +620,7 @@ export function buildMarkdownSheet(character, heroStore) {
       const bonusStr = isAuto ? 'Auto' : (Number(atk.rollBonus) >= 0 ? `+${atk.rollBonus}` : `${atk.rollBonus}`);
       const effectDesc = `${atk.effectName || 'Damage'} ${atk.effectRank ?? atk.rank ?? 0}`;
       const descStr = atk.descriptor || 'Physical';
-      const dcStr = atk.dc ? `DC ${atk.dc} vs ${atk.resistance || 'Toughness'}` : '—';
+      const dcStr = atk.dc ? `DC ${atk.dc} vs ${atk.resistance || 'Toughness'}` : '-';
       const rangeCrit = `${atk.range || 'Close'}, Crit ${atk.crit || 20}`;
       md += `| **${atk.name}** | ${bonusStr} | ${effectDesc} | ${descStr} | ${dcStr} | ${rangeCrit} |\n`;
     });
@@ -752,7 +752,7 @@ export function buildMarkdownSheet(character, heroStore) {
       const statusStr = r.status ? `[Status: ${r.status}]` : '';
       const subStr = r.subtype ? `(${r.subtype})` : `(${r.type || 'Gear'})`;
       md += `- **${r.name}** ${subStr} (${cost} EP) ${statusStr}`;
-      if (r.desc) md += ` — ${r.desc}`;
+      if (r.desc) md += ` - ${r.desc}`;
       md += `\n`;
     });
     md += `\n`;
@@ -805,8 +805,8 @@ export function buildBBCodeSheet(character, heroStore) {
   const identity = character.identity || 'Secret Alter Ego';
   const isSecret = character.isSecretIdentity !== false;
   const identityType = isSecret ? 'Secret Identity' : 'Public Identity';
-  const player = character.player || '—';
-  const affiliation = character.groupAffiliation || '—';
+  const player = character.player || 'None';
+  const affiliation = character.groupAffiliation || 'None';
   const baseOfOps = character.baseOfOperations || 'Freedom City';
   const heroPoints = character.heroPoints ?? 1;
 
@@ -962,7 +962,7 @@ export function buildBBCodeSheet(character, heroStore) {
       if (p.type === 'device') {
         const isEasily = p.deviceConfig?.type === 'easily_removable';
         const devType = isEasily ? 'Easily Removable Device' : 'Removable Device';
-        bb += `• [b]${p.name || 'Device'}[/b] (${cost} PP) — [i]${devType}[/i]${descriptors}\n`;
+        bb += `• [b]${p.name || 'Device'}[/b] (${cost} PP) - [i]${devType}[/i]${descriptors}\n`;
         const subPowers = p.devicePowers || [];
         subPowers.forEach(sp => {
           const eff = sp.effect || sp;
@@ -980,7 +980,7 @@ export function buildBBCodeSheet(character, heroStore) {
           }
         });
       } else if (p.type === 'compound') {
-        bb += `• [b]${p.name || 'Compound Power'}[/b] (${cost} PP) — [i]Compound Suite[/i]${descriptors}\n`;
+        bb += `• [b]${p.name || 'Compound Power'}[/b] (${cost} PP) - [i]Compound Suite[/i]${descriptors}\n`;
         const compEffects = p.compoundEffects || [];
         compEffects.forEach(cp => {
           const eff = cp.effect || cp;
@@ -1041,7 +1041,7 @@ export function buildBBCodeSheet(character, heroStore) {
     const statusStr = sk.isTrained ? 'Trained' : 'Untrained';
     const rankPart = sk.ranks > 0 ? `${sk.ranks} Ranks` : '0 Ranks';
     const enhPart = sk.enhBonus > 0 ? ` + ${sk.enhBonus} Enhanced` : '';
-    bb += `• [b]${sk.displayName} (${sk.abilityCode}):[/b] ${formatMod(sk.totalBonus)} [i](${sk.abilityCode} ${formatMod(sk.abilityMod)} + ${rankPart}${enhPart} — ${statusStr})[/i]\n`;
+    bb += `• [b]${sk.displayName} (${sk.abilityCode}):[/b] ${formatMod(sk.totalBonus)} [i](${sk.abilityCode} ${formatMod(sk.abilityMod)} + ${rankPart}${enhPart} - ${statusStr})[/i]\n`;
   });
   bb += `\n[hr]\n\n`;
 
@@ -1059,7 +1059,7 @@ export function buildBBCodeSheet(character, heroStore) {
       const cost = r.epCost ?? r.cost ?? 1;
       const statusStr = r.status ? `[${r.status}]` : '';
       const subStr = r.subtype ? `(${r.subtype})` : `(${r.type || 'Gear'})`;
-      bb += `• [b]${r.name}[/b] ${subStr} (${cost} EP) ${statusStr}${r.desc ? ` — ${r.desc}` : ''}\n`;
+      bb += `• [b]${r.name}[/b] ${subStr} (${cost} EP) ${statusStr}${r.desc ? ` - ${r.desc}` : ''}\n`;
     });
     bb += `\n`;
   }
@@ -1110,8 +1110,8 @@ export function buildPlainTextSheet(character, heroStore) {
   const identity = character.identity || 'Secret Alter Ego';
   const isSecret = character.isSecretIdentity !== false;
   const identityType = isSecret ? 'Secret Identity' : 'Public Identity';
-  const player = character.player || '—';
-  const affiliation = character.groupAffiliation || '—';
+  const player = character.player || 'None';
+  const affiliation = character.groupAffiliation || 'None';
   const baseOfOps = character.baseOfOperations || 'Freedom City';
   const heroPoints = character.heroPoints ?? 1;
 
@@ -1258,7 +1258,7 @@ export function buildPlainTextSheet(character, heroStore) {
       const bonusStr = isAuto ? 'Auto-hit' : `${formatMod(atk.rollBonus)} to hit`;
       const effectDesc = `${atk.effectName || 'Damage'} ${atk.effectRank ?? atk.rank ?? 0}`;
       const descStr = atk.descriptor ? `(${atk.descriptor})` : '';
-      const dcStr = atk.dc ? `DC ${atk.dc} vs ${atk.resistance || 'Toughness'}` : '—';
+      const dcStr = atk.dc ? `DC ${atk.dc} vs ${atk.resistance || 'Toughness'}` : '-';
       const rangeCrit = `${atk.range || 'Close'}, Crit ${atk.crit || 20}`;
       txt += `- ${atk.name}: ${bonusStr} | ${effectDesc} ${descStr} | ${dcStr} | ${rangeCrit}\n`;
     });
@@ -1282,7 +1282,7 @@ export function buildPlainTextSheet(character, heroStore) {
       if (p.type === 'device') {
         const isEasily = p.deviceConfig?.type === 'easily_removable';
         const devType = isEasily ? 'Easily Removable Device' : 'Removable Device';
-        txt += `${pIdx + 1}. ${p.name || 'Device'} (${cost} PP) — ${devType}${descriptors}\n`;
+        txt += `${pIdx + 1}. ${p.name || 'Device'} (${cost} PP) - ${devType}${descriptors}\n`;
         const subPowers = p.devicePowers || [];
         subPowers.forEach(sp => {
           const eff = sp.effect || sp;
@@ -1300,7 +1300,7 @@ export function buildPlainTextSheet(character, heroStore) {
           }
         });
       } else if (p.type === 'compound') {
-        txt += `${pIdx + 1}. ${p.name || 'Compound Power'} (${cost} PP) — Compound Suite${descriptors}\n`;
+        txt += `${pIdx + 1}. ${p.name || 'Compound Power'} (${cost} PP) - Compound Suite${descriptors}\n`;
         const compEffects = p.compoundEffects || [];
         compEffects.forEach(cp => {
           const eff = cp.effect || cp;
@@ -1390,7 +1390,7 @@ export function buildPlainTextSheet(character, heroStore) {
       const cost = r.epCost ?? r.cost ?? 1;
       const statusStr = r.status ? `[${r.status}]` : '';
       const subStr = r.subtype ? `(${r.subtype})` : `(${r.type || 'Gear'})`;
-      txt += `- ${r.name} ${subStr} (${cost} EP) ${statusStr}${r.desc ? ` — ${r.desc}` : ''}\n`;
+      txt += `- ${r.name} ${subStr} (${cost} EP) ${statusStr}${r.desc ? ` - ${r.desc}` : ''}\n`;
     });
     txt += `\n`;
   }

@@ -300,7 +300,7 @@
         <div v-if="modalMode === 'motivation'" class="narrative-mode-body">
           <div class="catalog-recommendation-banner">
             <div class="catalog-rec-header">
-              <i class="ri-sparkling-fill text-mot"></i>
+              <i class="ri-heart-3-line text-mot"></i>
               <span>Motivations catalog:</span>
             </div>
             <div class="presets-chips-grid">
@@ -349,7 +349,7 @@
         <div v-else class="narrative-mode-body">
           <div class="catalog-recommendation-banner">
             <div class="catalog-rec-header">
-              <i class="ri-sparkling-fill text-comp"></i>
+              <i class="ri-alert-line text-comp"></i>
               <span>Complications catalog:</span>
             </div>
             <div class="presets-chips-grid">
@@ -891,14 +891,6 @@ function removeTrait(item) {
 
 .comp-item:hover {
   border-color: rgba(255, 255, 255, 0.2);
-}
-
-.comp-item.item-motivation {
-  border-left: 3.5px solid #a855f7;
-}
-
-.comp-item.item-complication {
-  border-left: 3.5px solid #f43f5e;
 }
 
 .comp-item-layout {

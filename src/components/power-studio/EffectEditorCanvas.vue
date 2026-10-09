@@ -1478,7 +1478,7 @@ function calculateModSubtotal(mod, isFlaw = false) {
 }
 
 .mod-custom-input::placeholder {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   font-style: italic;
 }
 

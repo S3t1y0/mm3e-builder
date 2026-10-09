@@ -403,7 +403,7 @@
                     :class="{ active: gadgetConfig.mode === 'custom' }"
                     @click="gadgetConfig.mode = 'custom'"
                   >
-                    <i class="ri-magic-line"></i> Custom Invention / Device
+                    <i class="ri-tools-line"></i> Custom Invention / Device
                   </button>
                 </div>
 
@@ -1983,7 +1983,7 @@ function saveEquipmentItem() {
 
 .eq-hint-text {
   font-size: 0.68rem;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .eq-text-input,
@@ -2501,7 +2501,7 @@ function saveEquipmentItem() {
 }
 
 .chip-cost-inactive {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   font-size: 0.7rem;
   font-weight: 700;
   font-family: var(--font-mono, monospace);
@@ -2982,7 +2982,7 @@ function saveEquipmentItem() {
 }
 
 .b-stat span {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .b-stat strong {

@@ -1,5 +1,5 @@
 <template>
-  <div class="dndb-sheet-view" ref="sheetViewRef">
+  <div id="character-sheet" class="dndb-sheet-view" ref="sheetViewRef">
     <!-- Hero Identity & Combat Vitals Banner -->
     <HeroHeader />
 

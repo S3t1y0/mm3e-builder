@@ -319,7 +319,7 @@
       <header class="gr-card gr-page-2-header">
         <div style="display: flex; align-items: center; gap: 10px;">
           <img src="/mm-logo.png" alt="Mutants &amp; Masterminds" style="height: 30px; object-fit: contain;" />
-          <span class="gr-page-2-title">OFFICIAL CHARACTER SHEET — PAGE 2</span>
+          <span class="gr-page-2-title">OFFICIAL CHARACTER SHEET - PAGE 2</span>
         </div>
         <div style="font-size: 10.5px; font-weight: 900; color: #0f172a;">
           {{ heroStore.character.name || 'Hero' }} • PL {{ heroStore.character.powerLevel || 10 }}
@@ -354,7 +354,7 @@
             <span v-for="item in heroStore.character.resources" :key="item.id || item.name" class="gr-gear-pill">
               <strong>{{ item.name }}</strong>
               <span v-if="item.cost" style="color: #0284c7; font-weight: 700;">({{ item.cost }} EP)</span>
-              <span v-if="item.desc" style="color: #64748b;">— {{ item.desc }}</span>
+              <span v-if="item.desc" style="color: #475569;">: {{ item.desc }}</span>
             </span>
           </div>
           <div v-else class="gr-empty-hint">

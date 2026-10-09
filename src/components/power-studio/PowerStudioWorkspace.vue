@@ -1,5 +1,5 @@
 <template>
-  <div v-if="builderStore.isOpen" class="power-studio-fullscreen-window">
+  <div v-if="builderStore.isOpen" id="power-studio" class="power-studio-fullscreen-window">
     <!-- TOP WORKSTATION COMMAND BAR (Compact ~54px Streamlined Header) -->
     <header class="workspace-header-bar">
       <div class="header-left-cluster">

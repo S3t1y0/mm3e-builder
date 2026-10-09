@@ -267,7 +267,7 @@
             <!-- PRESET SUGGESTION CHIPS -->
             <div v-if="activeSpecAdv.specificationSuggestions?.length" class="spec-suggestions-block">
               <span class="spec-sugg-title">
-                <i class="ri-magic-line"></i> Common RAW Options:
+                <i class="ri-list-check-2"></i> Common RAW Options:
               </span>
               <div class="spec-sugg-chips">
                 <button
@@ -353,7 +353,7 @@
           <div class="spec-picker-box custom-adv-box">
             <div class="spec-picker-header">
               <div class="spec-picker-title-row">
-                <i class="ri-sparkling-fill" style="color: #f59e0b;"></i>
+                <i class="ri-medal-line" style="color: #f59e0b;"></i>
                 <h4>Create Custom Advantage</h4>
               </div>
               <button
@@ -1253,7 +1253,7 @@ function confirmCreateCustomAdv() {
   font-size: 0.72rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--text-muted, #64748b);
+  color: var(--text-secondary, #94a3b8);
   display: flex;
   align-items: center;
   gap: 0.3rem;

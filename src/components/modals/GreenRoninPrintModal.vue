@@ -1,6 +1,6 @@
 <template>
   <div v-if="uiStore.modals.printOfficial" class="gr-modal-overlay" @click.self="uiStore.closeModal('printOfficial')">
-    <div class="gr-modal-container">
+    <div id="official-print" class="gr-modal-container">
       <!-- TOP ACTION BAR -->
       <div class="gr-modal-bar">
         <div style="display: flex; align-items: center; gap: 0.75rem;">

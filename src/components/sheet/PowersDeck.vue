@@ -2841,7 +2841,7 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .sub-power-toggle-btn.is-off {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .sub-power-toggle-btn:disabled {
@@ -4207,12 +4207,12 @@ function getModifierInfo(modName, isFlaw = false) {
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.04em;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   margin-bottom: 0.2rem;
 }
 
 .rulebook-caption i {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .dossier-desc-text {

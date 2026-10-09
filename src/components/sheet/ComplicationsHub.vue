@@ -432,7 +432,7 @@
             <div class="comp-presets-box">
               <div class="presets-header">
                 <span class="presets-title">
-                  <i class="ri-magic-line"></i> Presets:
+                  <i class="ri-bookmark-3-line"></i> Presets:
                 </span>
               </div>
               <div class="presets-chips-deck">

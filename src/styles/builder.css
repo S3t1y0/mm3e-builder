@@ -454,7 +454,7 @@
 
 /* EFFECT COMPONENT CARD */
 .effect-component-card {
-  border-left: 3px solid var(--accent-primary);
+  border: 1px solid var(--border-color);
 }
 
 .component-header {
@@ -1947,7 +1947,7 @@
 }
 
 .pb-main-effect-card {
-  border-left: 3px solid var(--accent-primary);
+  border: 1px solid var(--border-color);
 }
 
 .card-section-header {
@@ -2124,25 +2124,22 @@
   font-size: 0.82rem;
   color: var(--text-secondary);
   line-height: 1.45;
-  border-left: 3px solid var(--accent-primary);
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.08));
 }
 
 .linked-effect-showcase-box .effect-desc-box {
-  border-left-color: #34d399;
   font-size: 0.79rem;
   padding: 0.55rem 0.75rem;
   background: rgba(15, 23, 42, 0.5);
 }
 
 .new-slot-base-picker-box .effect-desc-box {
-  border-left-color: #a855f7;
   font-size: 0.79rem;
   padding: 0.55rem 0.75rem;
   background: rgba(15, 23, 42, 0.5);
 }
 
 .array-slot-item .effect-desc-box {
-  border-left-color: #a855f7;
   font-size: 0.79rem;
   padding: 0.55rem 0.75rem;
   background: rgba(15, 23, 42, 0.5);
@@ -3340,7 +3337,7 @@
 
 /* Device Sub-Power Tabs & Container Card */
 .pb-device-container-card {
-  border-left: 3px solid #f59e0b;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
 .device-subpowers-nav-bar {
@@ -3419,7 +3416,7 @@
    POWER STUDIO: LINKED EFFECTS (COMPOUND POWERS)
    ========================================================================== */
 .pb-linked-card {
-  border-left: 3px solid #34d399;
+  border: 1px solid rgba(52, 211, 153, 0.3);
   position: relative;
 }
 
@@ -3629,8 +3626,7 @@
    POWER STUDIO: ARRAY STUDIO (ALTERNATE EFFECTS)
    ========================================================================== */
 .pb-array-card {
-  border-left: 3px solid #38bdf8;
-  border-color: rgba(56, 189, 248, 0.25);
+  border: 1px solid rgba(56, 189, 248, 0.25);
   background: linear-gradient(180deg, rgba(56, 189, 248, 0.04) 0%, rgba(15, 23, 42, 0.6) 100%);
   box-shadow: var(--shadow-md);
 }
@@ -3891,7 +3887,7 @@
   height: 100%;
   border-radius: var(--radius-pill);
   transition: width 0.3s ease, background-color 0.3s ease;
-  background: linear-gradient(90deg, #38bdf8, #a855f7);
+  background: linear-gradient(90deg, var(--accent-primary, #006fb8), var(--accent-secondary, #2a8fd6));
 }
 
 .budget-meter-fill.overflow {
@@ -5376,9 +5372,9 @@
 }
 
 .slot-type-btn.active.dynamic {
-  background: linear-gradient(135deg, rgba(56, 189, 248, 0.35), rgba(236, 72, 153, 0.25));
-  color: #fbcfe8;
-  border-color: rgba(236, 72, 153, 0.45);
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5fd;
+  border-color: #8b5cf6;
 }
 
 .mod-applied-chips-wrap {
