@@ -76,7 +76,7 @@
             </p>
 
             <div class="quick-recs-wrap">
-              <span class="quick-recs-label"><i class="ri-flashlight-line"></i> Quick Suggestions:</span>
+              <span class="quick-recs-label"><i class="ri-lightbulb-line"></i> Quick Suggestions:</span>
               <div class="quick-recs-pills">
                 <button
                   v-for="rec in quickRecommendations"

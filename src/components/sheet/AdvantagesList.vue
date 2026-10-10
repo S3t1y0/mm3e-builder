@@ -597,6 +597,12 @@ function broadcastAdvantage(adv) {
   gap: 0.3rem;
   font-size: 0.72rem;
   color: var(--text-muted);
+  transition: border-color var(--trans-fast);
+}
+
+.adv-search-mini:focus-within {
+  border-color: var(--accent-secondary, #2a8fd6);
+  box-shadow: 0 0 0 2px rgba(42, 143, 214, 0.25);
 }
 
 .adv-search-input {

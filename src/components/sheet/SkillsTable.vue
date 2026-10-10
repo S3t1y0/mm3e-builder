@@ -281,7 +281,7 @@
                         title="Decrease Rank"
                       >-</button>
                       <span class="step-val-xs">
-                        {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '—' : (inst.ranks || 0) }}
+                        {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : (inst.ranks || 0) }}
                         <span
                           v-if="!heroStore.isAbilityAbsent(ruleSkill.ability) && getEnhancedRanks(ruleSkill.name, inst.subtype) > 0"
                           class="enh-pip-tag"
@@ -322,7 +322,7 @@
                   >
                     <i :class="(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) ? 'ri-close-line' : 'ri-dice-line'"></i>
                     <span class="skill-roll-val">
-                      {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '—' : formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name)) }}
+                      {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name)) }}
                     </span>
                   </button>
                 </div>
@@ -371,7 +371,7 @@
                     title="Decrease Rank"
                   >-</button>
                   <span class="step-val-xs">
-                    {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '—' : getStandardRanks(ruleSkill.name) }}
+                    {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : getStandardRanks(ruleSkill.name) }}
                     <span
                       v-if="!heroStore.isAbilityAbsent(ruleSkill.ability) && getEnhancedRanks(ruleSkill.name) > 0"
                       class="enh-pip-tag"
@@ -403,7 +403,7 @@
               >
                 <i :class="heroStore.isAbilityAbsent(ruleSkill.ability) ? 'ri-close-line' : 'ri-dice-line'"></i>
                 <span class="skill-roll-val">
-                  {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '—' : formatMod(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name))) }}
+                  {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : formatMod(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name))) }}
                 </span>
               </button>
             </div>
@@ -801,7 +801,7 @@ function rollSkill(skillTitle, bonus) {
   font-size: 0.6rem;
   font-weight: 800;
   padding: 0.05rem 0.3rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-xs, 3px);
   line-height: 1;
 }
 
@@ -1286,7 +1286,7 @@ function rollSkill(skillTitle, bonus) {
   font-size: 0.6rem;
   font-weight: 800;
   padding: 0.05rem 0.3rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-xs, 3px);
   line-height: 1;
   flex-shrink: 0;
 }

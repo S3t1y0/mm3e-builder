@@ -41,9 +41,9 @@ import { compileTargetedAttacks } from '../rules/attacks.js';
  * Format number as a D20 modifier (+5, -2, +0).
  */
 function formatMod(val) {
-  if (val === null || val === undefined) return '—';
+  if (val === null || val === undefined) return '-';
   const num = Number(val);
-  if (isNaN(num)) return '—';
+  if (isNaN(num)) return '-';
   return num >= 0 ? `+${num}` : `${num}`;
 }
 
@@ -584,7 +584,7 @@ export function buildMarkdownSheet(character, heroStore) {
   ablDefinitions.forEach(abl => {
     const isAbsent = heroStore?.isAbilityAbsent ? heroStore.isAbilityAbsent(abl.code) : ((character.absentAbilities || []).includes(abl.code));
     if (isAbsent) {
-      md += `| **${abl.name} (${abl.code})** | **—** | **—** | Absent | - | -10 PP |\n`;
+      md += `| **${abl.name} (${abl.code})** | **-** | **-** | Absent | - | -10 PP |\n`;
       return;
     }
     const baseRank = Number(character.abilities?.[abl.code] || 0);
@@ -917,7 +917,7 @@ export function buildBBCodeSheet(character, heroStore) {
   const ablLines = ablDefs.map(abl => {
     const isAbsent = heroStore?.isAbilityAbsent ? heroStore.isAbilityAbsent(abl.code) : ((character.absentAbilities || []).includes(abl.code));
     if (isAbsent) {
-      return `[b]${abl.code}:[/b] — (Absent, -10 PP)`;
+      return `[b]${abl.code}:[/b] - (Absent, -10 PP)`;
     }
     const baseRank = Number(character.abilities?.[abl.code] || 0);
     const enhRank = Number(activeTraits.abilities?.[abl.code] || 0);
@@ -961,7 +961,7 @@ export function buildBBCodeSheet(character, heroStore) {
   bb += `• [b]Dodge:[/b] ${dodgeTotal} (Base AGL ${effAbilities.AGL || 0} + Bought ${dodgeBought}${shieldBonus > 0 ? ` + Shield ${shieldBonus}` : ''})\n`;
   bb += `• [b]Parry:[/b] ${parryTotal} (Base FGT ${effAbilities.FGT || 0} + Bought ${parryBought}${shieldBonus > 0 ? ` + Shield ${shieldBonus}` : ''})\n`;
   if (isFortAbsent) {
-    bb += `• [b]Fortitude:[/b] — (Absent STA / Immune to Fortitude Effects)\n`;
+    bb += `• [b]Fortitude:[/b] - (Absent STA / Immune to Fortitude Effects)\n`;
   } else {
     bb += `• [b]Fortitude:[/b] ${fortTotal} (Base STA ${effAbilities.STA || 0} + Bought ${fortBought})\n`;
   }
@@ -1237,7 +1237,7 @@ export function buildPlainTextSheet(character, heroStore) {
   const ablSummary = ablDefs.map(abl => {
     const isAbsent = heroStore?.isAbilityAbsent ? heroStore.isAbilityAbsent(abl.code) : ((character.absentAbilities || []).includes(abl.code));
     if (isAbsent) {
-      return `${abl.code}: — (Absent)`;
+      return `${abl.code}: - (Absent)`;
     }
     const totalScore = effAbilities[abl.code] ?? (Number(character.abilities?.[abl.code] || 0) + Number(activeTraits.abilities?.[abl.code] || 0));
     return `${abl.code}: ${totalScore} (${formatMod(totalScore)})`;
@@ -1293,7 +1293,7 @@ export function buildPlainTextSheet(character, heroStore) {
   txt += `Dodge:     ${String(dodgeTotal).padStart(2)}  (Base AGL ${effAbilities.AGL || 0} + Bought ${dodgeBought}${shieldBonus > 0 ? ` + Shield ${shieldBonus}` : ''})\n`;
   txt += `Parry:     ${String(parryTotal).padStart(2)}  (Base FGT ${effAbilities.FGT || 0} + Bought ${parryBought}${shieldBonus > 0 ? ` + Shield ${shieldBonus}` : ''})\n`;
   if (isFortAbsent) {
-    txt += `Fortitude:  —  (Absent STA / Immune to Fortitude Effects)\n`;
+    txt += `Fortitude:  -  (Absent STA / Immune to Fortitude Effects)\n`;
   } else {
     txt += `Fortitude: ${String(fortTotal).padStart(2)}  (Base STA ${effAbilities.STA || 0} + Bought ${fortBought})\n`;
   }

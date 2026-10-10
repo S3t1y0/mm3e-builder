@@ -303,7 +303,7 @@ function handleSeizeInitiative() {
 }
 
 .calc-operator {
-  color: var(--text-secondary, #64748b);
+  color: var(--text-secondary, #94a3b8);
   font-weight: 700;
   font-size: 0.75rem;
 }

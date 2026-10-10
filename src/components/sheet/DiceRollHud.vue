@@ -55,7 +55,7 @@
                 <i class="ri-alert-fill"></i> CRITICAL FAILURE (Nat 1)!
               </span>
               <span v-if="heroStore.lastRoll.isHeroPointReroll" class="roll-badge reroll-badge">
-                <i class="ri-flashlight-fill"></i> Hero Point Reroll
+                <i class="ri-shield-star-fill"></i> Hero Point Reroll
                 <template v-if="heroStore.lastRoll.isBoosted"> (+10 Boost)</template>
               </span>
               <span v-if="vttStatus" class="roll-badge vtt-badge" :class="{ 'vtt-ok': vttStatus.success, 'vtt-err': !vttStatus.success }">

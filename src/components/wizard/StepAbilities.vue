@@ -38,10 +38,10 @@
               class="absent-toggle-pill"
               :class="{ 'is-absent': heroStore.isAbilityAbsent(ability.key) }"
               @click="heroStore.toggleAbsentAbility(ability.key)"
-              :title="heroStore.isAbilityAbsent(ability.key) ? `Restore ${ability.name} to active (Rank 0)` : `Set ${ability.name} to Absent (—, -10 PP)`"
+              :title="heroStore.isAbilityAbsent(ability.key) ? `Restore ${ability.name} to active (Rank 0)` : `Set ${ability.name} to Absent (-, -10 PP)`"
             >
               <i :class="heroStore.isAbilityAbsent(ability.key) ? 'ri-close-circle-fill' : 'ri-indeterminate-circle-line'"></i>
-              <span>Absent (—)</span>
+              <span>Absent (-)</span>
             </button>
           </div>
 
@@ -63,7 +63,7 @@
 
           <!-- When Absent: Display Dash & Nil indication -->
           <div v-if="heroStore.isAbilityAbsent(ability.key)" class="absent-display-row">
-            <span class="absent-dash">—</span>
+            <span class="absent-dash">-</span>
             <span class="absent-caption">Nil / Non-existent</span>
           </div>
 

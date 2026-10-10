@@ -117,7 +117,7 @@
 
           <!-- Quick Presets Strip -->
           <div v-if="currentTraitCategory === 'abilities' || currentTraitCategory === 'defenses'" class="trait-presets-strip">
-            <span class="presets-label"><i class="ri-flashlight-line"></i> Presets:</span>
+            <span class="presets-label"><i class="ri-bookmark-line"></i> Presets:</span>
             <template v-if="currentTraitCategory === 'abilities'">
               <button type="button" class="preset-pill-btn" @click="applyTraitPreset(['Strength', 'Agility', 'Stamina'])">
                 Physical (STR, AGI, STA)
@@ -434,7 +434,7 @@
       <!-- Quick Presets Carousel / Row -->
       <div class="affliction-presets-section">
         <span class="section-label">
-          <i class="ri-flashlight-line"></i> Quick Affliction Presets:
+          <i class="ri-bookmark-line"></i> Quick Affliction Presets:
         </span>
         <div class="presets-chips-row">
           <button

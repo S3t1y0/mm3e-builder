@@ -1108,90 +1108,6 @@
       "source_location": "L529"
     },
     {
-      "id": "src_rules_skills_findmatchingcombatskill",
-      "label": "findMatchingCombatSkill()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "findmatchingcombatskill()",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L425"
-    },
-    {
-      "id": "src_rules_skills_getcombatskillmatchscore",
-      "label": "getCombatSkillMatchScore()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "getcombatskillmatchscore()",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L304"
-    },
-    {
-      "id": "src_rules_skills_isclosecombatmatch",
-      "label": "isCloseCombatMatch()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "isclosecombatmatch()",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L418"
-    },
-    {
-      "id": "src_rules_skills_israngedcombatmatch",
-      "label": "isRangedCombatMatch()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "israngedcombatmatch()",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L411"
-    },
-    {
-      "id": "src_rules_skills_normalizecombatterm",
-      "label": "normalizeCombatTerm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "normalizecombatterm()",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L113"
-    },
-    {
-      "id": "src_rules_skills_tokenizewords",
-      "label": "tokenizeWords()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "tokenizewords()",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L126"
-    },
-    {
-      "id": "src_rules_skills_wordmatches",
-      "label": "wordMatches()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "wordmatches()",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L135"
-    },
-    {
       "id": "src_components_modals_advantagelibrarymodal_deleteadvantage",
       "label": "deleteAdvantage()",
       "_callable": true,
@@ -2140,52 +2056,40 @@
       "source_location": "L121"
     },
     {
-      "id": "src_components_modals_roll20printmodal_copyallmacros",
-      "label": "copyAllMacros()",
+      "id": "src_components_modals_sharemodal_copylink",
+      "label": "copyLink()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
       "community_name": "exporters.js",
       "file_type": "code",
-      "norm_label": "copyallmacros()",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L447"
+      "norm_label": "copylink()",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L221"
     },
     {
-      "id": "src_components_modals_roll20printmodal_copysinglemacro",
-      "label": "copySingleMacro()",
+      "id": "src_components_modals_sharemodal_formatupdatedtime",
+      "label": "formatUpdatedTime()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
       "community_name": "exporters.js",
       "file_type": "code",
-      "norm_label": "copysinglemacro()",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L438"
+      "norm_label": "formatupdatedtime()",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L158"
     },
     {
-      "id": "src_components_modals_roll20printmodal_getskillability",
-      "label": "getSkillAbility()",
+      "id": "src_components_modals_sharemodal_generatelink",
+      "label": "generateLink()",
       "_callable": true,
       "_origin": "ast",
       "community": 2,
       "community_name": "exporters.js",
       "file_type": "code",
-      "norm_label": "getskillability()",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L415"
-    },
-    {
-      "id": "src_components_modals_roll20printmodal_handleprint",
-      "label": "handlePrint()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "exporters.js",
-      "file_type": "code",
-      "norm_label": "handleprint()",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L434"
+      "norm_label": "generatelink()",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L173"
     },
     {
       "id": "src_services_shareservice_base64urltouint8",
@@ -3172,6 +3076,30 @@
       "source_location": "L504"
     },
     {
+      "id": "src_components_wizard_stepabilities_formatmod",
+      "label": "formatMod()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "heroStore.js",
+      "file_type": "code",
+      "norm_label": "formatmod()",
+      "source_file": "src/components/wizard/StepAbilities.vue",
+      "source_location": "L195"
+    },
+    {
+      "id": "src_components_wizard_stepabilities_setabilityrank",
+      "label": "setAbilityRank()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "heroStore.js",
+      "file_type": "code",
+      "norm_label": "setabilityrank()",
+      "source_file": "src/components/wizard/StepAbilities.vue",
+      "source_location": "L191"
+    },
+    {
       "id": "src_rules_archetypes_getarchetypebyid",
       "label": "getArchetypeById()",
       "_callable": true,
@@ -3182,18 +3110,6 @@
       "norm_label": "getarchetypebyid()",
       "source_file": "src/rules/archetypes.js",
       "source_location": "L747"
-    },
-    {
-      "id": "src_rules_attacks_calculatedegrees",
-      "label": "calculateDegrees()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 28,
-      "community_name": "heroStore.js",
-      "file_type": "code",
-      "norm_label": "calculatedegrees()",
-      "source_file": "src/rules/attacks.js",
-      "source_location": "L275"
     },
     {
       "id": "src_rules_conditions_calculateconditionmodifiers",
@@ -3290,6 +3206,18 @@
       "norm_label": "synccolheights()",
       "source_file": "src/components/sheet/TacticalCharacterSheet.vue",
       "source_location": "L45"
+    },
+    {
+      "id": "src_components_modals_customequipmentmodal_getcalculatedatkbonus",
+      "label": "getCalculatedAtkBonus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "getcalculatedatkbonus()",
+      "source_file": "src/components/modals/CustomEquipmentModal.vue",
+      "source_location": "L1558"
     },
     {
       "id": "src_components_wizard_stepequipment_addpreset",
@@ -3508,6 +3436,102 @@
       "source_location": "L335"
     },
     {
+      "id": "src_rules_skills_findmatchingcombatskill",
+      "label": "findMatchingCombatSkill()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "findmatchingcombatskill()",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L425"
+    },
+    {
+      "id": "src_rules_skills_getcombatskillbonus",
+      "label": "getCombatSkillBonus()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "getcombatskillbonus()",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L468"
+    },
+    {
+      "id": "src_rules_skills_getcombatskillmatchscore",
+      "label": "getCombatSkillMatchScore()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "getcombatskillmatchscore()",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L304"
+    },
+    {
+      "id": "src_rules_skills_isclosecombatmatch",
+      "label": "isCloseCombatMatch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "isclosecombatmatch()",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L418"
+    },
+    {
+      "id": "src_rules_skills_israngedcombatmatch",
+      "label": "isRangedCombatMatch()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "israngedcombatmatch()",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L411"
+    },
+    {
+      "id": "src_rules_skills_normalizecombatterm",
+      "label": "normalizeCombatTerm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "normalizecombatterm()",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L113"
+    },
+    {
+      "id": "src_rules_skills_tokenizewords",
+      "label": "tokenizeWords()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "tokenizewords()",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L126"
+    },
+    {
+      "id": "src_rules_skills_wordmatches",
+      "label": "wordMatches()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "wordmatches()",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L135"
+    },
+    {
       "id": "src_components_sheet_heroheader_adjustheropoints",
       "label": "adjustHeroPoints()",
       "_callable": true,
@@ -3566,6 +3590,42 @@
       "norm_label": "setpl()",
       "source_file": "src/components/sheet/HeroHeader.vue",
       "source_location": "L538"
+    },
+    {
+      "id": "src_rules_attacks_getconditionexplanation",
+      "label": "getConditionExplanation()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "HeroHeader.vue",
+      "file_type": "code",
+      "norm_label": "getconditionexplanation()",
+      "source_file": "src/rules/attacks.js",
+      "source_location": "L11"
+    },
+    {
+      "id": "src_rules_conditions_getconditionbriefeffect",
+      "label": "getConditionBriefEffect()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "HeroHeader.vue",
+      "file_type": "code",
+      "norm_label": "getconditionbriefeffect()",
+      "source_file": "src/rules/conditions.js",
+      "source_location": "L132"
+    },
+    {
+      "id": "src_rules_conditions_isconditionsevere",
+      "label": "isConditionSevere()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "HeroHeader.vue",
+      "file_type": "code",
+      "norm_label": "isconditionsevere()",
+      "source_file": "src/rules/conditions.js",
+      "source_location": "L141"
     },
     {
       "id": "src_components_sheet_conditionstracker_clearall",
@@ -4036,42 +4096,6 @@
       "source_location": "L168"
     },
     {
-      "id": "src_components_modals_sharemodal_copylink",
-      "label": "copyLink()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "copylink()",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L221"
-    },
-    {
-      "id": "src_components_modals_sharemodal_formatupdatedtime",
-      "label": "formatUpdatedTime()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "formatupdatedtime()",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L158"
-    },
-    {
-      "id": "src_components_modals_sharemodal_generatelink",
-      "label": "generateLink()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "generatelink()",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L173"
-    },
-    {
       "id": "src_components_modals_customequipmentmodal_getcalculateddc",
       "label": "getCalculatedDC()",
       "_callable": true,
@@ -4336,18 +4360,6 @@
       "source_location": "L1543"
     },
     {
-      "id": "src_components_modals_customequipmentmodal_getcalculatedatkbonus",
-      "label": "getCalculatedAtkBonus()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "attacks.js",
-      "file_type": "code",
-      "norm_label": "getcalculatedatkbonus()",
-      "source_file": "src/components/modals/CustomEquipmentModal.vue",
-      "source_location": "L1558"
-    },
-    {
       "id": "src_rules_attacks_buildeffectbreakdown",
       "label": "buildEffectBreakdown()",
       "_callable": true,
@@ -4358,6 +4370,18 @@
       "norm_label": "buildeffectbreakdown()",
       "source_file": "src/rules/attacks.js",
       "source_location": "L42"
+    },
+    {
+      "id": "src_rules_attacks_calculatedegrees",
+      "label": "calculateDegrees()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "attacks.js",
+      "file_type": "code",
+      "norm_label": "calculatedegrees()",
+      "source_file": "src/rules/attacks.js",
+      "source_location": "L275"
     },
     {
       "id": "src_rules_attacks_compiletargetedattacks",
@@ -4384,52 +4408,52 @@
       "source_location": "L410"
     },
     {
-      "id": "src_rules_attacks_getconditionexplanation",
-      "label": "getConditionExplanation()",
+      "id": "src_components_modals_roll20printmodal_copyallmacros",
+      "label": "copyAllMacros()",
       "_callable": true,
       "_origin": "ast",
-      "community": 40,
-      "community_name": "attacks.js",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
       "file_type": "code",
-      "norm_label": "getconditionexplanation()",
-      "source_file": "src/rules/attacks.js",
-      "source_location": "L11"
+      "norm_label": "copyallmacros()",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L447"
     },
     {
-      "id": "src_rules_conditions_getconditionbriefeffect",
-      "label": "getConditionBriefEffect()",
+      "id": "src_components_modals_roll20printmodal_copysinglemacro",
+      "label": "copySingleMacro()",
       "_callable": true,
       "_origin": "ast",
-      "community": 40,
-      "community_name": "attacks.js",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
       "file_type": "code",
-      "norm_label": "getconditionbriefeffect()",
-      "source_file": "src/rules/conditions.js",
-      "source_location": "L132"
+      "norm_label": "copysinglemacro()",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L438"
     },
     {
-      "id": "src_rules_conditions_isconditionsevere",
-      "label": "isConditionSevere()",
+      "id": "src_components_modals_roll20printmodal_getskillability",
+      "label": "getSkillAbility()",
       "_callable": true,
       "_origin": "ast",
-      "community": 40,
-      "community_name": "attacks.js",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
       "file_type": "code",
-      "norm_label": "isconditionsevere()",
-      "source_file": "src/rules/conditions.js",
-      "source_location": "L141"
+      "norm_label": "getskillability()",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L415"
     },
     {
-      "id": "src_rules_skills_getcombatskillbonus",
-      "label": "getCombatSkillBonus()",
+      "id": "src_components_modals_roll20printmodal_handleprint",
+      "label": "handlePrint()",
       "_callable": true,
       "_origin": "ast",
-      "community": 40,
-      "community_name": "attacks.js",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
       "file_type": "code",
-      "norm_label": "getcombatskillbonus()",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L468"
+      "norm_label": "handleprint()",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L434"
     },
     {
       "id": "src_components_power_studio_compoundpowerstudio_geteffecticon",
@@ -4682,30 +4706,6 @@
       "norm_label": "ismotivation()",
       "source_file": "src/rules/complications.js",
       "source_location": "L277"
-    },
-    {
-      "id": "src_components_wizard_stepabilities_formatmod",
-      "label": "formatMod()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "StepAbilities.vue",
-      "file_type": "code",
-      "norm_label": "formatmod()",
-      "source_file": "src/components/wizard/StepAbilities.vue",
-      "source_location": "L195"
-    },
-    {
-      "id": "src_components_wizard_stepabilities_setabilityrank",
-      "label": "setAbilityRank()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "StepAbilities.vue",
-      "file_type": "code",
-      "norm_label": "setabilityrank()",
-      "source_file": "src/components/wizard/StepAbilities.vue",
-      "source_location": "L191"
     },
     {
       "id": "src_components_power_studio_modifierinspectormodal_formatcost",
@@ -7198,72 +7198,6 @@
       "source_location": "L410"
     },
     {
-      "id": "src_rules_skills",
-      "label": "skills.js",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "skills.js",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_rules_skills_close_categories",
-      "label": "CLOSE_CATEGORIES",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "close_categories",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L244"
-    },
-    {
-      "id": "src_rules_skills_ranged_categories",
-      "label": "RANGED_CATEGORIES",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "ranged_categories",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L144"
-    },
-    {
-      "id": "src_rules_skills_skill_ranks_per_pp",
-      "label": "SKILL_RANKS_PER_PP",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "skill_ranks_per_pp",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L107"
-    },
-    {
-      "id": "src_rules_skills_skills",
-      "label": "SKILLS",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "skills",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L2"
-    },
-    {
-      "id": "src_rules_skills_skills_catalog",
-      "label": "SKILLS_CATALOG",
-      "_origin": "ast",
-      "community": 11,
-      "community_name": "StepSkills.vue",
-      "file_type": "code",
-      "norm_label": "skills_catalog",
-      "source_file": "src/rules/skills.js",
-      "source_location": "L108"
-    },
-    {
       "id": "src_components_modals_advantagelibrarymodal",
       "label": "AdvantageLibraryModal.vue",
       "_origin": "ast",
@@ -8574,94 +8508,6 @@
       "source_location": "L92"
     },
     {
-      "id": "src_components_modals_roll20printmodal",
-      "label": "Roll20PrintModal.vue",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "exporters.js",
-      "file_type": "code",
-      "norm_label": "roll20printmodal.vue",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_modals_roll20printmodal_abilitylist",
-      "label": "abilityList",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "exporters.js",
-      "file_type": "code",
-      "norm_label": "abilitylist",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L384"
-    },
-    {
-      "id": "src_components_modals_roll20printmodal_basicconditions",
-      "label": "basicConditions",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "exporters.js",
-      "file_type": "code",
-      "norm_label": "basicconditions",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L378"
-    },
-    {
-      "id": "src_components_modals_roll20printmodal_currenttab",
-      "label": "currentTab",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "exporters.js",
-      "file_type": "code",
-      "norm_label": "currenttab",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L375"
-    },
-    {
-      "id": "src_components_modals_roll20printmodal_defenselist",
-      "label": "defenseList",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "exporters.js",
-      "file_type": "code",
-      "norm_label": "defenselist",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L395"
-    },
-    {
-      "id": "src_components_modals_roll20printmodal_filteredmacros",
-      "label": "filteredMacros",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "exporters.js",
-      "file_type": "code",
-      "norm_label": "filteredmacros",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L429"
-    },
-    {
-      "id": "src_components_modals_roll20printmodal_herostore",
-      "label": "heroStore",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "exporters.js",
-      "file_type": "code",
-      "norm_label": "herostore",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L372"
-    },
-    {
-      "id": "src_components_modals_roll20printmodal_macrofilter",
-      "label": "macroFilter",
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "exporters.js",
-      "file_type": "code",
-      "norm_label": "macrofilter",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L376"
-    },
-    {
       "id": "src_components_modals_roll20printmodal_macroslist",
       "label": "macrosList",
       "_origin": "ast",
@@ -8673,26 +8519,103 @@
       "source_location": "L425"
     },
     {
-      "id": "src_components_modals_roll20printmodal_movementdata",
-      "label": "movementData",
+      "id": "src_components_modals_sharemodal",
+      "label": "ShareModal.vue",
       "_origin": "ast",
       "community": 2,
       "community_name": "exporters.js",
       "file_type": "code",
-      "norm_label": "movementdata",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L403"
+      "norm_label": "sharemodal.vue",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L1"
     },
     {
-      "id": "src_components_modals_roll20printmodal_uistore",
+      "id": "src_components_modals_sharemodal_charactershareinfo",
+      "label": "characterShareInfo",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "exporters.js",
+      "file_type": "code",
+      "norm_label": "charactershareinfo",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L153"
+    },
+    {
+      "id": "src_components_modals_sharemodal_copied",
+      "label": "copied",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "exporters.js",
+      "file_type": "code",
+      "norm_label": "copied",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L134"
+    },
+    {
+      "id": "src_components_modals_sharemodal_forceoffline",
+      "label": "forceOffline",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "exporters.js",
+      "file_type": "code",
+      "norm_label": "forceoffline",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L136"
+    },
+    {
+      "id": "src_components_modals_sharemodal_hasactivesharelink",
+      "label": "hasActiveShareLink",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "exporters.js",
+      "file_type": "code",
+      "norm_label": "hasactivesharelink",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L154"
+    },
+    {
+      "id": "src_components_modals_sharemodal_herostore",
+      "label": "heroStore",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "exporters.js",
+      "file_type": "code",
+      "norm_label": "herostore",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L131"
+    },
+    {
+      "id": "src_components_modals_sharemodal_isgenerating",
+      "label": "isGenerating",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "exporters.js",
+      "file_type": "code",
+      "norm_label": "isgenerating",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L135"
+    },
+    {
+      "id": "src_components_modals_sharemodal_sharedata",
+      "label": "shareData",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "exporters.js",
+      "file_type": "code",
+      "norm_label": "sharedata",
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L138"
+    },
+    {
+      "id": "src_components_modals_sharemodal_uistore",
       "label": "uiStore",
       "_origin": "ast",
       "community": 2,
       "community_name": "exporters.js",
       "file_type": "code",
       "norm_label": "uistore",
-      "source_file": "src/components/modals/Roll20PrintModal.vue",
-      "source_location": "L373"
+      "source_file": "src/components/modals/ShareModal.vue",
+      "source_location": "L132"
     },
     {
       "id": "src_services_shareservice",
@@ -9812,17 +9735,6 @@
       "source_location": "L454"
     },
     {
-      "id": "src_components_modals_greenroninsheet_compiledattacks",
-      "label": "compiledAttacks",
-      "_origin": "ast",
-      "community": 27,
-      "community_name": "GreenRoninSheet.vue",
-      "file_type": "code",
-      "norm_label": "compiledattacks",
-      "source_file": "src/components/modals/GreenRoninSheet.vue",
-      "source_location": "L416"
-    },
-    {
       "id": "src_components_modals_greenroninsheet_displayattacks",
       "label": "displayAttacks",
       "_origin": "ast",
@@ -9889,6 +9801,39 @@
       "source_location": "L429"
     },
     {
+      "id": "src_components_wizard_stepabilities",
+      "label": "StepAbilities.vue",
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "heroStore.js",
+      "file_type": "code",
+      "norm_label": "stepabilities.vue",
+      "source_file": "src/components/wizard/StepAbilities.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_wizard_stepabilities_abilitieslist",
+      "label": "abilitiesList",
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "heroStore.js",
+      "file_type": "code",
+      "norm_label": "abilitieslist",
+      "source_file": "src/components/wizard/StepAbilities.vue",
+      "source_location": "L132"
+    },
+    {
+      "id": "src_components_wizard_stepabilities_herostore",
+      "label": "heroStore",
+      "_origin": "ast",
+      "community": 28,
+      "community_name": "heroStore.js",
+      "file_type": "code",
+      "norm_label": "herostore",
+      "source_file": "src/components/wizard/StepAbilities.vue",
+      "source_location": "L130"
+    },
+    {
       "id": "src_rules_archetypes",
       "label": "archetypes.js",
       "_origin": "ast",
@@ -9931,17 +9876,6 @@
       "norm_label": "combined_map",
       "source_file": "src/rules/conditions.js",
       "source_location": "L147"
-    },
-    {
-      "id": "src_rules_conditions_condition_brief_effects",
-      "label": "CONDITION_BRIEF_EFFECTS",
-      "_origin": "ast",
-      "community": 28,
-      "community_name": "heroStore.js",
-      "file_type": "code",
-      "norm_label": "condition_brief_effects",
-      "source_file": "src/rules/conditions.js",
-      "source_location": "L37"
     },
     {
       "id": "src_rules_conditions_death_failure_limit",
@@ -10274,6 +10208,83 @@
       "source_location": "L257"
     },
     {
+      "id": "src_rules_skills",
+      "label": "skills.js",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "skills.js",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_rules_skills_close_categories",
+      "label": "CLOSE_CATEGORIES",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "close_categories",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L244"
+    },
+    {
+      "id": "src_rules_skills_ranged_categories",
+      "label": "RANGED_CATEGORIES",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "ranged_categories",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L144"
+    },
+    {
+      "id": "src_rules_skills_skill_ranks_per_pp",
+      "label": "SKILL_RANKS_PER_PP",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "skill_ranks_per_pp",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L107"
+    },
+    {
+      "id": "src_rules_skills_skills",
+      "label": "SKILLS",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "skills",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L2"
+    },
+    {
+      "id": "src_rules_skills_skills_catalog",
+      "label": "SKILLS_CATALOG",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "StepEquipment.vue",
+      "file_type": "code",
+      "norm_label": "skills_catalog",
+      "source_file": "src/rules/skills.js",
+      "source_location": "L108"
+    },
+    {
+      "id": "src_components_modals_conditionpickermodal_allconditions",
+      "label": "allConditions",
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "HeroHeader.vue",
+      "file_type": "code",
+      "norm_label": "allconditions",
+      "source_file": "src/components/modals/ConditionPickerModal.vue",
+      "source_location": "L234"
+    },
+    {
       "id": "src_components_sheet_heroheader",
       "label": "HeroHeader.vue",
       "_origin": "ast",
@@ -10283,6 +10294,17 @@
       "norm_label": "heroheader.vue",
       "source_file": "src/components/sheet/HeroHeader.vue",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_sheet_heroheader_activeconditionitems",
+      "label": "activeConditionItems",
+      "_origin": "ast",
+      "community": 30,
+      "community_name": "HeroHeader.vue",
+      "file_type": "code",
+      "norm_label": "activeconditionitems",
+      "source_file": "src/components/sheet/HeroHeader.vue",
+      "source_location": "L507"
     },
     {
       "id": "src_components_sheet_heroheader_conditiondescmap",
@@ -10453,6 +10475,18 @@
       "source_location": "L24"
     },
     {
+      "id": "anti_slop_audit_003_2026_10_10_delivery_gate_remediation_summary_pass",
+      "label": "Delivery Gate: Remediation Summary (PASS)",
+      "_origin": "ast",
+      "community": 32,
+      "community_name": "Anti-Slop Audit Report (Siklus 3): MM3E Character Builder",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "delivery gate: remediation summary (pass)",
+      "source_file": "anti-slop/audit-003-2026-10-10.md",
+      "source_location": "L142"
+    },
+    {
       "id": "anti_slop_audit_003_2026_10_10_executive_summary",
       "label": "Executive Summary",
       "_origin": "ast",
@@ -10585,28 +10619,16 @@
       "source_location": "L60"
     },
     {
-      "id": "anti_slop_audit_003_2026_10_10_ringkasan_matriks_temuan_siklus_3",
-      "label": "Ringkasan Matriks Temuan Siklus 3",
+      "id": "anti_slop_audit_003_2026_10_10_ringkasan_matriks_temuan_status_remediasi_siklus_3",
+      "label": "Ringkasan Matriks Temuan & Status Remediasi Siklus 3",
       "_origin": "ast",
       "community": 32,
       "community_name": "Anti-Slop Audit Report (Siklus 3): MM3E Character Builder",
       "file_type": "document",
       "node_kind": "heading",
-      "norm_label": "ringkasan matriks temuan siklus 3",
+      "norm_label": "ringkasan matriks temuan & status remediasi siklus 3",
       "source_file": "anti-slop/audit-003-2026-10-10.md",
       "source_location": "L128"
-    },
-    {
-      "id": "anti_slop_audit_003_2026_10_10_status_siklus_audit",
-      "label": "Status Siklus Audit",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "Anti-Slop Audit Report (Siklus 3): MM3E Character Builder",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "status siklus audit",
-      "source_file": "anti-slop/audit-003-2026-10-10.md",
-      "source_location": "L142"
     },
     {
       "id": "package",
@@ -11489,103 +11511,184 @@
       "source_location": "L27"
     },
     {
-      "id": "src_components_modals_sharemodal",
-      "label": "ShareModal.vue",
+      "id": "anti_slop_audit_004_2026_10_10",
+      "label": "audit-004-2026-10-10.md",
       "_origin": "ast",
       "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "sharemodal.vue",
-      "source_file": "src/components/modals/ShareModal.vue",
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "audit-004-2026-10-10.md",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
       "source_location": "L1"
     },
     {
-      "id": "src_components_modals_sharemodal_charactershareinfo",
-      "label": "characterShareInfo",
+      "id": "anti_slop_audit_004_2026_10_10_anti_slop_audit_report_siklus_4_mm3e_character_builder",
+      "label": "Anti-Slop Audit Report (Siklus 4): MM3E Character Builder",
       "_origin": "ast",
       "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "charactershareinfo",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L153"
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "anti-slop audit report (siklus 4): mm3e character builder",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L1"
     },
     {
-      "id": "src_components_modals_sharemodal_copied",
-      "label": "copied",
+      "id": "anti_slop_audit_004_2026_10_10_daftar_temuan_audit_siklus_4_numbered_findings_list",
+      "label": "Daftar Temuan Audit Siklus 4 (Numbered Findings List)",
       "_origin": "ast",
       "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "copied",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L134"
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "daftar temuan audit siklus 4 (numbered findings list)",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L28"
     },
     {
-      "id": "src_components_modals_sharemodal_forceoffline",
-      "label": "forceOffline",
+      "id": "anti_slop_audit_004_2026_10_10_executive_summary",
+      "label": "Executive Summary",
       "_origin": "ast",
       "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "forceoffline",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L136"
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "executive summary",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L11"
     },
     {
-      "id": "src_components_modals_sharemodal_hasactivesharelink",
-      "label": "hasActiveShareLink",
+      "id": "anti_slop_audit_004_2026_10_10_f_28_sisa_karakter_em_dash_pada_status_absent_di_tooltip_wizard_dan_modul_ekspor",
+      "label": "[F-28] Sisa Karakter Em Dash (`\u2014`) pada Status Absent di Tooltip, Wizard, dan Modul Ekspor",
       "_origin": "ast",
       "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "hasactivesharelink",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L154"
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "[f-28] sisa karakter em dash (`\u2014`) pada status absent di tooltip, wizard, dan modul ekspor",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L32"
     },
     {
-      "id": "src_components_modals_sharemodal_herostore",
-      "label": "heroStore",
+      "id": "anti_slop_audit_004_2026_10_10_f_29_teks_mikro_berwarna_slate_500_64748b_di_bawah_ambang_batas_kontras_wcag_aa_4_5_1",
+      "label": "[F-29] Teks Mikro Berwarna Slate-500 (`#64748b`) di Bawah Ambang Batas Kontras WCAG AA (4.5:1)",
       "_origin": "ast",
       "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "herostore",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L131"
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "[f-29] teks mikro berwarna slate-500 (`#64748b`) di bawah ambang batas kontras wcag aa (4.5:1)",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L50"
     },
     {
-      "id": "src_components_modals_sharemodal_isgenerating",
-      "label": "isGenerating",
+      "id": "anti_slop_audit_004_2026_10_10_f_30_variabel_warna_teks_cetak_tidak_terpakai_kontras_buruk_pada_stylesheet_lembar_resmi",
+      "label": "[F-30] Variabel Warna Teks Cetak Tidak Terpakai & Kontras Buruk pada Stylesheet Lembar Resmi",
       "_origin": "ast",
       "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "isgenerating",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L135"
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "[f-30] variabel warna teks cetak tidak terpakai & kontras buruk pada stylesheet lembar resmi",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L63"
     },
     {
-      "id": "src_components_modals_sharemodal_sharedata",
-      "label": "shareData",
+      "id": "anti_slop_audit_004_2026_10_10_f_31_aksesibilitas_keyboard_input_pencarian_tanpa_cincin_fokus_visual_outline_none",
+      "label": "[F-31] Aksesibilitas Keyboard: Input Pencarian Tanpa Cincin Fokus Visual (`outline: none`)",
       "_origin": "ast",
       "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "sharedata",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L138"
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "[f-31] aksesibilitas keyboard: input pencarian tanpa cincin fokus visual (`outline: none`)",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L74"
     },
     {
-      "id": "src_components_modals_sharemodal_uistore",
-      "label": "uiStore",
+      "id": "anti_slop_audit_004_2026_10_10_f_32_overuse_ikon_petir_ri_flashlight_line_ri_flashlight_fill_untuk_fitur_yang_tidak_relevan",
+      "label": "[F-32] Overuse Ikon Petir (`ri-flashlight-line` / `ri-flashlight-fill`) untuk Fitur yang Tidak Relevan",
       "_origin": "ast",
       "community": 39,
-      "community_name": "ShareModal.vue",
-      "file_type": "code",
-      "norm_label": "uistore",
-      "source_file": "src/components/modals/ShareModal.vue",
-      "source_location": "L132"
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "[f-32] overuse ikon petir (`ri-flashlight-line` / `ri-flashlight-fill`) untuk fitur yang tidak relevan",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L88"
+    },
+    {
+      "id": "anti_slop_audit_004_2026_10_10_f_33_monospace_as_aesthetic_pada_teks_petunjuk_biasa_plain_text_hint_pills",
+      "label": "[F-33] \"Monospace as Aesthetic\" pada Teks Petunjuk Biasa (*Plain-Text Hint Pills*)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "[f-33] \"monospace as aesthetic\" pada teks petunjuk biasa (*plain-text hint pills*)",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L109"
+    },
+    {
+      "id": "anti_slop_audit_004_2026_10_10_f_34_pill_shape_border_radius_berlebih_9999px_sisa_aksen_warna_kuning_acak_pada_wizard_skills",
+      "label": "[F-34] Pill-Shape Border Radius Berlebih (`9999px`) & Sisa Aksen Warna Kuning Acak pada Wizard Skills",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "[f-34] pill-shape border radius berlebih (`9999px`) & sisa aksen warna kuning acak pada wizard skills",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L123"
+    },
+    {
+      "id": "anti_slop_audit_004_2026_10_10_priority_high_hard_gate_absolute_rules",
+      "label": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "priority: high (hard gate \u2014 absolute rules)",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L30"
+    },
+    {
+      "id": "anti_slop_audit_004_2026_10_10_priority_low_quality_locks_consistency_craftsmanship",
+      "label": "Priority: LOW (Quality Locks \u2014 Consistency & Craftsmanship)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "priority: low (quality locks \u2014 consistency & craftsmanship)",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L121"
+    },
+    {
+      "id": "anti_slop_audit_004_2026_10_10_priority_medium_purpose_gate_technique_allowed_purpose_required",
+      "label": "Priority: MEDIUM (Purpose-Gate \u2014 Technique Allowed, Purpose Required)",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "priority: medium (purpose-gate \u2014 technique allowed, purpose required)",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L86"
+    },
+    {
+      "id": "anti_slop_audit_004_2026_10_10_ringkasan_matriks_temuan_siklus_4",
+      "label": "Ringkasan Matriks Temuan Siklus 4",
+      "_origin": "ast",
+      "community": 39,
+      "community_name": "Priority: HIGH (Hard Gate \u2014 Absolute Rules)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "ringkasan matriks temuan siklus 4",
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L137"
     },
     {
       "id": "src_components_modals_customequipmentmodal",
@@ -11797,26 +11900,15 @@
       "source_location": "L1174"
     },
     {
-      "id": "src_components_modals_conditionpickermodal_allconditions",
-      "label": "allConditions",
+      "id": "src_components_modals_greenroninsheet_compiledattacks",
+      "label": "compiledAttacks",
       "_origin": "ast",
       "community": 40,
       "community_name": "attacks.js",
       "file_type": "code",
-      "norm_label": "allconditions",
-      "source_file": "src/components/modals/ConditionPickerModal.vue",
-      "source_location": "L234"
-    },
-    {
-      "id": "src_components_sheet_heroheader_activeconditionitems",
-      "label": "activeConditionItems",
-      "_origin": "ast",
-      "community": 40,
-      "community_name": "attacks.js",
-      "file_type": "code",
-      "norm_label": "activeconditionitems",
-      "source_file": "src/components/sheet/HeroHeader.vue",
-      "source_location": "L507"
+      "norm_label": "compiledattacks",
+      "source_file": "src/components/modals/GreenRoninSheet.vue",
+      "source_location": "L416"
     },
     {
       "id": "src_rules_attacks",
@@ -11828,6 +11920,138 @@
       "norm_label": "attacks.js",
       "source_file": "src/rules/attacks.js",
       "source_location": "L1"
+    },
+    {
+      "id": "src_rules_conditions_basic_conditions",
+      "label": "BASIC_CONDITIONS",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "attacks.js",
+      "file_type": "code",
+      "norm_label": "basic_conditions",
+      "source_file": "src/rules/conditions.js",
+      "source_location": "L3"
+    },
+    {
+      "id": "src_rules_conditions_condition_brief_effects",
+      "label": "CONDITION_BRIEF_EFFECTS",
+      "_origin": "ast",
+      "community": 40,
+      "community_name": "attacks.js",
+      "file_type": "code",
+      "norm_label": "condition_brief_effects",
+      "source_file": "src/rules/conditions.js",
+      "source_location": "L37"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal",
+      "label": "Roll20PrintModal.vue",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "roll20printmodal.vue",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal_abilitylist",
+      "label": "abilityList",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "abilitylist",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L384"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal_basicconditions",
+      "label": "basicConditions",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "basicconditions",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L378"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal_currenttab",
+      "label": "currentTab",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "currenttab",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L375"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal_defenselist",
+      "label": "defenseList",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "defenselist",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L395"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal_filteredmacros",
+      "label": "filteredMacros",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "filteredmacros",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L429"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal_herostore",
+      "label": "heroStore",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "herostore",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L372"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal_macrofilter",
+      "label": "macroFilter",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "macrofilter",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L376"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal_movementdata",
+      "label": "movementData",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "movementdata",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L403"
+    },
+    {
+      "id": "src_components_modals_roll20printmodal_uistore",
+      "label": "uiStore",
+      "_origin": "ast",
+      "community": 41,
+      "community_name": "Roll20PrintModal.vue",
+      "file_type": "code",
+      "norm_label": "uistore",
+      "source_file": "src/components/modals/Roll20PrintModal.vue",
+      "source_location": "L373"
     },
     {
       "id": "src_components_power_studio_compoundpowerstudio",
@@ -11993,17 +12217,6 @@
       "norm_label": "searchquery",
       "source_file": "src/components/rules/RulesReference.vue",
       "source_location": "L169"
-    },
-    {
-      "id": "src_rules_conditions_basic_conditions",
-      "label": "BASIC_CONDITIONS",
-      "_origin": "ast",
-      "community": 43,
-      "community_name": "RulesReference.vue",
-      "file_type": "code",
-      "norm_label": "basic_conditions",
-      "source_file": "src/rules/conditions.js",
-      "source_location": "L3"
     },
     {
       "id": "src_rules_conditions_combined_conditions",
@@ -12354,39 +12567,6 @@
       "norm_label": "props",
       "source_file": "src/components/power-studio/SubPowerArrayWorkbench.vue",
       "source_location": "L173"
-    },
-    {
-      "id": "src_components_wizard_stepabilities",
-      "label": "StepAbilities.vue",
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "StepAbilities.vue",
-      "file_type": "code",
-      "norm_label": "stepabilities.vue",
-      "source_file": "src/components/wizard/StepAbilities.vue",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_wizard_stepabilities_abilitieslist",
-      "label": "abilitiesList",
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "StepAbilities.vue",
-      "file_type": "code",
-      "norm_label": "abilitieslist",
-      "source_file": "src/components/wizard/StepAbilities.vue",
-      "source_location": "L132"
-    },
-    {
-      "id": "src_components_wizard_stepabilities_herostore",
-      "label": "heroStore",
-      "_origin": "ast",
-      "community": 49,
-      "community_name": "StepAbilities.vue",
-      "file_type": "code",
-      "norm_label": "herostore",
-      "source_file": "src/components/wizard/StepAbilities.vue",
-      "source_location": "L130"
     },
     {
       "id": "src_components_power_studio_modifierinspectormodal",
@@ -24376,7 +24556,7 @@
     },
     {
       "source": "anti_slop_audit_003_2026_10_10_anti_slop_audit_report_siklus_3_mm3e_character_builder",
-      "target": "anti_slop_audit_003_2026_10_10_ringkasan_matriks_temuan_siklus_3",
+      "target": "anti_slop_audit_003_2026_10_10_ringkasan_matriks_temuan_status_remediasi_siklus_3",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -24387,7 +24567,7 @@
     },
     {
       "source": "anti_slop_audit_003_2026_10_10_anti_slop_audit_report_siklus_3_mm3e_character_builder",
-      "target": "anti_slop_audit_003_2026_10_10_status_siklus_audit",
+      "target": "anti_slop_audit_003_2026_10_10_delivery_gate_remediation_summary_pass",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -24515,6 +24695,160 @@
       "confidence_score": 1.0,
       "source_file": "anti-slop/audit-003-2026-10-10.md",
       "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10",
+      "target": "anti_slop_audit_004_2026_10_10_anti_slop_audit_report_siklus_4_mm3e_character_builder",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_anti_slop_audit_report_siklus_4_mm3e_character_builder",
+      "target": "anti_slop_audit_004_2026_10_10_executive_summary",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L11",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_anti_slop_audit_report_siklus_4_mm3e_character_builder",
+      "target": "anti_slop_audit_004_2026_10_10_ringkasan_matriks_temuan_siklus_4",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L137",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_anti_slop_audit_report_siklus_4_mm3e_character_builder",
+      "target": "anti_slop_audit_004_2026_10_10_daftar_temuan_audit_siklus_4_numbered_findings_list",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L28",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_daftar_temuan_audit_siklus_4_numbered_findings_list",
+      "target": "anti_slop_audit_004_2026_10_10_priority_low_quality_locks_consistency_craftsmanship",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L121",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_daftar_temuan_audit_siklus_4_numbered_findings_list",
+      "target": "anti_slop_audit_004_2026_10_10_priority_high_hard_gate_absolute_rules",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L30",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_daftar_temuan_audit_siklus_4_numbered_findings_list",
+      "target": "anti_slop_audit_004_2026_10_10_priority_medium_purpose_gate_technique_allowed_purpose_required",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L86",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_priority_high_hard_gate_absolute_rules",
+      "target": "anti_slop_audit_004_2026_10_10_f_28_sisa_karakter_em_dash_pada_status_absent_di_tooltip_wizard_dan_modul_ekspor",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L32",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_priority_high_hard_gate_absolute_rules",
+      "target": "anti_slop_audit_004_2026_10_10_f_29_teks_mikro_berwarna_slate_500_64748b_di_bawah_ambang_batas_kontras_wcag_aa_4_5_1",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L50",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_priority_high_hard_gate_absolute_rules",
+      "target": "anti_slop_audit_004_2026_10_10_f_30_variabel_warna_teks_cetak_tidak_terpakai_kontras_buruk_pada_stylesheet_lembar_resmi",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L63",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_priority_high_hard_gate_absolute_rules",
+      "target": "anti_slop_audit_004_2026_10_10_f_31_aksesibilitas_keyboard_input_pencarian_tanpa_cincin_fokus_visual_outline_none",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L74",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_priority_low_quality_locks_consistency_craftsmanship",
+      "target": "anti_slop_audit_004_2026_10_10_f_34_pill_shape_border_radius_berlebih_9999px_sisa_aksen_warna_kuning_acak_pada_wizard_skills",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L123",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_priority_medium_purpose_gate_technique_allowed_purpose_required",
+      "target": "anti_slop_audit_004_2026_10_10_f_33_monospace_as_aesthetic_pada_teks_petunjuk_biasa_plain_text_hint_pills",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L109",
+      "weight": 1.0
+    },
+    {
+      "source": "anti_slop_audit_004_2026_10_10_priority_medium_purpose_gate_technique_allowed_purpose_required",
+      "target": "anti_slop_audit_004_2026_10_10_f_32_overuse_ikon_petir_ri_flashlight_line_ri_flashlight_fill_untuk_fitur_yang_tidak_relevan",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "anti-slop/audit-004-2026-10-10.md",
+      "source_location": "L88",
       "weight": 1.0
     },
     {
@@ -36195,5 +36529,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "80713f9b522d853840311492cafbdac4f04a8039"
+  "built_at_commit": "ef388aee9694dcd3d3f745b85ea5631f1bdc929d"
 }

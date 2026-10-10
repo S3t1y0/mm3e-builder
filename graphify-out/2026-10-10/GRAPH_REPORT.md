@@ -1,17 +1,17 @@
 # Graph Report - mm3e-builder-vue  (2026-10-10)
 
 ## Corpus Check
-- 78 files · ~612,614 words
+- 79 files · ~614,221 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 11 file(s) not represented in the graph (top: .css 6, (none) 2, .ico 1)
 
 ## Summary
-- 1185 nodes · 1970 edges · 63 communities (59 shown, 4 thin omitted)
+- 1200 nodes · 1984 edges · 63 communities (60 shown, 3 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 16 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `80713f9b`
+- Built from commit: `ef388aee`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -55,8 +55,9 @@
 - DefensesBlock.vue
 - StepDefenses.vue
 - usePowerBuilderStore
-- ShareModal.vue
+- Priority: HIGH (Hard Gate — Absolute Rules)
 - attacks.js
+- Roll20PrintModal.vue
 - CompoundPowerStudio.vue
 - RulesReference.vue
 - CombatInitiativeCard.vue
@@ -64,7 +65,6 @@
 - DeviceContainerStudio.vue
 - SubPowerArrayWorkbench.vue
 - isMotivation
-- StepAbilities.vue
 - advantages.js
 - regenerateDescription
 - AbilitiesMatrix.vue
@@ -93,21 +93,21 @@
 10. `broadcastPower()` - 13 edges
 
 ## Surprising Connections (you probably didn't know these)
-- `compiledAttacks` --calls--> `compileTargetedAttacks()`  [EXTRACTED]
-  src/components/modals/GreenRoninSheet.vue → src/rules/attacks.js
-- `generateLink()` --calls--> `generateShareUrl()`  [EXTRACTED]
-  src/components/modals/ShareModal.vue → src/services/shareService.js
 - `getSubEffectCost()` --calls--> `calculateEffectCost()`  [EXTRACTED]
   src/components/power-studio/CompoundPowerStudio.vue → src/rules/powerEngine.js
 - `activeEffCost` --calls--> `calculateEffectCost()`  [EXTRACTED]
   src/components/power-studio/CostBreakdownSidebar.vue → src/rules/powerEngine.js
 - `getSubPowerCost()` --calls--> `calculateEffectCost()`  [EXTRACTED]
   src/components/power-studio/DeviceContainerStudio.vue → src/rules/powerEngine.js
+- `ensureInitialized()` --calls--> `normalizeEffect()`  [EXTRACTED]
+  src/components/power-studio/EffectConfigurator.vue → src/rules/powerEngine.js
+- `arrayCapacity` --calls--> `calculateEffectCost()`  [EXTRACTED]
+  src/components/power-studio/SubPowerArrayWorkbench.vue → src/rules/powerEngine.js
 
 ## Import Cycles
 - None detected.
 
-## Communities (63 total, 4 thin omitted)
+## Communities (63 total, 3 thin omitted)
 
 ### Community 0 - "EffectConfigurator.vue"
 Cohesion: 0.03
@@ -118,12 +118,12 @@ Cohesion: 0.07
 Nodes (35): broadcastComplication(), exportRoll20(), activeCompoundTabs, activeDeviceTabs, broadcastEffect(), broadcastExtra(), broadcastFlaw(), broadcastPower() (+27 more)
 
 ### Community 2 - "exporters.js"
-Cohesion: 0.07
-Nodes (34): lz-string, loadFromHash(), activeTextContent, copied, heroStore, textFormat, uiStore, abilityList (+26 more)
+Cohesion: 0.08
+Nodes (34): lz-string, loadFromHash(), activeTextContent, copied, heroStore, textFormat, uiStore, macrosList (+26 more)
 
 ### Community 3 - "StepEquipment.vue"
-Cohesion: 0.09
-Nodes (18): activeFilter, budgetInfo, customStudioCategory, filteredPresets, filteredResources, getCategoryCount(), getResIconClass(), getSubtypeLabel() (+10 more)
+Cohesion: 0.07
+Nodes (32): getCalculatedAtkBonus(), activeFilter, budgetInfo, customStudioCategory, filteredPresets, filteredResources, getCategoryCount(), getResIconClass() (+24 more)
 
 ### Community 4 - "CustomEquipmentModal.vue"
 Cohesion: 0.05
@@ -154,8 +154,8 @@ Cohesion: 0.08
 Nodes (19): activeMode, copied, exportJsonString, exportSizeKb, fileInputRef, formattedLastSaved, handleDownload(), handleExportSlot() (+11 more)
 
 ### Community 11 - "StepSkills.vue"
-Cohesion: 0.07
-Nodes (34): activeCategory, calculateTotalBonus(), categories, filteredSkills, focusInputRef, getAdvantageBonusForSkill(), getAdvantageNameForSkill(), getEnhancedRanks() (+26 more)
+Cohesion: 0.09
+Nodes (22): activeCategory, calculateTotalBonus(), categories, filteredSkills, focusInputRef, getAdvantageBonusForSkill(), getAdvantageNameForSkill(), getEnhancedRanks() (+14 more)
 
 ### Community 12 - "AdvantageLibraryModal.vue"
 Cohesion: 0.08
@@ -218,20 +218,20 @@ Cohesion: 0.12
 Nodes (16): Anti-Slop Audit Report (Siklus 2): MM3E Character Builder, Daftar Temuan Audit Siklus 2 (Numbered Findings List), Delivery Gate: Remediation Summary (PASS), Executive Summary, [F-13] Penekanan Fokus Outline (`outline: none`) di Komponen & Modal Tanpa `:focus-visible` Spesifik, [F-14] Kontras Warna Slate-500 (`#64748b`) pada Lembar Karakter Cetak PDF Kertas Putih, [F-15] Animasi Looping Tanpa Henti pada Ikon Perlengkapan Terpasang, [F-16] Ikon Tongkat Sihir (`ri-magic-line`) Sebagai Fallback Tombol Aksi & Kondisi Penyembuhan (+8 more)
 
 ### Community 27 - "GreenRoninSheet.vue"
-Cohesion: 0.17
-Nodes (9): allPowers, compiledAttacks, displayAttacks, getSkillAbility(), hasPage2Content, heroStore, overflowPowers, primaryPowers (+1 more)
+Cohesion: 0.18
+Nodes (8): allPowers, displayAttacks, getSkillAbility(), hasPage2Content, heroStore, overflowPowers, primaryPowers, trainedSkills
 
 ### Community 28 - "heroStore.js"
-Cohesion: 0.16
-Nodes (15): ARCHETYPES, calculateDegrees(), calculateConditionModifiers(), COMBINED_MAP, CONDITION_BRIEF_EFFECTS, DEATH_FAILURE_LIMIT, DEBILITATED_EFFECTS, DYING_DC (+7 more)
+Cohesion: 0.14
+Nodes (15): abilitiesList, heroStore, ARCHETYPES, calculateConditionModifiers(), COMBINED_MAP, DEATH_FAILURE_LIMIT, DEBILITATED_EFFECTS, DYING_DC (+7 more)
 
 ### Community 29 - "vue"
 Cohesion: 0.14
 Nodes (11): vue, activePerceptionMod, aweMod, heroStore, passivePerception, percRanks, specialSenses, uiStore (+3 more)
 
 ### Community 30 - "HeroHeader.vue"
-Cohesion: 0.18
-Nodes (6): conditionDescMap, heroInitials, heroStore, rollInitiative(), showBioDrawer, uiStore
+Cohesion: 0.15
+Nodes (11): allConditions, activeConditionItems, conditionDescMap, heroInitials, heroStore, rollInitiative(), showBioDrawer, uiStore (+3 more)
 
 ### Community 31 - "ConditionsTracker.vue"
 Cohesion: 0.12
@@ -239,7 +239,7 @@ Nodes (8): ABILITY_CODES, activeConditions, activeDebilitatedSummary, heroStore,
 
 ### Community 32 - "Anti-Slop Audit Report (Siklus 3): MM3E Character Builder"
 Cohesion: 0.12
-Nodes (15): Anti-Slop Audit Report (Siklus 3): MM3E Character Builder, Daftar Temuan Audit Siklus 3 (Numbered Findings List), Executive Summary, [F-21] Karakter Em Dash (`—`) pada Teks Antarmuka & Sisa Frasa Kaku "RAW", [F-22] Penekanan Outline Keyboard (`outline: none`) Tanpa Indikator Fokus Visual pada Field Header & Hub, [F-23] Animasi Looping Tanpa Henti (`pulseOverBudget infinite`) pada Lencana Anggaran PP, [F-24] Polusi Emoji & Glif Teks Dekoratif (`⚡` dan `★`) di Dalam String Data, [F-25] Pendaran Neon Berlebih (`box-shadow` & `text-shadow` Glow) yang Tersisa di Kartu & Tab Powers Deck (+7 more)
+Nodes (15): Anti-Slop Audit Report (Siklus 3): MM3E Character Builder, Daftar Temuan Audit Siklus 3 (Numbered Findings List), Delivery Gate: Remediation Summary (PASS), Executive Summary, [F-21] Karakter Em Dash (`—`) pada Teks Antarmuka & Sisa Frasa Kaku "RAW", [F-22] Penekanan Outline Keyboard (`outline: none`) Tanpa Indikator Fokus Visual pada Field Header & Hub, [F-23] Animasi Looping Tanpa Henti (`pulseOverBudget infinite`) pada Lencana Anggaran PP, [F-24] Polusi Emoji & Glif Teks Dekoratif (`⚡` dan `★`) di Dalam String Data (+7 more)
 
 ### Community 33 - "main.js"
 Cohesion: 0.06
@@ -265,21 +265,25 @@ Nodes (10): dodgeTotal, fortitudeTotal, heroStore, isStaAbsent, maxCap, parryTot
 Cohesion: 0.18
 Nodes (10): builderStore, arrayCapacity, builderStore, capacityPercent, getSlotCost(), hasAlternateEffects, headroom, highestSlotCost (+2 more)
 
-### Community 39 - "ShareModal.vue"
-Cohesion: 0.17
-Nodes (9): characterShareInfo, copied, forceOffline, generateLink(), hasActiveShareLink, heroStore, isGenerating, shareData (+1 more)
+### Community 39 - "Priority: HIGH (Hard Gate — Absolute Rules)"
+Cohesion: 0.13
+Nodes (14): Anti-Slop Audit Report (Siklus 4): MM3E Character Builder, Daftar Temuan Audit Siklus 4 (Numbered Findings List), Executive Summary, [F-28] Sisa Karakter Em Dash (`—`) pada Status Absent di Tooltip, Wizard, dan Modul Ekspor, [F-29] Teks Mikro Berwarna Slate-500 (`#64748b`) di Bawah Ambang Batas Kontras WCAG AA (4.5:1), [F-30] Variabel Warna Teks Cetak Tidak Terpakai & Kontras Buruk pada Stylesheet Lembar Resmi, [F-31] Aksesibilitas Keyboard: Input Pencarian Tanpa Cincin Fokus Visual (`outline: none`), [F-32] Overuse Ikon Petir (`ri-flashlight-line` / `ri-flashlight-fill`) untuk Fitur yang Tidak Relevan (+6 more)
 
 ### Community 40 - "attacks.js"
-Cohesion: 0.35
-Nodes (10): allConditions, getCalculatedAtkBonus(), activeConditionItems, buildEffectBreakdown(), compileTargetedAttacks(), processEffect(), getConditionExplanation(), getConditionBriefEffect() (+2 more)
+Cohesion: 0.32
+Nodes (7): compiledAttacks, buildEffectBreakdown(), calculateDegrees(), compileTargetedAttacks(), processEffect(), BASIC_CONDITIONS, CONDITION_BRIEF_EFFECTS
+
+### Community 41 - "Roll20PrintModal.vue"
+Cohesion: 0.14
+Nodes (9): abilityList, basicConditions, currentTab, defenseList, filteredMacros, heroStore, macroFilter, movementData (+1 more)
 
 ### Community 42 - "CompoundPowerStudio.vue"
 Cohesion: 0.22
 Nodes (9): activeSub, builderStore, editorCanvasTitle, getEffectIcon(), getSubEffectCost(), validation, getEffectIcon(), getEffectIcon() (+1 more)
 
 ### Community 43 - "RulesReference.vue"
-Cohesion: 0.17
-Nodes (11): activeSection, combatActions, combatManeuvers, filteredActions, filteredBasicConditions, filteredCombinedConditions, filteredManeuvers, measurementRows (+3 more)
+Cohesion: 0.18
+Nodes (10): activeSection, combatActions, combatManeuvers, filteredActions, filteredBasicConditions, filteredCombinedConditions, filteredManeuvers, measurementRows (+2 more)
 
 ### Community 44 - "CombatInitiativeCard.vue"
 Cohesion: 0.20
@@ -346,24 +350,24 @@ Cohesion: 0.67
 Nodes (3): getVehicleBaseStr(), getVehicleBaseTough(), onVehicleSizeChange()
 
 ## Knowledge Gaps
-- **497 isolated node(s):** `name`, `private`, `version`, `description`, `type` (+492 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 734 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **4 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **506 isolated node(s):** `name`, `private`, `version`, `description`, `type` (+501 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 744 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `vue` connect `vue` to `EffectConfigurator.vue`, `PowersDeck.vue`, `exporters.js`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `ModifierInspectorModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `DiceRollHud.vue`, `EquipmentWorkshop.vue`, `ExportImportModal.vue`, `StepSkills.vue`, `AdvantageLibraryModal.vue`, `ComplicationsHub.vue`, `CharacterWizard.vue`, `App.vue`, `CostBreakdownSidebar.vue`, `AdvantagesList.vue`, `StepComplications.vue`, `EffectEditorCanvas.vue`, `PowerStudioWorkspace.vue`, `TabbedActionHub.vue`, `GreenRoninSheet.vue`, `HeroHeader.vue`, `ConditionsTracker.vue`, `main.js`, `ConditionPickerModal.vue`, `EffectsLibraryModal.vue`, `DefensesBlock.vue`, `StepDefenses.vue`, `usePowerBuilderStore`, `ShareModal.vue`, `CompoundPowerStudio.vue`, `RulesReference.vue`, `CombatInitiativeCard.vue`, `DeviceContainerStudio.vue`, `SubPowerArrayWorkbench.vue`?**
-  _High betweenness centrality (0.355) - this node is a cross-community bridge._
-- **Why does `useHeroStore` connect `heroStore.js` to `PowersDeck.vue`, `exporters.js`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `DiceRollHud.vue`, `EquipmentWorkshop.vue`, `ExportImportModal.vue`, `StepSkills.vue`, `AdvantageLibraryModal.vue`, `powerEngine.js`, `ComplicationsHub.vue`, `CharacterWizard.vue`, `App.vue`, `CostBreakdownSidebar.vue`, `AdvantagesList.vue`, `StepComplications.vue`, `EffectEditorCanvas.vue`, `PowerStudioWorkspace.vue`, `TabbedActionHub.vue`, `GreenRoninSheet.vue`, `vue`, `HeroHeader.vue`, `ConditionsTracker.vue`, `ConditionPickerModal.vue`, `DefensesBlock.vue`, `StepDefenses.vue`, `ShareModal.vue`, `CombatInitiativeCard.vue`, `StepAbilities.vue`, `AbilitiesMatrix.vue`, `StepConcept.vue`?**
-  _High betweenness centrality (0.093) - this node is a cross-community bridge._
-- **Why does `useUiStore` connect `App.vue` to `PowersDeck.vue`, `exporters.js`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `ModifierInspectorModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `EquipmentWorkshop.vue`, `ExportImportModal.vue`, `StepSkills.vue`, `AdvantageLibraryModal.vue`, `ComplicationsHub.vue`, `CharacterWizard.vue`, `AdvantagesList.vue`, `PowerStudioWorkspace.vue`, `TabbedActionHub.vue`, `vue`, `HeroHeader.vue`, `ConditionPickerModal.vue`, `DefensesBlock.vue`, `ShareModal.vue`, `CombatInitiativeCard.vue`, `AbilitiesMatrix.vue`, `StepConcept.vue`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+- **Why does `vue` connect `vue` to `EffectConfigurator.vue`, `PowersDeck.vue`, `exporters.js`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `ModifierInspectorModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `DiceRollHud.vue`, `EquipmentWorkshop.vue`, `ExportImportModal.vue`, `StepSkills.vue`, `AdvantageLibraryModal.vue`, `ComplicationsHub.vue`, `CharacterWizard.vue`, `App.vue`, `CostBreakdownSidebar.vue`, `AdvantagesList.vue`, `StepComplications.vue`, `EffectEditorCanvas.vue`, `PowerStudioWorkspace.vue`, `TabbedActionHub.vue`, `GreenRoninSheet.vue`, `HeroHeader.vue`, `ConditionsTracker.vue`, `main.js`, `ConditionPickerModal.vue`, `EffectsLibraryModal.vue`, `DefensesBlock.vue`, `StepDefenses.vue`, `usePowerBuilderStore`, `Roll20PrintModal.vue`, `CompoundPowerStudio.vue`, `RulesReference.vue`, `CombatInitiativeCard.vue`, `DeviceContainerStudio.vue`, `SubPowerArrayWorkbench.vue`?**
+  _High betweenness centrality (0.349) - this node is a cross-community bridge._
+- **Why does `useHeroStore` connect `heroStore.js` to `PowersDeck.vue`, `exporters.js`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `DiceRollHud.vue`, `EquipmentWorkshop.vue`, `ExportImportModal.vue`, `StepSkills.vue`, `AdvantageLibraryModal.vue`, `powerEngine.js`, `ComplicationsHub.vue`, `CharacterWizard.vue`, `App.vue`, `CostBreakdownSidebar.vue`, `AdvantagesList.vue`, `StepComplications.vue`, `EffectEditorCanvas.vue`, `PowerStudioWorkspace.vue`, `TabbedActionHub.vue`, `GreenRoninSheet.vue`, `vue`, `HeroHeader.vue`, `ConditionsTracker.vue`, `ConditionPickerModal.vue`, `DefensesBlock.vue`, `StepDefenses.vue`, `Roll20PrintModal.vue`, `CombatInitiativeCard.vue`, `AbilitiesMatrix.vue`, `StepConcept.vue`?**
+  _High betweenness centrality (0.090) - this node is a cross-community bridge._
+- **Why does `useUiStore` connect `App.vue` to `PowersDeck.vue`, `exporters.js`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `ModifierInspectorModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `EquipmentWorkshop.vue`, `ExportImportModal.vue`, `StepSkills.vue`, `AdvantageLibraryModal.vue`, `ComplicationsHub.vue`, `CharacterWizard.vue`, `AdvantagesList.vue`, `PowerStudioWorkspace.vue`, `TabbedActionHub.vue`, `vue`, `HeroHeader.vue`, `ConditionPickerModal.vue`, `DefensesBlock.vue`, `Roll20PrintModal.vue`, `CombatInitiativeCard.vue`, `AbilitiesMatrix.vue`, `StepConcept.vue`?**
+  _High betweenness centrality (0.052) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `version` to the rest of the system?**
-  _497 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _506 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `EffectConfigurator.vue` be split into smaller, more focused modules?**
   _Cohesion score 0.027777777777777776 - nodes in this community are weakly interconnected._
 - **Should `PowersDeck.vue` be split into smaller, more focused modules?**
   _Cohesion score 0.06787330316742081 - nodes in this community are weakly interconnected._
 - **Should `exporters.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.07342995169082125 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.07822410147991543 - nodes in this community are weakly interconnected._

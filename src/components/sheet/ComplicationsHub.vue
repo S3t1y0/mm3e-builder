@@ -228,7 +228,7 @@
                 @click="triggerTrait(item)"
                 title="Award +1 Hero Point when this motivation creates a dilemma or setback"
               >
-                <i class="ri-flashlight-fill"></i>
+                <i class="ri-shield-star-fill"></i>
                 <span>Trigger (+1 Hero Point)</span>
               </button>
             </div>
@@ -324,7 +324,7 @@
                 @click="triggerTrait(item)"
                 title="Award +1 Hero Point when this complication causes trouble"
               >
-                <i class="ri-flashlight-fill"></i>
+                <i class="ri-shield-star-fill"></i>
                 <span>Trigger (+1 Hero Point)</span>
               </button>
             </div>

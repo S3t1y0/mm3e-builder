@@ -250,7 +250,7 @@ function toggleOrigin(origin) {
 
 .badge-chip {
   padding: 0.35rem 0.75rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-sm, 4px);
   border: 1px solid var(--border-color);
   background: var(--bg-card);
   color: var(--text-secondary);

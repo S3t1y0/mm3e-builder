@@ -188,7 +188,7 @@
               <span class="gr-defense-name">FORTITUDE</span>
               <span class="gr-defense-base">(STA)</span>
             </div>
-            <span class="gr-defense-val">{{ heroStore.defenseTotals.FORTITUDE !== null ? heroStore.defenseTotals.FORTITUDE : '—' }}</span>
+            <span class="gr-defense-val">{{ heroStore.defenseTotals.FORTITUDE !== null ? heroStore.defenseTotals.FORTITUDE : '-' }}</span>
           </div>
           <div class="gr-defense-row">
             <div class="gr-defense-label">
@@ -391,11 +391,11 @@ import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
 
 const heroStore = useHeroStore();
 
-// Format modifier helper (+5, -2, +0, or — for absent)
+// Format modifier helper (+5, -2, +0, or - for absent)
 function formatMod(val) {
-  if (val === null || val === undefined) return '—';
+  if (val === null || val === undefined) return '-';
   const num = Number(val);
-  if (isNaN(num)) return '—';
+  if (isNaN(num)) return '-';
   return num >= 0 ? `+${num}` : `${num}`;
 }
 

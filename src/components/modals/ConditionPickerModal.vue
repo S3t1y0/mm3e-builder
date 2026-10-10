@@ -712,8 +712,7 @@ const filteredConditions = computed(() => {
 .deb-hint-pill {
   font-size: 0.64rem;
   font-weight: 600;
-  color: #64748b;
-  font-family: var(--font-mono, monospace);
+  color: var(--text-secondary, #94a3b8);
 }
 
 .modal-deb-pills-grid {
@@ -773,7 +772,7 @@ const filteredConditions = computed(() => {
 
 .mdeb-pill-btn.is-absent .mdeb-code {
   text-decoration: line-through;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .mdeb-brief {
@@ -793,7 +792,7 @@ const filteredConditions = computed(() => {
 }
 
 .mdeb-pill-btn.is-absent .mdeb-brief {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 /* Live Status Strip */
@@ -812,11 +811,11 @@ const filteredConditions = computed(() => {
 }
 
 .modal-deb-status-strip.muted {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .modal-deb-status-strip.muted i {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   font-size: 0.78rem;
   flex-shrink: 0;
 }

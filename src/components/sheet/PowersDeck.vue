@@ -211,7 +211,7 @@
                 </small>
               </span>
               <span class="glance-spec-item">
-                <i class="ri-flashlight-line"></i> {{ getActiveEffect(pow).action || 'Standard' }}
+                <i class="ri-play-circle-line"></i> {{ getActiveEffect(pow).action || 'Standard' }}
               </span>
               <span class="glance-spec-item">
                 <i class="ri-focus-line"></i> {{ formatRange(getActiveEffect(pow)) }}
@@ -403,7 +403,7 @@
               <!-- Combat Specs Matrix Grid (Placed First for instant battle reference) -->
               <div class="dossier-specs-grid">
                 <div class="spec-item">
-                  <span class="spec-label"><i class="ri-flashlight-line"></i> Action</span>
+                  <span class="spec-label"><i class="ri-play-circle-line"></i> Action</span>
                   <span class="spec-value">{{ getActiveEffect(pow).action || 'Standard' }}</span>
                 </div>
                 <div class="spec-item">

@@ -33,7 +33,7 @@
             <span>Deficit: <strong class="tabular-nums">{{ budgetInfo.totalEP - budgetInfo.maxEP }} EP</strong> (Requires Rank {{ budgetInfo.neededRanks }} Advantage)</span>
           </div>
           <button type="button" class="btn btn-danger btn-sm" @click="syncEquipmentAdvantage">
-            <i class="ri-flashlight-line"></i> Auto-Sync Advantage ({{ budgetInfo.neededRanks }} PP)
+            <i class="ri-refresh-line"></i> Auto-Sync Advantage ({{ budgetInfo.neededRanks }} PP)
           </button>
         </template>
         <template v-else>
@@ -48,7 +48,7 @@
             @click="syncEquipmentAdvantage"
             title="Adjust advantage to exact needed ranks"
           >
-            <i class="ri-flashlight-line"></i> Adjust to {{ budgetInfo.neededRanks }} Ranks
+            <i class="ri-refresh-line"></i> Adjust to {{ budgetInfo.neededRanks }} Ranks
           </button>
         </template>
 

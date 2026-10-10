@@ -32,7 +32,7 @@
               :title="heroStore.isAbilityAbsent(ab.key) ? `Restore ${ab.name}` : `Set ${ab.name} to Absent (-10 PP)`"
               @click.stop="heroStore.toggleAbsentAbility(ab.key)"
             >
-              {{ heroStore.isAbilityAbsent(ab.key) ? '—' : 'Nil' }}
+              {{ heroStore.isAbilityAbsent(ab.key) ? '-' : 'Nil' }}
             </button>
           </div>
           <span class="ab-name">{{ ab.name }}</span>
@@ -75,7 +75,7 @@
                 absent: heroStore.isAbilityAbsent(ab.key)
               }"
             >
-              {{ heroStore.isAbilityAbsent(ab.key) ? '—' : formatModifier(getEffectiveRank(ab.key)) }}
+              {{ heroStore.isAbilityAbsent(ab.key) ? '-' : formatModifier(getEffectiveRank(ab.key)) }}
             </span>
           </button>
 

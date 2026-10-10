@@ -519,7 +519,7 @@ function handleResetDying() {
   background: rgba(16, 185, 129, 0.12);
   border: 1px solid rgba(16, 185, 129, 0.25);
   padding: 0.2rem 0.6rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-sm, 4px);
   display: flex;
   align-items: center;
   gap: 0.35rem;
@@ -1036,8 +1036,7 @@ function handleResetDying() {
 .deb-hint-badge {
   font-size: 0.64rem;
   font-weight: 600;
-  color: #64748b;
-  font-family: var(--font-mono, monospace);
+  color: var(--text-secondary, #94a3b8);
 }
 
 .deb-drawer-pills {
@@ -1096,7 +1095,7 @@ function handleResetDying() {
 
 .deb-pill-btn.is-absent .deb-pill-code {
   text-decoration: line-through;
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .deb-pill-code {
@@ -1123,7 +1122,7 @@ function handleResetDying() {
 }
 
 .deb-pill-btn.is-absent .deb-pill-sub {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 /* Live Status Strip */
@@ -1142,11 +1141,11 @@ function handleResetDying() {
 }
 
 .deb-drawer-status-strip.muted {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
 }
 
 .deb-drawer-status-strip.muted i {
-  color: #64748b;
+  color: var(--text-secondary, #94a3b8);
   font-size: 0.78rem;
   flex-shrink: 0;
 }

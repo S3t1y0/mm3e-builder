@@ -104,7 +104,7 @@
             :title="heroStore.isAbilityAbsent('STA') ? 'Immune to Fortitude effects (Absent Stamina)' : 'Click to Roll Fortitude Check'"
           >
             <i :class="heroStore.isAbilityAbsent('STA') ? 'ri-shield-check-line' : 'ri-dice-line'"></i>
-            <span class="def-total">{{ heroStore.isAbilityAbsent('STA') ? '—' : (combatDefenses.FORTITUDE >= 0 ? `+${combatDefenses.FORTITUDE}` : combatDefenses.FORTITUDE) }}</span>
+            <span class="def-total">{{ heroStore.isAbilityAbsent('STA') ? '-' : (combatDefenses.FORTITUDE >= 0 ? `+${combatDefenses.FORTITUDE}` : combatDefenses.FORTITUDE) }}</span>
             <span class="def-roll-label">{{ heroStore.isAbilityAbsent('STA') ? 'Immune' : 'Roll' }}</span>
           </button>
           <div v-if="heroStore.isAbilityAbsent('STA')" class="def-stepper derived">

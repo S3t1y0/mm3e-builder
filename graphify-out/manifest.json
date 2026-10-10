@@ -24,9 +24,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/ConditionPickerModal.vue": {
-    "mtime": 1791632968.4329832,
-    "seen": 1791633105.3136106,
-    "ast_hash": "4b472a80d1cc261b8aec64a582197636",
+    "mtime": 1791638382.3456295,
+    "seen": 1791638911.0931132,
+    "ast_hash": "bbfc735a963272abe37b63540639dd9d",
     "semantic_hash": ""
   },
   "src/components/modals/CustomEquipmentModal.vue": {
@@ -48,9 +48,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/GreenRoninSheet.vue": {
-    "mtime": 1791605410.783704,
-    "seen": 1791607200.9206302,
-    "ast_hash": "e173dbdc240e2ed224b080b0de08b767",
+    "mtime": 1791638308.5736482,
+    "seen": 1791638911.0931177,
+    "ast_hash": "9ffaf8635487a3099fd092d946f45800",
     "semantic_hash": ""
   },
   "src/components/modals/MarkdownExportModal.vue": {
@@ -90,9 +90,9 @@
     "semantic_hash": ""
   },
   "src/components/power-studio/EffectConfigurator.vue": {
-    "mtime": 1791633056.0108225,
-    "seen": 1791633105.3136222,
-    "ast_hash": "5d0f06534fa67a18d4bcc365ab1e16b7",
+    "mtime": 1791638668.0800922,
+    "seen": 1791638911.0931246,
+    "ast_hash": "34e2be2a8e9517b714c31457f235065e",
     "semantic_hash": ""
   },
   "src/components/power-studio/EffectEditorCanvas.vue": {
@@ -144,51 +144,51 @@
     "semantic_hash": ""
   },
   "src/components/sheet/AbilitiesMatrix.vue": {
-    "mtime": 1791632612.5102403,
-    "seen": 1791633105.31363,
-    "ast_hash": "8bcc4eb2c556dd694b95224001d84d13",
+    "mtime": 1791638262.2685385,
+    "seen": 1791638911.0931327,
+    "ast_hash": "3d4377c1afd127398f8c851dacf88cdc",
     "semantic_hash": ""
   },
   "src/components/sheet/AdvantagesList.vue": {
-    "mtime": 1791540601.9539506,
-    "seen": 1791607200.9206414,
-    "ast_hash": "3014e812e56e644285d9c917ff1ee111",
+    "mtime": 1791638515.1182182,
+    "seen": 1791638911.093134,
+    "ast_hash": "991dc95babfd59b4fbc3a29a9fe4a514",
     "semantic_hash": ""
   },
   "src/components/sheet/CombatInitiativeCard.vue": {
-    "mtime": 1791540638.0444016,
-    "seen": 1791607200.9206424,
-    "ast_hash": "2bf614688c286dc2ab5e52787022743f",
+    "mtime": 1791638433.8086154,
+    "seen": 1791638911.0931346,
+    "ast_hash": "628872ecfdb8e5a3914ac272299fcd4b",
     "semantic_hash": ""
   },
   "src/components/sheet/ComplicationsHub.vue": {
-    "mtime": 1791632857.5587232,
-    "seen": 1791633105.313633,
-    "ast_hash": "9d34eb182e6c71c41514eac66a50203e",
+    "mtime": 1791638712.7972362,
+    "seen": 1791638911.0931354,
+    "ast_hash": "2cac79ddaf76f7d3e82dad85764cedc9",
     "semantic_hash": ""
   },
   "src/components/sheet/ConditionsTracker.vue": {
-    "mtime": 1791632944.4938667,
-    "seen": 1791633105.3136337,
-    "ast_hash": "ef10efaf5548f98d58c97adef11a58b5",
+    "mtime": 1791638839.599506,
+    "seen": 1791638911.0931363,
+    "ast_hash": "29c2bf6aae0373d1bc074327c7240f65",
     "semantic_hash": ""
   },
   "src/components/sheet/DefensesBlock.vue": {
-    "mtime": 1791632701.4982421,
-    "seen": 1791633105.3136346,
-    "ast_hash": "8c99256a4e7cc55ad9aaf847985ea0bb",
+    "mtime": 1791638272.6849177,
+    "seen": 1791638911.0931373,
+    "ast_hash": "4721313cf684ed7b77e01b53f32b9d0e",
     "semantic_hash": ""
   },
   "src/components/sheet/DiceRollHud.vue": {
-    "mtime": 1791523843.9591796,
-    "seen": 1791607200.9206448,
-    "ast_hash": "040ed566885fa883d4cc74c7bc04342a",
+    "mtime": 1791638680.110911,
+    "seen": 1791638911.093138,
+    "ast_hash": "59c9042844682f6fb1bfeb61ac453d4b",
     "semantic_hash": ""
   },
   "src/components/sheet/EquipmentWorkshop.vue": {
-    "mtime": 1791525231.3405626,
-    "seen": 1791607200.9206457,
-    "ast_hash": "086b981bf3d49c9e4717a09674269f54",
+    "mtime": 1791638544.590913,
+    "seen": 1791638911.093139,
+    "ast_hash": "825f9adacf46309d8769b9eeadd7b2cf",
     "semantic_hash": ""
   },
   "src/components/sheet/HeroHeader.vue": {
@@ -198,9 +198,9 @@
     "semantic_hash": ""
   },
   "src/components/sheet/PowersDeck.vue": {
-    "mtime": 1791632907.9560134,
-    "seen": 1791633105.3136382,
-    "ast_hash": "6c3d6d1bf87e14da6dccb8317626ece6",
+    "mtime": 1791638586.1551332,
+    "seen": 1791638911.0931408,
+    "ast_hash": "2b920310570e80ef126a771fce761bb2",
     "semantic_hash": ""
   },
   "src/components/sheet/SensesCard.vue": {
@@ -210,9 +210,9 @@
     "semantic_hash": ""
   },
   "src/components/sheet/SkillsTable.vue": {
-    "mtime": 1791632684.816548,
-    "seen": 1791633105.3136396,
-    "ast_hash": "9955499575ddee23c4b3bdfaae764908",
+    "mtime": 1791638803.6022093,
+    "seen": 1791638911.0931423,
+    "ast_hash": "6203f77a716cb7ccd5f819e26a2f3b0f",
     "semantic_hash": ""
   },
   "src/components/sheet/TabbedActionHub.vue": {
@@ -240,15 +240,15 @@
     "semantic_hash": ""
   },
   "src/components/wizard/StepAbilities.vue": {
-    "mtime": 1791632630.1179585,
-    "seen": 1791633105.3136442,
-    "ast_hash": "8bfd592c5c93f7cf992bab1ffdc05591",
+    "mtime": 1791638138.7235484,
+    "seen": 1791638911.093147,
+    "ast_hash": "86f0000fdfc94398d49f1d0849905b24",
     "semantic_hash": ""
   },
   "src/components/wizard/StepAdvantages.vue": {
-    "mtime": 1791633024.664526,
-    "seen": 1791633105.313645,
-    "ast_hash": "9482092a9c24d77276772fdf58378c92",
+    "mtime": 1791638557.3157163,
+    "seen": 1791638911.093148,
+    "ast_hash": "d0ffe220f889ecf0ae99d1e858432dc9",
     "semantic_hash": ""
   },
   "src/components/wizard/StepComplications.vue": {
@@ -258,21 +258,21 @@
     "semantic_hash": ""
   },
   "src/components/wizard/StepConcept.vue": {
-    "mtime": 1791420809.9259827,
-    "seen": 1791607200.9206533,
-    "ast_hash": "e8ac2b5b8d4e2ac1d02f4b73d89e6d33",
+    "mtime": 1791638818.4800258,
+    "seen": 1791638911.0931494,
+    "ast_hash": "99358c7e9b5d55c5bef502a4f44ed467",
     "semantic_hash": ""
   },
   "src/components/wizard/StepDefenses.vue": {
-    "mtime": 1791632724.883152,
-    "seen": 1791633105.313647,
-    "ast_hash": "42d6ce21f0e6c74406c079c4160469df",
+    "mtime": 1791638190.6255653,
+    "seen": 1791638911.0931501,
+    "ast_hash": "ac3e3e6fc472d4af127f6356d4d6ca26",
     "semantic_hash": ""
   },
   "src/components/wizard/StepEquipment.vue": {
-    "mtime": 1790323464.3808815,
-    "seen": 1791607200.9206545,
-    "ast_hash": "585c0953b6a34e77ac24de918128e0ce",
+    "mtime": 1791638530.1482477,
+    "seen": 1791638911.093151,
+    "ast_hash": "d679e0d072a17aa880d07d46675956cf",
     "semantic_hash": ""
   },
   "src/components/wizard/StepPowers.vue": {
@@ -288,9 +288,9 @@
     "semantic_hash": ""
   },
   "src/components/wizard/StepSkills.vue": {
-    "mtime": 1791632656.9532318,
-    "seen": 1791633105.3136504,
-    "ast_hash": "dbbe2c39ae04fe3c5017ab6c032d8020",
+    "mtime": 1791638772.1403992,
+    "seen": 1791638911.0931532,
+    "ast_hash": "6e60b28969a6711f77ecc58c933ab980",
     "semantic_hash": ""
   },
   "src/main.js": {
@@ -414,9 +414,9 @@
     "semantic_hash": ""
   },
   "src/utils/exporters.js": {
-    "mtime": 1791632783.3548236,
-    "seen": 1791633105.313669,
-    "ast_hash": "ad86e8b1870aaaeeb7092f6b8165afc4",
+    "mtime": 1791638354.0514958,
+    "seen": 1791638911.093173,
+    "ast_hash": "556e5dbf83f44df8af6d16b7d15859be",
     "semantic_hash": ""
   },
   "src/utils/seamlessScroll.js": {
@@ -759,6 +759,12 @@
     "mtime": 1791633095.7927997,
     "seen": 1791633105.3136759,
     "ast_hash": "c4f391d7c5935740f5c7a5769b09bbbf",
+    "semantic_hash": ""
+  },
+  "anti-slop/audit-004-2026-10-10.md": {
+    "mtime": 1791638898.9279995,
+    "seen": 1791638911.093181,
+    "ast_hash": "72b452f1497aff9a69ea4e0dd0d7979f",
     "semantic_hash": ""
   }
 }

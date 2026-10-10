@@ -111,7 +111,7 @@
                       </span>
                     </td>
                     <td class="tabular-nums mod-cell">
-                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (—)">—</span>
+                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (-)">-</span>
                       <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                     </td>
                     <td colspan="2" style="text-align: right; padding-right: 1rem;">
@@ -153,7 +153,7 @@
                         </span>
                       </td>
                       <td class="tabular-nums mod-cell">
-                        <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (—)">—</span>
+                        <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (-)">-</span>
                         <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                       </td>
                       <td style="text-align: center;">
@@ -165,7 +165,7 @@
                             @click="stepSpecialization(inst, -1)"
                             title="Decrease Rank"
                           >-</button>
-                          <span class="tabular-nums step-value">{{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '—' : (inst.ranks || 0) }}</span>
+                          <span class="tabular-nums step-value">{{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : (inst.ranks || 0) }}</span>
                           <button
                             type="button"
                             class="btn-step-sm"
@@ -234,7 +234,7 @@
                       </span>
                     </td>
                     <td class="tabular-nums mod-cell">
-                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (—)">—</span>
+                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (-)">-</span>
                       <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                     </td>
                     <td style="text-align: center;">
@@ -246,7 +246,7 @@
                           @click="stepStandardSkill(ruleSkill.name, -1)"
                           title="Decrease Rank"
                         >-</button>
-                        <span class="tabular-nums step-value">{{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '—' : getStandardRanks(ruleSkill.name) }}</span>
+                        <span class="tabular-nums step-value">{{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : getStandardRanks(ruleSkill.name) }}</span>
                         <button
                           type="button"
                           class="btn-step-sm"
@@ -728,12 +728,12 @@ function confirmSpecialtySkill() {
 }
 
 .cat-pill-count {
-  background: #eab308;
-  color: #0f172a;
+  background: var(--accent-primary);
+  color: #fff;
   font-size: 0.62rem;
-  font-weight: 900;
+  font-weight: 800;
   padding: 0.05rem 0.35rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-xs, 3px);
   line-height: 1;
 }
 
@@ -749,8 +749,8 @@ function confirmSpecialtySkill() {
 }
 
 .skills-search-wrap:focus-within {
-  border-color: #facc15;
-  box-shadow: 0 0 0 2px rgba(250, 204, 21, 0.2);
+  border-color: var(--accent-secondary, #2a8fd6);
+  box-shadow: 0 0 0 2px rgba(42, 143, 214, 0.25);
 }
 
 .search-icon {
@@ -1037,7 +1037,7 @@ function confirmSpecialtySkill() {
   font-size: 0.65rem;
   font-weight: 800;
   padding: 0.05rem 0.4rem;
-  border-radius: 9999px;
+  border-radius: var(--radius-xs, 3px);
   line-height: 1;
 }
 

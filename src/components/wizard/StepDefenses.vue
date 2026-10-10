@@ -153,7 +153,7 @@
             </div>
           </div>
           <div class="def-total tabular-nums" :class="{ 'is-immune-text': isStaAbsent }">
-            {{ isStaAbsent ? 'IMMUNE (—)' : fortitudeTotal }}
+            {{ isStaAbsent ? 'IMMUNE (-)' : fortitudeTotal }}
           </div>
         </div>
         <div v-if="isStaAbsent" class="def-absent-notice">

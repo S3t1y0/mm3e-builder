@@ -37,7 +37,7 @@
             <span>Deficit: <strong>{{ budgetInfo.totalEP - budgetInfo.maxEP }} EP</strong> (Requires Rank {{ budgetInfo.neededRanks }} Equipment)</span>
           </div>
           <button type="button" class="btn-sync-warn" @click="syncEquipmentAdvantage">
-            <i class="ri-flashlight-line"></i> Auto-Sync Advantage ({{ budgetInfo.neededRanks }} Ranks / {{ budgetInfo.neededRanks }} PP)
+            <i class="ri-refresh-line"></i> Auto-Sync Advantage ({{ budgetInfo.neededRanks }} Ranks / {{ budgetInfo.neededRanks }} PP)
           </button>
         </template>
         <template v-else>
@@ -52,7 +52,7 @@
             @click="syncEquipmentAdvantage"
             title="Adjust advantage to exact needed ranks"
           >
-            <i class="ri-flashlight-line"></i> Adjust to {{ budgetInfo.neededRanks }} Ranks
+            <i class="ri-refresh-line"></i> Adjust to {{ budgetInfo.neededRanks }} Ranks
           </button>
         </template>
       </div>
@@ -1019,6 +1019,12 @@ function exportRoll20(item) {
   border: 1px solid var(--border-color);
   border-radius: var(--radius-sm);
   padding: 0.45rem 0.75rem;
+  transition: border-color var(--trans-fast);
+}
+
+.preset-search-row:focus-within {
+  border-color: var(--accent-secondary, #2a8fd6);
+  box-shadow: 0 0 0 2px rgba(42, 143, 214, 0.25);
 }
 
 .preset-search-row input {
