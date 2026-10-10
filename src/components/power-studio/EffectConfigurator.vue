@@ -2670,7 +2670,7 @@ function deleteCustomTrait(traitName) {
   align-items: center;
   justify-content: space-between;
   padding: 0.9rem 1.25rem;
-  background: linear-gradient(90deg, rgba(56, 239, 125, 0.08) 0%, rgba(79, 143, 247, 0.05) 100%);
+  background: linear-gradient(90deg, rgba(0, 111, 184, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%);
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 

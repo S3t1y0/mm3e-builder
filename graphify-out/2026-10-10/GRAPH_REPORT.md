@@ -1,7 +1,7 @@
 # Graph Report - mm3e-builder-vue  (2026-10-10)
 
 ## Corpus Check
-- 78 files · ~612,666 words
+- 78 files · ~612,614 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 11 file(s) not represented in the graph (top: .css 6, (none) 2, .ico 1)
 
@@ -239,7 +239,7 @@ Nodes (8): ABILITY_CODES, activeConditions, activeDebilitatedSummary, heroStore,
 
 ### Community 32 - "Anti-Slop Audit Report (Siklus 3): MM3E Character Builder"
 Cohesion: 0.12
-Nodes (15): Anti-Slop Audit Report (Siklus 3): MM3E Character Builder, Daftar Temuan Audit Siklus 3 (Numbered Findings List), Delivery Gate: Remediation Summary (PASS), Executive Summary, [F-21] Karakter Em Dash (`—`) pada Teks Antarmuka & Sisa Frasa Kaku "RAW", [F-22] Penekanan Outline Keyboard (`outline: none`) Tanpa Indikator Fokus Visual pada Field Header & Hub, [F-23] Animasi Looping Tanpa Henti (`pulseOverBudget infinite`) pada Lencana Anggaran PP, [F-24] Polusi Emoji & Glif Teks Dekoratif (`⚡` dan `★`) di Dalam String Data (+7 more)
+Nodes (15): Anti-Slop Audit Report (Siklus 3): MM3E Character Builder, Daftar Temuan Audit Siklus 3 (Numbered Findings List), Executive Summary, [F-21] Karakter Em Dash (`—`) pada Teks Antarmuka & Sisa Frasa Kaku "RAW", [F-22] Penekanan Outline Keyboard (`outline: none`) Tanpa Indikator Fokus Visual pada Field Header & Hub, [F-23] Animasi Looping Tanpa Henti (`pulseOverBudget infinite`) pada Lencana Anggaran PP, [F-24] Polusi Emoji & Glif Teks Dekoratif (`⚡` dan `★`) di Dalam String Data, [F-25] Pendaran Neon Berlebih (`box-shadow` & `text-shadow` Glow) yang Tersisa di Kartu & Tab Powers Deck (+7 more)
 
 ### Community 33 - "main.js"
 Cohesion: 0.06

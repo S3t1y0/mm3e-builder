@@ -1760,7 +1760,7 @@
 .pb-struct-card.active {
   background: rgba(220, 38, 38, 0.12);
   border-color: var(--accent-primary);
-  box-shadow: 0 0 16px rgba(220, 38, 38, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .struct-card-header {
@@ -1870,7 +1870,7 @@
 .pb-struct-card[data-set-struct="device"].active {
   background: rgba(245, 158, 11, 0.08);
   border-color: #f59e0b;
-  box-shadow: 0 0 16px rgba(245, 158, 11, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .pb-struct-card[data-set-struct="device"].active .struct-radio-indicator {
@@ -1928,21 +1928,21 @@
   background: rgba(56, 189, 248, 0.15);
   border-color: var(--accent-secondary);
   color: #bae6fd;
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .pb-delivery-pill.active.pill-removable {
   background: rgba(245, 158, 11, 0.15);
   border-color: #fbbf24;
   color: #fde68a;
-  box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .pb-delivery-pill.active.pill-easily {
   background: rgba(239, 68, 68, 0.15);
   border-color: #f87171;
   color: #fecaca;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
+  box-shadow: var(--shadow-sm);
 }
 
 .pb-main-effect-card {
@@ -2935,7 +2935,7 @@
 .pill-dot.cat-mod-range { background: #38bdf8; }
 .pill-dot.cat-mod-action { background: #fbbf24; }
 .pill-dot.cat-mod-sensory { background: #38bdf8; }
-.pill-dot.cat-mod-utility { background: #34d399; box-shadow: 0 0 6px rgba(16, 185, 129, 0.65); }
+.pill-dot.cat-mod-utility { background: #34d399; }
 .pill-dot.cat-mod-limitation { background: #fb7185; }
 .pill-dot.cat-mod-device { background: #2dd4bf; }
 

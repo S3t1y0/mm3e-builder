@@ -110,7 +110,7 @@ const ABILITIES_CONFIG = [
     key: 'STA',
     name: 'Stamina',
     desc: 'Physical health, recovery, and resistance',
-    absentDesc: 'Construct trait. Base Toughness 0, Fortitude defense absent (requires Immunity 30 per RAW), no natural healing.'
+    absentDesc: 'Construct trait. Base Toughness 0, Fortitude defense absent (requires Immunity 30), no natural healing.'
   },
   {
     key: 'AGL',

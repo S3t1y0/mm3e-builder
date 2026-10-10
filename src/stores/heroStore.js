@@ -1117,7 +1117,7 @@ export const useHeroStore = defineStore('hero', {
     // --- Character Sheet Skills, Advantages, Complications & Rolls ---
     setSkillRank(name, subtype, ranks) {
       if (this.isSkillAbilityAbsent(name)) {
-        return; // Block buying ranks for absent abilities per RAW
+        return; // Block buying ranks for absent abilities
       }
       if (!Array.isArray(this.character.skills)) this.character.skills = [];
       let skill = this.character.skills.find(s => s.name === name && (s.subtype || '') === (subtype || ''));

@@ -220,7 +220,7 @@
         </div>
 
         <div class="code-preview-header">
-          <span>JSON RAW PREVIEW ({{ exportSizeKb }} KB)</span>
+          <span>JSON DATA PREVIEW ({{ exportSizeKb }} KB)</span>
           <span style="color: var(--text-muted);">Formatted with 2 spaces indentation</span>
         </div>
         <pre class="json-code-box"><code>{{ exportJsonString }}</code></pre>

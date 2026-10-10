@@ -568,7 +568,7 @@ function triggerTrait(item) {
 
   if (isMot) {
     sendFeatureToVTT({
-      name: `⚡ Motivation: ${item.name}`,
+      name: `Motivation: ${item.name}`,
       category: 'motivation_award',
       type: 'Motivation',
       subtype: item.name || '',
@@ -579,7 +579,7 @@ function triggerTrait(item) {
     uiStore.showToast(`Triggered "${item.name}" (+1 Hero Point)`, 'success');
   } else {
     sendFeatureToVTT({
-      name: `⚡ Complication: ${item.name}`,
+      name: `Complication: ${item.name}`,
       category: 'complication_award',
       type: item.type || 'Complication',
       subtype: item.name || '',
@@ -1465,6 +1465,13 @@ function broadcastComplication(item) {
 .comp-form-group input:focus,
 .comp-form-group textarea:focus {
   border-color: #a855f7;
+}
+
+.comp-form-group select:focus-visible,
+.comp-form-group input:focus-visible,
+.comp-form-group textarea:focus-visible {
+  outline: 2px solid var(--accent-secondary, #2a8fd6);
+  outline-offset: 2px;
 }
 
 .theme-complication .comp-form-group select:focus,

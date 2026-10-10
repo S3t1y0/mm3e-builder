@@ -10453,18 +10453,6 @@
       "source_location": "L24"
     },
     {
-      "id": "anti_slop_audit_003_2026_10_10_delivery_gate_remediation_summary_pass",
-      "label": "Delivery Gate: Remediation Summary (PASS)",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "Anti-Slop Audit Report (Siklus 3): MM3E Character Builder",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "delivery gate: remediation summary (pass)",
-      "source_file": "anti-slop/audit-003-2026-10-10.md",
-      "source_location": "L142"
-    },
-    {
       "id": "anti_slop_audit_003_2026_10_10_executive_summary",
       "label": "Executive Summary",
       "_origin": "ast",
@@ -10597,16 +10585,28 @@
       "source_location": "L60"
     },
     {
-      "id": "anti_slop_audit_003_2026_10_10_ringkasan_matriks_temuan_status_remediasi_siklus_3",
-      "label": "Ringkasan Matriks Temuan & Status Remediasi Siklus 3",
+      "id": "anti_slop_audit_003_2026_10_10_ringkasan_matriks_temuan_siklus_3",
+      "label": "Ringkasan Matriks Temuan Siklus 3",
       "_origin": "ast",
       "community": 32,
       "community_name": "Anti-Slop Audit Report (Siklus 3): MM3E Character Builder",
       "file_type": "document",
       "node_kind": "heading",
-      "norm_label": "ringkasan matriks temuan & status remediasi siklus 3",
+      "norm_label": "ringkasan matriks temuan siklus 3",
       "source_file": "anti-slop/audit-003-2026-10-10.md",
       "source_location": "L128"
+    },
+    {
+      "id": "anti_slop_audit_003_2026_10_10_status_siklus_audit",
+      "label": "Status Siklus Audit",
+      "_origin": "ast",
+      "community": 32,
+      "community_name": "Anti-Slop Audit Report (Siklus 3): MM3E Character Builder",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "status siklus audit",
+      "source_file": "anti-slop/audit-003-2026-10-10.md",
+      "source_location": "L142"
     },
     {
       "id": "package",
@@ -24376,7 +24376,7 @@
     },
     {
       "source": "anti_slop_audit_003_2026_10_10_anti_slop_audit_report_siklus_3_mm3e_character_builder",
-      "target": "anti_slop_audit_003_2026_10_10_ringkasan_matriks_temuan_status_remediasi_siklus_3",
+      "target": "anti_slop_audit_003_2026_10_10_ringkasan_matriks_temuan_siklus_3",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -24387,7 +24387,7 @@
     },
     {
       "source": "anti_slop_audit_003_2026_10_10_anti_slop_audit_report_siklus_3_mm3e_character_builder",
-      "target": "anti_slop_audit_003_2026_10_10_delivery_gate_remediation_summary_pass",
+      "target": "anti_slop_audit_003_2026_10_10_status_siklus_audit",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",

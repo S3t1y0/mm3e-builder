@@ -119,7 +119,7 @@
                         type="button"
                         class="btn btn-xs btn-outline-primary"
                         :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                        :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot add specializations per RAW` : `Add new ${ruleSkill.name} specialization`"
+                        :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot add specializations` : `Add new ${ruleSkill.name} specialization`"
                         @click="openAddSpecialtyDialog(ruleSkill.name)"
                       >
                         <i class="ri-add-line"></i> Add Spec
@@ -170,7 +170,7 @@
                             type="button"
                             class="btn-step-sm"
                             :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                            :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks per RAW` : 'Increase Rank'"
+                            :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
                             @click="stepSpecialization(inst, 1)"
                           >+</button>
                           <button
@@ -187,9 +187,9 @@
                         <span 
                           v-if="heroStore.isAbilityAbsent(ruleSkill.ability)"
                           class="badge-absent-check"
-                          title="Absent Ability: Automatic failure per RAW"
+                          title="Absent Ability: Automatic failure"
                         >
-                          — (Fail)
+                          - (Fail)
                         </span>
                         <span 
                           v-else
@@ -207,7 +207,7 @@
                     <td colspan="5">
                       <div class="spec-empty-box" @click="!heroStore.isAbilityAbsent(ruleSkill.ability) && openAddSpecialtyDialog(ruleSkill.name)">
                         <i :class="heroStore.isAbilityAbsent(ruleSkill.ability) ? 'ri-close-circle-line' : 'ri-add-circle-line'"></i>
-                        <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)">Absent <strong>{{ ruleSkill.ability }}</strong>: Cannot specialize per RAW.</span>
+                        <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)">Absent <strong>{{ ruleSkill.ability }}</strong>: Cannot specialize.</span>
                         <span v-else>No <strong>{{ ruleSkill.name }}</strong> specializations added yet. Click "+ Add Spec" to specialize.</span>
                       </div>
                     </td>
@@ -251,7 +251,7 @@
                           type="button"
                           class="btn-step-sm"
                           :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                          :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks per RAW` : 'Increase Rank'"
+                          :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
                           @click="stepStandardSkill(ruleSkill.name, 1)"
                         >+</button>
                       </div>
@@ -260,9 +260,9 @@
                       <span 
                         v-if="heroStore.isAbilityAbsent(ruleSkill.ability)"
                         class="badge-absent-check"
-                        title="Absent Ability: Automatic failure per RAW"
+                        title="Absent Ability: Automatic failure"
                       >
-                        — (Fail)
+                        - (Fail)
                       </span>
                       <span 
                         v-else
@@ -302,13 +302,13 @@
               <label class="form-label">Skill Type</label>
               <select v-model="specialtyType" class="form-control spec-select">
                 <option value="Close Combat" :disabled="heroStore.isAbilityAbsent('FGT')">
-                  Close Combat (FGT){{ heroStore.isAbilityAbsent('FGT') ? ' — Absent (Locked)' : '' }}
+                  Close Combat (FGT){{ heroStore.isAbilityAbsent('FGT') ? ': Absent (Locked)' : '' }}
                 </option>
                 <option value="Ranged Combat" :disabled="heroStore.isAbilityAbsent('DEX')">
-                  Ranged Combat (DEX){{ heroStore.isAbilityAbsent('DEX') ? ' — Absent (Locked)' : '' }}
+                  Ranged Combat (DEX){{ heroStore.isAbilityAbsent('DEX') ? ': Absent (Locked)' : '' }}
                 </option>
                 <option value="Expertise" :disabled="heroStore.isAbilityAbsent('INT')">
-                  Expertise (INT){{ heroStore.isAbilityAbsent('INT') ? ' — Absent (Locked)' : '' }}
+                  Expertise (INT){{ heroStore.isAbilityAbsent('INT') ? ': Absent (Locked)' : '' }}
                 </option>
               </select>
             </div>
@@ -1369,9 +1369,9 @@ function confirmSpecialtySkill() {
 }
 
 .btn-modal-confirm {
-  background: linear-gradient(135deg, #eab308, #ca8a04);
-  border: 1px solid #facc15;
-  color: #0f172a;
+  background: linear-gradient(135deg, var(--accent-primary, #006fb8), var(--accent-secondary, #2a8fd6));
+  border: 1px solid var(--accent-secondary, #2a8fd6);
+  color: #ffffff;
   padding: 0.4rem 1rem;
   border-radius: var(--radius-sm);
   font-size: 0.82rem;
@@ -1381,7 +1381,7 @@ function confirmSpecialtySkill() {
   gap: 0.35rem;
   cursor: pointer;
   transition: all var(--trans-fast);
-  box-shadow: 0 2px 10px rgba(234, 179, 8, 0.35);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-modal-confirm:hover:not(:disabled) {

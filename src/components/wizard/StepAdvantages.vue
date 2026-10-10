@@ -1210,7 +1210,6 @@ function removeAdvantage(idOrName) {
 .active-feat-card {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-left: 3px solid #64748b;
   border-radius: var(--radius-md);
   padding: 0.85rem 0.95rem;
   display: flex;
@@ -1832,8 +1831,8 @@ function removeAdvantage(idOrName) {
   font-weight: 700;
   padding: 0.5rem 0.95rem;
   white-space: nowrap;
-  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-  border: 1px solid rgba(244, 114, 182, 0.35);
+  background: linear-gradient(135deg, var(--accent-primary, #006fb8) 0%, var(--accent-secondary, #2a8fd6) 100%);
+  border: 1px solid var(--accent-secondary, #2a8fd6);
   color: #fff;
   transition: all var(--trans-fast);
 }
@@ -2204,8 +2203,8 @@ function removeAdvantage(idOrName) {
 }
 
 .btn-modal-confirm {
-  background: linear-gradient(135deg, #ec4899 0%, #db2777 100%);
-  border: none;
+  background: linear-gradient(135deg, var(--accent-primary, #006fb8) 0%, var(--accent-secondary, #2a8fd6) 100%);
+  border: 1px solid var(--accent-secondary, #2a8fd6);
   border-radius: var(--radius-sm);
   color: #fff;
   font-size: 0.84rem;

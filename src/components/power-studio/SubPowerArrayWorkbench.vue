@@ -463,6 +463,11 @@ const capacityPercent = computed(() => {
   border-color: var(--border-color);
 }
 
+.slot-name-inline-input:focus-visible {
+  outline: 2px solid var(--accent-secondary, #2a8fd6);
+  outline-offset: 1px;
+}
+
 .slot-sub-info {
   display: flex;
   align-items: center;

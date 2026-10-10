@@ -92,7 +92,7 @@
             <span v-if="!heroStore.isAbilityAbsent('STA') && enhDefenses.FORTITUDE > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.FORTITUDE}`">
               +{{ enhDefenses.FORTITUDE }} Enh
             </span>
-            <span class="def-base-info">{{ heroStore.isAbilityAbsent('STA') ? 'STA —' : `STA ${heroStore.effectiveAbilities.STA || 0}` }}</span>
+            <span class="def-base-info">{{ heroStore.isAbilityAbsent('STA') ? 'STA: Absent' : `STA ${heroStore.effectiveAbilities.STA || 0}` }}</span>
           </div>
         </div>
         <div class="def-body">
@@ -101,7 +101,7 @@
             class="def-roll-btn"
             :disabled="heroStore.isAbilityAbsent('STA')"
             @click="!heroStore.isAbilityAbsent('STA') && rollDefense('Fortitude', combatDefenses.FORTITUDE)"
-            :title="heroStore.isAbilityAbsent('STA') ? 'Immune to Fortitude effects (Absent Stamina per RAW)' : 'Click to Roll Fortitude Check'"
+            :title="heroStore.isAbilityAbsent('STA') ? 'Immune to Fortitude effects (Absent Stamina)' : 'Click to Roll Fortitude Check'"
           >
             <i :class="heroStore.isAbilityAbsent('STA') ? 'ri-shield-check-line' : 'ri-dice-line'"></i>
             <span class="def-total">{{ heroStore.isAbilityAbsent('STA') ? '—' : (combatDefenses.FORTITUDE >= 0 ? `+${combatDefenses.FORTITUDE}` : combatDefenses.FORTITUDE) }}</span>
@@ -161,7 +161,7 @@
               +{{ equipmentArmorBonus }} Armor
             </span>
             <span v-if="heroStore.isAbilityAbsent('STA')" class="def-base-info">
-              STA — (0){{ protectionBonus > 0 ? ` (+${protectionBonus} Power)` : '' }}{{ defensiveRollBonus > 0 ? ` (+${defensiveRollBonus} Adv)` : '' }}
+              STA: Absent (0){{ protectionBonus > 0 ? ` (+${protectionBonus} Power)` : '' }}{{ defensiveRollBonus > 0 ? ` (+${defensiveRollBonus} Adv)` : '' }}
             </span>
             <span v-else-if="heroStore.character.injuries > 0" class="def-base-info def-injured-text" :title="`Base STA ${heroStore.effectiveAbilities.STA || 0}, minus ${heroStore.character.injuries} bruise penalty`">
               STA {{ heroStore.effectiveAbilities.STA || 0 }} (-{{ heroStore.character.injuries }} Bruised)

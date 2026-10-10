@@ -56,7 +56,7 @@
               <label>Skill Base</label>
               <select v-model="selectedBaseSkill" class="spec-select">
                 <option v-for="sk in subtypeSkills" :key="sk.name" :value="sk.name" :disabled="heroStore.isAbilityAbsent(sk.ability)">
-                  {{ sk.name }} ({{ sk.ability }}){{ heroStore.isAbilityAbsent(sk.ability) ? ' — Absent (Locked)' : '' }}
+                  {{ sk.name }} ({{ sk.ability }}){{ heroStore.isAbilityAbsent(sk.ability) ? ': Absent (Locked)' : '' }}
                 </option>
               </select>
             </div>
@@ -235,7 +235,7 @@
                     class="btn-spec-inline-add"
                     :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
                     @click="openInlineSpecModal(ruleSkill.name)"
-                    :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot specialize per RAW` : `Add new ${ruleSkill.name} specialization`"
+                    :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot specialize` : `Add new ${ruleSkill.name} specialization`"
                   >
                     <i class="ri-add-line"></i> Spec
                   </button>
@@ -292,7 +292,7 @@
                         type="button"
                         class="step-btn-xs"
                         :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                        :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks per RAW` : 'Increase Rank'"
+                        :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
                         @click="stepSpecialization(inst, 1)"
                       >+</button>
                     </div>
@@ -382,7 +382,7 @@
                     type="button"
                     class="step-btn-xs"
                     :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                    :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks per RAW` : 'Increase Rank'"
+                    :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
                     @click="stepStandardSkill(ruleSkill.name, 1)"
                   >+</button>
                 </div>
@@ -399,7 +399,7 @@
                 }"
                 :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
                 @click="!heroStore.isAbilityAbsent(ruleSkill.ability) && rollSkill(ruleSkill.name, calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)))"
-                :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Automatic failure per RAW. Checks cannot be rolled.` : `Roll ${ruleSkill.name} check (d20 + ${calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name))})`"
+                :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Automatic failure. Checks cannot be rolled.` : `Roll ${ruleSkill.name} check (d20 + ${calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name))})`"
               >
                 <i :class="heroStore.isAbilityAbsent(ruleSkill.ability) ? 'ri-close-line' : 'ri-dice-line'"></i>
                 <span class="skill-roll-val">

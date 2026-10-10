@@ -258,7 +258,7 @@ export function generateRoll20Macros(character, heroStore) {
       macros.push({
         category: 'Abilities',
         title: `${abl.label} Check`,
-        command: `&{template:default} {{name=${name} - ${abl.label} Check}} {{Result=Absent Ability (Automatic Failure per RAW)}}`,
+        command: `&{template:default} {{name=${name} - ${abl.label} Check}} {{Result=Absent Ability (Automatic Failure)}}`,
         simpleCommand: `/em tries ${abl.label} check but lacks the ability (Automatic Failure).`
       });
       return;
@@ -310,7 +310,7 @@ export function generateRoll20Macros(character, heroStore) {
       macros.push({
         category: 'Skills',
         title: `${sk.displayName} Check`,
-        command: `&{template:default} {{name=${name} - ${sk.displayName} Check}} {{Result=Absent Ability (Automatic Failure per RAW)}}`,
+        command: `&{template:default} {{name=${name} - ${sk.displayName} Check}} {{Result=Absent Ability (Automatic Failure)}}`,
         simpleCommand: `/em tries ${sk.displayName} check but lacks the ability (Automatic Failure).`
       });
       return;
@@ -619,7 +619,7 @@ export function buildMarkdownSheet(character, heroStore) {
   const fortBought = character.defensesBought?.FORTITUDE || 0;
   const fortTotal = heroStore?.getDefenseTotal('FORTITUDE') ?? ((effAbilities.STA || 0) + fortBought);
   if (fortTotal === null || (character.absentAbilities || []).includes('STA')) {
-    md += `| **Fortitude** | **—** | STA (Absent) | — | Immune to Fortitude Effects (RAW) |\n`;
+    md += `| **Fortitude** | **-** | STA (Absent) | - | Immune to Fortitude Effects |\n`;
   } else {
     md += `| **Fortitude** | **${fortTotal}** | STA (${formatMod(effAbilities.STA || 0)}) | +${fortBought} | Physical Resistance |\n`;
   }

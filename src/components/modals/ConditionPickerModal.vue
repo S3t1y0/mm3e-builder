@@ -749,7 +749,7 @@ const filteredConditions = computed(() => {
 .mdeb-pill-btn.is-active {
   background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(185, 28, 28, 0.32));
   border-color: #ef4444;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .mdeb-pill-btn.is-absent {
@@ -769,7 +769,6 @@ const filteredConditions = computed(() => {
 .mdeb-pill-btn.is-active .mdeb-code {
   color: #fff;
   font-weight: 900;
-  text-shadow: 0 0 4px rgba(239, 68, 68, 0.6);
 }
 
 .mdeb-pill-btn.is-absent .mdeb-code {

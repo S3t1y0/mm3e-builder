@@ -532,7 +532,7 @@ function handleTurnOnAndRoll(atk) {
 .quick-init-btn:hover {
   background: rgba(245, 158, 11, 0.22);
   border-color: #f59e0b;
-  box-shadow: 0 0 8px rgba(245, 158, 11, 0.3);
+  box-shadow: var(--shadow-sm);
 }
 
 .quick-init-btn:active {
@@ -738,7 +738,7 @@ function handleTurnOnAndRoll(atk) {
 .btn-attack-roll:hover {
   background: linear-gradient(180deg, #0088df 0%, #0068ad 100%);
   border-color: #38bdf8;
-  box-shadow: 0 0 10px rgba(0, 111, 184, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
@@ -782,7 +782,7 @@ function handleTurnOnAndRoll(atk) {
   background: #f59e0b;
   color: #0b1020;
   border-color: #fbbf24;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 
@@ -825,7 +825,7 @@ function handleTurnOnAndRoll(atk) {
   background: #f59e0b;
   color: #0b1020;
   border-color: #fbbf24;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+  box-shadow: var(--shadow-md);
   transform: translateY(-1px);
 }
 

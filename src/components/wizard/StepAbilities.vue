@@ -49,7 +49,7 @@
           <div
             class="ability-cost-tag tabular-nums"
             :class="{ 'is-refund': heroStore.isAbilityAbsent(ability.key) }"
-            :title="heroStore.isAbilityAbsent(ability.key) ? 'Absent Ability refund: -10 PP per RAW' : 'Cost: 2 PP per rank'"
+            :title="heroStore.isAbilityAbsent(ability.key) ? 'Absent Ability refund: -10 PP' : 'Cost: 2 PP per rank'"
           >
             {{ heroStore.isAbilityAbsent(ability.key) ? '-10 PP' : `${(heroStore.character.abilities[ability.key] || 0) * 2} PP` }}
           </div>
@@ -142,7 +142,7 @@ const abilitiesList = [
     name: 'Stamina',
     desc: 'Physical health, recovery, and resistance to disease, poison, and injury.',
     affects: 'Base Toughness, Fortitude',
-    absentDesc: 'Construct trait. Base Toughness 0, Fortitude defense absent (requires Immunity 30 per RAW), no natural healing.'
+    absentDesc: 'Construct trait. Base Toughness 0, Fortitude defense absent (requires Immunity 30), no natural healing.'
   },
   {
     key: 'AGL',

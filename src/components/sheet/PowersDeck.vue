@@ -185,7 +185,7 @@
                 :class="{ active: (pow.activeSlotId || 'main') === 'main' }"
                 @click="heroStore.setActivePowerSlot(pow.id, 'main')"
               >
-                ★ {{ pow.mainEffect?.name || 'Primary' }}
+                <i class="ri-star-fill" style="color: #fbbf24; font-size: 0.75rem; margin-right: 2px;"></i> {{ pow.mainEffect?.name || 'Primary' }}
               </button>
               <button
                 v-for="alt in (pow.alternateEffects || [])"
@@ -822,7 +822,7 @@
                     :class="{ active: (sub.activeSlotId || 'main') === 'main' }"
                     @click="heroStore.setActiveCompoundSubSlot(pow.id, sIdx, 'main')"
                   >
-                    ★ {{ sub.effect?.name || sub.name || 'Primary' }}
+                    <i class="ri-star-fill" style="color: #fbbf24; font-size: 0.75rem; margin-right: 2px;"></i> {{ sub.effect?.name || sub.name || 'Primary' }}
                   </button>
                   <button
                     v-for="alt in sub.alternateEffects"
@@ -1229,7 +1229,7 @@
                       :class="{ active: (sub.activeSlotId || 'main') === 'main' }"
                       @click="heroStore.setActiveDeviceSubSlot(pow.id, sIdx, 'main')"
                     >
-                      ★ {{ sub.effect?.name || 'Primary' }}
+                      <i class="ri-star-fill" style="color: #fbbf24; font-size: 0.75rem; margin-right: 2px;"></i> {{ sub.effect?.name || 'Primary' }}
                     </button>
                     <button
                       v-for="alt in sub.alternateEffects"
@@ -2030,7 +2030,7 @@ function broadcastPower(pow) {
 
     const stuntsList = [];
     if (pow.activeSlotId !== 'main') {
-      stuntsList.push(`★ ${pow.mainEffect?.name || 'Primary Mode'}`);
+      stuntsList.push(`[Primary] ${pow.mainEffect?.name || 'Primary Mode'}`);
     }
     (pow.alternateEffects || []).forEach(a => {
       if (a.id !== pow.activeSlotId) {
@@ -2065,7 +2065,7 @@ function broadcastPower(pow) {
   if (pow.type === 'compound' && Array.isArray(pow.compoundEffects) && pow.compoundEffects.length > 0) {
     compoundComponents = pow.compoundEffects.map((s, idx) => {
       const sEff = getSubPowerActiveEffect(s);
-      const priTag = (s.isPrimaryAction || s.isPrimary) ? '★ ' : '';
+      const priTag = (s.isPrimaryAction || s.isPrimary) ? '[Primary] ' : '';
       const dc = calculateDC(sEff);
       const dcStr = dc ? ` [${dc}]` : '';
       return `${priTag}${s.name || `Component ${idx + 1}`} (${sEff?.baseEffect || 'Effect'} Rank ${sEff?.ranks || 1}${dcStr})`;
@@ -3573,12 +3573,12 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .chip-toggle-dot-btn.online .chip-status-dot {
   background: #10b981;
-  box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
+  box-shadow: none;
 }
 
 .chip-toggle-dot-btn.offline .chip-status-dot {
   background: #ef4444;
-  box-shadow: 0 0 5px rgba(239, 68, 68, 0.6);
+  box-shadow: none;
 }
 
 .chip-icon {
@@ -3743,7 +3743,7 @@ function getModifierInfo(modName, isFlaw = false) {
   background: rgba(14, 165, 233, 0.15);
   border-color: #0284c7;
   color: #38bdf8;
-  box-shadow: 0 0 10px rgba(14, 165, 233, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .compound-tab-item.active .tab-icon {
@@ -3757,7 +3757,7 @@ function getModifierInfo(modName, isFlaw = false) {
 .compound-tab-item.is-primary-tab.active {
   border-color: #f59e0b;
   color: #fbbf24;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.25);
+  box-shadow: var(--shadow-sm);
 }
 
 .tab-primary-badge {
@@ -3787,7 +3787,7 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .tab-status-dot.online {
   background: #10b981;
-  box-shadow: 0 0 5px #10b981;
+  box-shadow: none;
 }
 
 .tab-icon {
@@ -3994,7 +3994,7 @@ function getModifierInfo(modName, isFlaw = false) {
   background: #a855f7;
   color: #ffffff;
   border-color: #a855f7;
-  box-shadow: 0 0 8px rgba(168, 85, 247, 0.45);
+  box-shadow: var(--shadow-sm);
 }
 
 /* Modifiers & Linked strip */
@@ -4916,7 +4916,7 @@ function getModifierInfo(modName, isFlaw = false) {
   background: #0284c7;
   color: #ffffff;
   border-color: #38bdf8;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-effect-vtt.sub {
@@ -4947,7 +4947,7 @@ function getModifierInfo(modName, isFlaw = false) {
   background: #059669;
   border-color: #34d399;
   color: #ffffff;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-mod-vtt.flaw {
@@ -5105,11 +5105,10 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .config-choice-card {
-  background: transparent;
-  border: none;
-  border-left: 2px solid rgba(139, 92, 246, 0.45);
-  border-radius: 0;
-  padding: 0.25rem 0 0.25rem 0.6rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xs);
+  padding: 0.4rem 0.6rem;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
@@ -5117,7 +5116,7 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .config-choice-card:hover {
-  border-left-color: rgba(139, 92, 246, 0.8);
+  border-color: rgba(139, 92, 246, 0.5);
 }
 
 .config-choice-top {

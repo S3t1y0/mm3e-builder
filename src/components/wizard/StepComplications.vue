@@ -947,17 +947,18 @@ function removeTrait(item) {
   color: var(--text-secondary);
   margin: 0;
   line-height: 1.4;
-  padding: 0.3rem 0.55rem;
-  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
-  background: rgba(0, 0, 0, 0.2);
+  padding: 0.35rem 0.55rem;
+  border-radius: var(--radius-xs);
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
 }
 
 .quote-mot {
-  border-left: 2px solid rgba(168, 85, 247, 0.4);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .quote-comp {
-  border-left: 2px solid rgba(244, 63, 94, 0.4);
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
 .comp-card-actions {

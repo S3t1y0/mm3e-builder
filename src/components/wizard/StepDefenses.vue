@@ -50,7 +50,7 @@
           </div>
         </div>
 
-        <!-- CAP 3: FORTITUDE + WILL (or WILL CAP if Fortitude absent per RAW) -->
+        <!-- CAP 3: FORTITUDE + WILL (or WILL CAP if Fortitude absent) -->
         <div v-if="isStaAbsent" class="cap-card" :class="{ overflow: willTotal > singleWillCap }">
           <div class="cap-header">
             <span>Will Defense Cap</span>
@@ -216,7 +216,7 @@
               <span style="font-weight: 800; color: #38bdf8; font-size: 1.05rem;">Toughness</span>
             </div>
             <div class="tabular-nums" style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem;">
-              Base STA: <strong style="color: #fff;">{{ isStaAbsent ? '— (0)' : (heroStore.effectiveAbilities?.STA ?? 0) }}</strong> &bull;
+              Base STA: <strong style="color: #fff;">{{ isStaAbsent ? '- (0)' : (heroStore.effectiveAbilities?.STA ?? 0) }}</strong> &bull;
               <span style="white-space: nowrap;">Powers/Armor: <strong style="color: #fff;">+{{ heroStore.protectionBonus || 0 }}</strong></span>
             </div>
           </div>
