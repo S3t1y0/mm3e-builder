@@ -65,16 +65,82 @@ export const CONDITION_BRIEF_EFFECTS = {
   Surprised: 'Defenses Halved • Stunned'
 };
 
+export const DEBILITATED_EFFECTS = {
+  STR: {
+    key: 'STR',
+    name: 'Strength',
+    components: ['Defenseless', 'Immobile', 'Stunned'],
+    brief: 'Collapsed • Stunned',
+    desc: 'Collapsed; defenseless, immobile, and stunned, but mentally aware.'
+  },
+  AGL: {
+    key: 'AGL',
+    name: 'Agility',
+    components: ['Defenseless', 'Immobile', 'Stunned'],
+    brief: 'Collapsed • Stunned',
+    desc: 'Collapsed; defenseless, immobile, and stunned, but mentally aware.'
+  },
+  DEX: {
+    key: 'DEX',
+    name: 'Dexterity',
+    components: ['Defenseless', 'Immobile', 'Stunned'],
+    brief: 'Collapsed • Stunned',
+    desc: 'Collapsed; defenseless, immobile, and stunned, but mentally aware.'
+  },
+  STA: {
+    key: 'STA',
+    name: 'Stamina',
+    components: ['Dying'],
+    brief: 'Dying (-5 Survival)',
+    desc: 'Mortal danger; dying with an additional -5 modifier on Fortitude survival checks.'
+  },
+  FGT: {
+    key: 'FGT',
+    name: 'Fighting',
+    components: ['Dazed', 'Defenseless'],
+    brief: 'Dazed • No Close Atk',
+    desc: 'Dazed and defenseless; cannot make close attacks.'
+  },
+  INT: {
+    key: 'INT',
+    name: 'Intellect',
+    components: ['Unaware'],
+    brief: 'Unaware',
+    desc: 'Complete loss of intellect and cognition; unaware.'
+  },
+  AWE: {
+    key: 'AWE',
+    name: 'Awareness',
+    components: ['Unaware'],
+    brief: 'Unaware',
+    desc: 'Complete loss of sensory perception and intuition; unaware.'
+  },
+  PRE: {
+    key: 'PRE',
+    name: 'Presence',
+    components: ['Unaware'],
+    brief: 'Unaware',
+    desc: 'Complete loss of personality and willpower; unaware.'
+  }
+};
+
 export const SEVERE_CONDITIONS = new Set([
   'Stunned', 'Defenseless', 'Immobile', 'Disabled', 'Incapacitated',
   'Paralyzed', 'Asleep', 'Dying'
 ]);
 
 export function getConditionBriefEffect(name) {
+  if (!name) return '';
+  if (name.startsWith('Debilitated:')) {
+    const code = name.split(':')[1]?.toUpperCase();
+    return DEBILITATED_EFFECTS[code]?.brief || 'Trait < -5';
+  }
   return CONDITION_BRIEF_EFFECTS[name] || '';
 }
 
 export function isConditionSevere(name) {
+  if (!name) return false;
+  if (name.startsWith('Debilitated:')) return true;
   return SEVERE_CONDITIONS.has(name);
 }
 
@@ -89,6 +155,25 @@ export function resolveActiveConditionSet(activeConditions = []) {
     if (!raw) continue;
     const name = raw.trim();
     resolved.add(name);
+
+    if (name.startsWith('Debilitated:')) {
+      const code = name.split(':')[1]?.toUpperCase();
+      const deb = DEBILITATED_EFFECTS[code];
+      if (deb) {
+        resolved.add('Debilitated');
+        for (const comp of deb.components) {
+          resolved.add(comp);
+          const subKey = comp.toLowerCase();
+          const sub = COMBINED_MAP[subKey];
+          if (Array.isArray(sub)) {
+            for (const subComp of sub) {
+              resolved.add(subComp);
+            }
+          }
+        }
+      }
+    }
+
     const key = name.toLowerCase();
     const sub = COMBINED_MAP[key];
     if (Array.isArray(sub)) {
@@ -183,6 +268,20 @@ export function calculateConditionModifiers({
   // Action economy
   const actionState = isStunned ? 'stunned' : (isDazed ? 'dazed' : 'normal');
 
+  // Debilitated abilities extraction
+  const debilitatedAbilities = [];
+  for (const c of activeConditions) {
+    if (c && typeof c === 'string' && c.startsWith('Debilitated:')) {
+      const code = c.split(':')[1]?.toUpperCase();
+      if (code && !debilitatedAbilities.includes(code)) {
+        debilitatedAbilities.push(code);
+      }
+    }
+  }
+  const isFgtDebilitated = debilitatedAbilities.includes('FGT');
+  const isStaDebilitated = debilitatedAbilities.includes('STA');
+  const cannotCloseAttack = isFgtDebilitated;
+
   // Attack penalties
   const closeAttackPenalty = checkPenalty + (isProne ? -5 : 0);
   const rangedAttackPenalty = checkPenalty;
@@ -203,6 +302,23 @@ export function calculateConditionModifiers({
   const isDying = condSet.has('Dying');
   if (isDying) tags.push({ label: 'Dying (Fortitude DC 15)', type: 'danger', reason: 'Hero is near death. Fortitude check DC 15 required each round or suffer death.' });
 
+  if (isFgtDebilitated) {
+    tags.push({ label: 'Debilitated Fighting: No Close Attacks', type: 'danger', reason: 'Fighting is debilitated below -5. Cannot make close attacks.' });
+  }
+  if (isStaDebilitated) {
+    tags.push({ label: 'Debilitated Stamina: Dying (-5 Fortitude Survival)', type: 'danger', reason: 'Stamina is debilitated below -5. Character is dying with -5 modifier to survival checks.' });
+  }
+  for (const code of ['STR', 'AGL', 'DEX']) {
+    if (debilitatedAbilities.includes(code)) {
+      tags.push({ label: `Debilitated ${DEBILITATED_EFFECTS[code]?.name || code}: Collapsed`, type: 'danger', reason: 'Physical ability is debilitated below -5. Defenseless, immobile, and stunned.' });
+    }
+  }
+  for (const code of ['INT', 'AWE', 'PRE']) {
+    if (debilitatedAbilities.includes(code)) {
+      tags.push({ label: `Debilitated ${DEBILITATED_EFFECTS[code]?.name || code}: Unaware`, type: 'danger', reason: 'Mental ability is debilitated below -5. Completely unaware.' });
+    }
+  }
+
   const hasMods = (
     isDefenseless ||
     isVulnerable ||
@@ -215,6 +331,7 @@ export function calculateConditionModifiers({
     isProne ||
     isUnaware ||
     isDying ||
+    debilitatedAbilities.length > 0 ||
     defRollLost > 0
   );
 
@@ -230,6 +347,10 @@ export function calculateConditionModifiers({
     isProne,
     isUnaware,
     isDying,
+    cannotCloseAttack,
+    isFgtDebilitated,
+    isStaDebilitated,
+    debilitatedAbilities,
     defRollLost,
     checkPenalty,
     closeAttackPenalty,

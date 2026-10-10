@@ -111,7 +111,7 @@
                 :class="{ 'is-severe': item.isSevere }"
                 :title="item.desc ? `${item.name}: ${item.desc}` : item.name"
               >
-                <span class="cond-chip-name">{{ item.name }}</span>
+                <span class="cond-chip-name">{{ item.displayName || item.name }}</span>
                 <span v-if="item.briefEffect" class="cond-chip-effect">{{ item.briefEffect }}</span>
                 <button
                   type="button"
@@ -474,6 +474,7 @@ const showBioDrawer = ref(false);
 import {
   BASIC_CONDITIONS,
   COMBINED_CONDITIONS,
+  DEBILITATED_EFFECTS,
   getConditionBriefEffect,
   isConditionSevere
 } from '../../rules/conditions.js';
@@ -497,17 +498,28 @@ const conditionDescMap = computed(() => {
   for (const c of COMBINED_CONDITIONS) {
     map[c.name] = c.desc;
   }
+  for (const [code, info] of Object.entries(DEBILITATED_EFFECTS)) {
+    map[`Debilitated:${code}`] = info.desc;
+  }
   return map;
 });
 
 const activeConditionItems = computed(() => {
   const active = heroStore.character.activeConditions || [];
-  return active.map(name => ({
-    name,
-    briefEffect: getConditionBriefEffect(name),
-    isSevere: isConditionSevere(name),
-    desc: conditionDescMap.value[name] || ''
-  }));
+  return active.map(name => {
+    let displayName = name;
+    if (name.startsWith('Debilitated:')) {
+      const code = name.split(':')[1]?.toUpperCase();
+      displayName = `Debilitated (${code})`;
+    }
+    return {
+      name,
+      displayName,
+      briefEffect: getConditionBriefEffect(name),
+      isSevere: isConditionSevere(name),
+      desc: conditionDescMap.value[name] || ''
+    };
+  });
 });
 
 function setIdentityStatus(isSecret) {

@@ -486,7 +486,23 @@ export const useHeroStore = defineStore('hero', {
     },
 
     isDying(state) {
-      return (state.character.activeConditions || []).includes('Dying');
+      const conds = state.character.activeConditions || [];
+      return conds.includes('Dying') || conds.includes('Debilitated:STA');
+    },
+
+    isStaDebilitated(state) {
+      return (state.character.activeConditions || []).includes('Debilitated:STA');
+    },
+
+    debilitatedAbilities(state) {
+      const list = [];
+      for (const c of (state.character.activeConditions || [])) {
+        if (c && typeof c === 'string' && c.startsWith('Debilitated:')) {
+          const code = c.split(':')[1]?.toUpperCase();
+          if (code && !list.includes(code)) list.push(code);
+        }
+      }
+      return list;
     },
 
     isDead(state) {
@@ -503,10 +519,11 @@ export const useHeroStore = defineStore('hero', {
         isDying: this.isDying,
         isDead: this.isDead,
         isStable: !!state.character.isDyingStable,
+        isStaDebilitated: this.isStaDebilitated,
         failures,
         maxFailures: DEATH_FAILURE_LIMIT,
         hasDiehard: this.hasDiehard,
-        fortitudeBonus: this.effectiveCombatDefenses.FORTITUDE || 0
+        fortitudeBonus: (Number(this.effectiveCombatDefenses.FORTITUDE) || 0) + (this.isStaDebilitated ? -5 : 0)
       };
     },
 
@@ -935,6 +952,12 @@ export const useHeroStore = defineStore('hero', {
         }
         // Option A: Auto-refund skills associated with absent ability
         this.refundSkillsForAbsentAbility(code);
+        // Clear debilitation if present on newly absent ability
+        const debTag = `Debilitated:${code}`;
+        const debIdx = (this.character.activeConditions || []).indexOf(debTag);
+        if (debIdx !== -1) {
+          this.character.activeConditions.splice(debIdx, 1);
+        }
       }
       this.pushHistory();
     },
@@ -952,6 +975,12 @@ export const useHeroStore = defineStore('hero', {
         }
         // Option A: Auto-refund skills associated with absent ability
         this.refundSkillsForAbsentAbility(code);
+        // Clear debilitation if present on newly absent ability
+        const debTag = `Debilitated:${code}`;
+        const debIdx = (this.character.activeConditions || []).indexOf(debTag);
+        if (debIdx !== -1) {
+          this.character.activeConditions.splice(debIdx, 1);
+        }
         this.pushHistory();
       } else if (!isAbsent && idx >= 0) {
         this.character.absentAbilities.splice(idx, 1);
@@ -1386,6 +1415,38 @@ export const useHeroStore = defineStore('hero', {
       this.pushHistory();
     },
 
+    isDebilitated(key) {
+      const code = (key || '').toUpperCase();
+      return (this.character.activeConditions || []).includes(`Debilitated:${code}`);
+    },
+
+    toggleDebilitatedAbility(key) {
+      const code = (key || '').toUpperCase();
+      if (!code) return;
+      // Cannot debilitate an absent ability (immune to Weaken effects)
+      if (this.isAbilityAbsent(code)) return;
+
+      if (!Array.isArray(this.character.activeConditions)) {
+        this.character.activeConditions = [];
+      }
+      const debTag = `Debilitated:${code}`;
+      const idx = this.character.activeConditions.indexOf(debTag);
+      if (idx !== -1) {
+        this.character.activeConditions.splice(idx, 1);
+        if (code === 'STA') {
+          this.character.dyingFailures = 0;
+          this.character.isDyingStable = false;
+        }
+      } else {
+        this.character.activeConditions.push(debTag);
+        if (code === 'STA') {
+          this.character.dyingFailures = 0;
+          this.character.isDyingStable = false;
+        }
+      }
+      this.pushHistory();
+    },
+
     clearConditions() {
       this.character.activeConditions = [];
       this.character.dyingFailures = 0;
@@ -1394,9 +1455,18 @@ export const useHeroStore = defineStore('hero', {
     },
 
     rollDyingCheck() {
-      const bonus = Number(this.effectiveCombatDefenses.FORTITUDE) || 0;
-      const rollData = this.rollCheck('Dying Survival Check (Fortitude)', bonus, DYING_DC, 'Defense', {
-        isDyingCheck: true
+      const isStaDeb = this.isStaDebilitated;
+      const staPenalty = isStaDeb ? -5 : 0;
+      const baseFort = Number(this.effectiveCombatDefenses.FORTITUDE) || 0;
+      const bonus = baseFort + staPenalty;
+      const checkTitle = isStaDeb
+        ? 'Dying Survival Check (Fortitude, -5 Debilitated Stamina)'
+        : 'Dying Survival Check (Fortitude)';
+
+      const rollData = this.rollCheck(checkTitle, bonus, DYING_DC, 'Defense', {
+        isDyingCheck: true,
+        isDebilitatedStamina: isStaDeb,
+        debilitatedPenalty: staPenalty
       });
 
       const evalResult = evaluateDyingFortitudeCheck(rollData.total, DYING_DC);
@@ -1420,6 +1490,10 @@ export const useHeroStore = defineStore('hero', {
       const dyingIdx = this.character.activeConditions.indexOf('Dying');
       if (dyingIdx !== -1) {
         this.character.activeConditions.splice(dyingIdx, 1);
+      }
+      const debStaIdx = this.character.activeConditions.indexOf('Debilitated:STA');
+      if (debStaIdx !== -1) {
+        this.character.activeConditions.splice(debStaIdx, 1);
       }
       // Per M&M 3e rules, stabilized dying character remains Incapacitated
       if (!this.character.activeConditions.includes('Incapacitated')) {

@@ -312,15 +312,15 @@
                     type="button"
                     class="sheet-skill-roll-btn"
                     :class="{ 
-                      'is-absent-btn': heroStore.isAbilityAbsent(ruleSkill.ability),
+                      'is-absent-btn': heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack),
                       'btn-trained': !heroStore.isAbilityAbsent(ruleSkill.ability) && (Number(inst.ranks ?? inst.rank) || 0) + getEnhancedRanks(ruleSkill.name, inst.subtype) > 0,
                       'btn-signature': !heroStore.isAbilityAbsent(ruleSkill.ability) && isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks)
                     }"
-                    :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                    @click="!heroStore.isAbilityAbsent(ruleSkill.ability) && rollSkill(ruleSkill.name + ': ' + (inst.subtype || 'General'), calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))"
-                    :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Automatic failure per RAW. Checks cannot be rolled.` : `Roll ${ruleSkill.name} (${inst.subtype}) check`"
+                    :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)"
+                    @click="!(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) && rollSkill(ruleSkill.name + ': ' + (inst.subtype || 'General'), calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))"
+                    :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Automatic failure. Checks cannot be rolled.` : ((ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack) ? 'Cannot make close attacks while Fighting is Debilitated' : `Roll ${ruleSkill.name} (${inst.subtype}) check`)"
                   >
-                    <i :class="heroStore.isAbilityAbsent(ruleSkill.ability) ? 'ri-close-line' : 'ri-dice-line'"></i>
+                    <i :class="(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) ? 'ri-close-line' : 'ri-dice-line'"></i>
                     <span class="skill-roll-val">
                       {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '—' : formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name)) }}
                     </span>
@@ -622,6 +622,10 @@ function isSignatureSkill(bonus, ranks) {
 }
 
 function rollSkill(skillTitle, bonus) {
+  if (skillTitle.toLowerCase().includes('close combat') && heroStore.conditionModifiers.cannotCloseAttack) {
+    uiStore.showToast('Cannot make close attacks while Fighting is Debilitated', 'error');
+    return;
+  }
   const circ = heroStore.circumstancePenalty || 0;
   const extra = circ !== 0 ? {
     conditionPenalty: circ,

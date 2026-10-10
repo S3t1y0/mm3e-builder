@@ -88,7 +88,8 @@
               v-if="atk.isPowerDisabled"
               type="button"
               class="btn-turnon-roll"
-              title="Activate power and roll attack check"
+              :disabled="isAttackDisabled(atk)"
+              :title="getAttackButtonTitle(atk, 'turn-on')"
               @click="handleTurnOnAndRoll(atk)"
             >
               <i class="ri-flashlight-line"></i>
@@ -100,7 +101,8 @@
               v-else-if="atk.isActive"
               type="button"
               class="btn-attack-roll"
-              :title="atk.rollBonus !== null ? `Roll attack check (${getEffectiveAttackBonus(atk) >= 0 ? '+' : ''}${getEffectiveAttackBonus(atk)})` : 'Trigger combat effect'"
+              :disabled="isAttackDisabled(atk)"
+              :title="getAttackButtonTitle(atk, 'roll')"
               @click="handleRollAttack(atk)"
             >
               <i class="ri-dice-line"></i>
@@ -112,7 +114,8 @@
               v-else
               type="button"
               class="btn-switch-roll"
-              title="Switch slot to Active and roll attack check"
+              :disabled="isAttackDisabled(atk)"
+              :title="getAttackButtonTitle(atk, 'switch')"
               @click="handleSwitchAndRoll(atk)"
             >
               <i class="ri-shuffle-line"></i>
@@ -391,7 +394,24 @@ function getAttackPenaltyTag(atk) {
   return pen;
 }
 
+function isAttackDisabled(atk) {
+  if (atk.range === 'Close' && heroStore.conditionModifiers.cannotCloseAttack) {
+    return true;
+  }
+  return false;
+}
+
+function getAttackButtonTitle(atk, mode = 'roll') {
+  if (atk.range === 'Close' && heroStore.conditionModifiers.cannotCloseAttack) {
+    return 'Cannot make close attacks while Fighting is Debilitated';
+  }
+  if (mode === 'turn-on') return 'Activate power and roll attack check';
+  if (mode === 'switch') return 'Switch slot to Active and roll attack check';
+  return atk.rollBonus !== null ? `Roll attack check (${getEffectiveAttackBonus(atk) >= 0 ? '+' : ''}${getEffectiveAttackBonus(atk)})` : 'Trigger combat effect';
+}
+
 function handleRollAttack(atk) {
+  if (isAttackDisabled(atk)) return;
   const bonus = getEffectiveAttackBonus(atk) ?? 0;
   const extra = {
     dc: atk.dc,
@@ -413,6 +433,7 @@ function handleRollAttack(atk) {
 }
 
 function handleSwitchAndRoll(atk) {
+  if (isAttackDisabled(atk)) return;
   if (atk.isSubPower && atk.powerId && atk.devSubIdx !== undefined) {
     heroStore.setActiveDeviceSubSlot(atk.powerId, atk.devSubIdx, atk.slotId);
   } else if (atk.powerId) {
@@ -423,6 +444,7 @@ function handleSwitchAndRoll(atk) {
 }
 
 function handleTurnOnAndRoll(atk) {
+  if (isAttackDisabled(atk)) return;
   if (atk.powerId) {
     heroStore.setPowerActive(atk.powerId, true);
     if (atk.isSubPower && atk.devSubIdx !== undefined) {

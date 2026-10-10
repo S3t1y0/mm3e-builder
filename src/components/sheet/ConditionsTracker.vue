@@ -123,6 +123,14 @@
         </button>
       </div>
 
+      <!-- Debilitated Stamina Callout Banner -->
+      <div v-if="heroStore.isStaDebilitated && heroStore.isDying && !heroStore.isDead" class="sta-debilitated-banner">
+        <div class="sta-deb-info">
+          <i class="ri-alert-fill"></i>
+          <span><strong>Debilitated Stamina:</strong> -5 penalty applied to Fortitude checks to avoid death.</span>
+        </div>
+      </div>
+
       <!-- Death Clock Pips Row -->
       <div v-if="!heroStore.character.isDyingStable || heroStore.isDying" class="death-clock-row">
         <span class="death-clock-label">DEATH CLOCK:</span>
@@ -176,7 +184,7 @@
           title="Roll d20 + Fortitude vs DC 15"
         >
           <i class="ri-dice-line"></i>
-          <span>Roll Fortitude Survival (DC 15, Bonus {{ heroStore.effectiveCombatDefenses.FORTITUDE >= 0 ? `+${heroStore.effectiveCombatDefenses.FORTITUDE}` : heroStore.effectiveCombatDefenses.FORTITUDE }})</span>
+          <span>Roll Fortitude Survival (DC 15, Bonus {{ heroStore.dyingTacticalState.fortitudeBonus >= 0 ? `+${heroStore.dyingTacticalState.fortitudeBonus}` : heroStore.dyingTacticalState.fortitudeBonus }})</span>
         </button>
 
         <!-- 2. Spend Hero Point (Escape Death) -->
@@ -257,15 +265,64 @@
           :key="c.name"
           class="cond-chip"
           :class="{
-            active: isDirectlyActive(c.name),
-            'active-inherited': isInheritedActive(c.name)
+            active: isDirectlyActive(c.name) || (c.name === 'Debilitated' && heroStore.debilitatedAbilities.length > 0),
+            'active-inherited': isInheritedActive(c.name),
+            'has-subdrawer': c.name === 'Debilitated'
           }"
           :title="isInheritedActive(c.name) ? `${c.name} (Active via combined condition)` : c.desc"
-          @click="heroStore.toggleCondition(c.name)"
+          @click="handleBasicConditionClick(c.name)"
         >
           <span class="chip-dot"></span>
-          <span>{{ c.name }}</span>
+          <span>{{ c.name }}{{ getDebilitatedChipSuffix(c.name) }}</span>
+          <i
+            v-if="c.name === 'Debilitated'"
+            class="deb-expand-caret"
+            :class="isDebilitatedDrawerOpen ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"
+          ></i>
         </button>
+      </div>
+
+      <!-- DEBILITATED ABILITY SELECTOR DRAWER -->
+      <div
+        v-if="isDebilitatedDrawerOpen || heroStore.debilitatedAbilities.length > 0"
+        class="deb-drawer-box mt-2"
+      >
+        <div class="deb-drawer-head">
+          <div class="deb-drawer-title-group">
+            <i class="ri-pulse-line"></i>
+            <span class="deb-drawer-title">Debilitated Abilities</span>
+          </div>
+          <span v-if="heroStore.debilitatedAbilities.length > 0" class="deb-active-badge">
+            {{ heroStore.debilitatedAbilities.length }} Active
+          </span>
+          <span v-else class="deb-hint-badge">Trait &lt; -5</span>
+        </div>
+        <div class="deb-drawer-pills">
+          <button
+            v-for="code in ABILITY_CODES"
+            :key="code"
+            type="button"
+            class="deb-pill-btn"
+            :class="{
+              'is-active': heroStore.isDebilitated(code),
+              'is-absent': heroStore.isAbilityAbsent(code)
+            }"
+            :disabled="heroStore.isAbilityAbsent(code)"
+            :title="heroStore.isAbilityAbsent(code) ? `${code} is Absent (immune to Weaken)` : getDebilitatedDesc(code)"
+            @click="heroStore.toggleDebilitatedAbility(code)"
+            @mouseenter="hoveredAbility = code"
+            @mouseleave="hoveredAbility = null"
+          >
+            <span class="deb-pill-code">{{ code }}</span>
+            <span class="deb-pill-sub">{{ getShortLabel(code) }}</span>
+          </button>
+        </div>
+
+        <!-- Live Dynamic Status / Helper Strip -->
+        <div class="deb-drawer-status-strip" :class="activeDebilitatedSummary.type">
+          <i :class="activeDebilitatedSummary.icon"></i>
+          <span class="status-strip-text">{{ activeDebilitatedSummary.text }}</span>
+        </div>
       </div>
     </div>
 
@@ -290,15 +347,22 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
-import { BASIC_CONDITIONS, COMBINED_CONDITIONS } from '../../rules/conditions.js';
+import { BASIC_CONDITIONS, COMBINED_CONDITIONS, DEBILITATED_EFFECTS } from '../../rules/conditions.js';
 
 const heroStore = useHeroStore();
+
+const ABILITY_CODES = ['STR', 'STA', 'AGL', 'DEX', 'FGT', 'INT', 'AWE', 'PRE'];
+const isDebilitatedDrawerOpen = ref(false);
+const hoveredAbility = ref(null);
 
 const activeConditions = computed(() => heroStore.character.activeConditions || []);
 
 function isDirectlyActive(name) {
+  if (name === 'Debilitated') {
+    return activeConditions.value.includes('Debilitated') || heroStore.debilitatedAbilities.length > 0;
+  }
   return activeConditions.value.includes(name);
 }
 
@@ -306,6 +370,75 @@ function isInheritedActive(name) {
   if (isDirectlyActive(name)) return false;
   return heroStore.activeConditionSet.has(name);
 }
+
+function handleBasicConditionClick(name) {
+  if (name === 'Debilitated') {
+    isDebilitatedDrawerOpen.value = !isDebilitatedDrawerOpen.value;
+  } else {
+    heroStore.toggleCondition(name);
+  }
+}
+
+function getDebilitatedChipSuffix(name) {
+  if (name !== 'Debilitated') return '';
+  const active = heroStore.debilitatedAbilities || [];
+  if (active.length === 0) return '';
+  return ` (${active.join(', ')})`;
+}
+
+function getShortLabel(code) {
+  const map = {
+    STR: 'Collapsed',
+    STA: 'Dying',
+    AGL: 'Collapsed',
+    DEX: 'Collapsed',
+    FGT: 'Dazed',
+    INT: 'Unaware',
+    AWE: 'Unaware',
+    PRE: 'Unaware'
+  };
+  return map[code] || 'Trait < -5';
+}
+
+function getDebilitatedDesc(code) {
+  return DEBILITATED_EFFECTS[code]?.desc || 'Trait reduced below -5';
+}
+
+function getDebilitatedBrief(code) {
+  return DEBILITATED_EFFECTS[code]?.brief || '';
+}
+
+const activeDebilitatedSummary = computed(() => {
+  if (hoveredAbility.value) {
+    const code = hoveredAbility.value;
+    const info = DEBILITATED_EFFECTS[code];
+    return {
+      text: `${code} (${info?.name || code}): ${info?.desc || ''}`,
+      icon: 'ri-information-line',
+      type: 'info'
+    };
+  }
+
+  const active = heroStore.debilitatedAbilities || [];
+  if (active.length === 0) {
+    return {
+      text: 'Click any ability to toggle Debilitated condition (< -5).',
+      icon: 'ri-cursor-line',
+      type: 'muted'
+    };
+  }
+
+  const parts = active.map(code => {
+    const brief = DEBILITATED_EFFECTS[code]?.brief || 'Trait < -5';
+    return `${code} (${brief})`;
+  });
+
+  return {
+    text: `Active: ${parts.join(' • ')}`,
+    icon: 'ri-alert-fill',
+    type: 'danger'
+  };
+});
 
 function clearAll() {
   heroStore.clearConditions();
@@ -819,5 +952,227 @@ function handleResetDying() {
   background: rgba(255, 255, 255, 0.05);
   color: #fff;
   border-color: rgba(255, 255, 255, 0.4);
+}
+
+/* Debilitated Stamina Callout Banner */
+.sta-debilitated-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background: rgba(225, 29, 72, 0.12);
+  border: 1px solid rgba(225, 29, 72, 0.35);
+  border-radius: var(--radius-xs, 4px);
+  padding: 0.45rem 0.75rem;
+  margin-bottom: 0.65rem;
+  color: #fda4af;
+  font-size: 0.76rem;
+}
+
+.sta-deb-info {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.sta-deb-info i {
+  color: #f43f5e;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+/* Debilitated Caret */
+.deb-expand-caret {
+  margin-left: 0.25rem;
+  font-size: 0.82rem;
+  opacity: 0.8;
+}
+
+/* Debilitated Ability Selector Drawer */
+.deb-drawer-box {
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.65rem 0.8rem;
+  margin-bottom: 0.85rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  box-sizing: border-box;
+  width: 100%;
+}
+
+.deb-drawer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.55rem;
+}
+
+.deb-drawer-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.deb-drawer-title-group i {
+  color: #ef4444;
+}
+
+.deb-active-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  display: inline-flex;
+  align-items: center;
+}
+
+.deb-hint-badge {
+  font-size: 0.64rem;
+  font-weight: 600;
+  color: #64748b;
+  font-family: var(--font-mono, monospace);
+}
+
+.deb-drawer-pills {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .deb-drawer-pills {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.deb-pill-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.2rem;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  transition: all var(--trans-fast, 0.15s ease);
+  box-sizing: border-box;
+}
+
+.deb-pill-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+}
+
+.deb-pill-btn.is-active {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(185, 28, 28, 0.32));
+  border-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
+}
+
+.deb-pill-btn.is-active .deb-pill-code {
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 0 4px rgba(239, 68, 68, 0.6);
+}
+
+.deb-pill-btn.is-absent {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-style: dashed;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.deb-pill-btn.is-absent .deb-pill-code {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
+.deb-pill-code {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: var(--text-primary, #f1f5f9);
+  line-height: 1.1;
+}
+
+.deb-pill-sub {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--text-secondary, #94a3b8);
+  line-height: 1.1;
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.deb-pill-btn.is-active .deb-pill-sub {
+  color: #fca5a5;
+}
+
+.deb-pill-btn.is-absent .deb-pill-sub {
+  color: #64748b;
+}
+
+/* Live Status Strip */
+.deb-drawer-status-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.deb-drawer-status-strip.muted {
+  color: #64748b;
+}
+
+.deb-drawer-status-strip.muted i {
+  color: #64748b;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.deb-drawer-status-strip.info {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.25);
+  color: #bae6fd;
+}
+
+.deb-drawer-status-strip.info i {
+  color: #38bdf8;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.deb-drawer-status-strip.danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.deb-drawer-status-strip.danger i {
+  color: #ef4444;
+  font-size: 0.82rem;
+  flex-shrink: 0;
 }
 </style>

@@ -133,6 +133,47 @@
               </div>
 
               <p class="cond-card-desc">{{ cond.desc }}</p>
+
+              <!-- Interactive Ability Selector for Debilitated -->
+              <div v-if="cond.name === 'Debilitated'" class="modal-deb-box mt-2" @click.stop>
+                <div class="modal-deb-head">
+                  <div class="modal-deb-title-wrap">
+                    <i class="ri-pulse-line modal-deb-icon"></i>
+                    <span class="modal-deb-title">Debilitated Abilities</span>
+                  </div>
+                  <span v-if="heroStore.debilitatedAbilities.length > 0" class="deb-count-pill">
+                    {{ heroStore.debilitatedAbilities.length }} Active
+                  </span>
+                  <span v-else class="deb-hint-pill">Trait &lt; -5</span>
+                </div>
+
+                <div class="modal-deb-pills-grid">
+                  <button
+                    v-for="code in ABILITY_CODES"
+                    :key="code"
+                    type="button"
+                    class="mdeb-pill-btn"
+                    :class="{
+                      'is-active': heroStore.isDebilitated(code),
+                      'is-absent': heroStore.isAbilityAbsent(code)
+                    }"
+                    :disabled="heroStore.isAbilityAbsent(code)"
+                    :title="heroStore.isAbilityAbsent(code) ? `${code} is Absent (immune to Weaken)` : getDebilitatedDesc(code)"
+                    @click="heroStore.toggleDebilitatedAbility(code)"
+                    @mouseenter="hoveredAbility = code"
+                    @mouseleave="hoveredAbility = null"
+                  >
+                    <span class="mdeb-code">{{ code }}</span>
+                    <span class="mdeb-brief">{{ getShortLabel(code) }}</span>
+                  </button>
+                </div>
+
+                <!-- Live Dynamic Status / Helper Strip -->
+                <div class="modal-deb-status-strip" :class="activeDebilitatedSummary.type">
+                  <i :class="activeDebilitatedSummary.icon"></i>
+                  <span class="status-strip-text">{{ activeDebilitatedSummary.text }}</span>
+                </div>
+              </div>
             </div>
 
             <!-- Empty Search Results -->
@@ -177,12 +218,15 @@ import { useUiStore } from '../../stores/uiStore.js';
 import {
   BASIC_CONDITIONS,
   COMBINED_CONDITIONS,
+  DEBILITATED_EFFECTS,
   getConditionBriefEffect,
   isConditionSevere
 } from '../../rules/conditions.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
+
+const ABILITY_CODES = ['STR', 'STA', 'AGL', 'DEX', 'FGT', 'INT', 'AWE', 'PRE'];
 
 const searchQuery = ref('');
 const filterTab = ref('all'); // 'all' | 'basic' | 'combined'
@@ -208,6 +252,9 @@ const activeCount = computed(() => {
 });
 
 function isDirectlyActive(name) {
+  if (name === 'Debilitated') {
+    return (heroStore.character.activeConditions || []).includes('Debilitated') || heroStore.debilitatedAbilities.length > 0;
+  }
   return (heroStore.character.activeConditions || []).includes(name);
 }
 
@@ -216,8 +263,70 @@ function isInheritedActive(name) {
   return heroStore.activeConditionSet.has(name);
 }
 
+const hoveredAbility = ref(null);
+
+function getShortLabel(code) {
+  const map = {
+    STR: 'Collapsed',
+    STA: 'Dying',
+    AGL: 'Collapsed',
+    DEX: 'Collapsed',
+    FGT: 'Dazed',
+    INT: 'Unaware',
+    AWE: 'Unaware',
+    PRE: 'Unaware'
+  };
+  return map[code] || 'Trait < -5';
+}
+
+const activeDebilitatedSummary = computed(() => {
+  if (hoveredAbility.value) {
+    const code = hoveredAbility.value;
+    const info = DEBILITATED_EFFECTS[code];
+    return {
+      text: `${code} (${info?.name || code}): ${info?.desc || ''}`,
+      icon: 'ri-information-line',
+      type: 'info'
+    };
+  }
+
+  const active = heroStore.debilitatedAbilities || [];
+  if (active.length === 0) {
+    return {
+      text: 'Click any ability above to apply Debilitated status (< -5).',
+      icon: 'ri-cursor-line',
+      type: 'muted'
+    };
+  }
+
+  const parts = active.map(code => {
+    const brief = DEBILITATED_EFFECTS[code]?.brief || 'Trait < -5';
+    return `${code} (${brief})`;
+  });
+
+  return {
+    text: `Active: ${parts.join(' • ')}`,
+    icon: 'ri-alert-fill',
+    type: 'danger'
+  };
+});
+
 function handleToggle(name) {
+  if (name === 'Debilitated' && heroStore.debilitatedAbilities.length > 0) {
+    for (const code of [...heroStore.debilitatedAbilities]) {
+      heroStore.toggleDebilitatedAbility(code);
+    }
+    return;
+  }
   heroStore.toggleCondition(name);
+}
+
+function getDebilitatedDesc(code) {
+  return DEBILITATED_EFFECTS[code]?.desc || 'Trait reduced below -5';
+}
+
+function getDebilitatedBrief(code) {
+  return DEBILITATED_EFFECTS[code]?.brief || '';
 }
 
 const filteredConditions = computed(() => {
@@ -543,5 +652,203 @@ const filteredConditions = computed(() => {
   padding: 0.85rem 1.35rem;
   border-top: 1px solid var(--border-color);
   background: rgba(11, 17, 34, 0.6);
+}
+
+/* Debilitated Selection Box inside Modal Card */
+.modal-deb-box {
+  background: rgba(2, 6, 23, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.65rem 0.75rem;
+  margin-top: 0.65rem;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.modal-deb-box:hover {
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.modal-deb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 0.5rem;
+}
+
+.modal-deb-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.modal-deb-icon {
+  color: #ef4444;
+  font-size: 0.85rem;
+}
+
+.modal-deb-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #e2e8f0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.deb-count-pill {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.12rem 0.45rem;
+  border-radius: 999px;
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.deb-hint-pill {
+  font-size: 0.64rem;
+  font-weight: 600;
+  color: #64748b;
+  font-family: var(--font-mono, monospace);
+}
+
+.modal-deb-pills-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.35rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.mdeb-pill-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.2rem;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.mdeb-pill-btn:hover:not(:disabled) {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.4);
+  transform: translateY(-1px);
+}
+
+.mdeb-pill-btn.is-active {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.22), rgba(185, 28, 28, 0.32));
+  border-color: #ef4444;
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.25);
+}
+
+.mdeb-pill-btn.is-absent {
+  opacity: 0.3;
+  cursor: not-allowed;
+  border-style: dashed;
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.mdeb-code {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #f1f5f9;
+  line-height: 1.1;
+}
+
+.mdeb-pill-btn.is-active .mdeb-code {
+  color: #fff;
+  font-weight: 900;
+  text-shadow: 0 0 4px rgba(239, 68, 68, 0.6);
+}
+
+.mdeb-pill-btn.is-absent .mdeb-code {
+  text-decoration: line-through;
+  color: #64748b;
+}
+
+.mdeb-brief {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: #94a3b8;
+  line-height: 1.1;
+  margin-top: 0.15rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.mdeb-pill-btn.is-active .mdeb-brief {
+  color: #fca5a5;
+}
+
+.mdeb-pill-btn.is-absent .mdeb-brief {
+  color: #64748b;
+}
+
+/* Live Status Strip */
+.modal-deb-status-strip {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 4px;
+  font-size: 0.68rem;
+  line-height: 1.35;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.2s ease;
+}
+
+.modal-deb-status-strip.muted {
+  color: #64748b;
+}
+
+.modal-deb-status-strip.muted i {
+  color: #64748b;
+  font-size: 0.78rem;
+  flex-shrink: 0;
+}
+
+.modal-deb-status-strip.info {
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.25);
+  color: #bae6fd;
+}
+
+.modal-deb-status-strip.info i {
+  color: #38bdf8;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.modal-deb-status-strip.danger {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.3);
+  color: #fca5a5;
+}
+
+.modal-deb-status-strip.danger i {
+  color: #ef4444;
+  font-size: 0.82rem;
+  flex-shrink: 0;
+}
+
+.status-strip-text {
+  flex: 1;
+  white-space: normal;
+  word-break: break-word;
 }
 </style>
