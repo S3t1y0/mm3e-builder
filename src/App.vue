@@ -132,7 +132,7 @@
               target="_blank"
               rel="noopener noreferrer"
               class="dropdown-item"
-              @click="handleExtensionDownload"
+              @click="isToolsOpen = false"
               title="Download Roll20 companion extension from Google Drive"
             >
               <i class="ri-download-cloud-2-line icon-amber"></i>
@@ -258,7 +258,7 @@ import { useUiStore } from './stores/uiStore.js';
 import { usePowerBuilderStore } from './stores/powerBuilderStore.js';
 import { parseSharedCharacterFromHash } from './services/shareService.js';
 import { isEmbedMode, getEmbedType, initEmbedBridge } from './services/embedBridge.js';
-import { trackEvent } from './utils/analytics.js';
+import { initUrlSync, syncUiStateToUrl } from './utils/urlSync.js';
 
 import TacticalCharacterSheet from './components/sheet/TacticalCharacterSheet.vue';
 import CharacterWizard from './components/wizard/CharacterWizard.vue';
@@ -301,17 +301,20 @@ watch(
   { deep: true }
 );
 
-// Synchronize body scroll lock when store modals open/close
+// Synchronize body scroll lock and URL query parameters when store modals/tabs change
 watch(
-  [() => uiStore.modals, () => builderStore.isOpen],
+  [() => uiStore.activeTab, () => uiStore.modals, () => builderStore.isOpen],
   () => {
     const isAnyModalOpen = Object.values(uiStore.modals).some(Boolean) || Boolean(builderStore.isOpen);
     if (typeof document !== 'undefined') {
       document.documentElement.classList.toggle('modal-open', isAnyModalOpen);
       document.body.classList.toggle('modal-open', isAnyModalOpen);
     }
+    if (!isEmbed.value) {
+      syncUiStateToUrl(uiStore, builderStore);
+    }
   },
-  { deep: true, immediate: true }
+  { deep: true }
 );
 
 function flushSave() {
@@ -337,11 +340,6 @@ function handleKeyDown(event) {
       return;
     }
   }
-}
-
-function handleExtensionDownload() {
-  trackEvent('click_download_extension', { source: 'tools_menu' });
-  isToolsOpen.value = false;
 }
 
 function handleToolAction(action) {
@@ -378,10 +376,6 @@ async function loadFromHash() {
     const sharedChar = await parseSharedCharacterFromHash(hash);
     if (sharedChar && (sharedChar.name || sharedChar.abilities)) {
       heroStore.loadCharacter(sharedChar);
-      trackEvent('open_shared_hero', {
-        pl: sharedChar.powerLevel || 10,
-        isCloud: isKvLink
-      });
       uiStore.showToast(
         `Loaded "${sharedChar.name || 'Hero'}" (PL ${sharedChar.powerLevel || 10})`,
         'success',
@@ -444,6 +438,7 @@ onMounted(() => {
     });
   } else {
     loadFromHash();
+    initUrlSync(uiStore, builderStore);
   }
 
   if (typeof window !== 'undefined') {

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { trackEvent } from '../utils/analytics.js';
+import { syncUiStateToUrl } from '../utils/urlSync.js';
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
@@ -29,28 +29,35 @@ export const useUiStore = defineStore('ui', {
 
     setNavTab(tab) {
       if (tab === 'rules') {
-        trackEvent('nav_tab_switch', { tab: 'rules' });
         if (typeof window !== 'undefined') {
           window.open('https://s3t1y0.github.io/mm3e-reference/', '_blank', 'noopener,noreferrer');
         }
         return;
       }
-      if (this.activeTab !== tab) {
-        trackEvent('nav_tab_switch', { tab });
-      }
       this.activeNavTab = tab;
       this.activeTab = tab;
+      syncUiStateToUrl(this);
     },
 
     setActiveTab(tab) {
-      this.setNavTab(tab);
+      if (tab === 'rules') {
+        if (typeof window !== 'undefined') {
+          window.open('https://s3t1y0.github.io/mm3e-reference/', '_blank', 'noopener,noreferrer');
+        }
+        return;
+      }
+      this.activeNavTab = tab;
+      this.activeTab = tab;
+      syncUiStateToUrl(this);
     },
 
     openModal(modalName) {
       if (this.modals[modalName] !== undefined) {
-        trackEvent('open_modal', { modal: modalName });
-        this.closeAllModals();
+        for (const key of Object.keys(this.modals)) {
+          this.modals[key] = false;
+        }
         this.modals[modalName] = true;
+        syncUiStateToUrl(this);
       }
     },
 
@@ -62,6 +69,7 @@ export const useUiStore = defineStore('ui', {
     closeModal(modalName) {
       if (this.modals[modalName] !== undefined) {
         this.modals[modalName] = false;
+        syncUiStateToUrl(this);
       }
     },
 
@@ -69,6 +77,7 @@ export const useUiStore = defineStore('ui', {
       for (const key of Object.keys(this.modals)) {
         this.modals[key] = false;
       }
+      syncUiStateToUrl(this);
     },
 
     showToast(message, type = 'info', duration = 3000) {

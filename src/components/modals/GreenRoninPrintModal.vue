@@ -33,18 +33,11 @@
 
 <script setup>
 import { useUiStore } from '../../stores/uiStore.js';
-import { useHeroStore } from '../../stores/heroStore.js';
 import GreenRoninSheet from './GreenRoninSheet.vue';
-import { trackEvent } from '../../utils/analytics.js';
 
 const uiStore = useUiStore();
-const heroStore = useHeroStore();
 
 function handlePrint() {
-  trackEvent('print_official_pdf', {
-    pl: heroStore.character?.powerLevel || 10,
-    totalPP: heroStore.totalSpentPP || 0
-  });
   window.print();
 }
 </script>

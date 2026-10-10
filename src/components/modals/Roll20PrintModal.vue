@@ -368,7 +368,6 @@ import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
 import { generateRoll20Macros } from '../../utils/exporters.js';
-import { trackEvent } from '../../utils/analytics.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -433,17 +432,12 @@ const filteredMacros = computed(() => {
 });
 
 function handlePrint() {
-  trackEvent('print_roll20_pdf', {
-    pl: heroStore.character?.powerLevel || 10,
-    totalPP: heroStore.totalSpentPP || 0
-  });
   window.print();
 }
 
 async function copySingleMacro(cmd) {
   try {
     await navigator.clipboard.writeText(cmd);
-    trackEvent('copy_roll20_macro', { count: 1 });
     uiStore.showToast('Macro copied to clipboard!', 'success');
   } catch (e) {
     uiStore.showToast('Failed to copy macro', 'error');
@@ -454,7 +448,6 @@ async function copyAllMacros() {
   const text = macrosList.value.map(m => `# --- ${m.title} ---\n${m.command}\n`).join('\n');
   try {
     await navigator.clipboard.writeText(text);
-    trackEvent('copy_roll20_macro', { count: macrosList.value.length, all: true });
     uiStore.showToast('All macros copied to clipboard!', 'success');
   } catch (e) {
     uiStore.showToast('Failed to copy macros', 'error');
