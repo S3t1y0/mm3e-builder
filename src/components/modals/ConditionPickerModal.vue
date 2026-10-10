@@ -94,7 +94,12 @@
                 'active-inherited': isInheritedActive(cond.name),
                 'is-severe': cond.isSevere
               }"
+              role="button"
+              tabindex="0"
+              :aria-pressed="isDirectlyActive(cond.name)"
               @click="handleToggle(cond.name)"
+              @keydown.enter.prevent="handleToggle(cond.name)"
+              @keydown.space.prevent="handleToggle(cond.name)"
             >
               <div class="cond-card-top">
                 <div class="cond-card-title-col">
@@ -487,6 +492,12 @@ const filteredConditions = computed(() => {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(0, 111, 184, 0.4);
   transform: translateY(-1px);
+}
+
+.cond-select-card:focus-visible {
+  outline: 2px solid var(--accent-secondary, #2a8fd6);
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(42, 143, 214, 0.25);
 }
 
 .cond-select-card.active {

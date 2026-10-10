@@ -63,8 +63,16 @@ export const BASE_EFFECT_ICONS = {
 };
 
 export function getBaseEffectIcon(baseEffect) {
-  if (!baseEffect) return 'ri-flashlight-line';
-  return BASE_EFFECT_ICONS[baseEffect] || 'ri-flashlight-line';
+  if (!baseEffect) return 'ri-shield-star-line';
+  if (BASE_EFFECT_ICONS[baseEffect]) return BASE_EFFECT_ICONS[baseEffect];
+
+  const clean = String(baseEffect).toLowerCase();
+  if (clean.includes('attack') || clean.includes('damage') || clean.includes('strike') || clean.includes('blast')) return 'ri-sword-line';
+  if (clean.includes('defend') || clean.includes('shield') || clean.includes('protect') || clean.includes('armor')) return 'ri-shield-line';
+  if (clean.includes('move') || clean.includes('speed') || clean.includes('flight') || clean.includes('teleport')) return 'ri-compass-3-line';
+  if (clean.includes('sense') || clean.includes('sight') || clean.includes('mind') || clean.includes('aura')) return 'ri-eye-line';
+  if (clean.includes('heal') || clean.includes('regen') || clean.includes('life')) return 'ri-heart-pulse-line';
+  return 'ri-shield-star-line';
 }
 
 export const BASE_EFFECTS = [

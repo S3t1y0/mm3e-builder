@@ -1,8 +1,8 @@
 <template>
   <div class="green-ronin-sheet-wrapper print-target">
-    <!-- ================= PAGE 1: CORE OFFICIAL CHARACTER SHEET ================= -->
+    <!-- Page 1: Core Official Character Sheet -->
     <div class="gr-page gr-page-1">
-      <!-- 1. TOP HEADER BANNER -->
+      <!-- Header Section -->
       <header class="gr-card gr-header">
         <div class="gr-logo-wrap">
           <img src="/mm-logo.png" alt="Mutants &amp; Masterminds" class="gr-logo-img" />
@@ -13,11 +13,25 @@
           <div class="gr-meta-row">
             <div class="gr-meta-item" style="flex: 1.5;">
               <span class="gr-meta-label">HERO:</span>
-              <span class="gr-meta-line">{{ heroStore.character.name || '' }}</span>
+              <input
+                v-model="heroStore.character.name"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Hero Name"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
             <div class="gr-meta-item" style="flex: 1;">
               <span class="gr-meta-label">PLAYER:</span>
-              <span class="gr-meta-line">{{ heroStore.character.player || '' }}</span>
+              <input
+                v-model="heroStore.character.player"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Player Name"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
           </div>
 
@@ -25,14 +39,37 @@
           <div class="gr-meta-row">
             <div class="gr-meta-item" style="flex: 2;">
               <span class="gr-meta-label">IDENTITY:</span>
-              <span class="gr-meta-line">{{ heroStore.character.identity || '' }}</span>
+              <input
+                v-model="heroStore.character.identity"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Real Identity"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
-            <div class="gr-radio-group">
-              <span class="gr-radio-option" @click="heroStore.character.isSecretIdentity = true">
+            <div class="gr-radio-group" role="radiogroup" aria-label="Identity Type">
+              <span
+                class="gr-radio-option"
+                role="radio"
+                :aria-checked="heroStore.character.isSecretIdentity !== false"
+                tabindex="0"
+                @click="heroStore.character.isSecretIdentity = true; heroStore.pushHistory()"
+                @keydown.space.prevent="heroStore.character.isSecretIdentity = true; heroStore.pushHistory()"
+                @keydown.enter.prevent="heroStore.character.isSecretIdentity = true; heroStore.pushHistory()"
+              >
                 <span class="gr-radio-circle" :class="{ active: heroStore.character.isSecretIdentity !== false }"></span>
                 <span>SECRET</span>
               </span>
-              <span class="gr-radio-option" @click="heroStore.character.isSecretIdentity = false">
+              <span
+                class="gr-radio-option"
+                role="radio"
+                :aria-checked="heroStore.character.isSecretIdentity === false"
+                tabindex="0"
+                @click="heroStore.character.isSecretIdentity = false; heroStore.pushHistory()"
+                @keydown.space.prevent="heroStore.character.isSecretIdentity = false; heroStore.pushHistory()"
+                @keydown.enter.prevent="heroStore.character.isSecretIdentity = false; heroStore.pushHistory()"
+              >
                 <span class="gr-radio-circle" :class="{ active: heroStore.character.isSecretIdentity === false }"></span>
                 <span>PUBLIC</span>
               </span>
@@ -43,27 +80,69 @@
           <div class="gr-meta-row">
             <div class="gr-meta-item">
               <span class="gr-meta-label">GENDER:</span>
-              <span class="gr-meta-line">{{ heroStore.character.gender || '' }}</span>
+              <input
+                v-model="heroStore.character.gender"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Gender"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
             <div class="gr-meta-item">
               <span class="gr-meta-label">AGE:</span>
-              <span class="gr-meta-line">{{ heroStore.character.age || '' }}</span>
+              <input
+                v-model="heroStore.character.age"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Age"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
             <div class="gr-meta-item">
               <span class="gr-meta-label">HEIGHT:</span>
-              <span class="gr-meta-line">{{ heroStore.character.height || '' }}</span>
+              <input
+                v-model="heroStore.character.height"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Height"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
             <div class="gr-meta-item">
               <span class="gr-meta-label">WEIGHT:</span>
-              <span class="gr-meta-line">{{ heroStore.character.weight || '' }}</span>
+              <input
+                v-model="heroStore.character.weight"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Weight"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
             <div class="gr-meta-item">
               <span class="gr-meta-label">EYES:</span>
-              <span class="gr-meta-line">{{ heroStore.character.eyes || '' }}</span>
+              <input
+                v-model="heroStore.character.eyes"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Eyes"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
             <div class="gr-meta-item">
               <span class="gr-meta-label">HAIR:</span>
-              <span class="gr-meta-line">{{ heroStore.character.hair || '' }}</span>
+              <input
+                v-model="heroStore.character.hair"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Hair"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
           </div>
 
@@ -71,11 +150,25 @@
           <div class="gr-meta-row">
             <div class="gr-meta-item" style="flex: 1.5;">
               <span class="gr-meta-label">GROUP AFFILIATION:</span>
-              <span class="gr-meta-line">{{ heroStore.character.groupAffiliation || '' }}</span>
+              <input
+                v-model="heroStore.character.groupAffiliation"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Group Affiliation"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
             <div class="gr-meta-item" style="flex: 1.2;">
               <span class="gr-meta-label">BASE OF OPERATIONS:</span>
-              <span class="gr-meta-line">{{ heroStore.character.baseOfOperations || '' }}</span>
+              <input
+                v-model="heroStore.character.baseOfOperations"
+                type="text"
+                class="gr-meta-input"
+                placeholder="Base of Operations"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
             <div class="gr-meta-item" style="flex: 0.65;">
               <span class="gr-meta-label">POWER LEVEL:</span>
@@ -98,7 +191,7 @@
         </div>
       </header>
 
-      <!-- 2. ROW 1: ABILITIES + OFFENSE + DEFENSES -->
+      <!-- Abilities, Offense, and Defenses -->
       <div class="gr-stats-layout">
         <!-- Left Column: Abilities (top) & Offense (bottom) -->
         <div class="gr-left-combat-col">
@@ -207,15 +300,22 @@
         </div>
       </div>
 
-      <!-- 3. ROW 2: NOTES BAR -->
+      <!-- Notes Bar -->
       <div class="gr-card gr-notes-bar">
-        <span class="gr-notes-label">NOTES</span>
-        <span class="gr-notes-text">
-          {{ heroStore.character.notes ? heroStore.character.notes.slice(0, 160) : (heroStore.character.identity ? `Secret Identity: ${heroStore.character.identity}. ` : '') + 'Standard heroic campaign baseline.' }}
-        </span>
+        <label class="gr-notes-label" for="gr-input-notes">NOTES</label>
+        <input
+          id="gr-input-notes"
+          v-model="heroStore.character.notes"
+          type="text"
+          class="gr-notes-input"
+          placeholder="Brief character notes..."
+          maxlength="160"
+          autocomplete="off"
+          @change="heroStore.pushHistory()"
+        />
       </div>
 
-      <!-- 4. ROW 3: ADVANTAGES & SKILLS -->
+      <!-- Advantages and Skills -->
       <div class="gr-mid-grid">
         <!-- Left: Advantages (Clean flowing list, matching physical character sheet) -->
         <div class="gr-card gr-advantages-card">
@@ -250,7 +350,7 @@
         </div>
       </div>
 
-      <!-- 5. ROW 4: POWERS & DEVICES (Ruled Notebook Lines) -->
+      <!-- Powers & Devices -->
       <div class="gr-card gr-powers-card">
         <span class="gr-card-title">POWERS &amp; DEVICES</span>
         <div v-if="primaryPowers.length" class="gr-powers-list">
@@ -271,7 +371,7 @@
         </div>
       </div>
 
-      <!-- 6. ROW 5: GEAR & EQUIPMENT -->
+      <!-- Gear & Equipment -->
       <div class="gr-card gr-gear-card">
         <span class="gr-card-title">GEAR &amp; EQUIPMENT</span>
         <div v-if="heroStore.character.resources?.length" class="gr-gear-list">
@@ -284,14 +384,22 @@
         </div>
       </div>
 
-      <!-- 7. ROW 6: COMPLICATIONS & POWER POINTS / HERO POINTS -->
+      <!-- Complications & Points -->
       <div class="gr-footer-layout">
         <!-- Complications (Left) -->
         <div class="gr-card gr-complications-card">
           <span class="gr-card-title">COMPLICATIONS</span>
           <div v-if="heroStore.character.complications?.length" class="gr-complications-content">
             <div v-for="c in heroStore.character.complications.slice(0, 3)" :key="c.id" class="gr-comp-line">
-              <strong>{{ c.name }}:</strong> <span>{{ c.desc || 'Standard heroic complication.' }}</span>
+              <strong class="gr-comp-title">{{ c.name }}:</strong>
+              <input
+                v-model="c.desc"
+                type="text"
+                class="gr-comp-desc-input"
+                placeholder="Complication description..."
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
           </div>
           <div v-else class="gr-empty-hint">
@@ -313,7 +421,7 @@
       </div>
     </div>
 
-    <!-- ================= PAGE 2: EXTENDED OVERFLOW SHEET ================= -->
+    <!-- Page 2: Extended Overflow Sheet -->
     <div v-if="hasPage2Content" class="gr-page gr-page-2">
       <!-- Page 2 Header -->
       <header class="gr-card gr-page-2-header">
@@ -365,15 +473,31 @@
         <!-- Background & Full Complications -->
         <div class="gr-card gr-overflow-bio">
           <span class="gr-card-title">HERO BACKGROUND &amp; COMPLICATIONS DETAIL</span>
-          <div style="font-size: 9.5px; line-height: 1.45; color: #334155;">
-            <div v-if="heroStore.character.notes" style="margin-bottom: 8px;">
-              <strong style="color: #0f172a;">Background Story &amp; Tactics:</strong>
-              <p style="margin: 2px 0;">{{ heroStore.character.notes }}</p>
+          <div class="gr-bio-edit-wrap">
+            <div style="margin-bottom: 8px;">
+              <label class="gr-bio-heading" for="gr-bio-tactics">
+                <strong>Background Story &amp; Tactics:</strong>
+              </label>
+              <textarea
+                id="gr-bio-tactics"
+                v-model="heroStore.character.notes"
+                class="gr-bio-textarea"
+                placeholder="Hero background, origin story, motivations, and tactical combat profile..."
+                rows="4"
+                @change="heroStore.pushHistory()"
+              ></textarea>
             </div>
             <div v-if="heroStore.character.complications?.length">
               <strong style="color: #0f172a;">All Complications:</strong>
-              <div v-for="c in heroStore.character.complications" :key="c.id" style="margin-top: 3px;">
-                <strong>• {{ c.name }}:</strong> {{ c.desc || 'No description provided.' }}
+              <div v-for="c in heroStore.character.complications" :key="c.id" class="gr-comp-detail-row">
+                <strong class="gr-comp-name">• {{ c.name }}:</strong>
+                <input
+                  v-model="c.desc"
+                  type="text"
+                  class="gr-comp-desc-input"
+                  placeholder="Complication description..."
+                  @change="heroStore.pushHistory()"
+                />
               </div>
             </div>
           </div>

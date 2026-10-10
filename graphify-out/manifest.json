@@ -1,0 +1,752 @@
+{
+  ".vscode/extensions.json": {
+    "mtime": 1789387310.7186553,
+    "seen": 1791639885.3535645,
+    "ast_hash": "886c161c2f2d9388473a64033e7d1931",
+    "semantic_hash": ""
+  },
+  "package.json": {
+    "mtime": 1791464638.2938704,
+    "seen": 1791639885.3535686,
+    "ast_hash": "46d8e320ac2131878f76f19da0c14bf1",
+    "semantic_hash": ""
+  },
+  "src/App.vue": {
+    "mtime": 1791600965.5912833,
+    "seen": 1791639885.3535705,
+    "ast_hash": "73fe821a9c740acc1be6f15630a2afff",
+    "semantic_hash": ""
+  },
+  "src/components/modals/AdvantageLibraryModal.vue": {
+    "mtime": 1791540593.8503637,
+    "seen": 1791639885.3535714,
+    "ast_hash": "f45899458b9769f7719acdc35f6d57d1",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ConditionPickerModal.vue": {
+    "mtime": 1791638382.3456295,
+    "seen": 1791639885.3535721,
+    "ast_hash": "bbfc735a963272abe37b63540639dd9d",
+    "semantic_hash": ""
+  },
+  "src/components/modals/CustomEquipmentModal.vue": {
+    "mtime": 1791525710.099133,
+    "seen": 1791639885.3535728,
+    "ast_hash": "47aa841bf51ff9c3f0171e38e779bf44",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ExportImportModal.vue": {
+    "mtime": 1791632800.1413212,
+    "seen": 1791639885.3535736,
+    "ast_hash": "57647a1a89b0dcb1793acbc0389ac519",
+    "semantic_hash": ""
+  },
+  "src/components/modals/GreenRoninPrintModal.vue": {
+    "mtime": 1791600464.2076964,
+    "seen": 1791639885.3535745,
+    "ast_hash": "ebf920ec681387dd2583cb055e6575ad",
+    "semantic_hash": ""
+  },
+  "src/components/modals/GreenRoninSheet.vue": {
+    "mtime": 1791639841.648911,
+    "seen": 1791639885.353575,
+    "ast_hash": "9c23af958abd808430ce2f167718b98c",
+    "semantic_hash": ""
+  },
+  "src/components/modals/MarkdownExportModal.vue": {
+    "mtime": 1791600464.2071807,
+    "seen": 1791639885.3535757,
+    "ast_hash": "383323d07df52c2952d157fef3a90c3d",
+    "semantic_hash": ""
+  },
+  "src/components/modals/Roll20PrintModal.vue": {
+    "mtime": 1791602525.2459533,
+    "seen": 1791639885.3535762,
+    "ast_hash": "99c7ebb79c8472be47d8db6b603a63a8",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ShareModal.vue": {
+    "mtime": 1791600464.2122037,
+    "seen": 1791639885.3535771,
+    "ast_hash": "cdbac0fa11932064aa329692c07432ee",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/CompoundPowerStudio.vue": {
+    "mtime": 1790305042.7731395,
+    "seen": 1791639885.3535776,
+    "ast_hash": "7d8c8da18f4ff2e762d1efc7fb565049",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/CostBreakdownSidebar.vue": {
+    "mtime": 1791509907.0084555,
+    "seen": 1791639885.3535786,
+    "ast_hash": "be93d72a651b6ccee0b82e07fe404594",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/DeviceContainerStudio.vue": {
+    "mtime": 1789799276.2052808,
+    "seen": 1791639885.3535793,
+    "ast_hash": "0ea02c457881b8ead79ab73b853074a7",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/EffectConfigurator.vue": {
+    "mtime": 1791638668.0800922,
+    "seen": 1791639885.3535798,
+    "ast_hash": "34e2be2a8e9517b714c31457f235065e",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/EffectEditorCanvas.vue": {
+    "mtime": 1791523638.4320621,
+    "seen": 1791639885.3535805,
+    "ast_hash": "2b840059f4bd2eb645cfc1cc921edbab",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/EffectsLibraryModal.vue": {
+    "mtime": 1791525282.4044008,
+    "seen": 1791639885.353581,
+    "ast_hash": "3c4db70b58f31a436f4adb914bf4f5da",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/ModifierInspectorModal.vue": {
+    "mtime": 1791525329.23247,
+    "seen": 1791639885.353582,
+    "ast_hash": "c5a08253603866214db9b764d5aede75",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/PowerStudioWorkspace.vue": {
+    "mtime": 1791540697.1170745,
+    "seen": 1791639885.3535824,
+    "ast_hash": "bf32e44710b611cf9d80f54eb7a85d16",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/StructureSelector.vue": {
+    "mtime": 1791509706.2136414,
+    "seen": 1791639885.353583,
+    "ast_hash": "2a658b333d0a3d0b26fa996d9e3e860f",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/SubPowerArrayWorkbench.vue": {
+    "mtime": 1791632836.9818485,
+    "seen": 1791639885.3535838,
+    "ast_hash": "00d7d6df90c544d8ea3cfcb72f0a217c",
+    "semantic_hash": ""
+  },
+  "src/components/power-studio/TopLevelArrayStudio.vue": {
+    "mtime": 1791540704.3769274,
+    "seen": 1791639885.353585,
+    "ast_hash": "23411b0ad5822ca3fbcf9de5c641dbd4",
+    "semantic_hash": ""
+  },
+  "src/components/rules/RulesReference.vue": {
+    "mtime": 1789398479.8505378,
+    "seen": 1791639885.3535855,
+    "ast_hash": "f2fa9fa21282b049109501452a2b480e",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/AbilitiesMatrix.vue": {
+    "mtime": 1791638262.2685385,
+    "seen": 1791639885.3535862,
+    "ast_hash": "3d4377c1afd127398f8c851dacf88cdc",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/AdvantagesList.vue": {
+    "mtime": 1791638515.1182182,
+    "seen": 1791639885.3535867,
+    "ast_hash": "991dc95babfd59b4fbc3a29a9fe4a514",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/CombatInitiativeCard.vue": {
+    "mtime": 1791638433.8086154,
+    "seen": 1791639885.3535874,
+    "ast_hash": "628872ecfdb8e5a3914ac272299fcd4b",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/ComplicationsHub.vue": {
+    "mtime": 1791638712.7972362,
+    "seen": 1791639885.3535883,
+    "ast_hash": "2cac79ddaf76f7d3e82dad85764cedc9",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/ConditionsTracker.vue": {
+    "mtime": 1791638839.599506,
+    "seen": 1791639885.353589,
+    "ast_hash": "29c2bf6aae0373d1bc074327c7240f65",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/DefensesBlock.vue": {
+    "mtime": 1791638272.6849177,
+    "seen": 1791639885.3535895,
+    "ast_hash": "4721313cf684ed7b77e01b53f32b9d0e",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/DiceRollHud.vue": {
+    "mtime": 1791638680.110911,
+    "seen": 1791639885.3535903,
+    "ast_hash": "59c9042844682f6fb1bfeb61ac453d4b",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/EquipmentWorkshop.vue": {
+    "mtime": 1791638544.590913,
+    "seen": 1791639885.353591,
+    "ast_hash": "825f9adacf46309d8769b9eeadd7b2cf",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/HeroHeader.vue": {
+    "mtime": 1791607106.5695522,
+    "seen": 1791639885.353592,
+    "ast_hash": "2d3eeaead0cebb6cb0fb27538f908e21",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/PowersDeck.vue": {
+    "mtime": 1791638586.1551332,
+    "seen": 1791639885.3535924,
+    "ast_hash": "2b920310570e80ef126a771fce761bb2",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/SensesCard.vue": {
+    "mtime": 1791518021.6383817,
+    "seen": 1791639885.353593,
+    "ast_hash": "c58ac034e7509c5f59fd715f97a6b44c",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/SkillsTable.vue": {
+    "mtime": 1791638803.6022093,
+    "seen": 1791639885.3535936,
+    "ast_hash": "6203f77a716cb7ccd5f819e26a2f3b0f",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/TabbedActionHub.vue": {
+    "mtime": 1791540609.5733576,
+    "seen": 1791639885.3535943,
+    "ast_hash": "efba49060ab786edb5d2596dcd358da6",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/TacticalCharacterSheet.vue": {
+    "mtime": 1791523403.2683444,
+    "seen": 1791639885.353595,
+    "ast_hash": "c5ddd6b8bccdf57adab64a31cdcf8949",
+    "semantic_hash": ""
+  },
+  "src/components/sheet/TargetedAttacksList.vue": {
+    "mtime": 1791632928.992425,
+    "seen": 1791639885.353596,
+    "ast_hash": "71184ff85eb9b5e3f45cf0f50affcef3",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/CharacterWizard.vue": {
+    "mtime": 1791540623.4699006,
+    "seen": 1791639885.3535964,
+    "ast_hash": "9eda48059e0848b822d0f922180156d3",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/StepAbilities.vue": {
+    "mtime": 1791638138.7235484,
+    "seen": 1791639885.3535972,
+    "ast_hash": "86f0000fdfc94398d49f1d0849905b24",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/StepAdvantages.vue": {
+    "mtime": 1791638557.3157163,
+    "seen": 1791639885.3535976,
+    "ast_hash": "d0ffe220f889ecf0ae99d1e858432dc9",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/StepComplications.vue": {
+    "mtime": 1791633038.607366,
+    "seen": 1791639885.3535984,
+    "ast_hash": "5d5cb586e06f38c4b120348419535236",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/StepConcept.vue": {
+    "mtime": 1791638818.4800258,
+    "seen": 1791639885.3535995,
+    "ast_hash": "99358c7e9b5d55c5bef502a4f44ed467",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/StepDefenses.vue": {
+    "mtime": 1791638190.6255653,
+    "seen": 1791639885.3536005,
+    "ast_hash": "ac3e3e6fc472d4af127f6356d4d6ca26",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/StepEquipment.vue": {
+    "mtime": 1791638530.1482477,
+    "seen": 1791639885.353601,
+    "ast_hash": "d679e0d072a17aa880d07d46675956cf",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/StepPowers.vue": {
+    "mtime": 1790215858.516392,
+    "seen": 1791639885.3536015,
+    "ast_hash": "85521611cb9d5ab04b3a80993baeb5ec",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/StepReview.vue": {
+    "mtime": 1791603228.8153794,
+    "seen": 1791639885.3536024,
+    "ast_hash": "4bf56601505d6bd6326132cd795c29ef",
+    "semantic_hash": ""
+  },
+  "src/components/wizard/StepSkills.vue": {
+    "mtime": 1791638772.1403992,
+    "seen": 1791639885.353603,
+    "ast_hash": "6e60b28969a6711f77ecc58c933ab980",
+    "semantic_hash": ""
+  },
+  "src/main.js": {
+    "mtime": 1791464658.7722793,
+    "seen": 1791639885.3536036,
+    "ast_hash": "3a433949a300cb024251744d04aaab81",
+    "semantic_hash": ""
+  },
+  "src/rules/abilities.js": {
+    "mtime": 1788921207.895149,
+    "seen": 1791639885.353604,
+    "ast_hash": "fbb08a11696b21ea6e09553803b84c56",
+    "semantic_hash": ""
+  },
+  "src/rules/advantages.js": {
+    "mtime": 1791510245.1864216,
+    "seen": 1791639885.3536048,
+    "ast_hash": "422fabe1b787bcf4c86d6ea4111246df",
+    "semantic_hash": ""
+  },
+  "src/rules/archetypes.js": {
+    "mtime": 1789729393.966021,
+    "seen": 1791639885.3536053,
+    "ast_hash": "6d32b3826917365b9e2d3e8401d3923a",
+    "semantic_hash": ""
+  },
+  "src/rules/attacks.js": {
+    "mtime": 1790425806.395211,
+    "seen": 1791639885.3536062,
+    "ast_hash": "892e35900bc006cd45bc7dc492e18179",
+    "semantic_hash": ""
+  },
+  "src/rules/complications.js": {
+    "mtime": 1789729751.1664915,
+    "seen": 1791639885.353607,
+    "ast_hash": "f65b249c2840360e6db677b7bf0cd2ae",
+    "semantic_hash": ""
+  },
+  "src/rules/conditions.js": {
+    "mtime": 1791606614.5883794,
+    "seen": 1791639885.3536077,
+    "ast_hash": "af8571dcea5f0101363894d1b28d0774",
+    "semantic_hash": ""
+  },
+  "src/rules/defenses.js": {
+    "mtime": 1789630840.4373548,
+    "seen": 1791639885.3536084,
+    "ast_hash": "12dca57f9dddf29031cb35c3b1ddff46",
+    "semantic_hash": ""
+  },
+  "src/rules/equipmentCalculator.js": {
+    "mtime": 1789613098.0929432,
+    "seen": 1791639885.3536093,
+    "ast_hash": "7b38ca9f1de385b191f6ba7e2462c902",
+    "semantic_hash": ""
+  },
+  "src/rules/powerEngine.js": {
+    "mtime": 1791517559.1560895,
+    "seen": 1791639885.35361,
+    "ast_hash": "db7b058fd9e0a186f33227ee0aa71e15",
+    "semantic_hash": ""
+  },
+  "src/rules/resources.js": {
+    "mtime": 1789729330.8173776,
+    "seen": 1791639885.3536105,
+    "ast_hash": "f27abac4fc4c6abd9e1c951614365e84",
+    "semantic_hash": ""
+  },
+  "src/rules/skills.js": {
+    "mtime": 1790323314.8969357,
+    "seen": 1791639885.353611,
+    "ast_hash": "4d043548e6cf670d11dfef75930417f4",
+    "semantic_hash": ""
+  },
+  "src/services/embedBridge.js": {
+    "mtime": 1790056056.5633972,
+    "seen": 1791639885.3536117,
+    "ast_hash": "5779b28b84bde1617c9f256556ea2145",
+    "semantic_hash": ""
+  },
+  "src/services/shareService.js": {
+    "mtime": 1791093180.154047,
+    "seen": 1791639885.3536122,
+    "ast_hash": "8b67fce42532fdfbe81760fe36ce0dd7",
+    "semantic_hash": ""
+  },
+  "src/services/vttBridge.js": {
+    "mtime": 1790307811.267263,
+    "seen": 1791639885.353613,
+    "ast_hash": "1c6e2e422f4a87c9c29fcd7974c91538",
+    "semantic_hash": ""
+  },
+  "src/stores/heroStore.js": {
+    "mtime": 1791632758.8410797,
+    "seen": 1791639885.3536136,
+    "ast_hash": "4a34a37a7ab6794c4772412eb0307c47",
+    "semantic_hash": ""
+  },
+  "src/stores/powerBuilderStore.js": {
+    "mtime": 1791509717.3298054,
+    "seen": 1791639885.353614,
+    "ast_hash": "d3a691b635836d0918546351f6cdc02c",
+    "semantic_hash": ""
+  },
+  "src/stores/uiStore.js": {
+    "mtime": 1791600875.3776705,
+    "seen": 1791639885.3536148,
+    "ast_hash": "42ff8d146df7d341f52895dedc61b815",
+    "semantic_hash": ""
+  },
+  "src/utils/diceRoller.js": {
+    "mtime": 1789532444.8676836,
+    "seen": 1791639885.3536153,
+    "ast_hash": "0dc00e489b80ae8d3c19d0d035f5ebd0",
+    "semantic_hash": ""
+  },
+  "src/utils/dragScroll.js": {
+    "mtime": 1789730449.3895228,
+    "seen": 1791639885.3536158,
+    "ast_hash": "c3665e3d4ecb7ee1a4cb1a0e75bc3bd5",
+    "semantic_hash": ""
+  },
+  "src/utils/exporters.js": {
+    "mtime": 1791638354.0514958,
+    "seen": 1791639885.3536167,
+    "ast_hash": "556e5dbf83f44df8af6d16b7d15859be",
+    "semantic_hash": ""
+  },
+  "src/utils/seamlessScroll.js": {
+    "mtime": 1790422257.2076297,
+    "seen": 1791639885.3536174,
+    "ast_hash": "fa11aa5f7ef1fca390849c07721e3aee",
+    "semantic_hash": ""
+  },
+  "src/utils/urlSync.js": {
+    "mtime": 1791600944.1035614,
+    "seen": 1791639885.353618,
+    "ast_hash": "350754f2637f0d2896d1a93f49da4e63",
+    "semantic_hash": ""
+  },
+  "vercel.json": {
+    "mtime": 1791387459.2089899,
+    "seen": 1791639885.3536186,
+    "ast_hash": "8bf76fb7c4dd90c88cd7cee8013546d5",
+    "semantic_hash": ""
+  },
+  "vite.config.js": {
+    "mtime": 1789387310.7286558,
+    "seen": 1791639885.353619,
+    "ast_hash": "9a3003142e496b57f13cb8e23a40a89d",
+    "semantic_hash": ""
+  },
+  "DESIGN.md": {
+    "mtime": 1791382869.3408048,
+    "seen": 1791639885.35362,
+    "ast_hash": "9f48af4f925e3c087b071358506fb58f",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1791383960.5010746,
+    "seen": 1791639885.3536205,
+    "ast_hash": "70d1fccf700da73562ce7dce5385f21e",
+    "semantic_hash": ""
+  },
+  "index.html": {
+    "mtime": 1791512964.2121067,
+    "seen": 1791639885.3536212,
+    "ast_hash": "8ce94e964624e81894221eed769b2f3f",
+    "semantic_hash": ""
+  },
+  "public/robots.txt": {
+    "mtime": 1791272584.1648602,
+    "seen": 1791639885.353622,
+    "ast_hash": "e94fbce6123bef60371689ca543d6ac4",
+    "semantic_hash": ""
+  },
+  "public/apple-touch-icon.png": {
+    "mtime": 1791462213.9545913,
+    "seen": 1791639885.3536224,
+    "ast_hash": "e1ed243244d9348caff6e0a8b3c58a9c",
+    "semantic_hash": ""
+  },
+  "public/assets/mm3e-banner-logo.jpg": {
+    "mtime": 1791387194.1644042,
+    "seen": 1791639885.3536234,
+    "ast_hash": "b5572fbd3deb8c1867d8f11d8de5c39c",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/0aRNO0Z.png": {
+    "mtime": 1788926468.7989724,
+    "seen": 1791639885.353624,
+    "ast_hash": "bff83c35a11056631a720eca8e846607",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/advantages.gif": {
+    "mtime": 1788926468.8029718,
+    "seen": 1791639885.3536248,
+    "ast_hash": "aa141dd8f852bfac266d05f1e61765ca",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/battle.gif": {
+    "mtime": 1788926468.8049715,
+    "seen": 1791639885.3536255,
+    "ast_hash": "d7be1fea86814f7849980f927721cc49",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/border_wonkyshape.png": {
+    "mtime": 1788926468.805972,
+    "seen": 1791639885.3536263,
+    "ast_hash": "89ffd18e2eaf5fd4594a361f21b5eee5",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/circle.gif": {
+    "mtime": 1788926468.805972,
+    "seen": 1791639885.3536272,
+    "ast_hash": "7e23050b712d52971a03250d4a391343",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/circuit_tile.jpg": {
+    "mtime": 1788926468.8072443,
+    "seen": 1791639885.353628,
+    "ast_hash": "a9d4d6835dd46b9d42e259b9356e9c18",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/complications.gif": {
+    "mtime": 1788926468.8083913,
+    "seen": 1791639885.3536308,
+    "ast_hash": "3613466290212fafda83e4dbe771d9a5",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/conditions.gif": {
+    "mtime": 1788926468.8115716,
+    "seen": 1791639885.3536313,
+    "ast_hash": "0cf903404465894627b87170048b2fed",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/pow.png": {
+    "mtime": 1788926468.8115716,
+    "seen": 1791639885.353632,
+    "ast_hash": "f564064997c6b6c1ce6b14d8255f663f",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/roller.gif": {
+    "mtime": 1788926468.8135712,
+    "seen": 1791639885.3536325,
+    "ast_hash": "29d3e05aff3b411c380015ddbfd51640",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/skills.gif": {
+    "mtime": 1788926468.8165665,
+    "seen": 1791639885.3536332,
+    "ast_hash": "bfea18b6ff4cd1751f74f41b8e626968",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/textured_black.jpg": {
+    "mtime": 1788926468.8165665,
+    "seen": 1791639885.353634,
+    "ast_hash": "8496466081e4ad7f48066f3e3617c20d",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/textured_purple.gif": {
+    "mtime": 1788926468.817566,
+    "seen": 1791639885.3536346,
+    "ast_hash": "9b007b5435a629c99e552743fbba9185",
+    "semantic_hash": ""
+  },
+  "public/assets/roll20/tutorial_power.png": {
+    "mtime": 1788926468.817566,
+    "seen": 1791639885.3536353,
+    "ast_hash": "af49a38b296c08b7527ab1e410e3c8ec",
+    "semantic_hash": ""
+  },
+  "public/banner.jpg": {
+    "mtime": 1791387611.4269273,
+    "seen": 1791639885.3536358,
+    "ast_hash": "3f82ff2780119fdbd04dea7f676e7b2d",
+    "semantic_hash": ""
+  },
+  "public/banner.png": {
+    "mtime": 1791387625.2574353,
+    "seen": 1791639885.3536365,
+    "ast_hash": "b3483ce89b6db9143c0d6a4eb9722747",
+    "semantic_hash": ""
+  },
+  "public/banner.svg": {
+    "mtime": 1791387610.6056037,
+    "seen": 1791639885.3536375,
+    "ast_hash": "a84a2d5d525c0c897c427ce4d7d38c6e",
+    "semantic_hash": ""
+  },
+  "public/circuit-pattern.svg": {
+    "mtime": 1791435921.5131524,
+    "seen": 1791639885.353638,
+    "ast_hash": "2c8c18d5014ba4dffd2d4847e354f77f",
+    "semantic_hash": ""
+  },
+  "public/favicon-192x192.png": {
+    "mtime": 1791462213.94059,
+    "seen": 1791639885.3536386,
+    "ast_hash": "25e8ced79353725ff03250adfaa88c7b",
+    "semantic_hash": ""
+  },
+  "public/favicon-48x48.png": {
+    "mtime": 1791462213.9315903,
+    "seen": 1791639885.3536391,
+    "ast_hash": "6a625a63a7440bd40815be5f2526a43a",
+    "semantic_hash": ""
+  },
+  "public/favicon-512x512.png": {
+    "mtime": 1791462213.9495916,
+    "seen": 1791639885.3536396,
+    "ast_hash": "faabf03765d440daa82ff89167f68462",
+    "semantic_hash": ""
+  },
+  "public/favicon-96x96.png": {
+    "mtime": 1791462213.9345891,
+    "seen": 1791639885.3536406,
+    "ast_hash": "6b77a7840356407d8f30e99148b31ef4",
+    "semantic_hash": ""
+  },
+  "public/favicon.svg": {
+    "mtime": 1791462219.2367728,
+    "seen": 1791639885.3536413,
+    "ast_hash": "a2a2bfd0cff101108ac49a24229d44fb",
+    "semantic_hash": ""
+  },
+  "public/icons.svg": {
+    "mtime": 1789387310.7216558,
+    "seen": 1791639885.3536417,
+    "ast_hash": "3b4fcfcf393eca4d264dca4a4663bc37",
+    "semantic_hash": ""
+  },
+  "public/mm-logo-official.png": {
+    "mtime": 1791437053.290247,
+    "seen": 1791639885.3536425,
+    "ast_hash": "0d24fac57a6dab2f7d8e4ff1fc16b019",
+    "semantic_hash": ""
+  },
+  "public/mm-logo-vector.svg": {
+    "mtime": 1791437205.0325248,
+    "seen": 1791639885.353643,
+    "ast_hash": "fd429e36a10f7b4b0f8a5b88001d4a16",
+    "semantic_hash": ""
+  },
+  "public/mm-logo.jpg": {
+    "mtime": 1791420743.325538,
+    "seen": 1791639885.353644,
+    "ast_hash": "b5572fbd3deb8c1867d8f11d8de5c39c",
+    "semantic_hash": ""
+  },
+  "public/mm-logo.png": {
+    "mtime": 1791437053.5601325,
+    "seen": 1791639885.3536444,
+    "ast_hash": "0d24fac57a6dab2f7d8e4ff1fc16b019",
+    "semantic_hash": ""
+  },
+  "public/og-image.jpg": {
+    "mtime": 1791387611.4269273,
+    "seen": 1791639885.353645,
+    "ast_hash": "3f82ff2780119fdbd04dea7f676e7b2d",
+    "semantic_hash": ""
+  },
+  "public/og-image.png": {
+    "mtime": 1791387625.2574353,
+    "seen": 1791639885.3536458,
+    "ast_hash": "b3483ce89b6db9143c0d6a4eb9722747",
+    "semantic_hash": ""
+  },
+  "public/og-image.svg": {
+    "mtime": 1791387610.6056037,
+    "seen": 1791639885.3536463,
+    "ast_hash": "a84a2d5d525c0c897c427ce4d7d38c6e",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/0aRNO0Z.png": {
+    "mtime": 1788926468.7989724,
+    "seen": 1791639885.353647,
+    "ast_hash": "bff83c35a11056631a720eca8e846607",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/advantages.gif": {
+    "mtime": 1788926468.8029718,
+    "seen": 1791639885.353648,
+    "ast_hash": "aa141dd8f852bfac266d05f1e61765ca",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/battle.gif": {
+    "mtime": 1788926468.8049715,
+    "seen": 1791639885.3536484,
+    "ast_hash": "d7be1fea86814f7849980f927721cc49",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/border_wonkyshape.png": {
+    "mtime": 1788926468.805972,
+    "seen": 1791639885.3536491,
+    "ast_hash": "89ffd18e2eaf5fd4594a361f21b5eee5",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/circle.gif": {
+    "mtime": 1788926468.805972,
+    "seen": 1791639885.3536499,
+    "ast_hash": "7e23050b712d52971a03250d4a391343",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/circuit_tile.jpg": {
+    "mtime": 1788926468.8072443,
+    "seen": 1791639885.3536503,
+    "ast_hash": "a9d4d6835dd46b9d42e259b9356e9c18",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/complications.gif": {
+    "mtime": 1788926468.8083913,
+    "seen": 1791639885.3536513,
+    "ast_hash": "3613466290212fafda83e4dbe771d9a5",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/conditions.gif": {
+    "mtime": 1788926468.8115716,
+    "seen": 1791639885.3536518,
+    "ast_hash": "0cf903404465894627b87170048b2fed",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/pow.png": {
+    "mtime": 1788926468.8115716,
+    "seen": 1791639885.3536525,
+    "ast_hash": "f564064997c6b6c1ce6b14d8255f663f",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/roller.gif": {
+    "mtime": 1788926468.8135712,
+    "seen": 1791639885.353653,
+    "ast_hash": "29d3e05aff3b411c380015ddbfd51640",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/skills.gif": {
+    "mtime": 1788926468.8165665,
+    "seen": 1791639885.3536537,
+    "ast_hash": "bfea18b6ff4cd1751f74f41b8e626968",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/textured_black.jpg": {
+    "mtime": 1788926468.8165665,
+    "seen": 1791639885.3536544,
+    "ast_hash": "8496466081e4ad7f48066f3e3617c20d",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/textured_purple.gif": {
+    "mtime": 1788926468.817566,
+    "seen": 1791639885.353655,
+    "ast_hash": "9b007b5435a629c99e552743fbba9185",
+    "semantic_hash": ""
+  },
+  "src/assets/roll20/tutorial_power.png": {
+    "mtime": 1788926468.817566,
+    "seen": 1791639885.3536558,
+    "ast_hash": "af49a38b296c08b7527ab1e410e3c8ec",
+    "semantic_hash": ""
+  }
+}

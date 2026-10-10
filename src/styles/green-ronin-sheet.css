@@ -65,21 +65,19 @@
   font-family: var(--gr-header-font);
   font-size: 10px;
   letter-spacing: 0.08em;
-  color: #94a3b8;
+  color: #475569;
   text-transform: uppercase;
   pointer-events: none;
 }
 
 .gr-empty-hint {
-  color: #94a3b8;
+  color: #475569;
   font-style: italic;
   font-size: 8.5px;
   padding: 2px 4px;
 }
 
-/* ==========================================================================
-   HEADER SECTION
-   ========================================================================== */
+/* Header Section */
 .gr-header {
   display: grid;
   grid-template-columns: 175px 1fr;
@@ -145,6 +143,38 @@
   min-height: 13px;
 }
 
+.gr-meta-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-bottom: 1.2px solid #0f172a;
+  border-radius: 0;
+  background: transparent;
+  font-family: var(--gr-body-font);
+  font-weight: 700;
+  font-size: 10.5px;
+  color: #0f172a;
+  padding: 0 2px;
+  height: 15px;
+  line-height: 15px;
+  outline: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.gr-meta-input::placeholder {
+  color: #64748b;
+  font-weight: 400;
+  font-style: italic;
+  font-size: 9px;
+}
+
+.gr-meta-input:focus-visible,
+.gr-meta-input:focus {
+  background: rgba(2, 132, 199, 0.08);
+  border-bottom-color: var(--gr-blue-bg);
+  border-radius: 2px 2px 0 0;
+}
+
 .gr-radio-group {
   display: flex;
   gap: 8px;
@@ -160,6 +190,12 @@
   align-items: center;
   gap: 3px;
   cursor: pointer;
+}
+
+.gr-radio-option:focus-visible {
+  outline: 1.5px solid var(--gr-blue-bg);
+  outline-offset: 2px;
+  border-radius: 3px;
 }
 
 .gr-radio-circle {
@@ -206,9 +242,7 @@
   color: #0f172a;
 }
 
-/* ==========================================================================
-   ROW 1: ABILITIES + OFFENSE + DEFENSE
-   ========================================================================== */
+/* Abilities, Offense, and Defenses */
 .gr-stats-layout {
   display: grid;
   grid-template-columns: 1fr 142px;
@@ -282,7 +316,7 @@
 .gr-offense-title {
   font-family: var(--gr-header-font);
   font-size: 10px;
-  color: #94a3b8;
+  color: #475569;
   letter-spacing: 0.08em;
 }
 
@@ -385,7 +419,7 @@
   text-align: center;
   font-family: var(--gr-header-font);
   font-size: 10px;
-  color: #94a3b8;
+  color: #475569;
   letter-spacing: 0.08em;
 }
 
@@ -432,9 +466,7 @@
   color: #0f172a;
 }
 
-/* ==========================================================================
-   ROW 2: NOTES BAR
-   ========================================================================== */
+/* Notes Bar */
 .gr-notes-bar {
   padding: 2px 8px;
   min-height: 19px;
@@ -446,8 +478,10 @@
 .gr-notes-label {
   font-family: var(--gr-header-font);
   font-size: 8.5px;
-  color: #94a3b8;
+  color: #475569;
   letter-spacing: 0.08em;
+  white-space: nowrap;
+  cursor: pointer;
 }
 
 .gr-notes-text {
@@ -459,9 +493,35 @@
   flex: 1;
 }
 
-/* ==========================================================================
-   ROW 3: ADVANTAGES & SKILLS
-   ========================================================================== */
+.gr-notes-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--gr-body-font);
+  font-size: 8.8px;
+  color: #334155;
+  padding: 0 4px;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 3px;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gr-notes-input::placeholder {
+  color: #64748b;
+  font-style: italic;
+  font-size: 8.5px;
+}
+
+.gr-notes-input:focus-visible,
+.gr-notes-input:focus {
+  background: rgba(2, 132, 199, 0.08);
+  box-shadow: inset 0 0 0 1px var(--gr-blue-bg);
+}
+
+/* Advantages and Skills */
 .gr-mid-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -547,9 +607,7 @@
   text-align: right;
 }
 
-/* ==========================================================================
-   ROW 4: POWERS & DEVICES (Ruled Notebook Lines)
-   ========================================================================== */
+/* Powers and Devices */
 .gr-powers-card {
   padding-top: 16px;
   min-height: 175px;
@@ -611,9 +669,7 @@
   line-height: 18px;
 }
 
-/* ==========================================================================
-   ROW 5: GEAR & EQUIPMENT
-   ========================================================================== */
+/* Gear & Equipment */
 .gr-gear-card {
   padding-top: 15px;
   min-height: 38px;
@@ -632,9 +688,7 @@
   color: #0f172a;
 }
 
-/* ==========================================================================
-   ROW 6: COMPLICATIONS & POINTS
-   ========================================================================== */
+/* Complications and Power Points */
 .gr-footer-layout {
   display: grid;
   grid-template-columns: 1fr 142px;
@@ -661,6 +715,45 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gr-comp-title {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.gr-comp-desc-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  border-bottom: 1px dashed #cbd5e1;
+  outline: none;
+  background: transparent;
+  font-family: var(--gr-body-font);
+  font-size: 8.5px;
+  color: #334155;
+  padding: 0 3px;
+  height: 15px;
+  line-height: 15px;
+  border-radius: 2px 2px 0 0;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+.gr-comp-desc-input::placeholder {
+  color: #64748b;
+  font-style: italic;
+  font-size: 8px;
+}
+
+.gr-comp-desc-input:focus-visible,
+.gr-comp-desc-input:focus {
+  border-bottom: 1px solid var(--gr-blue-bg);
+  background: rgba(2, 132, 199, 0.08);
 }
 
 .gr-comp-line strong {
@@ -701,9 +794,7 @@
   color: #0f172a;
 }
 
-/* ==========================================================================
-   PAGE 2: EXTENDED OVERFLOW SHEET
-   ========================================================================== */
+/* Page 2: Extended Overflow Sheet */
 .gr-page-2 {
   min-height: 297mm;
   height: 297mm;
@@ -752,9 +843,66 @@
   min-height: 110px;
 }
 
-/* ==========================================================================
-   PRINT MEDIA RULES (Vector 300 DPI Export)
-   ========================================================================== */
+.gr-bio-edit-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex: 1;
+  padding-top: 14px;
+}
+
+.gr-bio-heading {
+  display: block;
+  font-size: 9px;
+  color: #0f172a;
+  margin-bottom: 3px;
+  cursor: pointer;
+}
+
+.gr-bio-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-family: var(--gr-body-font);
+  font-size: 9.2px;
+  line-height: 1.35;
+  color: #1e293b;
+  background: #ffffff;
+  resize: vertical;
+  min-height: 52px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gr-bio-textarea::placeholder {
+  color: #64748b;
+  font-style: italic;
+  font-size: 8.5px;
+}
+
+.gr-bio-textarea:focus-visible,
+.gr-bio-textarea:focus {
+  outline: none;
+  border-color: var(--gr-blue-bg);
+  box-shadow: 0 0 0 1.5px rgba(2, 132, 199, 0.2);
+}
+
+.gr-comp-detail-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.gr-comp-name {
+  font-size: 9px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+/* Print Media Rules */
 @media print {
   @page {
     size: A4 portrait;
@@ -848,5 +996,47 @@
   .gr-page-2 {
     page-break-after: auto !important;
     break-after: auto !important;
+  }
+
+  /* Live Input Fields in Print / PDF Mode */
+  .gr-meta-input,
+  .gr-notes-input,
+  .gr-comp-desc-input,
+  .gr-bio-textarea {
+    background: transparent !important;
+    outline: none !important;
+    box-shadow: none !important;
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    resize: none !important;
+  }
+
+  .gr-meta-input::placeholder,
+  .gr-notes-input::placeholder,
+  .gr-comp-desc-input::placeholder,
+  .gr-bio-textarea::placeholder {
+    color: transparent !important;
+    opacity: 0 !important;
+    -webkit-text-fill-color: transparent !important;
+  }
+
+  .gr-meta-input {
+    border: none !important;
+    border-bottom: 1.2px solid #0f172a !important;
+  }
+
+  .gr-notes-input {
+    border: none !important;
+  }
+
+  .gr-comp-desc-input {
+    border: none !important;
+    border-bottom: 1px dotted #94a3b8 !important;
+  }
+
+  .gr-bio-textarea {
+    border: 1px solid #cbd5e1 !important;
+    padding: 2px 4px !important;
+    overflow: hidden !important;
   }
 }

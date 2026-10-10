@@ -180,16 +180,28 @@ function handleRollCheck(ab) {
 }
 
 .matrix-absent-toggle {
+  position: relative;
   background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-muted);
   font-size: 0.6rem;
   font-weight: 700;
   border-radius: 3px;
-  padding: 0 4px;
+  padding: 1px 5px;
   line-height: 1.3;
   cursor: pointer;
   transition: all var(--trans-fast);
+}
+
+/* Touch hit-area expansion for mobile ergonomics (WCAG / R-03 >= 44x44px) */
+.matrix-absent-toggle::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
 }
 
 .matrix-absent-toggle:hover {
