@@ -76,29 +76,41 @@
       </div>
 
       <!-- 3. Fortitude -->
-      <div class="defense-card" :class="{ 'card-dying': heroStore.isDying }" title="Health, stamina, and biological/metabolic resistance.">
+      <div class="defense-card" :class="{ 'card-dying': heroStore.isDying, 'is-absent-card': heroStore.isAbilityAbsent('STA') }" title="Health, stamina, and biological/metabolic resistance.">
         <div class="def-header">
           <span class="def-name">Fortitude</span>
           <div class="def-meta-row">
-            <span v-if="heroStore.isDying" class="def-cond-badge danger" title="Dying: Fortitude DC 15 Survival Check Required each round">
+            <span v-if="heroStore.isAbilityAbsent('STA')" class="def-cond-badge danger" title="Construct / Absent Stamina: Immune to Fortitude checks">
+              Absent STA
+            </span>
+            <span v-else-if="heroStore.isDying" class="def-cond-badge danger" title="Dying: Fortitude DC 15 Survival Check Required each round">
               Dying (DC 15)
             </span>
-            <span v-if="condMods.checkPenalty !== 0" class="def-cond-badge danger" :title="condMods.isDisabled ? 'Disabled: -5 on resistance checks' : 'Impaired: -2 on resistance checks'">
+            <span v-if="!heroStore.isAbilityAbsent('STA') && condMods.checkPenalty !== 0" class="def-cond-badge danger" :title="condMods.isDisabled ? 'Disabled: -5 on resistance checks' : 'Impaired: -2 on resistance checks'">
               {{ condMods.checkPenalty }} {{ condMods.isDisabled ? 'Disabled' : 'Impaired' }}
             </span>
-            <span v-if="enhDefenses.FORTITUDE > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.FORTITUDE}`">
+            <span v-if="!heroStore.isAbilityAbsent('STA') && enhDefenses.FORTITUDE > 0" class="def-enh-badge" :title="`Enhanced Trait active: +${enhDefenses.FORTITUDE}`">
               +{{ enhDefenses.FORTITUDE }} Enh
             </span>
-            <span class="def-base-info">STA {{ heroStore.effectiveAbilities.STA || 0 }}</span>
+            <span class="def-base-info">{{ heroStore.isAbilityAbsent('STA') ? 'STA —' : `STA ${heroStore.effectiveAbilities.STA || 0}` }}</span>
           </div>
         </div>
         <div class="def-body">
-          <button type="button" class="def-roll-btn" @click="rollDefense('Fortitude', combatDefenses.FORTITUDE)" title="Click to Roll Fortitude Check">
-            <i class="ri-dice-line"></i>
-            <span class="def-total">{{ combatDefenses.FORTITUDE >= 0 ? `+${combatDefenses.FORTITUDE}` : combatDefenses.FORTITUDE }}</span>
-            <span class="def-roll-label">Roll</span>
+          <button
+            type="button"
+            class="def-roll-btn"
+            :disabled="heroStore.isAbilityAbsent('STA')"
+            @click="!heroStore.isAbilityAbsent('STA') && rollDefense('Fortitude', combatDefenses.FORTITUDE)"
+            :title="heroStore.isAbilityAbsent('STA') ? 'Immune to Fortitude effects (Absent Stamina per RAW)' : 'Click to Roll Fortitude Check'"
+          >
+            <i :class="heroStore.isAbilityAbsent('STA') ? 'ri-shield-check-line' : 'ri-dice-line'"></i>
+            <span class="def-total">{{ heroStore.isAbilityAbsent('STA') ? '—' : (combatDefenses.FORTITUDE >= 0 ? `+${combatDefenses.FORTITUDE}` : combatDefenses.FORTITUDE) }}</span>
+            <span class="def-roll-label">{{ heroStore.isAbilityAbsent('STA') ? 'Immune' : 'Roll' }}</span>
           </button>
-          <div class="def-stepper">
+          <div v-if="heroStore.isAbilityAbsent('STA')" class="def-stepper derived">
+            <span class="def-derived-label" style="color: #f87171;">Absent</span>
+          </div>
+          <div v-else class="def-stepper">
             <button type="button" class="step-btn" @click="stepDefense('FORTITUDE', -1)" title="Decrease Fortitude">-</button>
             <span class="def-bought-val">+{{ heroStore.character.defensesBought.FORTITUDE || 0 }} PP</span>
             <button type="button" class="step-btn" @click="stepDefense('FORTITUDE', 1)" title="Increase Fortitude">+</button>
@@ -148,7 +160,10 @@
             <span v-if="equipmentArmorBonus > 0" class="def-enh-badge" :title="`Equipped Armor: +${equipmentArmorBonus}`">
               +{{ equipmentArmorBonus }} Armor
             </span>
-            <span v-if="heroStore.character.injuries > 0" class="def-base-info def-injured-text" :title="`Base STA ${heroStore.effectiveAbilities.STA || 0}, minus ${heroStore.character.injuries} bruise penalty`">
+            <span v-if="heroStore.isAbilityAbsent('STA')" class="def-base-info">
+              STA — (0){{ protectionBonus > 0 ? ` (+${protectionBonus} Power)` : '' }}{{ defensiveRollBonus > 0 ? ` (+${defensiveRollBonus} Adv)` : '' }}
+            </span>
+            <span v-else-if="heroStore.character.injuries > 0" class="def-base-info def-injured-text" :title="`Base STA ${heroStore.effectiveAbilities.STA || 0}, minus ${heroStore.character.injuries} bruise penalty`">
               STA {{ heroStore.effectiveAbilities.STA || 0 }} (-{{ heroStore.character.injuries }} Bruised)
             </span>
             <span v-else class="def-base-info">

@@ -188,7 +188,7 @@
               <span class="gr-defense-name">FORTITUDE</span>
               <span class="gr-defense-base">(STA)</span>
             </div>
-            <span class="gr-defense-val">{{ heroStore.defenseTotals.FORTITUDE }}</span>
+            <span class="gr-defense-val">{{ heroStore.defenseTotals.FORTITUDE !== null ? heroStore.defenseTotals.FORTITUDE : '—' }}</span>
           </div>
           <div class="gr-defense-row">
             <div class="gr-defense-label">
@@ -391,9 +391,11 @@ import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
 
 const heroStore = useHeroStore();
 
-// Format modifier helper (+5, -2, +0)
+// Format modifier helper (+5, -2, +0, or — for absent)
 function formatMod(val) {
-  const num = Number(val) || 0;
+  if (val === null || val === undefined) return '—';
+  const num = Number(val);
+  if (isNaN(num)) return '—';
   return num >= 0 ? `+${num}` : `${num}`;
 }
 
@@ -430,8 +432,9 @@ const trainedSkills = computed(() => {
     .filter(sk => (Number(sk.ranks) || 0) > 0 || sk.subtype)
     .map(sk => {
       const abl = getSkillAbility(sk.name);
-      const ablMod = heroStore.effectiveAbilities[abl] || 0;
-      const total = (Number(sk.ranks) || 0) + ablMod;
+      const isAbsent = heroStore.isAbilityAbsent(abl);
+      const ablMod = isAbsent ? null : (heroStore.effectiveAbilities[abl] || 0);
+      const total = isAbsent ? null : ((Number(sk.ranks) || 0) + ablMod);
       let displayName = sk.name;
       if (sk.subtype) {
         // Clean compact specialty display

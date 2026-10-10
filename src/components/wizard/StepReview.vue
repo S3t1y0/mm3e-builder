@@ -138,11 +138,15 @@ const isDefenseCapsValid = computed(() => {
   const cap = maxCap.value;
   const dodge = (heroStore.effectiveAbilities.AGL || 0) + (heroStore.character.defensesBought.DODGE || 0);
   const parry = (heroStore.effectiveAbilities.FGT || 0) + (heroStore.character.defensesBought.PARRY || 0);
-  const fort = (heroStore.effectiveAbilities.STA || 0) + (heroStore.character.defensesBought.FORTITUDE || 0);
+  const isStaAbsent = heroStore.isAbilityAbsent ? heroStore.isAbilityAbsent('STA') : (heroStore.character.absentAbilities || []).includes('STA');
   const will = (heroStore.effectiveAbilities.AWE || 0) + (heroStore.character.defensesBought.WILL || 0);
   const tough = (heroStore.effectiveAbilities.STA || 0) + (heroStore.protectionBonus || 0);
 
-  return (dodge + tough <= cap) && (parry + tough <= cap) && (fort + will <= cap);
+  const willCapValid = isStaAbsent
+    ? (will <= (heroStore.character.powerLevel || 10))
+    : (((heroStore.effectiveAbilities.STA || 0) + (heroStore.character.defensesBought.FORTITUDE || 0) + will) <= cap);
+
+  return (dodge + tough <= cap) && (parry + tough <= cap) && willCapValid;
 });
 
 const isComplicationsValid = computed(() => {

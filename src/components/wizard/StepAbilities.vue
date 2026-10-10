@@ -24,22 +24,51 @@
         v-for="ability in abilitiesList"
         :key="ability.key"
         class="card wizard-ability-card"
+        :class="{ 'is-absent': heroStore.isAbilityAbsent(ability.key) }"
       >
-        <!-- Card Header: Code, Full Name, and PP Cost Tag -->
+        <!-- Card Header: Code, Full Name, Absent Toggle, and PP Cost Tag -->
         <div class="ability-card-header">
           <div class="ability-title-group">
             <span class="ability-code">{{ ability.key }}</span>
             <span class="ability-name">{{ ability.name }}</span>
+
+            <!-- Modular Absent Ability Toggle placed under the full name -->
+            <button
+              type="button"
+              class="absent-toggle-pill"
+              :class="{ 'is-absent': heroStore.isAbilityAbsent(ability.key) }"
+              @click="heroStore.toggleAbsentAbility(ability.key)"
+              :title="heroStore.isAbilityAbsent(ability.key) ? `Restore ${ability.name} to active (Rank 0)` : `Set ${ability.name} to Absent (—, -10 PP)`"
+            >
+              <i :class="heroStore.isAbilityAbsent(ability.key) ? 'ri-close-circle-fill' : 'ri-indeterminate-circle-line'"></i>
+              <span>Absent (—)</span>
+            </button>
           </div>
-          <div class="ability-cost-tag tabular-nums" title="Cost: 2 PP per rank">
-            {{ (heroStore.character.abilities[ability.key] || 0) * 2 }} PP
+
+          <!-- Cost Tag: Displays -10 PP refund when absent -->
+          <div
+            class="ability-cost-tag tabular-nums"
+            :class="{ 'is-refund': heroStore.isAbilityAbsent(ability.key) }"
+            :title="heroStore.isAbilityAbsent(ability.key) ? 'Absent Ability refund: -10 PP per RAW' : 'Cost: 2 PP per rank'"
+          >
+            {{ heroStore.isAbilityAbsent(ability.key) ? '-10 PP' : `${(heroStore.character.abilities[ability.key] || 0) * 2} PP` }}
           </div>
         </div>
 
-        <!-- Prominent Ability Rank & Proportional Stepper Control -->
-        <div class="ability-rank-box">
-          <div class="rank-eyebrow">Ability Rank</div>
-          <div class="rank-stepper-row">
+        <!-- Prominent Ability Rank & Stepper Control -->
+        <div class="ability-rank-box" :class="{ 'is-absent': heroStore.isAbilityAbsent(ability.key) }">
+          <div class="rank-eyebrow">
+            {{ heroStore.isAbilityAbsent(ability.key) ? 'Absent Ability' : 'Ability Rank' }}
+          </div>
+
+          <!-- When Absent: Display Dash & Nil indication -->
+          <div v-if="heroStore.isAbilityAbsent(ability.key)" class="absent-display-row">
+            <span class="absent-dash">—</span>
+            <span class="absent-caption">Nil / Non-existent</span>
+          </div>
+
+          <!-- When Normal: Active Stepper -->
+          <div v-else class="rank-stepper-row">
             <button
               type="button"
               class="stepper-action-btn"
@@ -79,8 +108,14 @@
         <!-- Description -->
         <p class="ability-desc">{{ ability.desc }}</p>
 
-        <!-- Derived Benefit Hint -->
-        <div class="ability-derived-box">
+        <!-- Derived Benefit Hint or Absent Consequence -->
+        <div v-if="heroStore.isAbilityAbsent(ability.key)" class="ability-derived-box is-absent-notice">
+          <i class="ri-alert-line derived-icon"></i>
+          <span class="derived-text">
+            <strong>Absent {{ ability.name }}:</strong> {{ ability.absentDesc }}
+          </span>
+        </div>
+        <div v-else class="ability-derived-box">
           <i class="ri-corner-down-right-line derived-icon"></i>
           <span class="derived-text">{{ ability.affects }}</span>
         </div>
@@ -99,49 +134,57 @@ const abilitiesList = [
     key: 'STR',
     name: 'Strength',
     desc: 'Physical prowess, lifting capacity, and close combat damage.',
-    affects: 'Damage DC, Athletics'
+    affects: 'Damage DC, Athletics',
+    absentDesc: 'Zero lifting capacity (0 kg). Melee attacks cannot deal Strength damage. Athletics checks automatically fail.'
   },
   {
     key: 'STA',
     name: 'Stamina',
     desc: 'Physical health, recovery, and resistance to disease, poison, and injury.',
-    affects: 'Base Toughness, Fortitude'
+    affects: 'Base Toughness, Fortitude',
+    absentDesc: 'Construct trait. Base Toughness 0, Fortitude defense absent (requires Immunity 30 per RAW), Will cap equals PL, no natural healing.'
   },
   {
     key: 'AGL',
     name: 'Agility',
     desc: 'Agility, balance, quick motor reflexes, and overall body coordination.',
-    affects: 'Base Dodge, Initiative, Acrobatics, Stealth'
+    affects: 'Base Dodge, Initiative, Acrobatics, Stealth',
+    absentDesc: 'No physical evasion or reflexes. Base Dodge 0, Initiative 0, and automatic failure on Acrobatics and Stealth checks.'
   },
   {
     key: 'DEX',
     name: 'Dexterity',
     desc: 'Hand-eye coordination, aim, tool manipulation, and ranged combat.',
-    affects: 'Ranged attack bonus, Sleight of Hand, Vehicles'
+    affects: 'Ranged attack bonus, Sleight of Hand, Vehicles',
+    absentDesc: 'No manual dexterity. Base Ranged Attack 0, and cannot operate vehicles, tools, or make Sleight of Hand checks.'
   },
   {
     key: 'FGT',
     name: 'Fighting',
     desc: 'Close combat competence and active hand-to-hand defense maneuvers.',
-    affects: 'Close attack bonus, Base Parry'
+    affects: 'Close attack bonus, Base Parry',
+    absentDesc: 'No close combat competence. Base Parry 0, Base Close Attack 0, and unable to actively parry melee attacks.'
   },
   {
     key: 'INT',
     name: 'Intellect',
     desc: 'Reasoning, logic, memory, technical aptitude, and general education.',
-    affects: 'Expertise, Technology, Investigation, Treatment'
+    affects: 'Expertise, Technology, Investigation, Treatment',
+    absentDesc: 'Mindless automaton. Acts solely on rigid programming or outside commands. Fails all intellect and technical checks.'
   },
   {
     key: 'AWE',
     name: 'Awareness',
     desc: 'Intuition, sensory perception, common sense, and mental resolve.',
-    affects: 'Base Will, Perception, Insight'
+    affects: 'Base Will, Perception, Insight',
+    absentDesc: 'Blind and deaf without sensory powers. Base Will 0, and fails all Perception and Insight checks.'
   },
   {
     key: 'PRE',
     name: 'Presence',
     desc: 'Charisma, leadership, force of personality, and social influence.',
-    affects: 'Deception, Intimidation, Persuasion'
+    affects: 'Deception, Intimidation, Persuasion',
+    absentDesc: 'No personality, ego, or social presence. Fails all Deception, Intimidation, and Persuasion checks.'
   }
 ];
 
@@ -277,7 +320,38 @@ function formatMod(val) {
 .ability-title-group {
   display: flex;
   flex-direction: column;
-  gap: 0.15rem;
+  align-items: flex-start;
+  gap: 0.2rem;
+}
+
+.absent-toggle-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.18rem 0.5rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  border-radius: var(--radius-xs);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all var(--trans-fast);
+  white-space: nowrap;
+  margin-top: 0.15rem;
+}
+
+.absent-toggle-pill:hover {
+  background: rgba(239, 68, 68, 0.12);
+  border-color: rgba(239, 68, 68, 0.35);
+  color: #fca5a5;
+}
+
+.absent-toggle-pill.is-absent {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fca5a5;
+  font-weight: 700;
 }
 
 .ability-code {
@@ -305,6 +379,13 @@ function formatMod(val) {
   border-radius: var(--radius-xs);
   border: 1px solid rgba(59, 130, 246, 0.28);
   white-space: nowrap;
+  transition: all var(--trans-fast);
+}
+
+.ability-cost-tag.is-refund {
+  color: #34d399;
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(16, 185, 129, 0.4);
 }
 
 /* Hero Rank & Stepper Section */
@@ -318,6 +399,36 @@ function formatMod(val) {
   flex-direction: column;
   align-items: center;
   width: 100%;
+  transition: all var(--trans-fast);
+}
+
+.ability-rank-box.is-absent {
+  background: rgba(239, 68, 68, 0.04);
+  border-color: rgba(239, 68, 68, 0.25);
+}
+
+.absent-display-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 38px;
+  gap: 0.1rem;
+}
+
+.absent-dash {
+  font-size: 1.6rem;
+  font-weight: 900;
+  color: #f87171;
+  line-height: 1;
+}
+
+.absent-caption {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #fca5a5;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .rank-eyebrow {
@@ -426,6 +537,33 @@ function formatMod(val) {
 
 .derived-text {
   color: var(--text-muted);
+}
+
+.ability-derived-box.is-absent-notice {
+  border-top-color: rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: var(--radius-xs);
+  padding: 0.45rem 0.6rem;
+  margin-top: auto;
+}
+
+.ability-derived-box.is-absent-notice .derived-icon {
+  color: #f87171;
+}
+
+.ability-derived-box.is-absent-notice .derived-text {
+  color: #fca5a5;
+  line-height: 1.4;
+}
+
+.wizard-ability-card.is-absent {
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.03);
+}
+
+.wizard-ability-card.is-absent:hover {
+  border-color: rgba(239, 68, 68, 0.5);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.15);
 }
 </style>
 

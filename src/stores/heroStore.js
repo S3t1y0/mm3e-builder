@@ -61,6 +61,7 @@ export function createDefaultCharacter() {
       STR: 0, STA: 0, AGL: 0, DEX: 0,
       FGT: 0, INT: 0, AWE: 0, PRE: 0
     },
+    absentAbilities: [],
     defensesBought: {
       DODGE: 0,
       PARRY: 0,
@@ -87,6 +88,9 @@ export const useHeroStore = defineStore('hero', {
   state: () => {
     const stored = getStoredCharacter();
     const char = stored ? { ...createDefaultCharacter(), ...stored } : createDefaultCharacter();
+    if (!Array.isArray(char.absentAbilities)) {
+      char.absentAbilities = [];
+    }
     if (Array.isArray(char.powers)) {
       char.powers = char.powers.map(p => normalizePower(p));
     }
@@ -213,8 +217,13 @@ export const useHeroStore = defineStore('hero', {
     effectiveAbilities(state) {
       const traits = this.activeEnhancedTraits;
       const res = {};
+      const absent = state.character.absentAbilities || [];
       for (const [key, val] of Object.entries(state.character.abilities)) {
-        res[key] = (val || 0) + (traits.abilities[key] || 0);
+        if (absent.includes(key)) {
+          res[key] = null;
+        } else {
+          res[key] = (val || 0) + (traits.abilities[key] || 0);
+        }
       }
       return res;
     },
@@ -223,6 +232,7 @@ export const useHeroStore = defineStore('hero', {
       const eff = this.effectiveAbilities;
       const traits = this.activeEnhancedTraits;
       const bought = state.character.defensesBought || {};
+      const isStaAbsent = (state.character.absentAbilities || []).includes('STA');
 
       // Calculate Protection bonus from Powers
       const powerProtBonus = this.protectionBonus;
@@ -237,7 +247,7 @@ export const useHeroStore = defineStore('hero', {
       return {
         DODGE: (eff.AGL || 0) + (bought.DODGE || 0) + (traits.defenses.DODGE || 0) + shieldBonus,
         PARRY: (eff.FGT || 0) + (bought.PARRY || 0) + (traits.defenses.PARRY || 0) + shieldBonus,
-        FORTITUDE: (eff.STA || 0) + (bought.FORTITUDE || 0) + (traits.defenses.FORTITUDE || 0),
+        FORTITUDE: isStaAbsent ? null : ((eff.STA || 0) + (bought.FORTITUDE || 0) + (traits.defenses.FORTITUDE || 0)),
         TOUGHNESS: (eff.STA || 0) + (bought.TOUGHNESS || 0) + powerProtBonus + armorBonus + defRoll + (traits.defenses.TOUGHNESS || 0),
         WILL: (eff.AWE || 0) + (bought.WILL || 0) + (traits.defenses.WILL || 0)
       };
@@ -293,16 +303,22 @@ export const useHeroStore = defineStore('hero', {
     // --- Budget & Point Summaries ---
     totalAbilityPP(state) {
       let sum = 0;
-      for (const val of Object.values(state.character.abilities)) {
-        sum += (val || 0) * 2;
+      const absent = state.character.absentAbilities || [];
+      for (const [key, val] of Object.entries(state.character.abilities)) {
+        if (absent.includes(key)) {
+          sum -= 10;
+        } else {
+          sum += (val || 0) * 2;
+        }
       }
       return sum;
     },
 
     totalDefensePP(state) {
       let sum = 0;
+      const isStaAbsent = (state.character.absentAbilities || []).includes('STA');
       for (const [key, val] of Object.entries(state.character.defensesBought || {})) {
-        if (key !== 'TOUGHNESS') {
+        if (key !== 'TOUGHNESS' && !(key === 'FORTITUDE' && isStaAbsent)) {
           sum += (val || 0);
         }
       }
@@ -651,6 +667,9 @@ export const useHeroStore = defineStore('hero', {
 
     getDefenseTotal(code) {
       const c = (code || '').toUpperCase();
+      if (c === 'FORTITUDE' && this.isAbilityAbsent('STA')) {
+        return null;
+      }
       return this.defenseTotals?.[c] ?? 0;
     },
 
@@ -662,11 +681,11 @@ export const useHeroStore = defineStore('hero', {
       const initBonus = (initAdv ? (initAdv.ranks || 1) * 4 : 0);
 
       const map = {
-        'DODGE': eff.AGL || 0,
-        'PARRY': eff.FGT || 0,
-        'FORTITUDE': eff.STA || 0,
-        'TOUGHNESS': eff.STA || 0,
-        'WILL': eff.AWE || 0,
+        'DODGE': eff.AGL !== null ? (eff.AGL || 0) : 0,
+        'PARRY': eff.FGT !== null ? (eff.FGT || 0) : 0,
+        'FORTITUDE': eff.STA !== null ? (eff.STA || 0) : null,
+        'TOUGHNESS': eff.STA !== null ? (eff.STA || 0) : 0,
+        'WILL': eff.AWE !== null ? (eff.AWE || 0) : 0,
         'INITIATIVE': (eff.AGL || 0) + initBonus
       };
       return map[c] ?? 0;
@@ -805,6 +824,9 @@ export const useHeroStore = defineStore('hero', {
     loadCharacter(char) {
       if (!char) return;
       this.character = { ...createDefaultCharacter(), ...char };
+      if (!Array.isArray(this.character.absentAbilities)) {
+        this.character.absentAbilities = [];
+      }
       if (Array.isArray(this.character.powers)) {
         this.character.powers = this.character.powers.map(p => normalizePower(p));
       }
@@ -839,6 +861,100 @@ export const useHeroStore = defineStore('hero', {
       const code = (key || '').toUpperCase();
       if (this.character.abilities[code] !== undefined) {
         this.character.abilities[code] = Number(rank);
+        this.pushHistory();
+      }
+    },
+
+    isAbilityAbsent(key) {
+      const code = (key || '').toUpperCase();
+      return Array.isArray(this.character.absentAbilities) && this.character.absentAbilities.includes(code);
+    },
+
+    isSkillAbilityAbsent(skillName) {
+      const SKILL_TO_ABILITY = {
+        'acrobatics': 'AGL',
+        'athletics': 'STR',
+        'close combat': 'FGT',
+        'deception': 'PRE',
+        'expertise': 'INT',
+        'insight': 'AWE',
+        'intimidation': 'PRE',
+        'investigation': 'INT',
+        'perception': 'AWE',
+        'persuasion': 'PRE',
+        'ranged combat': 'DEX',
+        'sleight of hand': 'DEX',
+        'stealth': 'AGL',
+        'technology': 'INT',
+        'treatment': 'INT',
+        'vehicles': 'DEX'
+      };
+      const ab = SKILL_TO_ABILITY[(skillName || '').toLowerCase()];
+      return ab ? this.isAbilityAbsent(ab) : false;
+    },
+
+    refundSkillsForAbsentAbility(code) {
+      const ABILITY_SKILLS_MAP = {
+        STR: ['athletics'],
+        AGL: ['acrobatics', 'stealth'],
+        DEX: ['ranged combat', 'sleight of hand', 'vehicles'],
+        FGT: ['close combat'],
+        INT: ['expertise', 'investigation', 'technology', 'treatment'],
+        AWE: ['insight', 'perception'],
+        PRE: ['deception', 'intimidation', 'persuasion']
+      };
+      const targets = ABILITY_SKILLS_MAP[code] || [];
+      if (targets.length === 0 || !Array.isArray(this.character.skills)) return;
+
+      this.character.skills = this.character.skills.filter(s => {
+        const name = (s.name || '').toLowerCase();
+        if (targets.includes(name)) {
+          // Specialization instances are removed to prevent orphan specializations
+          if (s.subtype) return false;
+          // Standard skills reset to 0 ranks (refunding spent PP)
+          s.ranks = 0;
+        }
+        return true;
+      });
+    },
+
+    toggleAbsentAbility(key) {
+      const code = (key || '').toUpperCase();
+      if (!Array.isArray(this.character.absentAbilities)) {
+        this.character.absentAbilities = [];
+      }
+      const idx = this.character.absentAbilities.indexOf(code);
+      if (idx >= 0) {
+        this.character.absentAbilities.splice(idx, 1);
+      } else {
+        this.character.absentAbilities.push(code);
+        if (code === 'STA') {
+          if (this.character.defensesBought) {
+            this.character.defensesBought.FORTITUDE = 0;
+          }
+        }
+        // Option A: Auto-refund skills associated with absent ability
+        this.refundSkillsForAbsentAbility(code);
+      }
+      this.pushHistory();
+    },
+
+    setAbilityAbsent(key, isAbsent) {
+      const code = (key || '').toUpperCase();
+      if (!Array.isArray(this.character.absentAbilities)) {
+        this.character.absentAbilities = [];
+      }
+      const idx = this.character.absentAbilities.indexOf(code);
+      if (isAbsent && idx < 0) {
+        this.character.absentAbilities.push(code);
+        if (code === 'STA' && this.character.defensesBought) {
+          this.character.defensesBought.FORTITUDE = 0;
+        }
+        // Option A: Auto-refund skills associated with absent ability
+        this.refundSkillsForAbsentAbility(code);
+        this.pushHistory();
+      } else if (!isAbsent && idx >= 0) {
+        this.character.absentAbilities.splice(idx, 1);
         this.pushHistory();
       }
     },
@@ -971,6 +1087,9 @@ export const useHeroStore = defineStore('hero', {
 
     // --- Character Sheet Skills, Advantages, Complications & Rolls ---
     setSkillRank(name, subtype, ranks) {
+      if (this.isSkillAbilityAbsent(name)) {
+        return; // Block buying ranks for absent abilities per RAW
+      }
       if (!Array.isArray(this.character.skills)) this.character.skills = [];
       let skill = this.character.skills.find(s => s.name === name && (s.subtype || '') === (subtype || ''));
       if (!skill) {
@@ -1355,7 +1474,8 @@ export const useHeroStore = defineStore('hero', {
         this.character.name = arch.name;
       }
 
-      // Abilities
+      // Abilities & Absent status
+      this.character.absentAbilities = Array.isArray(arch.absentAbilities) ? [...arch.absentAbilities] : [];
       if (arch.abilities) {
         for (const [key, val] of Object.entries(arch.abilities)) {
           this.setAbility(key, val);

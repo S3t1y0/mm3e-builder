@@ -50,8 +50,26 @@
           </div>
         </div>
 
-        <!-- CAP 3: FORTITUDE + WILL -->
-        <div class="cap-card" :class="{ overflow: isCapExceeded(fortitudeTotal + willTotal) }">
+        <!-- CAP 3: FORTITUDE + WILL (or WILL CAP if Fortitude absent per RAW) -->
+        <div v-if="isStaAbsent" class="cap-card" :class="{ overflow: willTotal > singleWillCap }">
+          <div class="cap-header">
+            <span>Will Defense Cap</span>
+            <span class="cap-val tabular-nums">{{ willTotal }} / {{ singleWillCap }}</span>
+          </div>
+          <div class="progress-bar-bg">
+            <div
+              class="progress-bar-fill"
+              :style="{ transform: `scaleX(${Math.min(1, willTotal / singleWillCap)})` }"
+              :class="{ over: willTotal > singleWillCap }"
+            ></div>
+          </div>
+          <div class="cap-footer tabular-nums">
+            <span>Will: {{ willTotal }} (Max PL)</span>
+            <span style="color: #34d399;">Fortitude: Absent (Immune)</span>
+          </div>
+        </div>
+
+        <div v-else class="cap-card" :class="{ overflow: isCapExceeded(fortitudeTotal + willTotal) }">
           <div class="cap-header">
             <span>Fortitude + Will</span>
             <span class="cap-val tabular-nums">{{ fortitudeTotal + willTotal }} / {{ maxCap }}</span>
@@ -126,15 +144,23 @@
       </div>
 
       <!-- FORTITUDE -->
-      <div class="card def-card" style="padding: 1rem;">
+      <div class="card def-card" :class="{ 'is-absent-def': isStaAbsent }" style="padding: 1rem;">
         <div class="def-header">
           <div>
             <div class="def-name">Fortitude</div>
-            <div class="def-sub">Base: STA ({{ heroStore.effectiveAbilities?.STA ?? 0 }})</div>
+            <div class="def-sub">
+              {{ isStaAbsent ? 'Base: STA (Absent / Construct)' : `Base: STA (${heroStore.effectiveAbilities?.STA ?? 0})` }}
+            </div>
           </div>
-          <div class="def-total tabular-nums">{{ fortitudeTotal }}</div>
+          <div class="def-total tabular-nums" :class="{ 'is-immune-text': isStaAbsent }">
+            {{ isStaAbsent ? 'IMMUNE (—)' : fortitudeTotal }}
+          </div>
         </div>
-        <div class="def-stepper-row">
+        <div v-if="isStaAbsent" class="def-absent-notice">
+          <i class="ri-shield-check-line"></i>
+          <span>Absent Stamina: Immune to Fortitude effects. Cannot buy ranks.</span>
+        </div>
+        <div v-else class="def-stepper-row">
           <label class="def-label">Bought Ranks (1 PP/ea):</label>
           <div class="stepper-controls">
             <button
@@ -190,7 +216,7 @@
               <span style="font-weight: 800; color: #38bdf8; font-size: 1.05rem;">Toughness</span>
             </div>
             <div class="tabular-nums" style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem;">
-              Base STA: <strong style="color: #fff;">{{ heroStore.effectiveAbilities?.STA ?? 0 }}</strong> &bull;
+              Base STA: <strong style="color: #fff;">{{ isStaAbsent ? '— (0)' : (heroStore.effectiveAbilities?.STA ?? 0) }}</strong> &bull;
               <span style="white-space: nowrap;">Powers/Armor: <strong style="color: #fff;">+{{ heroStore.protectionBonus || 0 }}</strong></span>
             </div>
           </div>
@@ -213,6 +239,8 @@ import { useHeroStore } from '../../stores/heroStore.js';
 
 const heroStore = useHeroStore();
 
+const isStaAbsent = computed(() => heroStore.isAbilityAbsent('STA'));
+const singleWillCap = computed(() => heroStore.character.powerLevel || 10);
 const maxCap = computed(() => (heroStore.character.powerLevel || 10) * 2);
 
 const dodgeTotal = computed(() => {
@@ -224,6 +252,7 @@ const parryTotal = computed(() => {
 });
 
 const fortitudeTotal = computed(() => {
+  if (isStaAbsent.value) return null;
   return heroStore.defenseTotals?.FORTITUDE ?? ((heroStore.effectiveAbilities?.STA || 0) + (heroStore.character.defensesBought?.FORTITUDE || 0));
 });
 
@@ -451,5 +480,36 @@ function setDefense(key, val) {
   border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: var(--radius-md);
   margin-top: 1.25rem;
+}
+
+.def-card.is-absent-def {
+  border-color: rgba(239, 68, 68, 0.25);
+  background: rgba(239, 68, 68, 0.04);
+}
+
+.is-immune-text {
+  font-size: 1.05rem !important;
+  color: #f87171 !important;
+  letter-spacing: 0.02em;
+}
+
+.def-absent-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--radius-xs);
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  font-size: 0.72rem;
+  line-height: 1.35;
+  margin-top: 0.4rem;
+}
+
+.def-absent-notice i {
+  font-size: 0.95rem;
+  color: #f87171;
+  flex-shrink: 0;
 }
 </style>

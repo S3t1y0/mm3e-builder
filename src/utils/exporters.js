@@ -41,7 +41,9 @@ import { compileTargetedAttacks } from '../rules/attacks.js';
  * Format number as a D20 modifier (+5, -2, +0).
  */
 function formatMod(val) {
-  const num = Number(val) || 0;
+  if (val === null || val === undefined) return '—';
+  const num = Number(val);
+  if (isNaN(num)) return '—';
   return num >= 0 ? `+${num}` : `${num}`;
 }
 
@@ -86,11 +88,15 @@ export function getAllCharacterSkills(character, heroStore) {
   const effAbilities = heroStore?.effectiveAbilities ?? (character.abilities || {});
   const activeEnhancedSkills = heroStore?.activeEnhancedTraits?.skills || {};
   const charSkills = Array.isArray(character.skills) ? character.skills : [];
+  const absentList = character.absentAbilities || [];
 
   const result = [];
   const processedIndexes = new Set();
 
   CORE_SKILLS.forEach(core => {
+    const abl = core.ability;
+    const isAbsent = absentList.includes(abl) || effAbilities[abl] === null;
+
     if (core.requiresSubtype) {
       const matches = [];
       charSkills.forEach((cs, idx) => {
@@ -109,10 +115,9 @@ export function getAllCharacterSkills(character, heroStore) {
             displayName = `${cs.name}: ${sub}`;
           }
           const ranks = Number(cs.ranks ?? cs.rank ?? 0) || 0;
-          const abl = core.ability;
-          const abilityMod = effAbilities[abl] || 0;
+          const abilityMod = isAbsent ? null : (effAbilities[abl] || 0);
           const enhBonus = Number(activeEnhancedSkills[displayName.toLowerCase()] || activeEnhancedSkills[cs.name.toLowerCase()] || 0);
-          const totalBonus = abilityMod + ranks + enhBonus;
+          const totalBonus = isAbsent ? null : (abilityMod + ranks + enhBonus);
 
           result.push({
             name: cs.name,
@@ -123,14 +128,14 @@ export function getAllCharacterSkills(character, heroStore) {
             ranks,
             enhBonus,
             totalBonus,
+            isAbsent,
             isTrained: ranks > 0
           });
         });
       } else {
-        const abl = core.ability;
-        const abilityMod = effAbilities[abl] || 0;
+        const abilityMod = isAbsent ? null : (effAbilities[abl] || 0);
         const enhBonus = Number(activeEnhancedSkills[core.name.toLowerCase()] || 0);
-        const totalBonus = abilityMod + enhBonus;
+        const totalBonus = isAbsent ? null : (abilityMod + enhBonus);
         result.push({
           name: core.name,
           subtype: '',
@@ -140,13 +145,13 @@ export function getAllCharacterSkills(character, heroStore) {
           ranks: 0,
           enhBonus,
           totalBonus,
+          isAbsent,
           isTrained: false
         });
       }
     } else {
       const foundIdx = charSkills.findIndex(cs => (cs.name || '').trim().toLowerCase() === core.name.toLowerCase());
-      const abl = core.ability;
-      const abilityMod = effAbilities[abl] || 0;
+      const abilityMod = isAbsent ? null : (effAbilities[abl] || 0);
 
       if (foundIdx !== -1) {
         processedIndexes.add(foundIdx);
@@ -155,7 +160,7 @@ export function getAllCharacterSkills(character, heroStore) {
         const displayName = sub ? `${cs.name}: ${sub}` : cs.name;
         const ranks = Number(cs.ranks ?? cs.rank ?? 0) || 0;
         const enhBonus = Number(activeEnhancedSkills[displayName.toLowerCase()] || activeEnhancedSkills[cs.name.toLowerCase()] || 0);
-        const totalBonus = abilityMod + ranks + enhBonus;
+        const totalBonus = isAbsent ? null : (abilityMod + ranks + enhBonus);
 
         result.push({
           name: cs.name,
@@ -166,11 +171,12 @@ export function getAllCharacterSkills(character, heroStore) {
           ranks,
           enhBonus,
           totalBonus,
+          isAbsent,
           isTrained: ranks > 0
         });
       } else {
         const enhBonus = Number(activeEnhancedSkills[core.name.toLowerCase()] || 0);
-        const totalBonus = abilityMod + enhBonus;
+        const totalBonus = isAbsent ? null : (abilityMod + enhBonus);
         result.push({
           name: core.name,
           subtype: '',
@@ -180,6 +186,7 @@ export function getAllCharacterSkills(character, heroStore) {
           ranks: 0,
           enhBonus,
           totalBonus,
+          isAbsent,
           isTrained: false
         });
       }
@@ -192,10 +199,11 @@ export function getAllCharacterSkills(character, heroStore) {
       const sub = (cs.subtype || '').trim();
       const displayName = sub ? `${cs.name}: ${sub}` : cs.name;
       const abl = getSkillAbility(cs.name);
-      const abilityMod = effAbilities[abl] || 0;
+      const isAbsent = absentList.includes(abl) || effAbilities[abl] === null;
+      const abilityMod = isAbsent ? null : (effAbilities[abl] || 0);
       const ranks = Number(cs.ranks ?? cs.rank ?? 0) || 0;
       const enhBonus = Number(activeEnhancedSkills[displayName.toLowerCase()] || activeEnhancedSkills[cs.name.toLowerCase()] || 0);
-      const totalBonus = abilityMod + ranks + enhBonus;
+      const totalBonus = isAbsent ? null : (abilityMod + ranks + enhBonus);
 
       result.push({
         name: cs.name,
@@ -206,6 +214,7 @@ export function getAllCharacterSkills(character, heroStore) {
         ranks,
         enhBonus,
         totalBonus,
+        isAbsent,
         isTrained: ranks > 0
       });
     }
@@ -244,6 +253,16 @@ export function generateRoll20Macros(character, heroStore) {
   ];
 
   abilities.forEach(abl => {
+    const isAbsent = heroStore?.isAbilityAbsent ? heroStore.isAbilityAbsent(abl.code) : ((character.absentAbilities || []).includes(abl.code));
+    if (isAbsent) {
+      macros.push({
+        category: 'Abilities',
+        title: `${abl.label} Check`,
+        command: `&{template:default} {{name=${name} - ${abl.label} Check}} {{Result=Absent Ability (Automatic Failure per RAW)}}`,
+        simpleCommand: `/em tries ${abl.label} check but lacks the ability (Automatic Failure).`
+      });
+      return;
+    }
     const score = heroStore.effectiveAbilities[abl.code] ?? (character.abilities?.[abl.code] || 0);
     const modStr = score >= 0 ? `+${score}` : `${score}`;
     macros.push({
@@ -265,7 +284,17 @@ export function generateRoll20Macros(character, heroStore) {
 
   defenses.forEach(def => {
     const total = heroStore.getDefenseTotal(def.code);
-    const modStr = total >= 0 ? `+${total}` : `${total}`;
+    if (def.code === 'FORTITUDE' && (total === null || (character.absentAbilities || []).includes('STA'))) {
+      macros.push({
+        category: 'Defenses',
+        title: `${def.label}`,
+        command: `&{template:default} {{name=${name} - ${def.label}}} {{Status=Immune to Fortitude Effects (Absent Stamina)}}`,
+        simpleCommand: `/em is Immune to Fortitude Effects (Absent Stamina).`
+      });
+      return;
+    }
+    const safeTotal = total ?? 0;
+    const modStr = safeTotal >= 0 ? `+${safeTotal}` : `${safeTotal}`;
     macros.push({
       category: 'Defenses',
       title: `${def.label}`,
@@ -277,6 +306,15 @@ export function generateRoll20Macros(character, heroStore) {
   // Skills (All Skills)
   const allSkills = getAllCharacterSkills(character, heroStore);
   allSkills.forEach(sk => {
+    if (sk.isAbsent) {
+      macros.push({
+        category: 'Skills',
+        title: `${sk.displayName} Check`,
+        command: `&{template:default} {{name=${name} - ${sk.displayName} Check}} {{Result=Absent Ability (Automatic Failure per RAW)}}`,
+        simpleCommand: `/em tries ${sk.displayName} check but lacks the ability (Automatic Failure).`
+      });
+      return;
+    }
     const modStr = formatMod(sk.totalBonus);
     macros.push({
       category: 'Skills',
@@ -544,6 +582,11 @@ export function buildMarkdownSheet(character, heroStore) {
   ];
 
   ablDefinitions.forEach(abl => {
+    const isAbsent = heroStore?.isAbilityAbsent ? heroStore.isAbilityAbsent(abl.code) : ((character.absentAbilities || []).includes(abl.code));
+    if (isAbsent) {
+      md += `| **${abl.name} (${abl.code})** | **—** | **—** | Absent | - | -10 PP |\n`;
+      return;
+    }
     const baseRank = Number(character.abilities?.[abl.code] || 0);
     const enhRank = Number(activeTraits.abilities?.[abl.code] || 0);
     const totalScore = effAbilities[abl.code] ?? (baseRank + enhRank);
@@ -575,7 +618,11 @@ export function buildMarkdownSheet(character, heroStore) {
 
   const fortBought = character.defensesBought?.FORTITUDE || 0;
   const fortTotal = heroStore?.getDefenseTotal('FORTITUDE') ?? ((effAbilities.STA || 0) + fortBought);
-  md += `| **Fortitude** | **${fortTotal}** | STA (${formatMod(effAbilities.STA || 0)}) | +${fortBought} | Physical Resistance |\n`;
+  if (fortTotal === null || (character.absentAbilities || []).includes('STA')) {
+    md += `| **Fortitude** | **—** | STA (Absent) | — | Immune to Fortitude Effects (RAW) |\n`;
+  } else {
+    md += `| **Fortitude** | **${fortTotal}** | STA (${formatMod(effAbilities.STA || 0)}) | +${fortBought} | Physical Resistance |\n`;
+  }
 
   const toughBought = character.defensesBought?.TOUGHNESS || 0;
   const toughTotal = heroStore?.getDefenseTotal('TOUGHNESS') ?? ((effAbilities.STA || 0) + toughBought + armorBonus + powerProt + defRoll);
@@ -868,6 +915,10 @@ export function buildBBCodeSheet(character, heroStore) {
   ];
 
   const ablLines = ablDefs.map(abl => {
+    const isAbsent = heroStore?.isAbilityAbsent ? heroStore.isAbilityAbsent(abl.code) : ((character.absentAbilities || []).includes(abl.code));
+    if (isAbsent) {
+      return `[b]${abl.code}:[/b] — (Absent, -10 PP)`;
+    }
     const baseRank = Number(character.abilities?.[abl.code] || 0);
     const enhRank = Number(activeTraits.abilities?.[abl.code] || 0);
     const totalScore = effAbilities[abl.code] ?? (baseRank + enhRank);
@@ -893,6 +944,7 @@ export function buildBBCodeSheet(character, heroStore) {
 
   const fortBought = character.defensesBought?.FORTITUDE || 0;
   const fortTotal = heroStore?.getDefenseTotal('FORTITUDE') ?? ((effAbilities.STA || 0) + fortBought);
+  const isFortAbsent = fortTotal === null || (character.absentAbilities || []).includes('STA');
 
   const toughBought = character.defensesBought?.TOUGHNESS || 0;
   const toughTotal = heroStore?.getDefenseTotal('TOUGHNESS') ?? ((effAbilities.STA || 0) + toughBought + armorBonus + powerProt + defRoll);
@@ -908,7 +960,11 @@ export function buildBBCodeSheet(character, heroStore) {
   bb += `[b][size=4][color=#2563eb]■ DEFENSES (${defensesCost} PP)[/color][/size][/b]\n`;
   bb += `• [b]Dodge:[/b] ${dodgeTotal} (Base AGL ${effAbilities.AGL || 0} + Bought ${dodgeBought}${shieldBonus > 0 ? ` + Shield ${shieldBonus}` : ''})\n`;
   bb += `• [b]Parry:[/b] ${parryTotal} (Base FGT ${effAbilities.FGT || 0} + Bought ${parryBought}${shieldBonus > 0 ? ` + Shield ${shieldBonus}` : ''})\n`;
-  bb += `• [b]Fortitude:[/b] ${fortTotal} (Base STA ${effAbilities.STA || 0} + Bought ${fortBought})\n`;
+  if (isFortAbsent) {
+    bb += `• [b]Fortitude:[/b] — (Absent STA / Immune to Fortitude Effects)\n`;
+  } else {
+    bb += `• [b]Fortitude:[/b] ${fortTotal} (Base STA ${effAbilities.STA || 0} + Bought ${fortBought})\n`;
+  }
   bb += `• [b]Toughness:[/b] ${toughTotal} (Base STA ${effAbilities.STA || 0}${toughBonusText})\n`;
   bb += `• [b]Will:[/b] ${willTotal} (Base AWE ${effAbilities.AWE || 0} + Bought ${willBought})\n\n`;
   bb += `[hr]\n\n`;
@@ -1179,6 +1235,10 @@ export function buildPlainTextSheet(character, heroStore) {
   ];
 
   const ablSummary = ablDefs.map(abl => {
+    const isAbsent = heroStore?.isAbilityAbsent ? heroStore.isAbilityAbsent(abl.code) : ((character.absentAbilities || []).includes(abl.code));
+    if (isAbsent) {
+      return `${abl.code}: — (Absent)`;
+    }
     const totalScore = effAbilities[abl.code] ?? (Number(character.abilities?.[abl.code] || 0) + Number(activeTraits.abilities?.[abl.code] || 0));
     return `${abl.code}: ${totalScore} (${formatMod(totalScore)})`;
   });
@@ -1187,6 +1247,11 @@ export function buildPlainTextSheet(character, heroStore) {
 
   txt += `Base Scores & Costs:\n`;
   ablDefs.forEach(abl => {
+    const isAbsent = heroStore?.isAbilityAbsent ? heroStore.isAbilityAbsent(abl.code) : ((character.absentAbilities || []).includes(abl.code));
+    if (isAbsent) {
+      txt += `- ${abl.name.padEnd(12)} (${abl.code}): Absent -> -10 PP\n`;
+      return;
+    }
     const baseRank = Number(character.abilities?.[abl.code] || 0);
     const enhRank = Number(activeTraits.abilities?.[abl.code] || 0);
     const cost = baseRank * 2;
@@ -1209,6 +1274,7 @@ export function buildPlainTextSheet(character, heroStore) {
 
   const fortBought = character.defensesBought?.FORTITUDE || 0;
   const fortTotal = heroStore?.getDefenseTotal('FORTITUDE') ?? ((effAbilities.STA || 0) + fortBought);
+  const isFortAbsent = fortTotal === null || (character.absentAbilities || []).includes('STA');
 
   const toughBought = character.defensesBought?.TOUGHNESS || 0;
   const toughTotal = heroStore?.getDefenseTotal('TOUGHNESS') ?? ((effAbilities.STA || 0) + toughBought + armorBonus + powerProt + defRoll);
@@ -1226,7 +1292,11 @@ export function buildPlainTextSheet(character, heroStore) {
   txt += `${subDivider}\n`;
   txt += `Dodge:     ${String(dodgeTotal).padStart(2)}  (Base AGL ${effAbilities.AGL || 0} + Bought ${dodgeBought}${shieldBonus > 0 ? ` + Shield ${shieldBonus}` : ''})\n`;
   txt += `Parry:     ${String(parryTotal).padStart(2)}  (Base FGT ${effAbilities.FGT || 0} + Bought ${parryBought}${shieldBonus > 0 ? ` + Shield ${shieldBonus}` : ''})\n`;
-  txt += `Fortitude: ${String(fortTotal).padStart(2)}  (Base STA ${effAbilities.STA || 0} + Bought ${fortBought})\n`;
+  if (isFortAbsent) {
+    txt += `Fortitude:  —  (Absent STA / Immune to Fortitude Effects)\n`;
+  } else {
+    txt += `Fortitude: ${String(fortTotal).padStart(2)}  (Base STA ${effAbilities.STA || 0} + Bought ${fortBought})\n`;
+  }
   txt += `Toughness: ${String(toughTotal).padStart(2)}  (Base STA ${effAbilities.STA || 0}${toughBonusText})\n`;
   txt += `Will:      ${String(willTotal).padStart(2)}  (Base AWE ${effAbilities.AWE || 0} + Bought ${willBought})\n\n`;
 

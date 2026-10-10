@@ -111,14 +111,16 @@
                       </span>
                     </td>
                     <td class="tabular-nums mod-cell">
-                      {{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}
+                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (—)">—</span>
+                      <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                     </td>
                     <td colspan="2" style="text-align: right; padding-right: 1rem;">
                       <button
                         type="button"
                         class="btn btn-xs btn-outline-primary"
+                        :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
+                        :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot add specializations per RAW` : `Add new ${ruleSkill.name} specialization`"
                         @click="openAddSpecialtyDialog(ruleSkill.name)"
-                        :title="`Add new ${ruleSkill.name} specialization`"
                       >
                         <i class="ri-add-line"></i> Add Spec
                       </button>
@@ -151,23 +153,25 @@
                         </span>
                       </td>
                       <td class="tabular-nums mod-cell">
-                        {{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}
+                        <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (—)">—</span>
+                        <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                       </td>
                       <td style="text-align: center;">
-                        <div class="stepper-wrap">
+                        <div class="stepper-wrap" :class="{ 'is-disabled-stepper': heroStore.isAbilityAbsent(ruleSkill.ability) }">
                           <button
                             type="button"
                             class="btn-step-sm"
-                            :disabled="(inst.ranks || 0) <= 0"
+                            :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || (inst.ranks || 0) <= 0"
                             @click="stepSpecialization(inst, -1)"
                             title="Decrease Rank"
                           >-</button>
-                          <span class="tabular-nums step-value">{{ inst.ranks || 0 }}</span>
+                          <span class="tabular-nums step-value">{{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '—' : (inst.ranks || 0) }}</span>
                           <button
                             type="button"
                             class="btn-step-sm"
+                            :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
+                            :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks per RAW` : 'Increase Rank'"
                             @click="stepSpecialization(inst, 1)"
-                            title="Increase Rank"
                           >+</button>
                           <button
                             type="button"
@@ -181,6 +185,14 @@
                       </td>
                       <td style="text-align: center;">
                         <span 
+                          v-if="heroStore.isAbilityAbsent(ruleSkill.ability)"
+                          class="badge-absent-check"
+                          title="Absent Ability: Automatic failure per RAW"
+                        >
+                          — (Fail)
+                        </span>
+                        <span 
+                          v-else
                           class="badge-check tabular-nums"
                           :class="{ 'is-active-check': calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name) > 0 }"
                         >
@@ -193,9 +205,10 @@
                   <!-- Empty State for Specialization Group -->
                   <tr v-else class="spec-empty-row">
                     <td colspan="5">
-                      <div class="spec-empty-box" @click="openAddSpecialtyDialog(ruleSkill.name)">
-                        <i class="ri-add-circle-line"></i>
-                        <span>No <strong>{{ ruleSkill.name }}</strong> specializations added yet. Click "+ Add Spec" to specialize.</span>
+                      <div class="spec-empty-box" @click="!heroStore.isAbilityAbsent(ruleSkill.ability) && openAddSpecialtyDialog(ruleSkill.name)">
+                        <i :class="heroStore.isAbilityAbsent(ruleSkill.ability) ? 'ri-close-circle-line' : 'ri-add-circle-line'"></i>
+                        <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)">Absent <strong>{{ ruleSkill.ability }}</strong>: Cannot specialize per RAW.</span>
+                        <span v-else>No <strong>{{ ruleSkill.name }}</strong> specializations added yet. Click "+ Add Spec" to specialize.</span>
                       </div>
                     </td>
                   </tr>
@@ -205,7 +218,7 @@
                 <template v-else>
                   <tr 
                     class="standard-skill-row"
-                    :class="{ 'is-trained': isStandardTrained(ruleSkill.name) }"
+                    :class="{ 'is-trained': isStandardTrained(ruleSkill.name), 'is-absent-row': heroStore.isAbilityAbsent(ruleSkill.ability) }"
                   >
                     <td>
                       <div class="skill-name-block">
@@ -221,28 +234,38 @@
                       </span>
                     </td>
                     <td class="tabular-nums mod-cell">
-                      {{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}
+                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (—)">—</span>
+                      <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                     </td>
                     <td style="text-align: center;">
-                      <div class="stepper-wrap">
+                      <div class="stepper-wrap" :class="{ 'is-disabled-stepper': heroStore.isAbilityAbsent(ruleSkill.ability) }">
                         <button
                           type="button"
                           class="btn-step-sm"
-                          :disabled="getStandardRanks(ruleSkill.name) <= 0"
+                          :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || getStandardRanks(ruleSkill.name) <= 0"
                           @click="stepStandardSkill(ruleSkill.name, -1)"
                           title="Decrease Rank"
                         >-</button>
-                        <span class="tabular-nums step-value">{{ getStandardRanks(ruleSkill.name) }}</span>
+                        <span class="tabular-nums step-value">{{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '—' : getStandardRanks(ruleSkill.name) }}</span>
                         <button
                           type="button"
                           class="btn-step-sm"
+                          :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
+                          :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks per RAW` : 'Increase Rank'"
                           @click="stepStandardSkill(ruleSkill.name, 1)"
-                          title="Increase Rank"
                         >+</button>
                       </div>
                     </td>
                     <td style="text-align: center;">
                       <span 
+                        v-if="heroStore.isAbilityAbsent(ruleSkill.ability)"
+                        class="badge-absent-check"
+                        title="Absent Ability: Automatic failure per RAW"
+                      >
+                        — (Fail)
+                      </span>
+                      <span 
+                        v-else
                         class="badge-check tabular-nums"
                         :class="{ 'is-active-check': calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)) > 0 }"
                       >
@@ -278,9 +301,15 @@
             <div class="form-group">
               <label class="form-label">Skill Type</label>
               <select v-model="specialtyType" class="form-control spec-select">
-                <option value="Close Combat">Close Combat (FGT)</option>
-                <option value="Ranged Combat">Ranged Combat (DEX)</option>
-                <option value="Expertise">Expertise (INT)</option>
+                <option value="Close Combat" :disabled="heroStore.isAbilityAbsent('FGT')">
+                  Close Combat (FGT){{ heroStore.isAbilityAbsent('FGT') ? ' — Absent (Locked)' : '' }}
+                </option>
+                <option value="Ranged Combat" :disabled="heroStore.isAbilityAbsent('DEX')">
+                  Ranged Combat (DEX){{ heroStore.isAbilityAbsent('DEX') ? ' — Absent (Locked)' : '' }}
+                </option>
+                <option value="Expertise" :disabled="heroStore.isAbilityAbsent('INT')">
+                  Expertise (INT){{ heroStore.isAbilityAbsent('INT') ? ' — Absent (Locked)' : '' }}
+                </option>
               </select>
             </div>
 
@@ -1362,6 +1391,33 @@ function confirmSpecialtySkill() {
 
 .btn-modal-confirm:disabled {
   opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.absent-mod-tag {
+  color: #f87171;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.badge-absent-check {
+  display: inline-block;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  font-family: var(--font-mono, monospace);
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: var(--radius-xs, 4px);
+}
+
+.standard-skill-row.is-absent-row {
+  opacity: 0.7;
+}
+
+.is-disabled-stepper button:disabled {
+  opacity: 0.25;
   cursor: not-allowed;
 }
 </style>
