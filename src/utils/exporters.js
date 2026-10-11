@@ -1,5 +1,6 @@
 import LZString from 'lz-string';
 import { calculatePowerTotalCost } from '../rules/powerEngine.js';
+import { calculateDC, resolveSpecialConfig, formatRange } from '../rules/powerFormatter.js';
 import { isMotivation } from '../rules/complications.js';
 
 export function escapeHtml(str) {
@@ -436,11 +437,18 @@ function formatEffectDetails(eff) {
 
   const traits = [];
   if (eff.action && eff.action !== 'Standard') traits.push(`Action: ${eff.action}`);
-  if (eff.range && eff.range !== 'Close') traits.push(`Range: ${eff.range}`);
+  if (eff.range && eff.range !== 'Close') traits.push(`Range: ${formatRange(eff)}`);
   if (eff.duration && eff.duration !== 'Instant') traits.push(`Duration: ${eff.duration}`);
-  if (eff.resistance) traits.push(`Resist: ${eff.resistance}`);
+  const dc = calculateDC(eff);
+  if (dc) traits.push(`Resist: ${dc}`);
+  else if (eff.resistance) traits.push(`Resist: ${eff.resistance}`);
   if (traits.length) {
     parts.push(`(${traits.join(', ')})`);
+  }
+
+  const specialConfig = resolveSpecialConfig(eff);
+  if (specialConfig) {
+    parts.push(specialConfig);
   }
 
   const extras = (Array.isArray(eff.extras) ? eff.extras : []).map(e => {

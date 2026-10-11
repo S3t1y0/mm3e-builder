@@ -9,9 +9,9 @@
         </div>
 
         <div class="gr-meta-grid">
-          <!-- Row 1: Hero & Player -->
-          <div class="gr-meta-row">
-            <div class="gr-meta-item" style="flex: 1.5;">
+          <!-- Sub-column Left: Identity & Core Metadata -->
+          <div class="gr-meta-subcol gr-meta-subcol-left">
+            <div class="gr-meta-item">
               <span class="gr-meta-label">HERO:</span>
               <input
                 v-model="heroStore.character.name"
@@ -22,7 +22,7 @@
                 @change="heroStore.pushHistory()"
               />
             </div>
-            <div class="gr-meta-item" style="flex: 1;">
+            <div class="gr-meta-item">
               <span class="gr-meta-label">PLAYER:</span>
               <input
                 v-model="heroStore.character.player"
@@ -33,11 +33,7 @@
                 @change="heroStore.pushHistory()"
               />
             </div>
-          </div>
-
-          <!-- Row 2: Identity & Secret/Public -->
-          <div class="gr-meta-row">
-            <div class="gr-meta-item" style="flex: 2;">
+            <div class="gr-meta-item">
               <span class="gr-meta-label">IDENTITY:</span>
               <input
                 v-model="heroStore.character.identity"
@@ -76,79 +72,84 @@
             </div>
           </div>
 
-          <!-- Row 3: Physical Traits -->
-          <div class="gr-meta-row">
-            <div class="gr-meta-item">
-              <span class="gr-meta-label">GENDER:</span>
-              <input
-                v-model="heroStore.character.gender"
-                type="text"
-                class="gr-meta-input"
-                placeholder="Gender"
-                autocomplete="off"
-                @change="heroStore.pushHistory()"
-              />
+          <!-- Sub-column Right: Physical Traits, Affiliation & PL -->
+          <div class="gr-meta-subcol gr-meta-subcol-right">
+            <!-- Row 1: Gender, Age, Height -->
+            <div class="gr-traits-row">
+              <div class="gr-meta-item">
+                <span class="gr-meta-label">GENDER:</span>
+                <input
+                  v-model="heroStore.character.gender"
+                  type="text"
+                  class="gr-meta-input"
+                  placeholder="Gender"
+                  autocomplete="off"
+                  @change="heroStore.pushHistory()"
+                />
+              </div>
+              <div class="gr-meta-item">
+                <span class="gr-meta-label">AGE:</span>
+                <input
+                  v-model="heroStore.character.age"
+                  type="text"
+                  class="gr-meta-input"
+                  placeholder="Age"
+                  autocomplete="off"
+                  @change="heroStore.pushHistory()"
+                />
+              </div>
+              <div class="gr-meta-item">
+                <span class="gr-meta-label">HEIGHT:</span>
+                <input
+                  v-model="heroStore.character.height"
+                  type="text"
+                  class="gr-meta-input"
+                  placeholder="Height"
+                  autocomplete="off"
+                  @change="heroStore.pushHistory()"
+                />
+              </div>
             </div>
-            <div class="gr-meta-item">
-              <span class="gr-meta-label">AGE:</span>
-              <input
-                v-model="heroStore.character.age"
-                type="text"
-                class="gr-meta-input"
-                placeholder="Age"
-                autocomplete="off"
-                @change="heroStore.pushHistory()"
-              />
-            </div>
-            <div class="gr-meta-item">
-              <span class="gr-meta-label">HEIGHT:</span>
-              <input
-                v-model="heroStore.character.height"
-                type="text"
-                class="gr-meta-input"
-                placeholder="Height"
-                autocomplete="off"
-                @change="heroStore.pushHistory()"
-              />
-            </div>
-            <div class="gr-meta-item">
-              <span class="gr-meta-label">WEIGHT:</span>
-              <input
-                v-model="heroStore.character.weight"
-                type="text"
-                class="gr-meta-input"
-                placeholder="Weight"
-                autocomplete="off"
-                @change="heroStore.pushHistory()"
-              />
-            </div>
-            <div class="gr-meta-item">
-              <span class="gr-meta-label">EYES:</span>
-              <input
-                v-model="heroStore.character.eyes"
-                type="text"
-                class="gr-meta-input"
-                placeholder="Eyes"
-                autocomplete="off"
-                @change="heroStore.pushHistory()"
-              />
-            </div>
-            <div class="gr-meta-item">
-              <span class="gr-meta-label">HAIR:</span>
-              <input
-                v-model="heroStore.character.hair"
-                type="text"
-                class="gr-meta-input"
-                placeholder="Hair"
-                autocomplete="off"
-                @change="heroStore.pushHistory()"
-              />
-            </div>
-          </div>
 
-          <!-- Row 4: Affiliation, Base, PL -->
-          <div class="gr-meta-row">
-            <div class="gr-meta-item" style="flex: 1.5;">
+            <!-- Row 2: Weight, Eyes, Hair -->
+            <div class="gr-traits-row">
+              <div class="gr-meta-item">
+                <span class="gr-meta-label">WEIGHT:</span>
+                <input
+                  v-model="heroStore.character.weight"
+                  type="text"
+                  class="gr-meta-input"
+                  placeholder="Weight"
+                  autocomplete="off"
+                  @change="heroStore.pushHistory()"
+                />
+              </div>
+              <div class="gr-meta-item">
+                <span class="gr-meta-label">EYES:</span>
+                <input
+                  v-model="heroStore.character.eyes"
+                  type="text"
+                  class="gr-meta-input"
+                  placeholder="Eyes"
+                  autocomplete="off"
+                  @change="heroStore.pushHistory()"
+                />
+              </div>
+              <div class="gr-meta-item">
+                <span class="gr-meta-label">HAIR:</span>
+                <input
+                  v-model="heroStore.character.hair"
+                  type="text"
+                  class="gr-meta-input"
+                  placeholder="Hair"
+                  autocomplete="off"
+                  @change="heroStore.pushHistory()"
+                />
+              </div>
+            </div>
+
+            <!-- Row 3: Group Affiliation -->
+            <div class="gr-meta-item">
               <span class="gr-meta-label">GROUP AFFILIATION:</span>
               <input
                 v-model="heroStore.character.groupAffiliation"
@@ -159,24 +160,28 @@
                 @change="heroStore.pushHistory()"
               />
             </div>
-            <div class="gr-meta-item" style="flex: 1.2;">
-              <span class="gr-meta-label">BASE OF OPERATIONS:</span>
-              <input
-                v-model="heroStore.character.baseOfOperations"
-                type="text"
-                class="gr-meta-input"
-                placeholder="Base of Operations"
-                autocomplete="off"
-                @change="heroStore.pushHistory()"
-              />
-            </div>
-            <div class="gr-meta-item" style="flex: 0.65;">
-              <span class="gr-meta-label">POWER LEVEL:</span>
-              <span class="gr-meta-line font-mono" style="font-weight: 900; color: #0f172a;">{{ heroStore.character.powerLevel || 10 }}</span>
+
+            <!-- Row 4: Base of Operations & Power Level -->
+            <div class="gr-traits-row">
+              <div class="gr-meta-item" style="flex: 1.6;">
+                <span class="gr-meta-label">BASE:</span>
+                <input
+                  v-model="heroStore.character.baseOfOperations"
+                  type="text"
+                  class="gr-meta-input"
+                  placeholder="Base of Operations"
+                  autocomplete="off"
+                  @change="heroStore.pushHistory()"
+                />
+              </div>
+              <div class="gr-meta-item" style="flex: 1; justify-content: flex-end;">
+                <span class="gr-meta-label">POWER LEVEL:</span>
+                <span class="gr-meta-line font-mono" style="font-weight: 900; color: #0f172a; flex: 0.6; text-align: center;">{{ heroStore.character.powerLevel || 10 }}</span>
+              </div>
             </div>
           </div>
 
-          <!-- Row 5: Power Point Totals Equation -->
+          <!-- Bottom: Power Point Totals Equation -->
           <div class="gr-pp-totals-row">
             <span class="gr-meta-label">POWER POINT TOTALS:</span>
             <span>ABILITIES <span class="gr-hl-num">[{{ heroStore.abilitiesCost }}]</span></span> • 
@@ -355,19 +360,42 @@
         <span class="gr-card-title">POWERS &amp; DEVICES</span>
         <div v-if="primaryPowers.length" class="gr-powers-list">
           <div v-for="p in primaryPowers" :key="p.id" class="gr-power-entry">
-            <div class="gr-power-main-line">
-              <span class="gr-power-header">{{ p.name }}:</span>
-              <span> {{ formatPowerMainLine(p) }}</span>
-              <span class="gr-power-cost-badge">{{ calculatePowerTotalCost(p) }} PP</span>
+            <!-- Power Header Row -->
+            <div class="gr-power-row gr-power-heading-row">
+              <strong class="gr-power-name">{{ p.name }}:</strong>
+              <span v-if="getPowerBlock(p).structureBadge" class="gr-power-badge">{{ getPowerBlock(p).structureBadge }}</span>
+              <span class="gr-power-main-effect">{{ getPowerBlock(p).mainLine }}</span>
+              <span class="gr-power-cost-badge">{{ getPowerBlock(p).totalCost }} PP</span>
             </div>
-            <!-- Sub / Alternate Effects -->
-            <div v-for="(sub, sIdx) in getSubEffects(p)" :key="sIdx" class="gr-power-sub-entry">
-              • {{ sub }}
+
+            <!-- Mechanics Line (Action, Range, Duration, DC) -->
+            <div v-if="getPowerBlock(p).mechanicsLine" class="gr-power-row gr-power-mechanics-line">
+              <span class="gr-power-mech-text">{{ getPowerBlock(p).mechanicsLine }}</span>
+            </div>
+
+            <!-- Special Config or Modifiers -->
+            <div v-if="getPowerBlock(p).specialConfigLine || getPowerBlock(p).modifiersLine" class="gr-power-row gr-power-detail-line">
+              <span v-if="getPowerBlock(p).specialConfigLine" class="gr-power-config-text">{{ getPowerBlock(p).specialConfigLine }}</span>
+              <span v-if="getPowerBlock(p).specialConfigLine && getPowerBlock(p).modifiersLine" class="gr-power-sep">•</span>
+              <span v-if="getPowerBlock(p).modifiersLine" class="gr-power-mods-text">{{ getPowerBlock(p).modifiersLine }}</span>
+            </div>
+
+            <!-- Sub Entries (Array Alternate Effects, Linked Components, Device Systems) -->
+            <div v-for="(sub, sIdx) in getPowerBlock(p).subEntries" :key="sIdx" class="gr-power-row gr-power-sub-entry">
+              <span class="gr-sub-bullet">•</span>
+              <strong class="gr-sub-label">{{ sub.label }}:</strong>
+              <span class="gr-sub-details">{{ sub.details || sub.effectName }}</span>
+              <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
             </div>
           </div>
+          <!-- Empty ruled rows filling remaining capacity -->
+          <div v-for="n in emptyPrimaryLinesCount" :key="'p-empty-' + n" class="gr-power-row gr-power-empty-row"></div>
         </div>
-        <div v-else class="gr-empty-hint" style="padding-top: 10px;">
-          No powers or device containers configured.
+        <div v-else class="gr-powers-list">
+          <div class="gr-power-row gr-empty-hint">
+            No powers or device containers configured.
+          </div>
+          <div v-for="n in (PRIMARY_POWERS_CAPACITY - 1)" :key="'p-empty-none-' + n" class="gr-power-row gr-power-empty-row"></div>
         </div>
       </div>
 
@@ -440,18 +468,42 @@
           <span class="gr-card-title">POWERS &amp; DEVICES (CONTINUED)</span>
           <div v-if="overflowPowers.length" class="gr-powers-list">
             <div v-for="p in overflowPowers" :key="p.id" class="gr-power-entry">
-              <div class="gr-power-main-line">
-                <span class="gr-power-header">{{ p.name }}:</span>
-                <span> {{ formatPowerMainLine(p) }}</span>
-                <span class="gr-power-cost-badge">{{ calculatePowerTotalCost(p) }} PP</span>
+              <!-- Power Header Row -->
+              <div class="gr-power-row gr-power-heading-row">
+                <strong class="gr-power-name">{{ p.name }}:</strong>
+                <span v-if="getPowerBlock(p).structureBadge" class="gr-power-badge">{{ getPowerBlock(p).structureBadge }}</span>
+                <span class="gr-power-main-effect">{{ getPowerBlock(p).mainLine }}</span>
+                <span class="gr-power-cost-badge">{{ getPowerBlock(p).totalCost }} PP</span>
               </div>
-              <div v-for="(sub, sIdx) in getSubEffects(p)" :key="sIdx" class="gr-power-sub-entry">
-                • {{ sub }}
+
+              <!-- Mechanics Line (Action, Range, Duration, DC) -->
+              <div v-if="getPowerBlock(p).mechanicsLine" class="gr-power-row gr-power-mechanics-line">
+                <span class="gr-power-mech-text">{{ getPowerBlock(p).mechanicsLine }}</span>
+              </div>
+
+              <!-- Special Config or Modifiers -->
+              <div v-if="getPowerBlock(p).specialConfigLine || getPowerBlock(p).modifiersLine" class="gr-power-row gr-power-detail-line">
+                <span v-if="getPowerBlock(p).specialConfigLine" class="gr-power-config-text">{{ getPowerBlock(p).specialConfigLine }}</span>
+                <span v-if="getPowerBlock(p).specialConfigLine && getPowerBlock(p).modifiersLine" class="gr-power-sep">•</span>
+                <span v-if="getPowerBlock(p).modifiersLine" class="gr-power-mods-text">{{ getPowerBlock(p).modifiersLine }}</span>
+              </div>
+
+              <!-- Sub Entries (Array Alternate Effects, Linked Components, Device Systems) -->
+              <div v-for="(sub, sIdx) in getPowerBlock(p).subEntries" :key="sIdx" class="gr-power-row gr-power-sub-entry">
+                <span class="gr-sub-bullet">•</span>
+                <strong class="gr-sub-label">{{ sub.label }}:</strong>
+                <span class="gr-sub-details">{{ sub.details || sub.effectName }}</span>
+                <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
               </div>
             </div>
+            <!-- Empty ruled lines filling Page 2 capacity seamlessly -->
+            <div v-for="n in emptyOverflowLinesCount" :key="'o-empty-' + n" class="gr-power-row gr-power-empty-row"></div>
           </div>
-          <div v-else class="gr-empty-hint" style="padding-top: 10px;">
-            All character powers fit on Page 1.
+          <div v-else class="gr-powers-list">
+            <div class="gr-power-row gr-empty-hint">
+              All character powers fit on Page 1.
+            </div>
+            <div v-for="n in (OVERFLOW_POWERS_CAPACITY - 1)" :key="'o-empty-none-' + n" class="gr-power-row gr-power-empty-row"></div>
           </div>
         </div>
 
@@ -512,6 +564,7 @@ import { computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { compileTargetedAttacks } from '../../rules/attacks.js';
 import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
+import { formatPowerStatblock } from '../../rules/powerFormatter.js';
 
 const heroStore = useHeroStore();
 
@@ -574,91 +627,72 @@ const trainedSkills = computed(() => {
     });
 });
 
+// Resolves comprehensive structured statblock per power structure
+function getPowerBlock(power) {
+  return formatPowerStatblock(power);
+}
+
+// Power row counting and capacity bounds
+const PRIMARY_POWERS_CAPACITY = 13;
+const OVERFLOW_POWERS_CAPACITY = 15;
+
+function getPowerRowCount(power) {
+  if (!power) return 0;
+  const block = getPowerBlock(power);
+  let count = 1;
+  if (block.mechanicsLine) count += 1;
+  if (block.specialConfigLine || block.modifiersLine) count += 1;
+  count += (block.subEntries || []).length;
+  return count;
+}
+
 // Powers splitting for adaptive 1 vs 2 pages
 const allPowers = computed(() => heroStore.character.powers || []);
 
 const primaryPowers = computed(() => {
-  if (allPowers.value.length <= 4) {
-    return allPowers.value;
+  const powers = allPowers.value;
+  if (!powers.length) return [];
+  const result = [];
+  let currentRows = 0;
+  for (const p of powers) {
+    const rows = getPowerRowCount(p);
+    if (result.length > 0 && currentRows + rows > PRIMARY_POWERS_CAPACITY) {
+      break;
+    }
+    result.push(p);
+    currentRows += rows;
   }
-  return allPowers.value.slice(0, 3);
+  return result;
 });
 
 const overflowPowers = computed(() => {
-  if (allPowers.value.length <= 4) return [];
-  return allPowers.value.slice(3);
+  const powers = allPowers.value;
+  const primaryCount = primaryPowers.value.length;
+  return powers.slice(primaryCount);
+});
+
+const primaryRowsCount = computed(() => {
+  return primaryPowers.value.reduce((sum, p) => sum + getPowerRowCount(p), 0);
+});
+
+const emptyPrimaryLinesCount = computed(() => {
+  return Math.max(0, PRIMARY_POWERS_CAPACITY - primaryRowsCount.value);
+});
+
+const overflowRowsCount = computed(() => {
+  return overflowPowers.value.reduce((sum, p) => sum + getPowerRowCount(p), 0);
+});
+
+const emptyOverflowLinesCount = computed(() => {
+  return Math.max(0, OVERFLOW_POWERS_CAPACITY - overflowRowsCount.value);
 });
 
 const hasPage2Content = computed(() => {
   return (
-    allPowers.value.length > 4 ||
+    overflowPowers.value.length > 0 ||
     (heroStore.character.resources?.length || 0) > 8 ||
     (heroStore.character.notes?.length || 0) > 160 ||
     (heroStore.character.complications?.length || 0) > 3
   );
 });
-
-// Format primary line of power in official Green Ronin statblock format
-function formatPowerMainLine(power) {
-  if (!power) return '';
-  const eff = power.mainEffect || {};
-  const base = eff.baseEffect || power.baseEffect || 'Effect';
-  const ranks = eff.ranks || power.ranks || 1;
-  const descriptors = Array.isArray(power.descriptors) && power.descriptors.length
-    ? ` (${power.descriptors.join(', ')})`
-    : '';
-
-  const extras = (eff.extras || []).map(e => e.name).join(', ');
-  const flaws = (eff.flaws || []).map(f => f.name).join(', ');
-  const mods = [extras, flaws].filter(Boolean).join('; ');
-
-  if (power.type === 'device') {
-    const devType = power.deviceConfig?.type === 'easily_removable' ? 'Easily Removable Device' : 'Removable Device';
-    return `${devType} (${base} ${ranks}${descriptors}${mods ? ' • ' + mods : ''})`;
-  }
-
-  let line = `${base} ${ranks}${descriptors}`;
-  if (mods) {
-    line += ` • ${mods}`;
-  }
-  return line;
-}
-
-// Sub effects (alternate effects, device items, linked effects) without redundant machine prefixes
-function getSubEffects(power) {
-  const list = [];
-  if (!power) return list;
-
-  // Alternate Effects
-  if (Array.isArray(power.alternateEffects) && power.alternateEffects.length) {
-    power.alternateEffects.forEach(alt => {
-      const eff = alt.effect || alt;
-      const base = eff.baseEffect || alt.name || 'Alternate Effect';
-      const ranks = eff.ranks || alt.ranks || 1;
-      list.push(`Alternate Effect: ${alt.name || base}: ${base} ${ranks} • ${alt.cost || 1} PP`);
-    });
-  }
-
-  // Linked Effects
-  if (Array.isArray(power.linkedEffects) && power.linkedEffects.length) {
-    power.linkedEffects.forEach(link => {
-      const eff = link.effect || link;
-      list.push(`Linked: ${link.name || eff.baseEffect}: ${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`);
-    });
-  }
-
-  // Device Powers (Clean bullet points without "Device Item:")
-  if (power.type === 'device' && Array.isArray(power.devicePowers)) {
-    power.devicePowers.forEach(sub => {
-      const eff = sub.effect || {};
-      const base = eff.baseEffect || sub.baseEffect || 'Effect';
-      const ranks = eff.ranks || sub.ranks || 1;
-      const extras = (eff.extras || []).map(e => e.name).join(', ');
-      const desc = extras ? `${base} ${ranks}, ${extras}` : `${base} ${ranks}`;
-      list.push(`${sub.name || 'Component'}: ${desc}`);
-    });
-  }
-
-  return list;
-}
 </script>

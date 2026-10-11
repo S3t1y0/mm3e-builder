@@ -80,9 +80,9 @@
 /* Header Section */
 .gr-header {
   display: grid;
-  grid-template-columns: 175px 1fr;
-  gap: 8px;
-  padding: 5px 8px 4px;
+  grid-template-columns: 160px 1fr;
+  gap: 10px;
+  padding: 4px 8px 3px;
   min-height: 72px;
 }
 
@@ -100,10 +100,35 @@
 }
 
 .gr-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  column-gap: 10px;
+  row-gap: 2.5px;
+}
+
+.gr-meta-subcol {
   display: flex;
   flex-direction: column;
   gap: 2.5px;
-  justify-content: center;
+  min-width: 0;
+  justify-content: space-between;
+}
+
+.gr-meta-subcol-left {
+  padding-right: 6px;
+  border-right: 1px dashed #cbd5e1;
+}
+
+.gr-meta-subcol-right {
+  padding-left: 2px;
+}
+
+.gr-traits-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  width: 100%;
+  min-width: 0;
 }
 
 .gr-meta-row {
@@ -123,18 +148,18 @@
 
 .gr-meta-label {
   font-family: var(--gr-header-font);
-  font-size: 8.8px;
+  font-size: 8.5px;
   font-weight: 900;
   color: #0f172a;
   white-space: nowrap;
-  letter-spacing: 0.03em;
+  letter-spacing: 0.02em;
 }
 
 .gr-meta-line {
   flex: 1;
   border-bottom: 1.2px solid #0f172a;
   font-weight: 700;
-  font-size: 10.5px;
+  font-size: 9.8px;
   color: #0f172a;
   padding: 0 2px;
   white-space: nowrap;
@@ -152,11 +177,11 @@
   background: transparent;
   font-family: var(--gr-body-font);
   font-weight: 700;
-  font-size: 10.5px;
+  font-size: 9.8px;
   color: #0f172a;
   padding: 0 2px;
-  height: 15px;
-  line-height: 15px;
+  height: 14px;
+  line-height: 14px;
   outline: none;
   transition: background-color 0.15s ease, border-color 0.15s ease;
 }
@@ -165,7 +190,7 @@
   color: #64748b;
   font-weight: 400;
   font-style: italic;
-  font-size: 9px;
+  font-size: 8.5px;
 }
 
 .gr-meta-input:focus-visible,
@@ -179,9 +204,9 @@
   display: flex;
   gap: 8px;
   align-items: center;
-  margin-left: 4px;
+  margin-top: 1px;
   font-family: var(--gr-header-font);
-  font-size: 8.5px;
+  font-size: 8.2px;
   color: #0f172a;
 }
 
@@ -218,16 +243,18 @@
 }
 
 .gr-pp-totals-row {
-  margin-top: 1px;
+  grid-column: 1 / -1;
+  margin-top: 2px;
   padding-top: 2px;
   border-top: 1px dashed #cbd5e1;
-  font-size: 8px;
+  font-size: 7.8px;
   font-weight: 700;
   color: #334155;
   display: flex;
   align-items: center;
   gap: 4px;
   flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .gr-hl-num {
@@ -237,7 +264,7 @@
 
 .gr-pp-total-eq {
   margin-left: auto;
-  font-size: 8.5px;
+  font-size: 8.2px;
   font-weight: 800;
   color: #0f172a;
 }
@@ -526,8 +553,7 @@
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 5px;
-  min-height: 120px;
-  max-height: 125px;
+  min-height: 80px;
 }
 
 .gr-advantages-card,
@@ -574,9 +600,8 @@
   display: flex;
   gap: 2px;
   align-items: baseline;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 105px;
+  min-width: 0;
+  flex-shrink: 1;
 }
 
 .gr-skill-title {
@@ -613,15 +638,6 @@
   min-height: 175px;
   flex: 1;
   background-color: #ffffff;
-  /* Notebook Ruled Lines matching line-height */
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 17px,
-    #e2e8f0 17px,
-    #e2e8f0 18px
-  );
-  background-position: 0 17px;
   overflow: hidden;
 }
 
@@ -629,44 +645,163 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  margin: 0;
+  padding: 0;
+  width: 100%;
 }
 
 .gr-power-entry {
-  font-size: 8.8px;
-  line-height: 18px;
-  color: #0f172a;
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  border: none;
 }
 
-.gr-power-main-line {
+/* Individual Power Row: Exactly 1 Ruled Line */
+.gr-power-row {
+  height: 18px;
+  min-height: 18px;
+  max-height: 18px;
+  line-height: 18px;
+  box-sizing: border-box;
+  border-bottom: 1px solid #e2e8f0;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  margin: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  width: 100%;
+  font-family: var(--gr-body-font);
 }
 
-.gr-power-header {
+.gr-power-heading-row {
+  gap: 4px;
+}
+
+.gr-power-name {
   font-weight: 900;
   color: #0f172a;
+  font-size: 8.8px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.gr-power-badge {
+  font-family: var(--gr-header-font);
+  font-size: 7px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #0369a1;
+  background: #e0f2fe;
+  border: 0.8px solid #bae6fd;
+  border-radius: 2px;
+  padding: 0.5px 3px;
+  letter-spacing: 0.03em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.gr-power-main-effect {
+  font-weight: 700;
+  color: #1e293b;
+  font-size: 8.2px;
+  line-height: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .gr-power-cost-badge {
   font-family: var(--gr-header-font);
   font-size: 8px;
+  font-weight: 800;
   color: #0369a1;
   background: #f0f9ff;
   border: 1px solid #bae6fd;
   border-radius: 3px;
   padding: 0 3px;
-  margin-left: 4px;
+  margin-left: auto;
+  line-height: 1.1;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gr-power-mechanics-line {
+  padding-left: 12px;
+  font-size: 7.8px;
+  color: #334155;
+}
+
+.gr-power-mech-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gr-power-detail-line {
+  padding-left: 12px;
+  font-size: 7.6px;
+  color: #475569;
+}
+
+.gr-power-sep {
+  margin: 0 3px;
+  color: #94a3b8;
 }
 
 .gr-power-sub-entry {
-  padding-left: 12px;
-  font-size: 8.2px;
+  padding-left: 14px;
+  gap: 3px;
+  font-size: 7.8px;
   color: #334155;
+}
+
+.gr-sub-bullet {
+  color: #0284c7;
+  font-weight: 900;
+  font-size: 8.5px;
+  line-height: 1;
+  margin-right: 2px;
+}
+
+.gr-sub-label {
+  font-weight: 800;
+  color: #0f172a;
   white-space: nowrap;
+}
+
+.gr-sub-details {
+  color: #334155;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 18px;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.gr-sub-cost-badge {
+  font-family: var(--gr-header-font);
+  font-size: 7.2px;
+  font-weight: 700;
+  color: #0284c7;
+  background: rgba(2, 132, 199, 0.08);
+  border: 0.8px solid rgba(2, 132, 199, 0.2);
+  border-radius: 2px;
+  padding: 0 2px;
+  margin-left: auto;
+  line-height: 1.1;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gr-power-empty-row {
+  height: 18px;
+  min-height: 18px;
+  max-height: 18px;
+  border-bottom: 1px solid #e2e8f0;
+  box-sizing: border-box;
 }
 
 /* Gear & Equipment */
@@ -822,17 +957,11 @@
 }
 
 .gr-overflow-powers {
+  padding-top: 16px;
   min-height: 220px;
   flex: 1;
   background-color: #ffffff;
-  background-image: repeating-linear-gradient(
-    to bottom,
-    transparent,
-    transparent 17px,
-    #e2e8f0 17px,
-    #e2e8f0 18px
-  );
-  background-position: 0 17px;
+  overflow: hidden;
 }
 
 .gr-overflow-equipment {
@@ -967,6 +1096,12 @@
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
+  }
+
+  .gr-sheet-scaler {
+    transform: none !important;
+    margin: 0 !important;
+    width: 100% !important;
   }
 
   .green-ronin-sheet-wrapper {
