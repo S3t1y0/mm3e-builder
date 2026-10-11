@@ -8,7 +8,7 @@
             <i class="ri-book-open-line text-accent"></i> M&M 3e SRD Rules Reference Library
           </h3>
           <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0.25rem 0 0;">
-            Quick reference guide for combat actions, tactical maneuvers, measurements table, and official Mutants & Masterminds 3e condition rules.
+            Quick reference guide for combat actions, tactical maneuvers, measurements table, and Mutants & Masterminds 3e condition rules.
           </p>
         </div>
 

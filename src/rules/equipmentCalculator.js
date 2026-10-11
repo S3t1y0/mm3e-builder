@@ -306,7 +306,7 @@ export function calculateTotalEquipmentCost(category, config) {
 }
 
 /**
- * Auto-generate Official M&M 3e Publication-Quality Rules Description
+ * Auto-generate M&M 3e Publication-Quality Rules Description
  */
 export function generateEquipmentDescription(category, config) {
   if (category === 'Weapons') {

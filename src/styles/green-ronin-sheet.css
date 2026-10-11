@@ -1,5 +1,5 @@
 /* src/styles/green-ronin-sheet.css
-   Official Green Ronin Mutants & Masterminds 3e Character Sheet Styles
+   Deluxe Mutants & Masterminds 3e Character Sheet Styles
    High-Fidelity Vector & Print Layout
 */
 
@@ -1053,7 +1053,7 @@
     overflow: visible !important;
   }
 
-  /* Hide the underlying app when printing official sheet */
+  /* Hide the underlying app when printing deluxe sheet */
   #app,
   .app-container,
   .top-menubar,
@@ -1066,7 +1066,7 @@
     display: none !important;
   }
 
-  /* Container setup for Teleported Official Sheet */
+  /* Container setup for Teleported Deluxe Sheet */
   .gr-modal-overlay {
     position: static !important;
     inset: auto !important;

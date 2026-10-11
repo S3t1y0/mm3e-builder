@@ -45,7 +45,7 @@
             <div v-if="currentStep === 1" class="step-pane">
               <div class="step-pane-head">
                 <h4>1. Choose Equipment Category & Identity</h4>
-                <p>Select the official M&M 3e equipment domain and name your custom gear.</p>
+                <p>Select the M&M 3e equipment domain and name your custom gear.</p>
               </div>
 
               <!-- 5 Category Cards Grid -->

@@ -41,7 +41,7 @@ export function formatSpeedRank(rank) {
 }
 
 /**
- * Calculates official Resistance Check DC according to M&M 3E rules.
+ * Calculates Resistance Check DC according to M&M 3E rules.
  * Damage/Blast: DC 15 + Rank vs Toughness.
  * Affliction/Weaken/Nullify: DC 10 + Rank vs Fortitude/Will.
  * Attack Extra: DC 10 + Rank vs Dodge.

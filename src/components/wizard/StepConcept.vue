@@ -75,7 +75,7 @@
       <!-- PHYSICAL TRAITS SECTION -->
       <div style="margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid var(--border-subtle);">
         <h5 style="font-size: 0.85rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">
-          Physical Appearance &amp; Official Sheet Details
+          Physical Appearance &amp; Sheet Details
         </h5>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 0.75rem;">
           <div class="form-group">

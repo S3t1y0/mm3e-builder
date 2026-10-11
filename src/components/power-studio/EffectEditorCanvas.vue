@@ -206,7 +206,7 @@
             class="btn-toggle-rules"
             :class="{ active: showRules }"
             @click="showRules = !showRules"
-            title="Toggle Official M&M 3e Rules"
+            title="Toggle M&M 3e Rules"
           >
             <i class="ri-book-read-line"></i>
             <span>{{ showRules ? 'Hide Rules' : 'M&M Rules' }}</span>
@@ -218,9 +218,9 @@
       <div v-if="showRules" class="rules-collapsible-drawer span-full">
         <div class="rules-drawer-head">
           <i class="ri-file-list-3-line"></i>
-          <span>Official Mechanics & Rules (DHH)</span>
+          <span>Core Mechanics & Rules (DHH)</span>
         </div>
-        <p class="rules-desc-text">{{ currentBaseInfo?.desc || 'Official M&M 3E base effect.' }}</p>
+        <p class="rules-desc-text">{{ currentBaseInfo?.desc || 'Standard M&M 3E base effect.' }}</p>
       </div>
 
       <!-- Combat Parameters Status Strip -->

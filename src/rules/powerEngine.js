@@ -3,7 +3,7 @@ import { ADVANTAGES } from './advantages.js';
 import { getCombatSkillBonus } from './skills.js';
 /**
  * Mutants & Masterminds 3e Power Engine
- * Official D20 Hero System Power Rules, Fractional Costs, Array Budgets,
+ * D20 Hero System Power Rules, Fractional Costs, Array Budgets,
  * Device / Removable Discounts, and Combat Metrics with PL Cap Compliance.
  */
 
@@ -3565,7 +3565,7 @@ export function normalizeEffect(rawEffect) {
       if (!Array.isArray(eff.config.selectedSenses) || eff.config.selectedSenses.length === 0) {
         eff.config.selectedSenses = [...(cfg.defaultSenses || ['visual_normal'])];
       } else {
-        // Map legacy IDs to official SRD IDs and exclude tactile senses (strictly forbidden in SRD)
+        // Map legacy IDs to SRD IDs and exclude tactile senses (strictly forbidden in SRD)
         const legacyMap = {
           normal_vision_total: 'visual_normal',
           normal_vision_partial: 'visual_normal',
@@ -3819,7 +3819,7 @@ export function calculateComponentCost(baseCostOrEffect, ranks = 1, extras = [],
 }
 
 /**
- * Calculates Device discount according to official M&M 3e rules:
+ * Calculates Device discount according to M&M 3e rules:
  * - Removable (Cannot be taken in combat, only when incapacitated): -1 PP per 5 PP
  * - Easily Removable (Can be disarmed or grabbed in combat): -2 PP per 5 PP
  */

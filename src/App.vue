@@ -106,7 +106,7 @@
             <button class="dropdown-item" @click="handleToolAction('printOfficial')">
               <i class="ri-printer-line icon-sapphire"></i>
               <div class="dropdown-item-text">
-                <strong>Print Official Sheet (PDF)</strong>
+                <strong>Print Deluxe Sheet (PDF)</strong>
               </div>
             </button>
 
@@ -197,7 +197,7 @@
             <button
               class="btn btn-secondary btn-sm"
               @click="uiStore.openModal('printOfficial')"
-              title="Print Official Character Sheet (PDF)"
+              title="Print Deluxe Character Sheet (PDF)"
             >
               <i class="ri-printer-line"></i> Print Sheet
             </button>
@@ -219,6 +219,15 @@
       <div v-else-if="uiStore.activeTab === 'rules'">
         <RulesReference />
       </div>
+
+      <!-- LEGAL DISCLAIMER FOOTER -->
+      <footer class="app-disclaimer-footer">
+        <div class="disclaimer-content">
+          <p>
+            <strong>Mutants &amp; Masterminds</strong> is a trademark of Green Ronin Publishing, LLC. This application is an unofficial, non-commercial fan-created utility and is not affiliated with, authorized, or endorsed by Green Ronin Publishing. Game mechanics are referenced under the Open Game License (OGL v1.0a).
+          </p>
+        </div>
+      </footer>
     </main>
 
     <!-- DEDICATED FULL-WINDOW POWER STUDIO (NOT FLOATING MODAL) -->
@@ -915,5 +924,24 @@ onBeforeUnmount(() => {
   .menubar-left {
     gap: 0.75rem;
   }
+}
+
+.app-disclaimer-footer {
+  margin-top: 3.5rem;
+  padding: 1.5rem 1rem;
+  border-top: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.disclaimer-content p {
+  max-width: 820px;
+  margin: 0 auto;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
+.disclaimer-content strong {
+  color: var(--text-secondary);
 }
 </style>

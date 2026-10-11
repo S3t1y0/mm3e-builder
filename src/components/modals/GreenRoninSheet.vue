@@ -1,6 +1,6 @@
 <template>
   <div class="green-ronin-sheet-wrapper print-target">
-    <!-- Page 1: Core Official Character Sheet -->
+    <!-- Page 1: Core Deluxe Character Sheet -->
     <div class="gr-page gr-page-1">
       <!-- Header Section -->
       <header class="gr-card gr-header">
@@ -236,7 +236,7 @@
             </div>
           </div>
 
-          <!-- Offense Block (3 Lined Rows matching official sheet) -->
+          <!-- Offense Block (3 Lined Rows) -->
           <div class="gr-card gr-offense-card">
             <div class="gr-offense-header-row">
               <span class="gr-offense-title">OFFENSE</span>
@@ -455,7 +455,7 @@
       <header class="gr-card gr-page-2-header">
         <div style="display: flex; align-items: center; gap: 10px;">
           <img src="/mm-logo.png" alt="Mutants &amp; Masterminds" style="height: 30px; object-fit: contain;" />
-          <span class="gr-page-2-title">OFFICIAL CHARACTER SHEET - PAGE 2</span>
+          <span class="gr-page-2-title">DELUXE CHARACTER SHEET - PAGE 2</span>
         </div>
         <div style="font-size: 10.5px; font-weight: 900; color: #0f172a;">
           {{ heroStore.character.name || 'Hero' }} • PL {{ heroStore.character.powerLevel || 10 }}

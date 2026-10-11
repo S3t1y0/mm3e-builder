@@ -8,7 +8,7 @@
           <span class="comp-title-text">Motivations & Complications</span>
         </div>
 
-        <!-- Official M&M 3e Rules Status Pill -->
+        <!-- Core M&M 3e Rules Status Pill -->
         <div
           class="comp-rules-status"
           :class="narrativeStatus.isValid ? 'status-met' : 'status-pending'"

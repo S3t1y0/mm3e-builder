@@ -4,7 +4,7 @@
  * 
  * Why Pathnames instead of Query Strings?
  * Vercel Web Analytics strips query strings (?tab=...) from the "Pages" dashboard view for GDPR/privacy compliance.
- * By updating the actual URL pathname (/wizard, /power-studio, /print-official), Vercel Analytics separates
+ * By updating the actual URL pathname (/wizard, /power-studio, /print-deluxe), Vercel Analytics separates
  * each section into distinct rows in the "Pages" report, showing exact visitor counts per feature for FREE!
  * 
  * Works 100% seamlessly on Vercel thanks to vercel.json rewrite rule: { "source": "/(.*)", "destination": "/index.html" }.
@@ -12,7 +12,7 @@
 
 const MODAL_PATH_MAP = {
   powerStudio: '/power-studio',
-  printOfficial: '/print-official',
+  printOfficial: '/print-deluxe',
   roll20: '/roll20',
   markdown: '/markdown',
   exportImport: '/export-import',
@@ -25,7 +25,9 @@ const MODAL_PATH_MAP = {
 const REVERSE_MODAL_PATH_MAP = Object.entries(MODAL_PATH_MAP).reduce((acc, [storeKey, path]) => {
   acc[path] = storeKey;
   return acc;
-}, {});
+}, {
+  '/print-official': 'printOfficial' // Legacy route backward compatibility
+});
 
 let isApplyingPopState = false;
 

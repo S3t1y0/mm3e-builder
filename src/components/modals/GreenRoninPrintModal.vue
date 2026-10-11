@@ -7,9 +7,9 @@
           <div style="display: flex; align-items: center; gap: 0.75rem;">
             <div class="gr-modal-title">
               <i class="ri-printer-fill" style="margin-right: 0.4rem; color: #38bdf8;"></i>
-              OFFICIAL CHARACTER SHEET (PDF)
+              DELUXE CHARACTER SHEET (PDF)
             </div>
-            <span class="gr-modal-badge">Green Ronin 3E Format</span>
+            <span class="gr-modal-badge">Classic 3E Format</span>
           </div>
 
           <!-- Custom Percentage Zoom Control -->

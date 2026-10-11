@@ -378,7 +378,7 @@
         <div v-if="isExpanded(pow.id || idx)" class="pow-expanded-drawer">
           <!-- Standard / Array Detailed Breakdown -->
           <div v-if="pow.type !== 'device' && pow.type !== 'compound'" class="drawer-content-flow">
-            <!-- 1. Base Effect Official Rules & Mechanics -->
+            <!-- 1. Base Effect Core Rules & Mechanics -->
             <div class="dossier-block effect-rules-block">
               <div class="dossier-block-head">
                 <div class="dossier-head-left">
@@ -420,10 +420,10 @@
                 </div>
               </div>
 
-              <!-- Official Rulebook Callout Reference -->
+              <!-- Core Rulebook Callout Reference -->
               <div class="rulebook-callout-box">
                 <span class="rulebook-caption">
-                  <i class="ri-book-open-line"></i> Official Rulebook Mechanics:
+                  <i class="ri-book-open-line"></i> Core Rulebook Mechanics:
                 </span>
                 <p class="dossier-desc-text">
                   {{ getEffectDesc(getActiveEffect(pow).baseEffect) }}
@@ -623,10 +623,10 @@
                     </div>
                   </div>
 
-                  <!-- 4. Official Rules Reference in Callout Box -->
+                  <!-- 4. Core Rules Reference in Callout Box -->
                   <div class="rulebook-callout-box linked">
                     <span class="rulebook-caption">
-                      <i class="ri-book-open-line"></i> Official Rulebook Mechanics:
+                      <i class="ri-book-open-line"></i> Core Rulebook Mechanics:
                     </span>
                     <p class="dossier-desc-text linked-rules-text">
                       {{ getEffectDesc(linked.baseEffect) }}
@@ -884,10 +884,10 @@
                   </div>
                 </div>
 
-                <!-- Official Rulebook Callout Reference -->
+                <!-- Core Rulebook Callout Reference -->
                 <div class="rulebook-callout-box">
                   <span class="rulebook-caption">
-                    <i class="ri-book-open-line"></i> Official Rulebook Mechanics:
+                    <i class="ri-book-open-line"></i> Core Rulebook Mechanics:
                   </span>
                   <p class="dossier-desc-text sub">
                     {{ getEffectDesc(getSubPowerActiveEffect(sub).baseEffect) }}
@@ -1057,7 +1057,7 @@
                     <!-- Rulebook Mechanics for Linked Effect -->
                     <div class="rulebook-callout-box linked">
                       <span class="rulebook-caption">
-                        <i class="ri-book-open-line"></i> Official Rulebook Mechanics:
+                        <i class="ri-book-open-line"></i> Core Rulebook Mechanics:
                       </span>
                       <p class="dossier-desc-text linked-rules-text">
                         {{ getEffectDesc(linked.baseEffect) }}
@@ -1289,10 +1289,10 @@
                     </div>
                   </div>
 
-                  <!-- Official Rulebook Callout Reference -->
+                  <!-- Core Rulebook Callout Reference -->
                   <div class="rulebook-callout-box">
                     <span class="rulebook-caption">
-                      <i class="ri-book-open-line"></i> Official Rulebook Mechanics:
+                      <i class="ri-book-open-line"></i> Core Rulebook Mechanics:
                     </span>
                     <p class="dossier-desc-text sub">{{ getEffectDesc(getSubPowerActiveEffect(sub).baseEffect) }}</p>
                   </div>
@@ -1418,10 +1418,10 @@
                       </div>
                     </div>
 
-                    <!-- 4. Official Rules Reference in Callout Box -->
+                    <!-- 4. Core Rules Reference in Callout Box -->
                     <div class="rulebook-callout-box linked">
                       <span class="rulebook-caption">
-                        <i class="ri-book-open-line"></i> Official Rulebook Mechanics:
+                        <i class="ri-book-open-line"></i> Core Rulebook Mechanics:
                       </span>
                       <p class="dossier-desc-text linked-rules-text">
                         {{ getEffectDesc(linked.baseEffect) }}
@@ -2535,7 +2535,7 @@ function formatRange(eff) {
 
 function getEffectDesc(baseName) {
   const match = BASE_EFFECTS.find(b => b.name?.toLowerCase() === (baseName || '').toLowerCase());
-  return match?.desc || 'Official superhuman power effect rules.';
+  return match?.desc || 'Core superhuman power effect rules.';
 }
 
 function getModifierInfo(modName, isFlaw = false) {
