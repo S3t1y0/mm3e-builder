@@ -83,6 +83,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useClipboard } from '@vueuse/core';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { buildMarkdownSheet, buildBBCodeSheet, buildPlainTextSheet } from '../../utils/exporters.js';
@@ -91,7 +92,7 @@ const heroStore = useHeroStore();
 const uiStore = useUiStore();
 
 const textFormat = ref('markdown');
-const copied = ref(false);
+const { copy, copied } = useClipboard({ copiedDuring: 2000 });
 
 const activeTextContent = computed(() => {
   if (textFormat.value === 'markdown') {
@@ -104,17 +105,9 @@ const activeTextContent = computed(() => {
 });
 
 async function copyTextExport() {
-  try {
-    await navigator.clipboard.writeText(activeTextContent.value);
-    copied.value = true;
-    const label = textFormat.value === 'plain' ? 'Plain Text' : textFormat.value.toUpperCase();
-    uiStore.showToast(`${label} sheet copied to clipboard!`, 'success');
-    setTimeout(() => {
-      copied.value = false;
-    }, 2000);
-  } catch (e) {
-    uiStore.showToast('Failed to copy text', 'error');
-  }
+  await copy(activeTextContent.value);
+  const label = textFormat.value === 'plain' ? 'Plain Text' : textFormat.value.toUpperCase();
+  uiStore.showToast(`${label} sheet copied to clipboard!`, 'success');
 }
 
 function downloadTextFile() {

@@ -123,6 +123,7 @@
 
 <script setup>
 import { ref, watch, computed } from 'vue';
+import { useClipboard } from '@vueuse/core';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { generateShareUrl } from '../../services/shareService.js';
@@ -130,7 +131,7 @@ import { generateShareUrl } from '../../services/shareService.js';
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
 
-const copied = ref(false);
+const { copy, copied } = useClipboard({ copiedDuring: 2000 });
 const isGenerating = ref(false);
 const forceOffline = ref(false);
 
@@ -219,14 +220,8 @@ watch(forceOffline, () => {
 
 async function copyLink() {
   if (!shareData.value.url) return;
-  try {
-    await navigator.clipboard.writeText(shareData.value.url);
-    copied.value = true;
-    uiStore.showToast('Link copied to clipboard.', 'success');
-    setTimeout(() => { copied.value = false; }, 2000);
-  } catch (err) {
-    uiStore.showToast('Failed to copy link.', 'error');
-  }
+  await copy(shareData.value.url);
+  uiStore.showToast('Link copied to clipboard.', 'success');
 }
 </script>
 

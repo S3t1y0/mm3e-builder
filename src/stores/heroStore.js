@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { max, sum } from 'radash';
 import { calculatePowerTotalCost, normalizePower, createEmptyPower, createEmptyEffect } from '../rules/powerEngine.js';
 import { compileTargetedAttacks, calculateDegrees } from '../rules/attacks.js';
 import { ARCHETYPES } from '../rules/archetypes.js';
@@ -254,10 +255,8 @@ export const useHeroStore = defineStore('hero', {
     },
 
     equipmentArmorBonus(state) {
-      let maxProt = 0;
-      const resources = state.character.resources || [];
-      for (const r of resources) {
-        if ((r.status || 'equipped') !== 'equipped') continue;
+      const equipped = (state.character.resources || []).filter(r => (r.status || 'equipped') === 'equipped');
+      const bonuses = equipped.map(r => {
         if (r.subtype === 'armor' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')) {
           const a = r.armor || {};
           let rank = Number(a.protectionRank);
@@ -265,17 +264,16 @@ export const useHeroStore = defineStore('hero', {
             const m = (r.desc || '').match(/Protection\s+(\d+)/i);
             rank = m ? parseInt(m[1], 10) : 0;
           }
-          if (rank > maxProt) maxProt = rank;
+          return rank;
         }
-      }
-      return maxProt;
+        return 0;
+      });
+      return max(bonuses) || 0;
     },
 
     equipmentShieldBonus(state) {
-      let maxShield = 0;
-      const resources = state.character.resources || [];
-      for (const r of resources) {
-        if ((r.status || 'equipped') !== 'equipped') continue;
+      const equipped = (state.character.resources || []).filter(r => (r.status || 'equipped') === 'equipped');
+      const bonuses = equipped.map(r => {
         if (r.subtype === 'shield' || (r.armor && (r.armor.shieldRank || r.armor.activeDefenseBonus))) {
           const a = r.armor || {};
           let shieldVal = Number(a.activeDefenseBonus ?? a.shieldRank ?? 0);
@@ -283,53 +281,35 @@ export const useHeroStore = defineStore('hero', {
             const m = (r.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (r.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
             shieldVal = m ? parseInt(m[1], 10) : 0;
           }
-          if (shieldVal > maxShield) maxShield = shieldVal;
+          return shieldVal;
         }
-      }
-      return maxShield;
+        return 0;
+      });
+      return max(bonuses) || 0;
     },
 
     protectionBonus() {
-      let bonus = 0;
-      for (const effect of this.activeEffects) {
-        const b = (effect.baseEffect || effect.name || '').toLowerCase();
-        if (b === 'protection') {
-          bonus += (parseInt(effect.ranks, 10) || 0);
-        }
-      }
-      return bonus;
+      const protEffects = this.activeEffects.filter(e => (e.baseEffect || e.name || '').toLowerCase() === 'protection');
+      return sum(protEffects, e => parseInt(e.ranks, 10) || 0);
     },
 
     // --- Budget & Point Summaries ---
     totalAbilityPP(state) {
-      let sum = 0;
       const absent = state.character.absentAbilities || [];
-      for (const [key, val] of Object.entries(state.character.abilities)) {
-        if (absent.includes(key)) {
-          sum -= 10;
-        } else {
-          sum += (val || 0) * 2;
-        }
-      }
-      return sum;
+      return sum(Object.entries(state.character.abilities || {}), ([key, val]) => {
+        return absent.includes(key) ? -10 : (val || 0) * 2;
+      });
     },
 
     totalDefensePP(state) {
-      let sum = 0;
       const isStaAbsent = (state.character.absentAbilities || []).includes('STA');
-      for (const [key, val] of Object.entries(state.character.defensesBought || {})) {
-        if (key !== 'TOUGHNESS' && !(key === 'FORTITUDE' && isStaAbsent)) {
-          sum += (val || 0);
-        }
-      }
-      return sum;
+      return sum(Object.entries(state.character.defensesBought || {}), ([key, val]) => {
+        return (key !== 'TOUGHNESS' && !(key === 'FORTITUDE' && isStaAbsent)) ? (val || 0) : 0;
+      });
     },
 
     totalSkillPP(state) {
-      let ranks = 0;
-      for (const s of (state.character.skills || [])) {
-        ranks += (parseInt(s.ranks ?? s.rank ?? 0, 10) || 0);
-      }
+      const ranks = sum(state.character.skills || [], s => parseInt(s.ranks ?? s.rank ?? 0, 10) || 0);
       return Math.ceil(ranks / 2);
     },
 
@@ -388,19 +368,11 @@ export const useHeroStore = defineStore('hero', {
     },
 
     totalAdvantagePP(state) {
-      let sum = 0;
-      for (const a of (state.character.advantages || [])) {
-        sum += (parseInt(a.ranks ?? a.rank ?? 1, 10) || 1);
-      }
-      return sum;
+      return sum(state.character.advantages || [], a => parseInt(a.ranks ?? a.rank ?? 1, 10) || 1);
     },
 
     totalPowerPP(state) {
-      let sum = 0;
-      for (const p of (state.character.powers || [])) {
-        sum += (calculatePowerTotalCost(p) || 0);
-      }
-      return sum;
+      return sum(state.character.powers || [], p => calculatePowerTotalCost(p) || 0);
     },
 
     abilitiesCost() { return this.totalAbilityPP; },
@@ -436,15 +408,11 @@ export const useHeroStore = defineStore('hero', {
     },
 
     speedBaseRank() {
-      let speedRank = 0;
-      for (const eff of this.activeEffects) {
+      const speedEffects = this.activeEffects.filter(eff => {
         const base = (eff.baseEffect || eff.effectType || eff.name || '').toLowerCase();
-        if (base === 'flight' || base === 'speed') {
-          const r = parseInt(eff.ranks, 10) || 0;
-          if (r > speedRank) speedRank = r;
-        }
-      }
-      return speedRank;
+        return base === 'flight' || base === 'speed';
+      });
+      return max(speedEffects.map(eff => parseInt(eff.ranks, 10) || 0)) || 0;
     },
 
     conditionModifiers(state) {

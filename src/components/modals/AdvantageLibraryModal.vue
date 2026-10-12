@@ -6,7 +6,6 @@
       @click.self="uiStore.closeModal('advantage')"
     >
       <div class="modal-dialog modal-xl advantage-modal-dialog">
-        <!-- MODAL HEADER -->
         <div class="modal-header">
           <div class="modal-title-group">
             <span class="icon"><i class="ri-star-line"></i></span>
@@ -38,9 +37,7 @@
           </div>
         </div>
 
-        <!-- MODAL BODY -->
         <div class="modal-body advantage-modal-body">
-          <!-- SEARCH & CATEGORY BAR -->
           <div class="adv-filter-toolbar">
             <div class="palette-search-box flex-1">
               <span class="search-icon"><i class="ri-search-line"></i></span>
@@ -61,7 +58,6 @@
               </button>
             </div>
 
-            <!-- CATEGORY FILTER CHIPS -->
             <div class="filter-pills-bar">
               <button
                 v-for="cat in categories"
@@ -77,7 +73,6 @@
             </div>
           </div>
 
-          <!-- ADVANTAGES CATALOG GRID -->
           <div ref="gridRef" class="adv-catalog-grid">
             <div
               v-if="filteredAdvantages.length === 0"
@@ -118,9 +113,8 @@
               <p class="adv-card-desc" :title="adv.desc">{{ adv.desc }}</p>
 
               <div class="adv-card-footer">
-                <!-- A. IF ADVANTAGE REQUIRES SPECIFICATION (e.g. Benefit, Favored Foe, Skill Mastery) -->
+                <!-- Specifiable advantage controls (e.g. Benefit, Favored Foe) -->
                 <template v-if="adv.requiresSpecification">
-                  <!-- List of already added subtypes on sheet -->
                   <div v-if="getSheetInstances(adv.name).length > 0" class="adv-instances-tray">
                     <div
                       v-for="inst in getSheetInstances(adv.name)"
@@ -161,7 +155,6 @@
                     </div>
                   </div>
 
-                  <!-- Add / Add Another Button -->
                   <button
                     type="button"
                     class="btn btn-secondary btn-xs btn-add-adv"
@@ -172,9 +165,8 @@
                   </button>
                 </template>
 
-                <!-- B. STANDARD ADVANTAGE (NO SPECIFICATION NEEDED) -->
+                <!-- Standard advantage controls -->
                 <template v-else>
-                  <!-- If already on sheet: On Sheet badge, Stepper, and Delete button -->
                   <div v-if="isAdvantageOnSheet(adv.name)" class="adv-card-active-controls">
                     <span class="badge-in-sheet">
                       <i class="ri-checkbox-circle-fill"></i>
@@ -208,7 +200,6 @@
                     </div>
                   </div>
 
-                  <!-- If not on sheet: Add button -->
                   <button
                     v-else
                     type="button"
@@ -223,7 +214,6 @@
           </div>
         </div>
 
-        <!-- MODAL FOOTER -->
         <div class="modal-footer">
           <span class="modal-footer-hint">
             <i class="ri-lightbulb-line"></i> Use <strong>"Add with Specification"</strong> for specialized advantages like Wealth, Favored Foe, or Skill Mastery.
@@ -238,7 +228,7 @@
         </div>
       </div>
 
-      <!-- SPECIFICATION PICKER POPUP MODAL -->
+      <!-- Specification dialog -->
       <transition name="fade">
         <div
           v-if="activeSpecAdv"
@@ -263,7 +253,6 @@
 
             <p class="spec-picker-desc">{{ activeSpecAdv.desc }}</p>
 
-            <!-- PRESET SUGGESTION CHIPS -->
             <div v-if="activeSpecAdv.specificationSuggestions?.length" class="spec-suggestions-block">
               <span class="spec-sugg-title">
                 <i class="ri-list-check-2"></i> Common Options:
@@ -282,7 +271,6 @@
               </div>
             </div>
 
-            <!-- TEXT INPUT -->
             <div class="spec-field-group">
               <label class="spec-field-label">
                 {{ activeSpecAdv.specificationLabel || 'Specification / Focus' }}:
@@ -297,7 +285,6 @@
               />
             </div>
 
-            <!-- RANK PICKER IF RANKED -->
             <div v-if="activeSpecAdv.ranked" class="spec-field-group">
               <label class="spec-field-label">Initial Rank:</label>
               <div class="spec-rank-stepper-wrap">
@@ -320,7 +307,6 @@
               </div>
             </div>
 
-            <!-- ACTIONS -->
             <div class="spec-picker-actions">
               <button
                 type="button"
@@ -342,7 +328,7 @@
         </div>
       </transition>
 
-      <!-- CREATE CUSTOM HOMEBREW ADVANTAGE MODAL -->
+      <!-- Custom advantage dialog -->
       <transition name="fade">
         <div
           v-if="showCustomModal"
@@ -473,7 +459,7 @@ const specInput = ref('');
 const specRank = ref(1);
 const specInputRef = ref(null);
 
-// Custom feat modal state
+// Custom advantage state
 const showCustomModal = ref(false);
 const customForm = ref({
   name: '',
@@ -536,7 +522,6 @@ const filteredAdvantages = computed(() => {
   const cat = activeCategory.value;
 
   return ADVANTAGES.filter(a => {
-    // Search match
     const matchesSearch = !q ||
       a.name.toLowerCase().includes(q) ||
       (a.desc && a.desc.toLowerCase().includes(q)) ||
@@ -544,7 +529,6 @@ const filteredAdvantages = computed(() => {
 
     if (!matchesSearch) return false;
 
-    // Category match
     if (cat === 'All') return true;
     if (cat === 'Ranked') return !!a.ranked;
     return a.category === cat;
@@ -609,7 +593,6 @@ function deleteInstance(id) {
   uiStore.showToast(`Removed ${title} from Advantages`, 'info');
 }
 
-// Open specification picker
 function openSpecModal(adv) {
   activeSpecAdv.value = adv;
   specInput.value = adv.specificationSuggestions?.[0] || '';
@@ -631,7 +614,6 @@ function confirmAddWithSpec() {
   activeSpecAdv.value = null;
 }
 
-// Custom feat modal
 function openCustomModal() {
   customForm.value = {
     name: '',
@@ -804,7 +786,7 @@ function confirmCreateCustomAdv() {
   background: rgba(255, 255, 255, 0.35);
 }
 
-/* ADVANTAGE CARD */
+/* Advantage card */
 .adv-catalog-card {
   display: flex;
   flex-direction: column;
@@ -940,7 +922,7 @@ function confirmCreateCustomAdv() {
   text-overflow: ellipsis;
 }
 
-/* ACTION SHELF (CARD FOOTER) */
+/* Card footer controls */
 .adv-card-footer {
   display: flex !important;
   flex-direction: column !important;
@@ -1172,7 +1154,7 @@ function confirmCreateCustomAdv() {
   transform: translateY(-1px);
 }
 
-/* SPECIFICATION POPUP MODAL */
+/* Specification dialog */
 .spec-picker-overlay {
   position: fixed;
   inset: 0;
@@ -1352,7 +1334,7 @@ function confirmCreateCustomAdv() {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-/* CUSTOM ADV FORM LAYOUT */
+/* Custom advantage dialog */
 .custom-adv-form {
   display: flex;
   flex-direction: column;

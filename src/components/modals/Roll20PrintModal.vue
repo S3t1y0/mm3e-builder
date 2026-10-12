@@ -364,10 +364,13 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { useClipboard } from '@vueuse/core';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
 import { generateRoll20Macros } from '../../utils/exporters.js';
+
+const { copy } = useClipboard();
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -436,22 +439,14 @@ function handlePrint() {
 }
 
 async function copySingleMacro(cmd) {
-  try {
-    await navigator.clipboard.writeText(cmd);
-    uiStore.showToast('Macro copied to clipboard!', 'success');
-  } catch (e) {
-    uiStore.showToast('Failed to copy macro', 'error');
-  }
+  await copy(cmd);
+  uiStore.showToast('Macro copied to clipboard!', 'success');
 }
 
 async function copyAllMacros() {
   const text = macrosList.value.map(m => `# --- ${m.title} ---\n${m.command}\n`).join('\n');
-  try {
-    await navigator.clipboard.writeText(text);
-    uiStore.showToast('All macros copied to clipboard!', 'success');
-  } catch (e) {
-    uiStore.showToast('Failed to copy macros', 'error');
-  }
+  await copy(text);
+  uiStore.showToast('All macros copied to clipboard!', 'success');
 }
 </script>
 

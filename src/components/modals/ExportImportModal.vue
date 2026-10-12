@@ -321,15 +321,17 @@
 
 <script setup>
 import { ref, computed, watch } from 'vue';
+import { useClipboard } from '@vueuse/core';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { downloadCharacterJson } from '../../utils/exporters.js';
+import { validateCharacterImport } from '../../schemas/characterSchema.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
 
 const activeMode = ref(uiStore.exportImportInitialTab || 'storage');
-const copied = ref(false);
+const { copy, copied } = useClipboard({ copiedDuring: 2000 });
 const rawImportText = ref('');
 const parsedPreview = ref(null);
 const importError = ref('');
@@ -428,14 +430,8 @@ function handleDownload() {
 }
 
 async function handleCopyExport() {
-  try {
-    await navigator.clipboard.writeText(exportJsonString.value);
-    copied.value = true;
-    uiStore.showToast('Character JSON copied to clipboard!', 'success');
-    setTimeout(() => { copied.value = false; }, 2500);
-  } catch (err) {
-    uiStore.showToast('Failed to copy to clipboard', 'error');
-  }
+  await copy(exportJsonString.value);
+  uiStore.showToast('Character JSON copied to clipboard!', 'success');
 }
 
 function triggerFileInput() {
@@ -478,15 +474,12 @@ function validateImportJson() {
 
   try {
     const obj = JSON.parse(text);
-    if (!obj || typeof obj !== 'object') {
-      importError.value = 'Invalid JSON: Content is not an object';
+    const validation = validateCharacterImport(obj);
+    if (!validation.isValid) {
+      importError.value = validation.error;
       return;
     }
-    if (!obj.abilities && !obj.powers && !obj.name) {
-      importError.value = 'Invalid Format: Missing M&M 3E character attributes';
-      return;
-    }
-    parsedPreview.value = obj;
+    parsedPreview.value = validation.data;
   } catch (e) {
     importError.value = 'JSON Syntax Error: ' + e.message;
   }
