@@ -1265,9 +1265,6 @@
               <h3 class="modal-title">
                 {{ editingCustomId ? 'Edit Custom Target / Sub-Effect' : 'New Custom Target / Sub-Effect' }}
               </h3>
-              <span class="modal-subtitle">
-                Configure custom parameter for {{ customSubModalTargetEffect }}
-              </span>
             </div>
           </div>
           <button type="button" class="modal-close-btn" @click="closeCustomSubModal">

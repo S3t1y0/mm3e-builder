@@ -9,7 +9,6 @@
           </div>
           <div>
             <h2 class="modal-title">Text Character Sheet Export</h2>
-            <p class="modal-sub">Formatted character sheets for Discord, GitHub, Obsidian, RPG forums, and plain text</p>
           </div>
         </div>
         <button class="btn btn-ghost btn-sm" @click="uiStore.closeModal('markdown')" aria-label="Close">

@@ -1,6 +1,7 @@
 import LZString from 'lz-string';
 import { calculatePowerTotalCost } from '../rules/powerEngine.js';
 import { calculateDC, resolveSpecialConfig, formatRange } from '../rules/powerFormatter.js';
+import { resolveEffectRulesBlock } from '../rules/powerRuleDescriptions.js';
 import { isMotivation } from '../rules/complications.js';
 
 export function escapeHtml(str) {
@@ -512,6 +513,75 @@ function formatEffectDetails(eff) {
 }
 
 /**
+ * Formats dynamic rule descriptions for a power effect (effect rules, extras, flaws) in Markdown.
+ */
+function formatEffectRulesMarkdown(eff, baseIndent = '  ') {
+  if (!eff) return '';
+  const { effectRuleDescs, modifierRules } = resolveEffectRulesBlock(eff);
+  const descs = Array.isArray(effectRuleDescs) ? effectRuleDescs : [];
+  const mods = Array.isArray(modifierRules) ? modifierRules : [];
+  if (!descs.length && !mods.length) return '';
+
+  const effName = eff.baseEffect || eff.name || 'Effect';
+  let out = `${baseIndent}- *Rules Reference:*\n`;
+  descs.forEach((d, idx) => {
+    const label = idx === 0 ? effName : '•';
+    out += `${baseIndent}  - *${label}:* ${d}\n`;
+  });
+  mods.forEach(m => {
+    const typeLabel = m.type === 'extra' ? 'Extra' : 'Flaw';
+    out += `${baseIndent}  - *${m.name} (${typeLabel}):* ${m.desc}\n`;
+  });
+  return out;
+}
+
+/**
+ * Formats dynamic rule descriptions for a power effect (effect rules, extras, flaws) in BBCode.
+ */
+function formatEffectRulesBBCode(eff, baseIndent = '  ') {
+  if (!eff) return '';
+  const { effectRuleDescs, modifierRules } = resolveEffectRulesBlock(eff);
+  const descs = Array.isArray(effectRuleDescs) ? effectRuleDescs : [];
+  const mods = Array.isArray(modifierRules) ? modifierRules : [];
+  if (!descs.length && !mods.length) return '';
+
+  const effName = eff.baseEffect || eff.name || 'Effect';
+  let out = `${baseIndent}- [i]Rules Reference:[/i]\n`;
+  descs.forEach((d, idx) => {
+    const label = idx === 0 ? effName : '•';
+    out += `${baseIndent}  * [i]${label}:[/i] ${d}\n`;
+  });
+  mods.forEach(m => {
+    const typeLabel = m.type === 'extra' ? 'Extra' : 'Flaw';
+    out += `${baseIndent}  * [i]${m.name} (${typeLabel}):[/i] ${m.desc}\n`;
+  });
+  return out;
+}
+
+/**
+ * Formats dynamic rule descriptions for a power effect (effect rules, extras, flaws) in Plain Text.
+ */
+function formatEffectRulesPlainText(eff, baseIndent = '   ') {
+  if (!eff) return '';
+  const { effectRuleDescs, modifierRules } = resolveEffectRulesBlock(eff);
+  const descs = Array.isArray(effectRuleDescs) ? effectRuleDescs : [];
+  const mods = Array.isArray(modifierRules) ? modifierRules : [];
+  if (!descs.length && !mods.length) return '';
+
+  const effName = eff.baseEffect || eff.name || 'Effect';
+  let out = `${baseIndent}- Rules Reference:\n`;
+  descs.forEach((d, idx) => {
+    const label = idx === 0 ? effName : '•';
+    out += `${baseIndent}  * ${label}: ${d}\n`;
+  });
+  mods.forEach(m => {
+    const typeLabel = m.type === 'extra' ? 'Extra' : 'Flaw';
+    out += `${baseIndent}  * ${m.name} (${typeLabel}): ${m.desc}\n`;
+  });
+  return out;
+}
+
+/**
  * Builds clean, comprehensive Markdown character sheet.
  */
 export function buildMarkdownSheet(character, heroStore) {
@@ -706,15 +776,20 @@ export function buildMarkdownSheet(character, heroStore) {
           subPowers.forEach(sp => {
             const eff = sp.effect || sp;
             md += `- **${sp.name || eff.baseEffect}:** ${formatEffectDetails(eff)}\n`;
+            md += formatEffectRulesMarkdown(eff, '  ');
             if (Array.isArray(sp.linkedEffects) && sp.linkedEffects.length > 0) {
               sp.linkedEffects.forEach(le => {
-                md += `  - *Linked:* **${le.name || le.baseEffect}:** ${formatEffectDetails(le.effect || le)}\n`;
+                const leEff = le.effect || le;
+                md += `  - *Linked:* **${le.name || leEff.baseEffect}:** ${formatEffectDetails(leEff)}\n`;
+                md += formatEffectRulesMarkdown(leEff, '    ');
               });
             }
             if (Array.isArray(sp.alternateEffects) && sp.alternateEffects.length > 0) {
               sp.alternateEffects.forEach(alt => {
+                const altEff = alt.effect || alt;
                 const altCost = alt.cost || 1;
-                md += `  - *Alternate Effect (Slot):* **${alt.name || alt.baseEffect}:** ${formatEffectDetails(alt.effect || alt)} (${altCost} PP)\n`;
+                md += `  - *Alternate Effect (Slot):* **${alt.name || altEff.baseEffect}:** ${formatEffectDetails(altEff)} (${altCost} PP)\n`;
+                md += formatEffectRulesMarkdown(altEff, '    ');
               });
             }
           });
@@ -726,11 +801,17 @@ export function buildMarkdownSheet(character, heroStore) {
         compEffects.forEach(cp => {
           const eff = cp.effect || cp;
           md += `- **${cp.name || eff.baseEffect}:** ${formatEffectDetails(eff)}\n`;
+          md += formatEffectRulesMarkdown(eff, '  ');
         });
+        if (Array.isArray(p.sharedModifiers) && p.sharedModifiers.length > 0) {
+          const sharedEff = { extras: p.sharedModifiers, flaws: [] };
+          md += formatEffectRulesMarkdown(sharedEff, '  ');
+        }
       } else {
         const eff = p.mainEffect || p;
         md += `### ${pIdx + 1}. **${p.name || eff.baseEffect || 'Power'}** (${cost} PP)\n`;
         md += `- **Effect:** ${formatEffectDetails(eff)}${descriptors}\n`;
+        md += formatEffectRulesMarkdown(eff, '  ');
 
         if (p.activation && p.activation !== 'none') {
           md += `- *Activation:* ${p.activation === 'move' ? 'Move Action (-1 PP)' : 'Standard Action (-2 PP)'}\n`;
@@ -738,14 +819,18 @@ export function buildMarkdownSheet(character, heroStore) {
 
         if (Array.isArray(p.linkedEffects) && p.linkedEffects.length > 0) {
           p.linkedEffects.forEach(link => {
-            md += `- *Linked Effect:* **${link.name || link.baseEffect}:** ${formatEffectDetails(link.effect || link)}\n`;
+            const linkEff = link.effect || link;
+            md += `- *Linked Effect:* **${link.name || linkEff.baseEffect}:** ${formatEffectDetails(linkEff)}\n`;
+            md += formatEffectRulesMarkdown(linkEff, '  ');
           });
         }
 
         if (Array.isArray(p.alternateEffects) && p.alternateEffects.length > 0) {
           p.alternateEffects.forEach(alt => {
+            const altEff = alt.effect || alt;
             const altCost = alt.cost || 1;
-            md += `- *Alternate Effect (Slot):* **${alt.name || alt.baseEffect}:** ${formatEffectDetails(alt.effect || alt)} (${altCost} PP)\n`;
+            md += `- *Alternate Effect (Slot):* **${alt.name || altEff.baseEffect}:** ${formatEffectDetails(altEff)} (${altCost} PP)\n`;
+            md += formatEffectRulesMarkdown(altEff, '  ');
           });
         }
       }
@@ -1031,15 +1116,20 @@ export function buildBBCodeSheet(character, heroStore) {
         subPowers.forEach(sp => {
           const eff = sp.effect || sp;
           bb += `  - [b]${sp.name || eff.baseEffect}:[/b] ${formatEffectDetails(eff)}\n`;
+          bb += formatEffectRulesBBCode(eff, '    ');
           if (Array.isArray(sp.linkedEffects) && sp.linkedEffects.length > 0) {
             sp.linkedEffects.forEach(le => {
-              bb += `    * [i]Linked:[/i] [b]${le.name || le.baseEffect}:[/b] ${formatEffectDetails(le.effect || le)}\n`;
+              const leEff = le.effect || le;
+              bb += `    * [i]Linked:[/i] [b]${le.name || leEff.baseEffect}:[/b] ${formatEffectDetails(leEff)}\n`;
+              bb += formatEffectRulesBBCode(leEff, '      ');
             });
           }
           if (Array.isArray(sp.alternateEffects) && sp.alternateEffects.length > 0) {
             sp.alternateEffects.forEach(alt => {
+              const altEff = alt.effect || alt;
               const altCost = alt.cost || 1;
-              bb += `    * [i]Alternate Effect:[/i] [b]${alt.name || alt.baseEffect}:[/b] ${formatEffectDetails(alt.effect || alt)} (${altCost} PP)\n`;
+              bb += `    * [i]Alternate Effect:[/i] [b]${alt.name || altEff.baseEffect}:[/b] ${formatEffectDetails(altEff)} (${altCost} PP)\n`;
+              bb += formatEffectRulesBBCode(altEff, '      ');
             });
           }
         });
@@ -1049,10 +1139,16 @@ export function buildBBCodeSheet(character, heroStore) {
         compEffects.forEach(cp => {
           const eff = cp.effect || cp;
           bb += `  - [b]${cp.name || eff.baseEffect}:[/b] ${formatEffectDetails(eff)}\n`;
+          bb += formatEffectRulesBBCode(eff, '    ');
         });
+        if (Array.isArray(p.sharedModifiers) && p.sharedModifiers.length > 0) {
+          const sharedEff = { extras: p.sharedModifiers, flaws: [] };
+          bb += formatEffectRulesBBCode(sharedEff, '    ');
+        }
       } else {
         const eff = p.mainEffect || p;
         bb += `• [b]${p.name || eff.baseEffect || 'Power'}[/b] (${cost} PP): ${formatEffectDetails(eff)}${descriptors}\n`;
+        bb += formatEffectRulesBBCode(eff, '  ');
 
         if (p.activation && p.activation !== 'none') {
           bb += `  - [i]Activation:[/i] ${p.activation === 'move' ? 'Move Action (-1 PP)' : 'Standard Action (-2 PP)'}\n`;
@@ -1060,14 +1156,18 @@ export function buildBBCodeSheet(character, heroStore) {
 
         if (Array.isArray(p.linkedEffects) && p.linkedEffects.length > 0) {
           p.linkedEffects.forEach(link => {
-            bb += `  - [i]Linked Effect:[/i] [b]${link.name || link.baseEffect}:[/b] ${formatEffectDetails(link.effect || link)}\n`;
+            const linkEff = link.effect || link;
+            bb += `  - [i]Linked Effect:[/i] [b]${link.name || linkEff.baseEffect}:[/b] ${formatEffectDetails(linkEff)}\n`;
+            bb += formatEffectRulesBBCode(linkEff, '    ');
           });
         }
 
         if (Array.isArray(p.alternateEffects) && p.alternateEffects.length > 0) {
           p.alternateEffects.forEach(alt => {
+            const altEff = alt.effect || alt;
             const altCost = alt.cost || 1;
-            bb += `  - [i]Alternate Effect:[/i] [b]${alt.name || alt.baseEffect}:[/b] ${formatEffectDetails(alt.effect || alt)} (${altCost} PP)\n`;
+            bb += `  - [i]Alternate Effect:[/i] [b]${alt.name || altEff.baseEffect}:[/b] ${formatEffectDetails(altEff)} (${altCost} PP)\n`;
+            bb += formatEffectRulesBBCode(altEff, '    ');
           });
         }
       }
@@ -1365,15 +1465,20 @@ export function buildPlainTextSheet(character, heroStore) {
         subPowers.forEach(sp => {
           const eff = sp.effect || sp;
           txt += `   - ${sp.name || eff.baseEffect}: ${formatEffectDetails(eff)}\n`;
+          txt += formatEffectRulesPlainText(eff, '     ');
           if (Array.isArray(sp.linkedEffects) && sp.linkedEffects.length > 0) {
             sp.linkedEffects.forEach(le => {
-              txt += `     * Linked: ${le.name || le.baseEffect}: ${formatEffectDetails(le.effect || le)}\n`;
+              const leEff = le.effect || le;
+              txt += `     * Linked: ${le.name || leEff.baseEffect}: ${formatEffectDetails(leEff)}\n`;
+              txt += formatEffectRulesPlainText(leEff, '       ');
             });
           }
           if (Array.isArray(sp.alternateEffects) && sp.alternateEffects.length > 0) {
             sp.alternateEffects.forEach(alt => {
+              const altEff = alt.effect || alt;
               const altCost = alt.cost || 1;
-              txt += `     * Alternate Effect: ${alt.name || alt.baseEffect}: ${formatEffectDetails(alt.effect || alt)} (${altCost} PP)\n`;
+              txt += `     * Alternate Effect: ${alt.name || alt.baseEffect}: ${formatEffectDetails(altEff)} (${altCost} PP)\n`;
+              txt += formatEffectRulesPlainText(altEff, '       ');
             });
           }
         });
@@ -1383,10 +1488,16 @@ export function buildPlainTextSheet(character, heroStore) {
         compEffects.forEach(cp => {
           const eff = cp.effect || cp;
           txt += `   - ${cp.name || eff.baseEffect}: ${formatEffectDetails(eff)}\n`;
+          txt += formatEffectRulesPlainText(eff, '     ');
         });
+        if (Array.isArray(p.sharedModifiers) && p.sharedModifiers.length > 0) {
+          const sharedEff = { extras: p.sharedModifiers, flaws: [] };
+          txt += formatEffectRulesPlainText(sharedEff, '     ');
+        }
       } else {
         const eff = p.mainEffect || p;
         txt += `${pIdx + 1}. ${p.name || eff.baseEffect || 'Power'} (${cost} PP): ${formatEffectDetails(eff)}${descriptors}\n`;
+        txt += formatEffectRulesPlainText(eff, '   ');
 
         if (p.activation && p.activation !== 'none') {
           txt += `   - Activation: ${p.activation === 'move' ? 'Move Action (-1 PP)' : 'Standard Action (-2 PP)'}\n`;
@@ -1394,14 +1505,18 @@ export function buildPlainTextSheet(character, heroStore) {
 
         if (Array.isArray(p.linkedEffects) && p.linkedEffects.length > 0) {
           p.linkedEffects.forEach(link => {
-            txt += `   - Linked Effect: ${link.name || link.baseEffect}: ${formatEffectDetails(link.effect || link)}\n`;
+            const linkEff = link.effect || link;
+            txt += `   - Linked Effect: ${link.name || linkEff.baseEffect}: ${formatEffectDetails(linkEff)}\n`;
+            txt += formatEffectRulesPlainText(linkEff, '     ');
           });
         }
 
         if (Array.isArray(p.alternateEffects) && p.alternateEffects.length > 0) {
           p.alternateEffects.forEach(alt => {
+            const altEff = alt.effect || alt;
             const altCost = alt.cost || 1;
-            txt += `   - Alternate Effect: ${alt.name || alt.baseEffect}: ${formatEffectDetails(alt.effect || alt)} (${altCost} PP)\n`;
+            txt += `   - Alternate Effect: ${alt.name || alt.baseEffect}: ${formatEffectDetails(altEff)} (${altCost} PP)\n`;
+            txt += formatEffectRulesPlainText(altEff, '     ');
           });
         }
       }

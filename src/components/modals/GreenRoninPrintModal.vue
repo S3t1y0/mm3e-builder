@@ -9,7 +9,6 @@
               <i class="ri-printer-line gr-modal-title-icon"></i>
               Deluxe Character Sheet (PDF)
             </div>
-            <span class="gr-modal-subtitle">Classic 3E Format</span>
           </div>
 
           <!-- Custom Percentage Zoom Control -->

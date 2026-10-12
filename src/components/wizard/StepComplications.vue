@@ -260,11 +260,6 @@
                 {{ editingId ? 'Edit ' : 'Add ' }}
                 {{ modalMode === 'motivation' ? 'Motivation' : 'Complication' }}
               </h4>
-              <p class="modal-subtitle">
-                {{ modalMode === 'motivation'
-                  ? 'The reason this character fights or acts as a hero.'
-                  : 'An obstacle or weakness that creates setbacks during play.' }}
-              </p>
             </div>
           </div>
           <button type="button" class="btn-close-modal" @click="showAddDialog = false" aria-label="Close dialog">

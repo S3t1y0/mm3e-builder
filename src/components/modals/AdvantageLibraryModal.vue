@@ -12,7 +12,6 @@
             <span class="icon"><i class="ri-star-line"></i></span>
             <div>
               <h3>M&M 3e Advantages Catalog</h3>
-              <p class="modal-subtitle">Talents, combat maneuvers, and situational benefits (1 PP / Rank)</p>
             </div>
           </div>
           <div class="modal-header-actions">

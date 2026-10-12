@@ -12,7 +12,6 @@
             <span class="icon"><i class="ri-equalizer-line"></i></span>
             <div>
               <h3>Extras & Flaws Modifiers Library</h3>
-              <p class="modal-subtitle">Mutants & Masterminds 3e Power Modifiers (Hero's Handbook Ch. 6)</p>
             </div>
           </div>
           <div class="modal-header-actions">

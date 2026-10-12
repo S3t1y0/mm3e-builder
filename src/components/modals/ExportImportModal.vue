@@ -9,7 +9,6 @@
           </div>
           <div>
             <h2 class="modal-title">Storage & Hero Backup</h2>
-            <p class="modal-sub">Manage browser local storage, download JSON backups, or import characters</p>
           </div>
         </div>
         <button class="btn btn-ghost btn-sm" @click="uiStore.closeModal('exportImport')">
@@ -108,7 +107,6 @@
               <h3 class="roster-title">
                 <i class="ri-folder-user-line"></i> Character Vault Slots
               </h3>
-              <p class="roster-subtitle">Store multiple character profiles or version checkpoints without downloading files.</p>
             </div>
             <div class="roster-badge-count">
               {{ heroStore.savedRoster?.length || 0 }} Saved Slots
@@ -221,7 +219,6 @@
 
         <div class="code-preview-header">
           <span>JSON DATA PREVIEW ({{ exportSizeKb }} KB)</span>
-          <span style="color: var(--text-muted);">Formatted with 2 spaces indentation</span>
         </div>
         <pre class="json-code-box"><code>{{ exportJsonString }}</code></pre>
       </div>

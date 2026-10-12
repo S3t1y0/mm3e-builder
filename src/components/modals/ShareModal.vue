@@ -9,7 +9,6 @@
           </div>
           <div>
             <h2 class="modal-title">Share Character</h2>
-            <p class="modal-sub">Create a link to view or play this character sheet</p>
           </div>
         </div>
         <button class="btn btn-ghost btn-sm" @click="uiStore.closeModal('share')" aria-label="Close">

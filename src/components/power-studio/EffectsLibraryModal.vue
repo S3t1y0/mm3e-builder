@@ -12,7 +12,6 @@
             <span class="icon"><i class="ri-flashlight-line"></i></span>
             <div>
               <h3>Power Effects Library</h3>
-              <p class="modal-subtitle">Base Effects (Hero's Handbook Ch. 6)</p>
             </div>
           </div>
           <div class="modal-header-actions">

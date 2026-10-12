@@ -12,7 +12,6 @@
             <span class="icon"><i class="ri-heart-pulse-fill"></i></span>
             <div>
               <h3>Apply Combat Conditions</h3>
-              <p class="modal-subtitle">Mutants &amp; Masterminds 3e Status Effects &amp; Tactical Penalties</p>
             </div>
           </div>
           <div class="modal-header-actions">
