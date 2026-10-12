@@ -136,7 +136,6 @@
                     >
                       <td>
                         <div class="spec-child-title-wrap">
-                          <i class="ri-corner-down-right-line spec-branch-icon"></i>
                           <div class="spec-child-name-block">
                             <div class="spec-name-tag-row">
                               <span 
@@ -1062,22 +1061,23 @@ function confirmSpecialtySkill() {
   color: #fef08a;
 }
 
-/* Specialization Child */
+/* Specialization child */
 .spec-child-row {
   background: rgba(56, 189, 248, 0.02);
+  border-left: 2px solid rgba(56, 189, 248, 0.45);
+  transition: background-color var(--trans-fast), border-color var(--trans-fast);
+}
+
+.spec-child-row:hover {
+  background: rgba(56, 189, 248, 0.05);
+  border-left-color: #38bdf8;
 }
 
 .spec-child-title-wrap {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding-left: 0.75rem;
-}
-
-.spec-branch-icon {
-  color: #38bdf8;
-  font-size: 0.9rem;
-  opacity: 0.8;
+  padding-left: 1.5rem;
 }
 
 .spec-child-name-block {

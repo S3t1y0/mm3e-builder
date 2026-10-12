@@ -255,11 +255,6 @@
                   }"
                   :title="ruleSkill.desc"
                 >
-                  <!-- Minimal Tree Marker -->
-                  <div class="spec-tree-marker" aria-hidden="true">
-                    <i class="ri-corner-down-right-line"></i>
-                  </div>
-
                   <!-- Name (Zero Truncation) -->
                   <div class="sheet-skill-info spec-child-info">
                     <div class="sheet-skill-title-row">
@@ -936,15 +931,22 @@ function rollSkill(skillTitle, bonus) {
 }
 
 .sheet-skill-row.is-specialization {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto 60px;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.32rem 0.55rem 0.32rem 1.25rem;
   background: rgba(56, 189, 248, 0.025);
-  border-left-color: #38bdf8;
-  border-radius: var(--radius-xs);
-  padding: 0.26rem 0.45rem;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-left: 2px solid rgba(56, 189, 248, 0.45);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  transition: background-color var(--trans-fast), border-color var(--trans-fast);
 }
 
 .sheet-skill-row.is-specialization:hover {
   background: rgba(56, 189, 248, 0.06);
   border-color: rgba(56, 189, 248, 0.25);
+  border-left-color: #38bdf8;
 }
 
 /* Ability Badges (Refined Triad Calibration) */
@@ -1238,20 +1240,18 @@ function rollSkill(skillTitle, bonus) {
   box-shadow: var(--shadow-sm);
 }
 
-/* Specialization Grouping (Dashboard Hardening) */
+/* Specialization grouping */
 .spec-group-container {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  background: rgba(15, 23, 42, 0.35);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 0.35rem;
-  transition: border-color var(--trans-fast);
+  gap: 0.2rem;
+  background: transparent;
+  border: none;
+  padding: 0;
 }
 
 .spec-group-container.has-specs {
-  border-color: rgba(56, 189, 248, 0.25);
+  border: none;
 }
 
 .spec-parent-row {
@@ -1259,7 +1259,17 @@ function rollSkill(skillTitle, bonus) {
   grid-template-columns: 32px minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.5rem;
-  padding: 0.2rem 0.3rem;
+  padding: 0.32rem 0.55rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  border-left: 2.5px solid transparent;
+  border-radius: var(--radius-sm);
+  transition: background-color var(--trans-fast), border-color var(--trans-fast);
+}
+
+.spec-parent-row:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 .spec-parent-info {
@@ -1328,20 +1338,10 @@ function rollSkill(skillTitle, bonus) {
 .spec-instances-list {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
-  padding-left: 0.35rem;
-  margin-top: 0.15rem;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 0.35rem;
-}
-
-.spec-tree-marker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #38bdf8;
-  font-size: 0.85rem;
-  opacity: 0.75;
+  gap: 0.2rem;
+  padding: 0;
+  margin: 0;
+  border: none;
 }
 
 /* Zero Truncation Subtype Name */
