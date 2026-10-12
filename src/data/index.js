@@ -8,4 +8,3 @@ export * from './configurableEffects.js';
 export * from './extras.js';
 export * from './flaws.js';
 export * from './modifierCategories.js';
-export * from './combos.js';

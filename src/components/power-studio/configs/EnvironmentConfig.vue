@@ -44,7 +44,7 @@
           <div class="card-footer">
             <span class="selection-status">
               <i :class="isEnvironmentSelected(el.id) ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'"></i>
-              {{ isEnvironmentSelected(el.id) ? 'Selected (+ ' + el.cost + ' PP/R)' : 'Click to Add' }}
+              {{ isEnvironmentSelected(el.id) ? 'Selected' : 'Click to Add' }}
             </span>
           </div>
         </div>

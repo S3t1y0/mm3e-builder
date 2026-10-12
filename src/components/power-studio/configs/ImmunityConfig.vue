@@ -74,7 +74,7 @@
           <div class="card-footer">
             <span class="selection-status">
               <i :class="isImmunitySelected(item.id) ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'"></i>
-              {{ isImmunitySelected(item.id) ? 'Active (' + item.ranks + ' R)' : 'Click to Add' }}
+              {{ isImmunitySelected(item.id) ? 'Active' : 'Click to Add' }}
             </span>
           </div>
         </div>

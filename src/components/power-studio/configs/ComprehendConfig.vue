@@ -44,7 +44,7 @@
           <div class="card-footer">
             <span class="selection-status">
               <i :class="isComprehendSelected(mode.id) ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'"></i>
-              {{ isComprehendSelected(mode.id) ? 'Active (' + mode.ranks + ' R)' : 'Click to Add' }}
+              {{ isComprehendSelected(mode.id) ? 'Active' : 'Click to Add' }}
             </span>
           </div>
         </div>

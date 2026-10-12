@@ -688,7 +688,7 @@ const netEffectCost = computed(() => {
   align-items: center;
   gap: 0.45rem;
   white-space: nowrap;
-  transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), transform var(--trans-fast), box-shadow var(--trans-fast);
+  transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast), transform var(--trans-fast);
 }
 
 .mod-compat-toggle:hover {
@@ -705,7 +705,12 @@ const netEffectCost = computed(() => {
   background: rgba(14, 165, 233, 0.15);
   border-color: rgba(56, 189, 248, 0.4);
   color: #38bdf8;
-  box-shadow: 0 2px 8px rgba(14, 165, 233, 0.2);
+}
+
+.mod-compat-toggle.active:hover {
+  background: rgba(14, 165, 233, 0.22);
+  border-color: rgba(56, 189, 248, 0.5);
+  color: #38bdf8;
 }
 
 .mod-compat-count {

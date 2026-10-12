@@ -874,25 +874,19 @@ function calculateModSubtotal(mod, isFlaw = false) {
   border-radius: var(--radius-xs);
   color: #e0f2fe;
   cursor: pointer;
-  transition: all var(--trans-fast);
+  transition: background-color var(--trans-fast), border-color var(--trans-fast), color var(--trans-fast);
   user-select: none;
 }
 
 .btn-catalog-trigger i {
   color: #38bdf8;
   font-size: 0.85rem;
-  transition: transform var(--trans-fast);
 }
 
 .btn-catalog-trigger:hover {
   background: rgba(0, 111, 184, 0.28);
   border-color: #38bdf8;
   color: #ffffff;
-  box-shadow: 0 0 10px rgba(0, 111, 184, 0.35);
-}
-
-.btn-catalog-trigger:hover i {
-  transform: scale(1.1);
 }
 
 .btn-catalog-trigger:active {

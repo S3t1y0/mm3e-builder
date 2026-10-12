@@ -112,7 +112,7 @@
           <div class="card-footer">
             <span class="selection-status">
               <i :class="isConcealmentSelected(item.id) ? 'ri-checkbox-circle-fill' : 'ri-checkbox-blank-circle-line'"></i>
-              {{ isConcealmentSelected(item.id) ? 'Active (' + item.ranks + ' R • ' + (item.ranks * 2) + ' PP)' : 'Click to Add' }}
+              {{ isConcealmentSelected(item.id) ? 'Active' : 'Click to Add' }}
             </span>
           </div>
         </div>

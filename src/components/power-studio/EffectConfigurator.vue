@@ -8,16 +8,8 @@
         <div class="header-titles">
           <div class="header-title-row">
             <span class="config-title">{{ cfg.label || 'Effect Specific Configuration' }}</span>
-            <span class="config-type-tag">{{ effect.baseEffect }}</span>
           </div>
           <span class="config-subtitle">{{ getConfigSummaryText }}</span>
-        </div>
-      </div>
-
-      <div class="header-right">
-        <div v-if="statBadge" class="stat-pill" :class="statBadge.type">
-          <i :class="statBadge.icon"></i>
-          <span>{{ statBadge.text }}</span>
         </div>
       </div>
     </div>
@@ -277,11 +269,6 @@ const calculatedBaseCostDisplay = computed(() => {
   return `${props.effect.baseCost || 1} PP/Rank`;
 });
 
-const currentCategoryObj = computed(() => {
-  const cat = props.effect?.config?.traitCategory || 'abilities';
-  return cfg.value?.categories?.[cat] || null;
-});
-
 const getConfigSummaryText = computed(() => {
   const c = props.effect?.config;
   const base = props.effect?.baseEffect;
@@ -362,43 +349,6 @@ const getConfigSummaryText = computed(() => {
       return 'Effect configuration parameters';
   }
 });
-
-const statBadge = computed(() => {
-  const base = props.effect?.baseEffect;
-  const c = props.effect?.config;
-  if (!c) return null;
-
-  if (base === 'Enhanced Trait') {
-    return {
-      type: 'badge-cost',
-      icon: 'ri-coins-line',
-      text: currentCategoryObj.value?.costDisplay || `${props.effect.baseCost} PP / Rank`
-    };
-  }
-  if (base === 'Senses' || base === 'Immunity' || base === 'Movement' || base === 'Comprehend' || base === 'Concealment') {
-    return {
-      type: 'badge-ranks',
-      icon: 'ri-medal-line',
-      text: `Calculated Ranks: ${props.effect.ranks}`
-    };
-  }
-  if (base === 'Illusion' || base === 'Environment') {
-    return {
-      type: 'badge-cost',
-      icon: 'ri-coins-line',
-      text: `Base Cost: ${props.effect.baseCost} PP/R`
-    };
-  }
-  if (base === 'Affliction' || base === 'Weaken') {
-    return {
-      type: 'badge-res',
-      icon: 'ri-shield-line',
-      text: `Resisted by ${props.effect.resistance || 'Fortitude'}`
-    };
-  }
-  return null;
-});
-
 
 const showCustomSubModal = ref(false);
 const customSubModalTargetEffect = ref('Senses');
