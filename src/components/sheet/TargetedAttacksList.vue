@@ -482,6 +482,7 @@ function handleTurnOnAndRoll(atk) {
 
 .card-title-group {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 0.55rem;
 }

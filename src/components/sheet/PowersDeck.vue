@@ -2570,6 +2570,7 @@ function getModifierInfo(modName, isFlaw = false) {
 
 .card-title-group {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 0.55rem;
 }
