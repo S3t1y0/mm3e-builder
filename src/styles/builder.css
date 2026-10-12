@@ -2230,7 +2230,7 @@
 .embedded-eff-card.active-selected {
   border-color: #10b981;
   background: rgba(16, 185, 129, 0.08);
-  box-shadow: 0 0 0 1px #10b981, 0 4px 16px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 0 1px #10b981, 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 
 .embedded-card-top {
@@ -2678,7 +2678,7 @@
   background: rgba(16, 185, 129, 0.22);
   border-color: #10b981;
   color: #a7f3d0;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.28);
+  box-shadow: none;
   font-weight: 700;
 }
 
@@ -2686,7 +2686,7 @@
   background: rgba(244, 63, 94, 0.22);
   border-color: #f43f5e;
   color: #fecdd3;
-  box-shadow: 0 0 8px rgba(244, 63, 94, 0.28);
+  box-shadow: none;
   font-weight: 700;
 }
 
@@ -3047,19 +3047,19 @@
   white-space: nowrap;
 }
 
-/* Glowing Cost Pill Variants */
+/* Cost Pill Variants */
 .cost-extra {
   background: rgba(16, 185, 129, 0.16);
   border: 1px solid rgba(16, 185, 129, 0.45);
   color: #34d399;
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.15);
+  box-shadow: none;
 }
 
 .cost-flaw {
   background: rgba(244, 63, 94, 0.16);
   border: 1px solid rgba(244, 63, 94, 0.45);
   color: #fb7185;
-  box-shadow: 0 0 8px rgba(244, 63, 94, 0.15);
+  box-shadow: none;
 }
 
 .cost-neutral {

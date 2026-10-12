@@ -385,23 +385,23 @@ onBeforeUnmount(() => {
 /* SPECIAL CARD STATES */
 .tactical-roll-card.is-crit {
   border-color: #fbbf24;
-  box-shadow: 0 0 30px rgba(251, 191, 36, 0.4), 0 16px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px #fbbf24;
 }
 .tactical-roll-card.is-crit .roll-timer-bar-fill {
-  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+  background: #f59e0b;
 }
 
 .tactical-roll-card.is-fumble {
   border-color: #ef4444;
-  box-shadow: 0 0 30px rgba(239, 68, 68, 0.4), 0 16px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px #ef4444;
 }
 .tactical-roll-card.is-fumble .roll-timer-bar-fill {
-  background: linear-gradient(90deg, #b91c1c, #ef4444);
+  background: #dc2626;
 }
 
 .tactical-roll-card.is-reroll {
   border-color: #38bdf8;
-  box-shadow: 0 0 28px rgba(56, 189, 248, 0.35), 0 16px 40px rgba(0, 0, 0, 0.8);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.8), 0 0 0 1px #38bdf8;
 }
 
 /* MAIN CARD BODY */
@@ -555,7 +555,7 @@ onBeforeUnmount(() => {
 .fumble-badge {
   background: #ef4444;
   color: #fff;
-  box-shadow: 0 0 10px rgba(239, 68, 68, 0.6);
+  box-shadow: var(--shadow-sm);
 }
 
 .reroll-badge {

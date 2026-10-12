@@ -120,7 +120,7 @@
               <strong class="tabular-nums" style="color: #fff;">{{ heroStore.skillsCost }} PP</strong>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">
-              <span style="color: #f472b6;">Advantages</span>
+              <span style="color: #f59e0b;">Advantages</span>
               <strong class="tabular-nums" style="color: #fff;">{{ heroStore.advantagesCost }} PP</strong>
             </div>
             <div style="display: flex; justify-content: space-between; align-items: center;">

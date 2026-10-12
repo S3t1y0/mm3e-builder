@@ -23,6 +23,16 @@
   width: 100%;
 }
 
+/* Eliminate blue focus ring/outline and blue background overlay when typing on sheet */
+.green-ronin-sheet-wrapper input:focus,
+.green-ronin-sheet-wrapper input:focus-visible,
+.green-ronin-sheet-wrapper textarea:focus,
+.green-ronin-sheet-wrapper textarea:focus-visible {
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 .gr-page {
   box-sizing: border-box;
   width: 210mm;
@@ -195,9 +205,11 @@
 
 .gr-meta-input:focus-visible,
 .gr-meta-input:focus {
-  background: rgba(2, 132, 199, 0.08);
-  border-bottom-color: var(--gr-blue-bg);
-  border-radius: 2px 2px 0 0;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  border-bottom-color: #0f172a !important;
+  border-radius: 0;
 }
 
 .gr-radio-group {
@@ -544,8 +556,9 @@
 
 .gr-notes-input:focus-visible,
 .gr-notes-input:focus {
-  background: rgba(2, 132, 199, 0.08);
-  box-shadow: inset 0 0 0 1px var(--gr-blue-bg);
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Advantages and Skills */
@@ -665,7 +678,7 @@
   max-height: 18px;
   line-height: 18px;
   box-sizing: border-box;
-  border-bottom: 1px solid #e2e8f0;
+  border-bottom: 1px solid #cbd5e1;
   display: flex;
   align-items: center;
   padding: 0 4px;
@@ -752,6 +765,78 @@
   color: #94a3b8;
 }
 
+/* Rules reference and modifier descriptions */
+.gr-power-rule-desc {
+  padding-left: 12px;
+  font-size: 7.6px;
+  color: #334155;
+  gap: 4px;
+}
+
+.gr-rule-dash {
+  color: #64748b;
+  font-weight: 700;
+  font-size: 8px;
+  flex-shrink: 0;
+}
+
+.gr-effect-rule-name {
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gr-power-rule-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-style: italic;
+  color: #334155;
+}
+
+.gr-power-mod-rule {
+  padding-left: 14px;
+  font-size: 7.4px;
+  color: #475569;
+  gap: 3px;
+}
+
+.gr-mod-rule-bullet {
+  color: #0284c7;
+  font-weight: 900;
+  font-size: 8px;
+  flex-shrink: 0;
+}
+
+.gr-mod-rule-name {
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.gr-mod-rule-text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #475569;
+}
+
+.gr-power-sub-rule-desc {
+  padding-left: 20px;
+  font-size: 7.5px;
+  color: #334155;
+  gap: 4px;
+}
+
+.gr-power-sub-mod-rule {
+  padding-left: 22px;
+  font-size: 7.3px;
+  color: #475569;
+  gap: 3px;
+}
+
 .gr-power-sub-entry {
   padding-left: 14px;
   gap: 3px;
@@ -800,8 +885,42 @@
   height: 18px;
   min-height: 18px;
   max-height: 18px;
-  border-bottom: 1px solid #e2e8f0;
+  line-height: 18px;
+  border-bottom: 1px solid #cbd5e1;
   box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  padding: 0 4px;
+  width: 100%;
+}
+
+.gr-power-empty-input {
+  width: 100%;
+  height: 16px;
+  line-height: 16px;
+  border: none;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
+  font-family: var(--gr-body-font);
+  font-size: 8px;
+  color: #0f172a;
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+.gr-power-empty-input:focus,
+.gr-power-empty-input:focus-visible {
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.gr-power-empty-input::placeholder {
+  color: #94a3b8;
+  font-style: italic;
+  font-size: 7.5px;
 }
 
 /* Gear & Equipment */
@@ -887,8 +1006,10 @@
 
 .gr-comp-desc-input:focus-visible,
 .gr-comp-desc-input:focus {
-  border-bottom: 1px solid var(--gr-blue-bg);
-  background: rgba(2, 132, 199, 0.08);
+  border-bottom: 1px dotted #94a3b8;
+  background: transparent !important;
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 .gr-comp-line strong {
@@ -1012,9 +1133,10 @@
 
 .gr-bio-textarea:focus-visible,
 .gr-bio-textarea:focus {
-  outline: none;
-  border-color: var(--gr-blue-bg);
-  box-shadow: 0 0 0 1.5px rgba(2, 132, 199, 0.2);
+  outline: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  border-color: #0f172a;
 }
 
 .gr-comp-detail-row {
@@ -1137,7 +1259,8 @@
   .gr-meta-input,
   .gr-notes-input,
   .gr-comp-desc-input,
-  .gr-bio-textarea {
+  .gr-bio-textarea,
+  .gr-power-empty-input {
     background: transparent !important;
     outline: none !important;
     box-shadow: none !important;
@@ -1149,10 +1272,19 @@
   .gr-meta-input::placeholder,
   .gr-notes-input::placeholder,
   .gr-comp-desc-input::placeholder,
-  .gr-bio-textarea::placeholder {
+  .gr-bio-textarea::placeholder,
+  .gr-power-empty-input::placeholder {
     color: transparent !important;
     opacity: 0 !important;
     -webkit-text-fill-color: transparent !important;
+  }
+
+  .gr-power-empty-row {
+    border-bottom: 1px solid #cbd5e1 !important;
+    height: 18px !important;
+    min-height: 18px !important;
+    max-height: 18px !important;
+    display: flex !important;
   }
 
   .gr-meta-input {

@@ -639,20 +639,22 @@ select optgroup {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent-primary) 0%, var(--accent-primary-hover) 100%);
-  color: #fff;
-  border: 1px solid rgba(42, 143, 214, 0.3);
-  box-shadow: 0 2px 6px rgba(0, 111, 184, 0.35);
+  background: #0284c7;
+  color: #ffffff;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  font-weight: 600;
 }
 .btn-primary:hover:not(:disabled) {
-  background: linear-gradient(135deg, var(--accent-secondary) 0%, var(--accent-primary) 100%);
-  border-color: rgba(42, 143, 214, 0.6);
-  box-shadow: 0 4px 14px rgba(0, 111, 184, 0.45), 0 0 10px rgba(42, 143, 214, 0.3);
+  background: #0ea5e9;
+  border-color: #38bdf8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   transform: translateY(-1px);
 }
 .btn-primary:active:not(:disabled) {
-  background: var(--accent-primary-hover);
-  transform: scale(0.96) translateY(0);
+  background: #0369a1;
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .btn-secondary {
@@ -732,16 +734,22 @@ select optgroup {
 }
 
 .btn-danger {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
-  color: #fff;
-  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.35);
+  background: #dc2626;
+  color: #ffffff;
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  font-weight: 600;
 }
 .btn-danger:hover:not(:disabled) {
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.5);
+  background: #ef4444;
+  border-color: #f87171;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   transform: translateY(-1px);
 }
 .btn-danger:active:not(:disabled) {
-  transform: scale(0.96) translateY(0);
+  background: #b91c1c;
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 /* ==========================================================================

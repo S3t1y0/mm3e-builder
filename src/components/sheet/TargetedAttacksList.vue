@@ -712,14 +712,14 @@ function handleTurnOnAndRoll(atk) {
   height: 32px;
   padding: 0 0.75rem;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 700;
   border-radius: var(--radius-xs, 4px);
-  background: linear-gradient(180deg, #0077c5 0%, #005a96 100%);
-  border: 1px solid rgba(56, 189, 248, 0.45);
+  background: #0284c7;
+  border: 1px solid rgba(56, 189, 248, 0.4);
   color: #ffffff;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   transition: all var(--trans-fast);
 }
 
@@ -736,15 +736,16 @@ function handleTurnOnAndRoll(atk) {
 }
 
 .btn-attack-roll:hover {
-  background: linear-gradient(180deg, #0088df 0%, #0068ad 100%);
+  background: #0ea5e9;
   border-color: #38bdf8;
-  box-shadow: var(--shadow-md);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
   transform: translateY(-1px);
 }
 
 .btn-attack-roll:active {
-  transform: translateY(1px);
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4);
+  background: #0369a1;
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-switch-roll {
@@ -755,14 +756,14 @@ function handleTurnOnAndRoll(atk) {
   height: 32px;
   padding: 0 0.75rem;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 700;
   border-radius: var(--radius-xs, 4px);
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.22) 0%, rgba(217, 119, 6, 0.28) 100%);
-  border: 1px solid rgba(245, 158, 11, 0.5);
-  color: #fde68a;
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   transition: all var(--trans-fast);
 }
 
@@ -779,15 +780,17 @@ function handleTurnOnAndRoll(atk) {
 }
 
 .btn-switch-roll:hover {
-  background: #f59e0b;
-  color: #0b1020;
-  border-color: #fbbf24;
-  box-shadow: var(--shadow-md);
+  background: #d97706;
+  color: #ffffff;
+  border-color: #f59e0b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
   transform: translateY(-1px);
 }
 
 .btn-switch-roll:active {
-  transform: translateY(1px);
+  background: #b45309;
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .btn-turnon-roll {
@@ -798,14 +801,14 @@ function handleTurnOnAndRoll(atk) {
   height: 32px;
   padding: 0 0.75rem;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 700;
   border-radius: var(--radius-xs, 4px);
-  background: linear-gradient(180deg, rgba(245, 158, 11, 0.18) 0%, rgba(180, 83, 9, 0.25) 100%);
-  border: 1px solid rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.14);
+  border: 1px solid rgba(245, 158, 11, 0.35);
   color: #fbbf24;
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
   transition: all var(--trans-fast);
 }
 
@@ -822,15 +825,17 @@ function handleTurnOnAndRoll(atk) {
 }
 
 .btn-turnon-roll:hover {
-  background: #f59e0b;
-  color: #0b1020;
-  border-color: #fbbf24;
-  box-shadow: var(--shadow-md);
+  background: #d97706;
+  color: #ffffff;
+  border-color: #f59e0b;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.35);
   transform: translateY(-1px);
 }
 
 .btn-turnon-roll:active {
-  transform: translateY(1px);
+  background: #b45309;
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .atk-specs-row {

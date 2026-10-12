@@ -487,19 +487,6 @@
   min-width: 200px;
 }
 
-.attack-badge {
-  font-size: 0.68rem;
-  font-weight: 800;
-  padding: 0.15rem 0.45rem;
-  border-radius: var(--radius-xs);
-  letter-spacing: var(--letter-spacing-caps);
-  text-transform: uppercase;
-}
-
-.attack-badge.basic { background: #3b82f6; color: #fff; }
-.attack-badge.power { background: var(--accent-primary); color: #fff; }
-.attack-badge.custom { background: var(--accent-amber); color: #09090b; }
-
 .attack-name {
   font-size: 1rem;
   font-weight: 700;
@@ -697,11 +684,6 @@
   font-weight: 700;
   padding: 0.15rem 0.55rem;
   border-radius: var(--radius-pill);
-}
-
-.normal-status-badge {
-  color: var(--text-muted);
-  font-size: 0.8rem;
 }
 
 .conditions-desc {
@@ -1732,12 +1714,6 @@
   gap: 0.2rem;
 }
 
-.sheet-skill-trained-badge.spec {
-  background: rgba(56, 189, 248, 0.15);
-  color: var(--accent-secondary);
-  border-color: rgba(56, 189, 248, 0.3);
-}
-
 .sheet-skill-untrained-badge {
   font-size: 0.65rem;
   font-weight: 600;
@@ -2288,16 +2264,6 @@
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.1px;
-}
-
-.synergy-rank-badge {
-  font-size: 0.70rem;
-  font-weight: 600;
-  color: #bae6fd;
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  padding: 0.08rem 0.4rem;
-  border-radius: var(--radius-xs);
 }
 
 .synergy-benefit-pill {
@@ -3235,14 +3201,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.35rem;
-}
-
-.playbook-step-badge {
-  font-size: 0.65rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  color: var(--accent-secondary);
 }
 
 .playbook-step-core {
@@ -4761,18 +4719,6 @@
   color: var(--text-primary);
   text-transform: uppercase;
   margin: 0;
-}
-
-.dndb-card-badge {
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 0.15rem 0.5rem;
-  background: rgba(0, 111, 184, 0.1);
-  border: 1px solid rgba(0, 111, 184, 0.25);
-  color: #38bdf8;
-  border-radius: var(--radius-xs);
-  text-transform: uppercase;
-  white-space: nowrap;
 }
 
 .dndb-card-sub {

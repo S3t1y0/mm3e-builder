@@ -254,9 +254,7 @@
         <!-- Modal Top Header -->
         <div class="narrative-modal-header">
           <div class="header-title-cluster">
-            <div class="header-icon-badge">
-              <i :class="modalMode === 'motivation' ? 'ri-compass-3-fill' : 'ri-alert-fill'"></i>
-            </div>
+            <i :class="modalMode === 'motivation' ? 'ri-compass-3-fill' : 'ri-alert-fill'" class="modal-header-icon"></i>
             <div>
               <h4 class="modal-title">
                 {{ editingId ? 'Edit ' : 'Add ' }}
@@ -1049,23 +1047,17 @@ function removeTrait(item) {
   gap: 0.65rem;
 }
 
-.header-icon-badge {
-  width: 32px;
-  height: 32px;
-  border-radius: var(--radius-xs);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
+.modal-header-icon {
+  font-size: 1.25rem;
+  margin-top: 2px;
+  flex-shrink: 0;
 }
 
-.theme-motivation .header-icon-badge {
-  background: rgba(168, 85, 247, 0.2);
+.theme-motivation .modal-header-icon {
   color: #c084fc;
 }
 
-.theme-complication .header-icon-badge {
-  background: rgba(244, 63, 94, 0.2);
+.theme-complication .modal-header-icon {
   color: #fb7185;
 }
 

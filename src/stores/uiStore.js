@@ -19,6 +19,7 @@ export const useUiStore = defineStore('ui', {
       markdown: false
     },
     exportImportInitialTab: 'export',
+    alwaysIncludePage2: false,
     toasts: []
   }),
 

@@ -158,9 +158,7 @@
                 </div>
 
                 <!-- If Static / Non-Ranked -->
-                <span v-else class="badge-static-rank">
-                  <i class="ri-check-line"></i> 1 Rank (Static)
-                </span>
+                <span v-else></span>
 
                 <!-- Delete Action -->
                 <button
@@ -339,9 +337,9 @@
                 <template v-else>
                   <!-- If already added: Show Active Status + Inline Stepper + Quick Delete -->
                   <div v-if="isAdvantageActive(item.name)" class="card-added-controls">
-                    <span class="badge-added-status">
-                      <i class="ri-checkbox-circle-fill"></i>
-                      <span>On Sheet ({{ getAdvantageRanks(item.name) }} Rk)</span>
+                    <span class="added-rank-label tabular-nums">
+                      <i class="ri-check-line" style="color: #34d399;"></i>
+                      {{ getAdvantageRanks(item.name) }} Rk
                     </span>
 
                     <div class="inline-actions-wrap">
@@ -922,8 +920,8 @@ function removeAdvantage(idOrName) {
   justify-content: space-between;
   gap: 1.25rem;
   padding: 1.15rem 1.35rem;
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.08) 0%, rgba(15, 15, 22, 0.6) 100%);
-  border: 1px solid rgba(236, 72, 153, 0.25);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.08) 0%, rgba(15, 23, 42, 0.6) 100%);
+  border: 1px solid rgba(245, 158, 11, 0.25);
   border-radius: var(--radius-lg);
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
 }
@@ -932,13 +930,13 @@ function removeAdvantage(idOrName) {
   width: 44px;
   height: 44px;
   border-radius: var(--radius-md);
-  background: rgba(236, 72, 153, 0.16);
-  border: 1px solid rgba(236, 72, 153, 0.35);
+  background: rgba(245, 158, 11, 0.16);
+  border: 1px solid rgba(245, 158, 11, 0.35);
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.45rem;
-  color: #f472b6;
+  color: #fbbf24;
   flex-shrink: 0;
 }
 
@@ -966,9 +964,9 @@ function removeAdvantage(idOrName) {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  background: rgba(236, 72, 153, 0.18);
-  border: 1px solid rgba(236, 72, 153, 0.4);
-  color: #f472b6;
+  background: rgba(245, 158, 11, 0.18);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
   font-size: 0.76rem;
   font-weight: 800;
   padding: 0.2rem 0.65rem;
@@ -996,8 +994,8 @@ function removeAdvantage(idOrName) {
 }
 
 .btn-open-modal:hover {
-  border-color: rgba(236, 72, 153, 0.5);
-  color: #f472b6;
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
 }
 
 /* ==========================================================================
@@ -1269,11 +1267,11 @@ function removeAdvantage(idOrName) {
 .active-pp-cost {
   font-size: 0.78rem;
   font-weight: 800;
-  color: #ec4899;
-  background: rgba(236, 72, 153, 0.12);
-  border: 1px solid rgba(236, 72, 153, 0.3);
+  color: #fbbf24;
+  background: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.3);
   padding: 0.15rem 0.5rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   white-space: nowrap;
 }
 
@@ -1356,15 +1354,6 @@ function removeAdvantage(idOrName) {
   color: #fff;
   min-width: 20px;
   text-align: center;
-}
-
-.badge-static-rank {
-  font-size: 0.7rem;
-  color: var(--text-muted);
-  font-weight: 700;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
 }
 
 .btn-remove-active {
@@ -1689,10 +1678,10 @@ function removeAdvantage(idOrName) {
   gap: 0.4rem;
 }
 
-.badge-added-status {
+.added-rank-label {
   font-size: 0.72rem;
-  font-weight: 800;
-  color: #34d399;
+  font-weight: 700;
+  color: var(--text-secondary);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
@@ -1839,7 +1828,7 @@ function removeAdvantage(idOrName) {
 
 .btn-custom-adv:hover {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .active-feat-top-actions {
@@ -1864,9 +1853,9 @@ function removeAdvantage(idOrName) {
 }
 
 .btn-edit-active:hover {
-  background: rgba(236, 72, 153, 0.2);
-  border-color: #ec4899;
-  color: #f472b6;
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
+  color: #fbbf24;
 }
 
 .badge-custom-tag {
@@ -1962,7 +1951,7 @@ function removeAdvantage(idOrName) {
 /* Modals */
 .spec-modal-card {
   background: #12121a;
-  border: 1px solid rgba(236, 72, 153, 0.35);
+  border: 1px solid rgba(245, 158, 11, 0.35);
   border-radius: var(--radius-lg);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85);
   width: 100%;
@@ -1993,8 +1982,8 @@ function removeAdvantage(idOrName) {
   align-items: center;
   justify-content: space-between;
   padding: 0.95rem 1.25rem;
-  background: linear-gradient(135deg, rgba(236, 72, 153, 0.12) 0%, rgba(15, 15, 22, 0.8) 100%);
-  border-bottom: 1px solid rgba(236, 72, 153, 0.2);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.8) 100%);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.2);
 }
 
 .spec-modal-header h4 {
@@ -2008,7 +1997,7 @@ function removeAdvantage(idOrName) {
 }
 
 .spec-modal-header h4 i {
-  color: #f472b6;
+  color: #fbbf24;
 }
 
 .spec-modal-close {
@@ -2079,16 +2068,16 @@ function removeAdvantage(idOrName) {
 }
 
 .spec-chip-btn:hover {
-  background: rgba(236, 72, 153, 0.2);
-  border-color: #ec4899;
+  background: rgba(245, 158, 11, 0.2);
+  border-color: #f59e0b;
   color: #fff;
 }
 
 .spec-chip-btn.active {
-  background: #db2777;
-  border-color: #f472b6;
+  background: #d97706;
+  border-color: #f59e0b;
   color: #fff;
-  box-shadow: 0 2px 8px rgba(219, 39, 119, 0.35);
+  box-shadow: var(--shadow-sm);
 }
 
 .form-group {
@@ -2122,7 +2111,7 @@ function removeAdvantage(idOrName) {
 
 .spec-label-hint {
   font-size: 0.68rem;
-  color: #f472b6;
+  color: #fbbf24;
   font-weight: 600;
 }
 
@@ -2148,8 +2137,8 @@ function removeAdvantage(idOrName) {
 .spec-input:focus,
 .spec-select:focus,
 .spec-textarea:focus {
-  border-color: #ec4899;
-  box-shadow: 0 0 0 3px rgba(236, 72, 153, 0.2);
+  border-color: var(--accent-secondary, #2a8fd6);
+  box-shadow: 0 0 0 3px rgba(42, 143, 214, 0.2);
 }
 
 .spec-custom-rank-wrap {
@@ -2219,7 +2208,7 @@ function removeAdvantage(idOrName) {
 
 .btn-modal-confirm:hover:not(:disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.4);
+  box-shadow: var(--shadow-md);
 }
 
 .btn-modal-confirm:disabled {

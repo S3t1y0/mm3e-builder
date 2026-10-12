@@ -1,5 +1,6 @@
 // js/rules/powerFormatter.js
 import { BASE_EFFECTS, CONFIGURABLE_EFFECTS, calculatePowerTotalCost } from './powerEngine.js';
+import { resolveEffectRulesBlock } from './powerRuleDescriptions.js';
 
 /**
  * Speed rank table for real-world velocity in Mutants & Masterminds 3E.
@@ -345,7 +346,7 @@ export function formatPowerStatblock(power) {
     ? `Activation: ${power.activation === 'move' ? 'Move Action (-1 PP)' : 'Standard Action (-2 PP)'}`
     : '';
 
-  // STRUCTURE 1: DEVICE CONTAINER
+  // Device container
   if (type === 'device') {
     const isEasily = power.deviceConfig?.type === 'easily_removable';
     const discPerFive = isEasily ? 2 : 1;
@@ -357,16 +358,20 @@ export function formatPowerStatblock(power) {
       const eff = sp.effect || sp;
       const sCost = calculatePowerTotalCost(sp) || eff.cost || 0;
       const sMech = formatEffectMechanics(eff);
-      const sCfg = resolveSpecialConfig(eff);
       const sMods = formatModifiers(eff);
+      const sRules = resolveEffectRulesBlock(eff);
 
-      const bodyParts = [sMech, sCfg, sMods].filter(Boolean).join(' • ');
+      const bodyParts = [sMech, sMods].filter(Boolean).join(' • ');
       return {
         label: sp.name || eff.baseEffect || 'System',
         effectName: `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`,
+        effectBaseName: eff.baseEffect || sp.name || 'Effect',
         mechanics: sMech,
         details: bodyParts,
-        costBadge: `${sCost} PP`
+        costBadge: `${sCost} PP`,
+        effectRuleDesc: sRules.effectRuleDesc,
+        effectRuleDescs: sRules.effectRuleDescs,
+        modifierRules: sRules.modifierRules
       };
     });
 
@@ -381,12 +386,16 @@ export function formatPowerStatblock(power) {
       mechanicsLine: specLine,
       modifiersLine: activation,
       specialConfigLine: '',
+      effectBaseName: '',
+      effectRuleDesc: '',
+      effectRuleDescs: [],
+      modifierRules: [],
       subEntries,
       summaryText: `${name}: ${badge} [${cost} PP] • ${subEntries.length} systems installed`
     };
   }
 
-  // STRUCTURE 2: COMPOUND POWER (Linked Combo or Bundled Traits)
+  // Compound power
   if (type === 'compound') {
     const compoundEffects = power.compoundEffects || [];
     const hasLinked = compoundEffects.some(cp => cp.isLinked);
@@ -397,20 +406,25 @@ export function formatPowerStatblock(power) {
       const cCost = calculatePowerTotalCost(cp) || eff.cost || 0;
       const tag = cp.isPrimaryAction ? 'Primary Action' : (cp.isLinked ? 'Linked Effect' : `Trait ${idx + 1}`);
       const sMech = formatEffectMechanics(eff);
-      const sCfg = resolveSpecialConfig(eff);
       const sMods = formatModifiers(eff);
+      const cRules = resolveEffectRulesBlock(eff);
 
-      const bodyParts = [sMech, sCfg, sMods].filter(Boolean).join(' • ');
+      const bodyParts = [sMech, sMods].filter(Boolean).join(' • ');
       return {
         label: `${tag}: ${cp.name || eff.baseEffect}`,
         effectName: `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`,
+        effectBaseName: eff.baseEffect || cp.name || 'Effect',
         mechanics: sMech,
         details: bodyParts,
-        costBadge: `${cCost} PP`
+        costBadge: `${cCost} PP`,
+        effectRuleDesc: cRules.effectRuleDesc,
+        effectRuleDescs: cRules.effectRuleDescs,
+        modifierRules: cRules.modifierRules
       };
     });
 
     const sharedMods = formatModifiers({ extras: power.sharedModifiers || [], flaws: [] });
+    const sharedRules = resolveEffectRulesBlock({ extras: power.sharedModifiers || [], flaws: [] });
 
     return {
       title: name,
@@ -420,36 +434,44 @@ export function formatPowerStatblock(power) {
       mainLine: descriptors,
       modifiersLine: [sharedMods, activation].filter(Boolean).join(' • '),
       specialConfigLine: '',
+      effectBaseName: '',
+      effectRuleDesc: '',
+      effectRuleDescs: [],
+      modifierRules: sharedRules.modifierRules,
       subEntries,
       summaryText: `${name}: ${badge} [${cost} PP]`
     };
   }
 
-  // STRUCTURE 3: POWER ARRAY (Primary Effect + Alternate Effects)
+  // Power array
   const hasAlternateEffects = Array.isArray(power.alternateEffects) && power.alternateEffects.length > 0;
   if (type === 'array' || hasAlternateEffects) {
     const mainEff = power.mainEffect || power;
     const mainBase = mainEff.baseEffect || 'Effect';
     const mainRanks = mainEff.ranks || 1;
     const mainMech = formatEffectMechanics(mainEff);
-    const mainCfg = resolveSpecialConfig(mainEff);
     const mainMods = formatModifiers(mainEff);
+    const mainRules = resolveEffectRulesBlock(mainEff);
 
     const subEntries = (power.alternateEffects || []).map(alt => {
       const altEff = alt.effect || alt;
       const isDynamic = Boolean(alt.isDynamic || alt.dynamic);
       const slotCost = isDynamic ? 2 : 1;
       const altMech = formatEffectMechanics(altEff);
-      const altCfg = resolveSpecialConfig(altEff);
       const altMods = formatModifiers(altEff);
+      const altRules = resolveEffectRulesBlock(altEff);
 
-      const bodyParts = [altMech, altCfg, altMods].filter(Boolean).join(' • ');
+      const bodyParts = [altMech, altMods].filter(Boolean).join(' • ');
       return {
         label: `Alternate Effect: ${alt.name || altEff.baseEffect}`,
         effectName: `${altEff.baseEffect || 'Effect'} ${altEff.ranks || 1}`,
+        effectBaseName: altEff.baseEffect || alt.name || 'Effect',
         mechanics: altMech,
         details: bodyParts,
-        costBadge: `${slotCost} PP Slot`
+        costBadge: `${slotCost} PP Slot`,
+        effectRuleDesc: altRules.effectRuleDesc,
+        effectRuleDescs: altRules.effectRuleDescs,
+        modifierRules: altRules.modifierRules
       };
     });
 
@@ -461,19 +483,24 @@ export function formatPowerStatblock(power) {
       mainLine: descriptors ? `${mainBase} ${mainRanks} ${descriptors}` : `${mainBase} ${mainRanks}`,
       mechanicsLine: mainMech,
       modifiersLine: [mainMods, activation].filter(Boolean).join(' • '),
-      specialConfigLine: mainCfg,
+      specialConfigLine: '',
+      effectBaseName: mainBase,
+      effectRuleDesc: mainRules.effectRuleDesc,
+      effectRuleDescs: mainRules.effectRuleDescs,
+      modifierRules: mainRules.modifierRules,
       subEntries,
       summaryText: `${name}: Array [${cost} PP] • Primary: ${mainBase} ${mainRanks}`
     };
   }
 
-  // STRUCTURE 4: STANDARD POWER (Single Effect)
+  // Standard single-effect power
   const eff = power.mainEffect || power;
   const base = eff.baseEffect || 'Effect';
   const ranks = eff.ranks || 1;
   const mech = formatEffectMechanics(eff);
-  const cfg = resolveSpecialConfig(eff);
   const mods = formatModifiers(eff);
+  const rules = resolveEffectRulesBlock(eff);
+
 
   return {
     title: name,
@@ -483,8 +510,14 @@ export function formatPowerStatblock(power) {
     mainLine: descriptors ? `${base} ${ranks} ${descriptors}` : `${base} ${ranks}`,
     mechanicsLine: mech,
     modifiersLine: [mods, activation].filter(Boolean).join(' • '),
-    specialConfigLine: cfg,
+    specialConfigLine: '',
+    effectBaseName: base,
+    effectRuleDesc: rules.effectRuleDesc,
+    effectRuleDescs: rules.effectRuleDescs,
+    modifierRules: rules.modifierRules,
     subEntries: [],
     summaryText: `${name}: ${base} ${ranks} [${cost} PP]`
   };
 }
+
+

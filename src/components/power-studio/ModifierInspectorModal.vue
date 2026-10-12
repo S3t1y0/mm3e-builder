@@ -147,7 +147,6 @@
               <div class="card-top-row">
                 <div class="card-name-cat">
                   <div style="display: flex; align-items: center; gap: 0.35rem; flex-wrap: wrap;">
-                    <span class="mod-category-badge">{{ mod.category || 'General' }}</span>
                     <span
                       v-if="mod.appliesTo && mod.appliesTo.length"
                       class="mod-applies-badge"
@@ -873,13 +872,6 @@ const netEffectCost = computed(() => {
   font-size: 0.95rem;
   font-weight: 800;
   color: #fff;
-}
-
-.mod-category-badge {
-  font-size: 0.62rem;
-  font-weight: 700;
-  color: var(--text-muted);
-  text-transform: uppercase;
 }
 
 .mod-applies-badge {

@@ -632,14 +632,13 @@ onBeforeUnmount(() => {
   height: 2px;
   background: var(--accent-primary);
   border-radius: 2px;
-  box-shadow: 0 0 8px rgba(0, 111, 184, 0.7);
 }
 
 .nav-tab-btn:active {
   transform: scale(0.97);
 }
 
-/* Active Hero Center Pill */
+/* Active Hero Center Bar */
 .menubar-center {
   display: flex;
   align-items: center;
@@ -651,8 +650,8 @@ onBeforeUnmount(() => {
   gap: 0.5rem;
   background: rgba(0, 0, 0, 0.35);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--radius-pill);
-  padding: 0.22rem 0.75rem;
+  border-radius: var(--radius-sm);
+  padding: 0.28rem 0.65rem;
   font-size: 0.74rem;
   color: var(--text-secondary);
 }
@@ -703,7 +702,7 @@ onBeforeUnmount(() => {
   font-size: 0.72rem;
   font-weight: 700;
   padding: 0.25rem 0.65rem;
-  border-radius: var(--radius-pill);
+  border-radius: var(--radius-sm);
   cursor: pointer;
   transition: all var(--trans-fast);
   margin-left: 0.5rem;
@@ -743,26 +742,30 @@ onBeforeUnmount(() => {
   display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  background: linear-gradient(135deg, #006fb8, #005a96);
-  border: 1px solid rgba(42, 143, 214, 0.5);
+  background: #0284c7;
+  border: 1px solid rgba(56, 189, 248, 0.4);
   color: #ffffff;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
   padding: 0.38rem 0.85rem;
   border-radius: var(--radius-sm);
   cursor: pointer;
-  box-shadow: 0 1px 6px rgba(0, 111, 184, 0.35);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
   transition: transform var(--trans-fast), box-shadow var(--trans-fast), background-color var(--trans-fast);
   white-space: nowrap;
 }
 
 .nav-btn-share:hover {
-  background: linear-gradient(135deg, #2a8fd6, #006fb8);
-  box-shadow: 0 2px 10px rgba(0, 111, 184, 0.5);
+  background: #0ea5e9;
+  border-color: #38bdf8;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+  transform: translateY(-1px);
 }
 
 .nav-btn-share:active {
-  transform: scale(0.96);
+  background: #0369a1;
+  transform: translateY(0);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .nav-dropdown-wrap {

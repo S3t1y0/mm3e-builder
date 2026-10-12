@@ -1098,16 +1098,6 @@ function confirmSpecialtySkill() {
   color: #e2e8f0;
 }
 
-.spec-badge-chip {
-  background: rgba(56, 189, 248, 0.12);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-  color: #38bdf8;
-  font-size: 0.58rem;
-  font-weight: 800;
-  padding: 0.05rem 0.3rem;
-  border-radius: 2px;
-}
-
 /* Specialization Empty Row */
 .spec-empty-row td {
   padding: 0.35rem 0.75rem 0.55rem 1.5rem;

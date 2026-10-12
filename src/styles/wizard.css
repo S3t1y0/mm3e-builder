@@ -204,17 +204,6 @@
   color: var(--text-secondary);
   margin: 0.2rem 0 0 0;
 }
-
-.wizard-stage-badge {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-pill);
-  background: rgba(56, 189, 248, 0.15);
-  color: var(--accent-secondary);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  white-space: nowrap;
-}
 /* 5. STAGE 1: CONCEPT & IDENTITY */
 .origin-chips-group {
   display: flex;
@@ -467,21 +456,6 @@
   color: var(--text-primary);
 }
 
-.spec-badge {
-  font-size: 0.62rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 9999px;
-  background: rgba(56, 189, 248, 0.15);
-  color: var(--accent-secondary);
-  border: 1px solid rgba(56, 189, 248, 0.3);
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-}
-
 .wizard-skill-ability {
   font-size: 0.7rem;
   color: var(--text-muted);
@@ -683,8 +657,8 @@
 
 .spec-base-card.active {
   border-color: var(--accent-secondary);
-  background: rgba(56, 189, 248, 0.1);
-  box-shadow: 0 0 12px rgba(56, 189, 248, 0.25);
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: var(--shadow-sm);
 }
 
 .spec-base-card i {

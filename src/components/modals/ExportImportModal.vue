@@ -656,14 +656,12 @@ watch(() => uiStore.modals.exportImport, (open) => {
   height: 10px;
   border-radius: 50%;
   background: #10b981;
-  box-shadow: 0 0 4px rgba(16, 185, 129, 0.4);
   margin-top: 0.35rem;
   flex-shrink: 0;
 }
 
 .status-pulse-dot.saving-pulse {
   background: #f59e0b;
-  box-shadow: 0 0 4px rgba(245, 158, 11, 0.5);
 }
 
 .vault-status-title-group {

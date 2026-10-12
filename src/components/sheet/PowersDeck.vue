@@ -3703,7 +3703,7 @@ function getModifierInfo(modName, isFlaw = false) {
   border-color: #f59e0b;
   color: #fbbf24;
   font-weight: 800;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.2);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 .device-tab-item.overview-tab {
@@ -4960,7 +4960,7 @@ function getModifierInfo(modName, isFlaw = false) {
   background: #dc2626;
   border-color: #f87171;
   color: #ffffff;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .btn-mod-vtt.linked {
@@ -4973,7 +4973,7 @@ function getModifierInfo(modName, isFlaw = false) {
   background: #0891b2;
   border-color: #22d3ee;
   color: #ffffff;
-  box-shadow: 0 0 8px rgba(6, 182, 212, 0.4);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 .linked-actions {

@@ -380,22 +380,81 @@
               <span v-if="getPowerBlock(p).modifiersLine" class="gr-power-mods-text">{{ getPowerBlock(p).modifiersLine }}</span>
             </div>
 
-            <!-- Sub Entries (Array Alternate Effects, Linked Components, Device Systems) -->
-            <div v-for="(sub, sIdx) in getPowerBlock(p).subEntries" :key="sIdx" class="gr-power-row gr-power-sub-entry">
-              <span class="gr-sub-bullet">•</span>
-              <strong class="gr-sub-label">{{ sub.label }}:</strong>
-              <span class="gr-sub-details">{{ sub.details || sub.effectName }}</span>
-              <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
+            <!-- Rule description -->
+            <div
+              v-for="(descLine, dIdx) in (getPowerBlock(p).effectRuleDescs?.length ? getPowerBlock(p).effectRuleDescs : [getPowerBlock(p).effectRuleDesc].filter(Boolean))"
+              :key="'p1-desc-' + dIdx"
+              class="gr-power-row gr-power-rule-desc"
+            >
+              <strong class="gr-effect-rule-name">
+                {{ dIdx === 0 ? (getPowerBlock(p).effectBaseName || 'Effect') + ':' : '•' }}
+              </strong>
+              <span class="gr-power-rule-text">{{ descLine }}</span>
             </div>
+
+            <!-- Applied modifiers -->
+            <div
+              v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules"
+              :key="'p1-mod-' + mIdx"
+              class="gr-power-row gr-power-mod-rule"
+            >
+              <span class="gr-mod-rule-bullet">•</span>
+              <strong class="gr-mod-rule-name">{{ modRule.name }}:</strong>
+              <span class="gr-mod-rule-text">{{ modRule.desc }}</span>
+            </div>
+
+            <!-- Nested effect systems -->
+            <template v-for="(sub, sIdx) in getPowerBlock(p).subEntries" :key="sIdx">
+              <div class="gr-power-row gr-power-sub-entry">
+                <span class="gr-sub-bullet">•</span>
+                <strong class="gr-sub-label">{{ sub.label }}:</strong>
+                <span class="gr-sub-details">{{ sub.details || sub.effectName }}</span>
+                <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
+              </div>
+              <div
+                v-for="(subDesc, sdIdx) in (sub.effectRuleDescs?.length ? sub.effectRuleDescs : [sub.effectRuleDesc].filter(Boolean))"
+                :key="'p1-subdesc-' + sIdx + '-' + sdIdx"
+                class="gr-power-row gr-power-sub-rule-desc"
+              >
+                <strong class="gr-effect-rule-name">
+                  {{ sdIdx === 0 ? (sub.effectBaseName || 'Effect') + ':' : '•' }}
+                </strong>
+                <span class="gr-power-rule-text">{{ subDesc }}</span>
+              </div>
+              <div
+                v-for="(smRule, smIdx) in sub.modifierRules"
+                :key="'p1-submod-' + sIdx + '-' + smIdx"
+                class="gr-power-row gr-power-sub-mod-rule"
+              >
+                <span class="gr-mod-rule-bullet">•</span>
+                <strong class="gr-mod-rule-name">{{ smRule.name }}:</strong>
+                <span class="gr-mod-rule-text">{{ smRule.desc }}</span>
+              </div>
+            </template>
           </div>
-          <!-- Empty ruled rows filling remaining capacity -->
-          <div v-for="n in emptyPrimaryLinesCount" :key="'p-empty-' + n" class="gr-power-row gr-power-empty-row"></div>
+          <!-- Ruled rows filling remaining capacity for manual filling -->
+          <div v-for="n in emptyPrimaryLinesCount" :key="'p-empty-' + n" class="gr-power-row gr-power-empty-row">
+            <input
+              v-model="getManualLine('primary', n - 1).text"
+              type="text"
+              class="gr-power-empty-input"
+              placeholder=""
+              autocomplete="off"
+              @change="heroStore.pushHistory()"
+            />
+          </div>
         </div>
         <div v-else class="gr-powers-list">
-          <div class="gr-power-row gr-empty-hint">
-            No powers or device containers configured.
+          <div v-for="n in PRIMARY_POWERS_CAPACITY" :key="'p-empty-none-' + n" class="gr-power-row gr-power-empty-row">
+            <input
+              v-model="getManualLine('primary', n - 1).text"
+              type="text"
+              class="gr-power-empty-input"
+              :placeholder="n === 1 ? 'Write or type powers and devices...' : ''"
+              autocomplete="off"
+              @change="heroStore.pushHistory()"
+            />
           </div>
-          <div v-for="n in (PRIMARY_POWERS_CAPACITY - 1)" :key="'p-empty-none-' + n" class="gr-power-row gr-power-empty-row"></div>
         </div>
       </div>
 
@@ -488,22 +547,81 @@
                 <span v-if="getPowerBlock(p).modifiersLine" class="gr-power-mods-text">{{ getPowerBlock(p).modifiersLine }}</span>
               </div>
 
-              <!-- Sub Entries (Array Alternate Effects, Linked Components, Device Systems) -->
-              <div v-for="(sub, sIdx) in getPowerBlock(p).subEntries" :key="sIdx" class="gr-power-row gr-power-sub-entry">
-                <span class="gr-sub-bullet">•</span>
-                <strong class="gr-sub-label">{{ sub.label }}:</strong>
-                <span class="gr-sub-details">{{ sub.details || sub.effectName }}</span>
-                <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
+              <!-- Rule description -->
+              <div
+                v-for="(descLine, dIdx) in (getPowerBlock(p).effectRuleDescs?.length ? getPowerBlock(p).effectRuleDescs : [getPowerBlock(p).effectRuleDesc].filter(Boolean))"
+                :key="'p2-desc-' + dIdx"
+                class="gr-power-row gr-power-rule-desc"
+              >
+                <strong class="gr-effect-rule-name">
+                  {{ dIdx === 0 ? (getPowerBlock(p).effectBaseName || 'Effect') + ':' : '•' }}
+                </strong>
+                <span class="gr-power-rule-text">{{ descLine }}</span>
               </div>
+
+              <!-- Applied modifiers -->
+              <div
+                v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules"
+                :key="'p2-mod-' + mIdx"
+                class="gr-power-row gr-power-mod-rule"
+              >
+                <span class="gr-mod-rule-bullet">•</span>
+                <strong class="gr-mod-rule-name">{{ modRule.name }}:</strong>
+                <span class="gr-mod-rule-text">{{ modRule.desc }}</span>
+              </div>
+
+              <!-- Nested effect systems -->
+              <template v-for="(sub, sIdx) in getPowerBlock(p).subEntries" :key="sIdx">
+                <div class="gr-power-row gr-power-sub-entry">
+                  <span class="gr-sub-bullet">•</span>
+                  <strong class="gr-sub-label">{{ sub.label }}:</strong>
+                  <span class="gr-sub-details">{{ sub.details || sub.effectName }}</span>
+                  <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
+                </div>
+                <div
+                  v-for="(subDesc, sdIdx) in (sub.effectRuleDescs?.length ? sub.effectRuleDescs : [sub.effectRuleDesc].filter(Boolean))"
+                  :key="'p2-subdesc-' + sIdx + '-' + sdIdx"
+                  class="gr-power-row gr-power-sub-rule-desc"
+                >
+                  <strong class="gr-effect-rule-name">
+                    {{ sdIdx === 0 ? (sub.effectBaseName || 'Effect') + ':' : '•' }}
+                  </strong>
+                  <span class="gr-power-rule-text">{{ subDesc }}</span>
+                </div>
+                <div
+                  v-for="(smRule, smIdx) in sub.modifierRules"
+                  :key="'p2-submod-' + sIdx + '-' + smIdx"
+                  class="gr-power-row gr-power-sub-mod-rule"
+                >
+                  <span class="gr-mod-rule-bullet">•</span>
+                  <strong class="gr-mod-rule-name">{{ smRule.name }}:</strong>
+                  <span class="gr-mod-rule-text">{{ smRule.desc }}</span>
+                </div>
+              </template>
             </div>
-            <!-- Empty ruled lines filling Page 2 capacity seamlessly -->
-            <div v-for="n in emptyOverflowLinesCount" :key="'o-empty-' + n" class="gr-power-row gr-power-empty-row"></div>
+            <!-- Ruled lines filling Page 2 capacity for manual filling -->
+            <div v-for="n in emptyOverflowLinesCount" :key="'o-empty-' + n" class="gr-power-row gr-power-empty-row">
+              <input
+                v-model="getManualLine('overflow', n - 1).text"
+                type="text"
+                class="gr-power-empty-input"
+                placeholder=""
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
+            </div>
           </div>
           <div v-else class="gr-powers-list">
-            <div class="gr-power-row gr-empty-hint">
-              All character powers fit on Page 1.
+            <div v-for="n in OVERFLOW_POWERS_CAPACITY" :key="'o-empty-none-' + n" class="gr-power-row gr-power-empty-row">
+              <input
+                v-model="getManualLine('overflow', n - 1).text"
+                type="text"
+                class="gr-power-empty-input"
+                :placeholder="n === 1 ? 'Continued powers and device notes...' : ''"
+                autocomplete="off"
+                @change="heroStore.pushHistory()"
+              />
             </div>
-            <div v-for="n in (OVERFLOW_POWERS_CAPACITY - 1)" :key="'o-empty-none-' + n" class="gr-power-row gr-power-empty-row"></div>
           </div>
         </div>
 
@@ -562,11 +680,13 @@
 <script setup>
 import { computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
+import { useUiStore } from '../../stores/uiStore.js';
 import { compileTargetedAttacks } from '../../rules/attacks.js';
 import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
 import { formatPowerStatblock } from '../../rules/powerFormatter.js';
 
 const heroStore = useHeroStore();
+const uiStore = useUiStore();
 
 // Format modifier helper (+5, -2, +0, or - for absent)
 function formatMod(val) {
@@ -627,14 +747,26 @@ const trainedSkills = computed(() => {
     });
 });
 
-// Resolves comprehensive structured statblock per power structure
 function getPowerBlock(power) {
   return formatPowerStatblock(power);
 }
 
-// Power row counting and capacity bounds
-const PRIMARY_POWERS_CAPACITY = 13;
-const OVERFLOW_POWERS_CAPACITY = 15;
+// Layout row limits for A4 page budget
+const PRIMARY_POWERS_CAPACITY = 25;
+const OVERFLOW_POWERS_CAPACITY = 24;
+
+function getManualLine(section, index) {
+  if (!heroStore.character.manualPowers) {
+    heroStore.character.manualPowers = { primary: [], overflow: [] };
+  }
+  if (!Array.isArray(heroStore.character.manualPowers[section])) {
+    heroStore.character.manualPowers[section] = [];
+  }
+  while (heroStore.character.manualPowers[section].length <= index) {
+    heroStore.character.manualPowers[section].push({ text: '' });
+  }
+  return heroStore.character.manualPowers[section][index];
+}
 
 function getPowerRowCount(power) {
   if (!power) return 0;
@@ -642,16 +774,30 @@ function getPowerRowCount(power) {
   let count = 1;
   if (block.mechanicsLine) count += 1;
   if (block.specialConfigLine || block.modifiersLine) count += 1;
-  count += (block.subEntries || []).length;
+  count += (block.effectRuleDescs?.length || (block.effectRuleDesc ? 1 : 0));
+  count += (block.modifierRules || []).length;
+  for (const sub of (block.subEntries || [])) {
+    count += 1;
+    count += (sub.effectRuleDescs?.length || (sub.effectRuleDesc ? 1 : 0));
+    count += (sub.modifierRules || []).length;
+  }
   return count;
 }
 
 // Powers splitting for adaptive 1 vs 2 pages
 const allPowers = computed(() => heroStore.character.powers || []);
 
+const totalPowerRows = computed(() => {
+  return allPowers.value.reduce((sum, p) => sum + getPowerRowCount(p), 0);
+});
+
 const primaryPowers = computed(() => {
   const powers = allPowers.value;
   if (!powers.length) return [];
+  // If all powers fit on Page 1, keep them all on Page 1
+  if (totalPowerRows.value <= PRIMARY_POWERS_CAPACITY) {
+    return powers;
+  }
   const result = [];
   let currentRows = 0;
   for (const p of powers) {
@@ -689,6 +835,7 @@ const emptyOverflowLinesCount = computed(() => {
 
 const hasPage2Content = computed(() => {
   return (
+    Boolean(uiStore.alwaysIncludePage2) ||
     overflowPowers.value.length > 0 ||
     (heroStore.character.resources?.length || 0) > 8 ||
     (heroStore.character.notes?.length || 0) > 160 ||

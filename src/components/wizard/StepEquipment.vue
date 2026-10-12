@@ -111,7 +111,6 @@
             </div>
             <div>
               <div class="item-tags-row">
-                <span class="badge-subtle">{{ getSubtypeLabel(item) }}</span>
                 <button
                   type="button"
                   class="status-toggle-pill"
@@ -219,7 +218,6 @@
               <div class="preset-info">
                 <div class="preset-head">
                   <strong class="preset-name">{{ p.name }}</strong>
-                  <span class="badge badge-subtle" style="font-size: 0.68rem;">{{ p.subtype || p.type }}</span>
                   <span class="badge badge-primary tabular-nums" style="font-size: 0.7rem;">{{ p.epCost }} EP</span>
                 </div>
                 <p class="preset-desc">{{ p.desc }}</p>
@@ -706,17 +704,6 @@ function getArmorProtection(r) {
   align-items: center;
   gap: 0.4rem;
   margin-bottom: 0.15rem;
-}
-
-.badge-subtle {
-  font-size: 0.65rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.05);
-  padding: 0.15rem 0.4rem;
-  border-radius: var(--radius-xs);
 }
 
 .status-toggle-pill {
