@@ -390,7 +390,7 @@ export function formatEffectMechanics(effect, options = {}) {
 /**
  * Creates a punchy, compact summary of an individual effect for inline statblock presentation.
  */
-export function formatEffectInlineSummary(effect) {
+export function formatEffectInlineSummary(effect, options = {}) {
   if (!effect) return '';
   const eff = effect.effect || effect;
   const rawBase = eff.baseEffect || eff.name || 'Effect';
@@ -399,6 +399,7 @@ export function formatEffectInlineSummary(effect) {
   const rankStr = eff.ranks ? ` ${eff.ranks}` : '';
   const spec = resolveSpecialConfig(eff);
   const c = eff.config || {};
+  const includeMech = options.powerMechanics !== false && options.includeMechanics !== false;
 
   let coreDesc = '';
   if (baseKey === 'protection') {
@@ -430,7 +431,9 @@ export function formatEffectInlineSummary(effect) {
     const dc = 15 + ranks;
     const res = eff.resistance || 'Toughness';
     const rng = eff.range === 'Ranged' ? 'Ranged ' : (eff.range === 'Perception' ? 'Perception ' : '');
-    coreDesc = `${rng}${rawBase} ${ranks} (DC ${dc} vs ${res})`;
+    coreDesc = includeMech
+      ? `${rng}${rawBase} ${ranks} (DC ${dc} vs ${res})`
+      : `${rawBase} ${ranks}`;
   } else if (baseKey === 'affliction') {
     const dc = 10 + ranks;
     const res = eff.resistance || 'Fortitude';
@@ -439,18 +442,24 @@ export function formatEffectInlineSummary(effect) {
     const third = c.thirdDegree || 'Incapacitated';
     const degrees = [first, second, third].filter(Boolean).join('/');
     const rng = eff.range === 'Ranged' ? 'Ranged ' : (eff.range === 'Perception' ? 'Perception ' : '');
-    coreDesc = `${rng}Affliction ${ranks} (DC ${dc} vs ${res}; ${degrees})`;
+    coreDesc = includeMech
+      ? `${rng}Affliction ${ranks} (DC ${dc} vs ${res}; ${degrees})`
+      : `Affliction ${ranks}${degrees ? ` (${degrees})` : ''}`;
   } else if (baseKey === 'weaken') {
     const dc = 10 + ranks;
     const res = eff.resistance || 'Fortitude';
     const trait = c.trait || c.targetTrait || 'Trait';
     const rng = eff.range === 'Ranged' ? 'Ranged ' : '';
-    coreDesc = `${rng}Weaken ${trait} ${ranks} (DC ${dc} vs ${res})`;
+    coreDesc = includeMech
+      ? `${rng}Weaken ${trait} ${ranks} (DC ${dc} vs ${res})`
+      : `Weaken ${trait} ${ranks}`;
   } else if (baseKey === 'nullify') {
     const dc = 10 + ranks;
     const res = eff.resistance || 'Will';
     const target = c.targetEffect || c.theme || 'Effects';
-    coreDesc = `Nullify ${target} ${ranks} (DC ${dc} vs ${res})`;
+    coreDesc = includeMech
+      ? `${rng}Nullify ${target} ${ranks} (DC ${dc} vs ${res})`
+      : `Nullify ${target} ${ranks}`;
   } else {
     const parts = [`${rawBase}${rankStr}`];
     if (spec) parts.push(spec);
@@ -458,7 +467,7 @@ export function formatEffectInlineSummary(effect) {
   }
 
   // Mechanically suppress DC duplication
-  const mech = formatEffectMechanics(eff, { includeDC: false });
+  const mech = includeMech ? formatEffectMechanics(eff, { includeDC: false }) : '';
   // Filter out impervious from mods on Protection since it is already inline
   const mods = baseKey === 'protection' ? '' : formatModifiers(eff, { compact: true });
 
@@ -472,11 +481,12 @@ export function formatEffectInlineSummary(effect) {
 /**
  * Formats a linked effect as a sub-entry for the statblock.
  */
-export function formatLinkedSubEntry(linked) {
+export function formatLinkedSubEntry(linked, options = {}) {
   if (!linked) return null;
   const eff = linked.effect || linked;
   const lCost = calculateEffectCost(eff, 0)?.totalCost || eff.cost || 0;
   const sRules = resolveEffectRulesBlock(eff);
+  const includeMech = options.powerMechanics !== false && options.includeMechanics !== false;
 
   const rawName = (linked.name || '').trim();
   const cleanName = rawName
@@ -491,13 +501,13 @@ export function formatLinkedSubEntry(linked) {
     ? `${effBase}${rankStr}`
     : `${cleanName} (${effBase}${rankStr})`;
 
-  const inlineSummary = formatEffectInlineSummary(eff);
+  const inlineSummary = formatEffectInlineSummary(eff, options);
 
   return {
     label: `↳ ${labelText}`,
     effectName: `${effBase}${rankStr}`,
     effectBaseName: effBase,
-    mechanics: '',
+    mechanics: includeMech ? formatEffectMechanics(eff) : '',
     details: inlineSummary || `${effBase}${rankStr}`,
     costBadge: `${lCost} PP`,
     effectRuleDesc: sRules.effectRuleDesc,
@@ -511,7 +521,7 @@ export function formatLinkedSubEntry(linked) {
  * Returns structured representation of any power according to its architectural type:
  * Standard, Array, Compound, or Device.
  */
-export function formatPowerStatblock(power) {
+export function formatPowerStatblock(power, options = {}) {
   if (!power) {
     return {
       title: 'Power',
@@ -530,6 +540,7 @@ export function formatPowerStatblock(power) {
   const cost = calculatePowerTotalCost(power) || 0;
   const name = power.name || 'Unnamed Power';
   const type = power.type || 'standard';
+  const includeMech = options.powerMechanics !== false && options.includeMechanics !== false;
 
   const rawDescList = Array.isArray(power.descriptors)
     ? power.descriptors
@@ -560,10 +571,10 @@ export function formatPowerStatblock(power) {
       const combinedModifierRules = [...sRules.modifierRules];
 
       if (spLinked.length === 0) {
-        const sMech = formatEffectMechanics(eff);
+        const sMech = includeMech ? formatEffectMechanics(eff) : '';
         const sMods = formatModifiers(eff);
         const sSpecial = resolveSpecialConfig(eff);
-        const inlineSummary = formatEffectInlineSummary(eff);
+        const inlineSummary = formatEffectInlineSummary(eff, options);
         const bodyParts = inlineSummary || [sSpecial, sMech, sMods].filter(Boolean).join(' • ') || `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`;
 
         subEntries.push({
@@ -580,7 +591,7 @@ export function formatPowerStatblock(power) {
       } else {
         // Linked combo: combine inline with adaptive line splitting
         let totalComboCost = sCost;
-        const mainSummary = formatEffectInlineSummary(eff);
+        const mainSummary = formatEffectInlineSummary(eff, options);
         const inlineLinkedParts = [];
         const overflowSubEntries = [];
 
@@ -596,7 +607,7 @@ export function formatPowerStatblock(power) {
             .replace(/\s*[\(\[]linked(?: effect)?[\)\]]\s*$/i, '')
             .trim();
           const isSame = !rawLName || rawLName.toLowerCase() === (leEff.baseEffect || '').toLowerCase();
-          const leSummary = formatEffectInlineSummary(leEff);
+          const leSummary = formatEffectInlineSummary(leEff, options);
           const leText = isSame ? leSummary : `${rawLName} (${leSummary})`;
 
           // Test current total length for adaptive 100-character line wrapping
@@ -616,7 +627,7 @@ export function formatPowerStatblock(power) {
               label: `↳ ${rawLName || leEff.baseEffect || 'Effect'}`,
               effectName: `${leEff.baseEffect || 'Effect'} ${leEff.ranks || 1}`,
               effectBaseName: leEff.baseEffect || rawLName || 'Effect',
-              mechanics: '',
+              mechanics: includeMech ? formatEffectMechanics(leEff) : '',
               details: leSummary,
               costBadge: `${leCost} PP`,
               effectRuleDesc: leRules.effectRuleDesc,
@@ -633,7 +644,7 @@ export function formatPowerStatblock(power) {
           label: sp.name || eff.baseEffect || 'System',
           effectName: `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`,
           effectBaseName: eff.baseEffect || sp.name || 'Effect',
-          mechanics: '',
+          mechanics: includeMech ? formatEffectMechanics(eff) : '',
           details: combinedDetails,
           costBadge: `${totalComboCost} PP`,
           effectRuleDesc: sRules.effectRuleDesc,
@@ -651,13 +662,13 @@ export function formatPowerStatblock(power) {
           const altEff = alt.effect || alt;
           const altCost = alt.isDynamic ? 2 : 1;
           const altRules = resolveEffectRulesBlock(altEff);
-          const altSummary = formatEffectInlineSummary(altEff);
+          const altSummary = formatEffectInlineSummary(altEff, options);
 
           subEntries.push({
             label: `Alternate Effect: ${alt.name || altEff.baseEffect}`,
             effectName: `${altEff.baseEffect || 'Effect'} ${altEff.ranks || 1}`,
             effectBaseName: altEff.baseEffect || alt.name || 'Effect',
-            mechanics: '',
+            mechanics: includeMech ? formatEffectMechanics(altEff) : '',
             details: altSummary,
             costBadge: `${altCost} PP Slot`,
             effectRuleDesc: altRules.effectRuleDesc,
@@ -667,7 +678,7 @@ export function formatPowerStatblock(power) {
 
           const altLinked = Array.isArray(alt.linkedEffects) ? alt.linkedEffects : (Array.isArray(altEff.linkedEffects) ? altEff.linkedEffects : []);
           altLinked.forEach(ale => {
-            const item = formatLinkedSubEntry(ale);
+            const item = formatLinkedSubEntry(ale, options);
             if (item) subEntries.push(item);
           });
         });
@@ -676,7 +687,7 @@ export function formatPowerStatblock(power) {
 
     if (Array.isArray(power.linkedEffects)) {
       power.linkedEffects.forEach(le => {
-        const item = formatLinkedSubEntry(le);
+        const item = formatLinkedSubEntry(le, options);
         if (item) subEntries.push(item);
       });
     }
@@ -694,7 +705,7 @@ export function formatPowerStatblock(power) {
       structureBadge: badge,
       descriptorsText: descriptors,
       mainLine: descriptors,
-      mechanicsLine: specLine,
+      mechanicsLine: includeMech ? specLine : '',
       modifiersLine: '',
       specialConfigLine: '',
       effectBaseName: '',
@@ -718,7 +729,7 @@ export function formatPowerStatblock(power) {
       const cCost = calculateEffectCost(eff, 0)?.totalCost || calculatePowerTotalCost(cp) || eff.cost || 0;
       const tag = cp.isPrimaryAction ? 'Primary Action' : (cp.isLinked ? 'Linked Effect' : `Trait ${idx + 1}`);
       const cRules = resolveEffectRulesBlock(eff);
-      const cSummary = formatEffectInlineSummary(eff);
+      const cSummary = formatEffectInlineSummary(eff, options);
 
       const rawCpName = (cp.name || eff.baseEffect || '').trim();
       const cleanCpName = rawCpName.replace(/\s*[\(\[]linked(?: effect)?[\)\]]\s*$/i, '').trim() || eff.baseEffect;
@@ -726,7 +737,7 @@ export function formatPowerStatblock(power) {
         label: `${tag}: ${cleanCpName}`,
         effectName: `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`,
         effectBaseName: eff.baseEffect || cleanCpName || 'Effect',
-        mechanics: '',
+        mechanics: includeMech ? formatEffectMechanics(eff) : '',
         details: cSummary,
         costBadge: `${cCost} PP`,
         effectRuleDesc: cRules.effectRuleDesc,
@@ -736,14 +747,14 @@ export function formatPowerStatblock(power) {
 
       const cpLinked = Array.isArray(cp.linkedEffects) ? cp.linkedEffects : (Array.isArray(eff.linkedEffects) ? eff.linkedEffects : []);
       cpLinked.forEach(le => {
-        const item = formatLinkedSubEntry(le);
+        const item = formatLinkedSubEntry(le, options);
         if (item) subEntries.push(item);
       });
     });
 
     if (Array.isArray(power.linkedEffects)) {
       power.linkedEffects.forEach(le => {
-        const item = formatLinkedSubEntry(le);
+        const item = formatLinkedSubEntry(le, options);
         if (item) subEntries.push(item);
       });
     }
@@ -774,7 +785,7 @@ export function formatPowerStatblock(power) {
     const mainEff = power.mainEffect || power;
     const mainBase = mainEff.baseEffect || 'Effect';
     const mainRanks = mainEff.ranks || 1;
-    const mainMech = formatEffectMechanics(mainEff);
+    const mainMech = includeMech ? formatEffectMechanics(mainEff) : '';
     const mainMods = formatModifiers(mainEff);
     const mainRules = resolveEffectRulesBlock(mainEff);
 
@@ -786,7 +797,7 @@ export function formatPowerStatblock(power) {
       : (Array.isArray(mainEff.linkedEffects) ? mainEff.linkedEffects : []);
 
     primaryLinked.forEach(le => {
-      const item = formatLinkedSubEntry(le);
+      const item = formatLinkedSubEntry(le, options);
       if (item) subEntries.push(item);
     });
 
@@ -795,13 +806,13 @@ export function formatPowerStatblock(power) {
       const isDynamic = Boolean(alt.isDynamic || alt.dynamic);
       const slotCost = isDynamic ? 2 : 1;
       const altRules = resolveEffectRulesBlock(altEff);
-      const altSummary = formatEffectInlineSummary(altEff);
+      const altSummary = formatEffectInlineSummary(altEff, options);
 
       subEntries.push({
         label: `Alternate Effect: ${alt.name || altEff.baseEffect}`,
         effectName: `${altEff.baseEffect || 'Effect'} ${altEff.ranks || 1}`,
         effectBaseName: altEff.baseEffect || alt.name || 'Effect',
-        mechanics: '',
+        mechanics: includeMech ? formatEffectMechanics(altEff) : '',
         details: altSummary,
         costBadge: `${slotCost} PP Slot`,
         effectRuleDesc: altRules.effectRuleDesc,
@@ -811,16 +822,16 @@ export function formatPowerStatblock(power) {
 
       const altLinked = Array.isArray(alt.linkedEffects) ? alt.linkedEffects : (Array.isArray(altEff.linkedEffects) ? altEff.linkedEffects : []);
       altLinked.forEach(ale => {
-        const item = formatLinkedSubEntry(ale);
+        const item = formatLinkedSubEntry(ale, options);
         if (item) subEntries.push(item);
       });
     });
 
+    const altCount = (power.alternateEffects || []).length;
     const hasLinked = primaryLinked.length > 0 || (power.alternateEffects || []).some(alt => {
       const ae = alt.effect || alt;
       return (alt.linkedEffects && alt.linkedEffects.length > 0) || (ae.linkedEffects && ae.linkedEffects.length > 0);
     });
-    const altCount = (power.alternateEffects || []).length;
     const badge = hasLinked ? `ARRAY (${altCount + 1} MODES • LINKED)` : `ARRAY (${altCount + 1} MODES)`;
 
     return {
@@ -845,7 +856,7 @@ export function formatPowerStatblock(power) {
   const eff = power.mainEffect || power;
   const base = eff.baseEffect || 'Effect';
   const ranks = eff.ranks || 1;
-  const mech = formatEffectMechanics(eff);
+  const mech = includeMech ? formatEffectMechanics(eff) : '';
   const mods = formatModifiers(eff);
   const rules = resolveEffectRulesBlock(eff);
   const combinedModifierRules = [...rules.modifierRules];
@@ -871,7 +882,7 @@ export function formatPowerStatblock(power) {
         .replace(/\s*[\(\[]linked(?: effect)?[\)\]]\s*$/i, '')
         .trim();
       const isSame = !rawLName || rawLName.toLowerCase() === (leEff.baseEffect || '').toLowerCase();
-      const leSummary = formatEffectInlineSummary(leEff);
+      const leSummary = formatEffectInlineSummary(leEff, options);
       const leText = isSame ? leSummary : `${rawLName} (${leSummary})`;
 
       const prospective = [displayMainLine, ...inlineLinked, leText].join(' & ');
@@ -889,7 +900,7 @@ export function formatPowerStatblock(power) {
           label: `↳ ${rawLName || leEff.baseEffect || 'Effect'}`,
           effectName: `${leEff.baseEffect || 'Effect'} ${leEff.ranks || 1}`,
           effectBaseName: leEff.baseEffect || rawLName || 'Effect',
-          mechanics: '',
+          mechanics: includeMech ? formatEffectMechanics(leEff) : '',
           details: leSummary,
           costBadge: `${leCost} PP`,
           effectRuleDesc: leRules.effectRuleDesc,

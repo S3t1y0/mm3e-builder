@@ -1,4 +1,7 @@
-import { calculateDC, resolveSpecialConfig, formatRange } from '../../rules/powerFormatter.js';
+import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
+import { isMotivation } from '../../rules/complications.js';
+import { compileTargetedAttacks } from '../../rules/attacks.js';
+import { calculateDC, resolveSpecialConfig, formatRange, formatPowerStatblock } from '../../rules/powerFormatter.js';
 import { resolveEffectRulesBlock, formatDistanceRank } from '../../rules/powerRuleDescriptions.js';
 
 /**
@@ -419,4 +422,324 @@ export function formatEffectRulesPlainText(eff, baseIndent = '   ') {
     out += `${baseIndent}  * ${m.name} (${typeLabel}): ${m.desc}\n`;
   });
   return out;
+}
+
+/**
+ * Compiles a canonical, normalized character export dataset.
+ * Serves as the single source of truth for Plain Text, Markdown, and BBCode exporters.
+ *
+ * @param {Object} character - Raw character object from store
+ * @param {Object} heroStore - Pinia hero store instance
+ * @param {Object} options - Export options { mode: 'compact' | 'exhaustive' }
+ * @returns {Object} Canonical export dataset
+ */
+export function compileExportData(character = {}, heroStore = null, options = {}) {
+  const opts = {
+    powerMechanics: options.powerMechanics !== undefined ? options.powerMechanics : true,
+    effectRules: options.effectRules !== undefined ? options.effectRules : (options.mode === 'exhaustive'),
+    modifierRules: options.modifierRules !== undefined ? options.modifierRules : (options.mode === 'exhaustive'),
+    showAbilities: options.showAbilities !== false,
+    showDefenses: options.showDefenses !== false,
+    showOffense: options.showOffense !== false,
+    showAdvantages: options.showAdvantages !== false,
+    showSkills: options.showSkills !== false,
+    skillsMode: options.skillsMode || 'all',
+    showPowers: options.showPowers !== false,
+    showMovement: options.showMovement !== false,
+    showEquipment: options.showEquipment !== false,
+    showComplications: options.showComplications !== false,
+    showNotes: options.showNotes !== false
+  };
+  const mode = (opts.effectRules || opts.modifierRules) ? 'exhaustive' : 'compact';
+  const pl = character.powerLevel || 10;
+  const name = character.name || 'Hero Name';
+  const identity = character.identity || 'Secret Alter Ego';
+  const isSecret = character.isSecretIdentity !== false;
+  const identityType = isSecret ? 'Secret Identity' : 'Public Identity';
+  const player = character.player || 'None';
+  const affiliation = character.groupAffiliation || 'None';
+  const baseOfOps = character.baseOfOperations || 'Freedom City';
+  const heroPoints = character.heroPoints ?? 1;
+
+  // Demographics
+  const demographics = [];
+  if (character.gender) demographics.push({ label: 'Gender', value: character.gender });
+  if (character.age) demographics.push({ label: 'Age', value: character.age });
+  if (character.height) demographics.push({ label: 'Height', value: character.height });
+  if (character.weight) demographics.push({ label: 'Weight', value: character.weight });
+  if (character.eyes) demographics.push({ label: 'Eyes', value: character.eyes });
+  if (character.hair) demographics.push({ label: 'Hair', value: character.hair });
+
+  // Power Point Accounting
+  const abilitiesCost = heroStore?.abilitiesCost ?? Object.values(character.abilities || {}).reduce((sum, v) => sum + (Number(v) || 0) * 2, 0);
+  const defensesCost = heroStore?.defensesCost ?? Object.entries(character.defensesBought || {}).reduce((sum, [k, v]) => k !== 'TOUGHNESS' ? sum + (Number(v) || 0) : sum, 0);
+  const totalSkillRanks = (character.skills || []).reduce((sum, s) => sum + (Number(s.ranks ?? s.rank) || 0), 0);
+  const skillsCost = heroStore?.skillsCost ?? Math.ceil(totalSkillRanks / 2);
+  const advantagesCost = heroStore?.advantagesCost ?? (character.advantages || []).reduce((sum, a) => sum + (Number(a.ranks ?? a.rank ?? 1) || 1), 0);
+  const powersCost = heroStore?.powersCost ?? (character.powers || []).reduce((sum, p) => sum + (calculatePowerTotalCost(p) || 0), 0);
+  const totalSpent = heroStore?.totalSpentPP ?? (abilitiesCost + defensesCost + skillsCost + advantagesCost + powersCost);
+  const totalBudget = heroStore?.totalBudgetPP ?? (pl * 15);
+  const remaining = heroStore?.remainingPP ?? (totalBudget - totalSpent);
+
+  const effAbilities = heroStore?.effectiveAbilities ?? (character.abilities || {});
+  const activeTraits = heroStore?.activeEnhancedTraits || { abilities: {}, defenses: {}, skills: {}, advantages: {} };
+
+  // Abilities (8 Core Abilities)
+  const ablDefs = [
+    { code: 'STR', name: 'Strength' },
+    { code: 'STA', name: 'Stamina' },
+    { code: 'AGL', name: 'Agility' },
+    { code: 'DEX', name: 'Dexterity' },
+    { code: 'FGT', name: 'Fighting' },
+    { code: 'INT', name: 'Intellect' },
+    { code: 'AWE', name: 'Awareness' },
+    { code: 'PRE', name: 'Presence' }
+  ];
+
+  const abilities = ablDefs.map(abl => {
+    const isAbsent = heroStore?.isAbilityAbsent ? heroStore.isAbilityAbsent(abl.code) : ((character.absentAbilities || []).includes(abl.code));
+    if (isAbsent) {
+      return {
+        code: abl.code,
+        name: abl.name,
+        score: null,
+        scoreDisplay: '-',
+        mod: '-',
+        baseRank: 'Absent',
+        enhRank: 0,
+        cost: -10,
+        isAbsent: true
+      };
+    }
+    const baseRank = Number(character.abilities?.[abl.code] || 0);
+    const enhRank = Number(activeTraits.abilities?.[abl.code] || 0);
+    const score = effAbilities[abl.code] ?? (baseRank + enhRank);
+    const mod = formatMod(score);
+    const cost = baseRank * 2;
+    return {
+      code: abl.code,
+      name: abl.name,
+      score,
+      scoreDisplay: String(score),
+      mod,
+      baseRank,
+      enhRank,
+      cost,
+      isAbsent: false
+    };
+  });
+
+  // Defenses
+  const shieldBonus = heroStore?.equipmentShieldBonus || 0;
+  const armorBonus = heroStore?.equipmentArmorBonus || 0;
+  const powerProt = heroStore?.protectionBonus || 0;
+  const defRoll = heroStore?.getAdvantageRanks ? heroStore.getAdvantageRanks('Defensive Roll') : 0;
+
+  const dodgeBought = character.defensesBought?.DODGE || 0;
+  const dodgeTotal = heroStore?.getDefenseTotal('DODGE') ?? ((effAbilities.AGL || 0) + dodgeBought + shieldBonus);
+  const dodgeNotes = shieldBonus > 0 ? `Shield +${shieldBonus}` : 'Active Defense';
+
+  const parryBought = character.defensesBought?.PARRY || 0;
+  const parryTotal = heroStore?.getDefenseTotal('PARRY') ?? ((effAbilities.FGT || 0) + parryBought + shieldBonus);
+  const parryNotes = shieldBonus > 0 ? `Shield +${shieldBonus}` : 'Active Defense';
+
+  const fortBought = character.defensesBought?.FORTITUDE || 0;
+  const isStaAbsent = (character.absentAbilities || []).includes('STA');
+  const fortTotal = isStaAbsent ? null : (heroStore?.getDefenseTotal('FORTITUDE') ?? ((effAbilities.STA || 0) + fortBought));
+  const fortNotes = isStaAbsent ? 'Immune to Fortitude Effects' : 'Physical Resistance';
+
+  const toughBought = character.defensesBought?.TOUGHNESS || 0;
+  const toughTotal = heroStore?.getDefenseTotal('TOUGHNESS') ?? ((effAbilities.STA || 0) + toughBought + armorBonus + powerProt + defRoll);
+  const toughBonuses = [];
+  if (armorBonus > 0) toughBonuses.push(`Armor +${armorBonus}`);
+  if (powerProt > 0) toughBonuses.push(`Protection +${powerProt}`);
+  if (defRoll > 0) toughBonuses.push(`Defensive Roll +${defRoll}`);
+  const toughNotes = toughBonuses.length > 0 ? toughBonuses.join(', ') : 'Base Toughness';
+
+  const willBought = character.defensesBought?.WILL || 0;
+  const willTotal = heroStore?.getDefenseTotal('WILL') ?? ((effAbilities.AWE || 0) + willBought);
+  const willNotes = 'Mental Resistance';
+
+  const defenses = [
+    {
+      code: 'DODGE',
+      name: 'Dodge',
+      total: dodgeTotal,
+      totalDisplay: String(dodgeTotal),
+      baseAbility: `AGL (${formatMod(effAbilities.AGL || 0)})`,
+      bought: dodgeBought,
+      notes: dodgeNotes,
+      isImmune: false
+    },
+    {
+      code: 'PARRY',
+      name: 'Parry',
+      total: parryTotal,
+      totalDisplay: String(parryTotal),
+      baseAbility: `FGT (${formatMod(effAbilities.FGT || 0)})`,
+      bought: parryBought,
+      notes: parryNotes,
+      isImmune: false
+    },
+    {
+      code: 'FORTITUDE',
+      name: 'Fortitude',
+      total: fortTotal,
+      totalDisplay: fortTotal !== null ? String(fortTotal) : '-',
+      baseAbility: isStaAbsent ? 'STA (Absent)' : `STA (${formatMod(effAbilities.STA || 0)})`,
+      bought: fortBought,
+      notes: fortNotes,
+      isImmune: isStaAbsent
+    },
+    {
+      code: 'TOUGHNESS',
+      name: 'Toughness',
+      total: toughTotal,
+      totalDisplay: String(toughTotal),
+      baseAbility: `STA (${formatMod(effAbilities.STA || 0)})`,
+      bought: toughBought,
+      notes: toughNotes,
+      isImmune: false
+    },
+    {
+      code: 'WILL',
+      name: 'Will',
+      total: willTotal,
+      totalDisplay: String(willTotal),
+      baseAbility: `AWE (${formatMod(effAbilities.AWE || 0)})`,
+      bought: willBought,
+      notes: willNotes,
+      isImmune: false
+    }
+  ];
+
+  // Offense (Initiative & Attacks)
+  const initBonus = heroStore?.initiativeTotal ?? (heroStore?.getDefenseBase('INITIATIVE') ?? (effAbilities.AGL || 0));
+  const initAdvRanks = heroStore?.getAdvantageRanks ? heroStore.getAdvantageRanks('Improved Initiative') : 0;
+  const initNotesParts = [`AGL ${formatMod(effAbilities.AGL || 0)}`];
+  if (initAdvRanks > 0) initNotesParts.push(`Improved Initiative +${initAdvRanks * 4}`);
+
+  let attacksList = heroStore?.targetedAttacks || [];
+  if (attacksList.length === 0) {
+    attacksList = compileTargetedAttacks(character, effAbilities, (n) => heroStore?.getAdvantageRanks ? heroStore.getAdvantageRanks(n) : 0);
+  }
+
+  const attacks = attacksList.map(atk => {
+    const isAuto = atk.isArea || atk.isPerception || atk.rollBonus === 'Auto' || atk.rollBonus === null;
+    const bonusStr = isAuto ? 'Auto' : (Number(atk.rollBonus) >= 0 ? `+${atk.rollBonus}` : `${atk.rollBonus}`);
+    const effectDesc = `${atk.effectName || 'Damage'} ${atk.effectRank ?? atk.rank ?? 0}`;
+    const descStr = atk.descriptor || 'Physical';
+    const dcStr = atk.dc ? `DC ${atk.dc} vs ${atk.resistance || 'Toughness'}` : '-';
+    const rangeCrit = `${atk.range || 'Close'}, Crit ${atk.crit || 20}`;
+    return {
+      name: atk.name,
+      bonusStr,
+      effectDesc,
+      descStr,
+      dcStr,
+      rangeCrit,
+      isAuto,
+      rawAttack: atk
+    };
+  });
+
+  // Advantages
+  const rawAdvs = Array.isArray(character.advantages) ? character.advantages : [];
+  const advantages = rawAdvs.map(adv => {
+    const advName = adv.name || 'Advantage';
+    const ranks = Number(adv.ranks ?? adv.rank ?? 1) || 1;
+    const specifier = adv.specifier || adv.detail || '';
+    let label = ranks > 1 ? `${advName} ${ranks}` : advName;
+    if (specifier) label += ` (${specifier})`;
+    return {
+      name: advName,
+      ranks,
+      specifier,
+      label,
+      desc: adv.desc || adv.description || ''
+    };
+  }).sort((a, b) => a.label.localeCompare(b.label));
+
+  // Skills (All 16 core skills + subskills, filtered if trained only)
+  let skills = getAllCharacterSkills(character, heroStore);
+  if (opts.skillsMode === 'trained') {
+    skills = skills.filter(sk => (Number(sk.ranks) || 0) > 0 || sk.subtype);
+  }
+
+  // Powers
+  const rawPowers = Array.isArray(character.powers) ? character.powers : [];
+  const powers = rawPowers.map(p => {
+    const statblock = formatPowerStatblock(p, opts);
+    return {
+      ...statblock,
+      cost: statblock.totalCost,
+      rawPower: p
+    };
+  });
+
+  // Movement Modes
+  const movement = getMovementModes(character);
+
+  // Equipment / Resources
+  const resources = character.resources || [];
+  const totalEP = heroStore?.totalEP ?? resources.reduce((sum, r) => sum + (Number(r.epCost ?? r.cost) || 0), 0);
+  const maxEP = (heroStore?.getAdvantageRanks ? heroStore.getAdvantageRanks('Equipment') : 0) * 5;
+
+  // Complications
+  const comps = character.complications || [];
+  const motivations = comps.filter(isMotivation);
+  const complications = comps.filter(c => !isMotivation(c));
+
+  return {
+    options: opts,
+    mode,
+    identity: {
+      name,
+      powerLevel: pl,
+      realIdentity: identity,
+      isSecret,
+      identityType,
+      player,
+      affiliation,
+      baseOfOperations: baseOfOps,
+      heroPoints,
+      demographics
+    },
+    ppAccounting: {
+      abilitiesCost,
+      defensesCost,
+      skillsCost,
+      advantagesCost,
+      powersCost,
+      totalSpent,
+      totalBudget,
+      remaining,
+      totalSkillRanks
+    },
+    abilities,
+    defenses,
+    offense: {
+      initiative: {
+        total: formatMod(initBonus),
+        bonus: initBonus,
+        notes: initNotesParts.join(', ')
+      },
+      attacks
+    },
+    advantages,
+    skills,
+    powers,
+    movement,
+    equipment: {
+      resources,
+      totalEP,
+      maxEP
+    },
+    complications: {
+      motivations,
+      complications,
+      all: comps
+    },
+    notes: character.notes || ''
+  };
 }

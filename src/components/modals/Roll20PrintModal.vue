@@ -329,7 +329,7 @@
 
         <div class="macro-category-row mb-3">
           <button
-            v-for="cat in ['All', 'Attacks', 'Defenses', 'Skills', 'Abilities', 'Initiative']"
+            v-for="cat in ['All', 'Attacks', 'Defenses', 'Skills', 'Abilities', 'Powers', 'Initiative']"
             :key="cat"
             class="cat-filter-btn"
             :class="{ active: macroFilter === cat }"

@@ -237,7 +237,7 @@
           </div>
 
           <!-- Offense Block (3 Lined Rows) -->
-          <div class="gr-card gr-offense-card">
+          <div v-if="uiStore.exportOptions.showOffense" class="gr-card gr-offense-card">
             <div class="gr-offense-header-row">
               <span class="gr-offense-title">OFFENSE</span>
               <div class="gr-initiative-pill">
@@ -306,7 +306,8 @@
       </div>
 
       <!-- Notes Bar -->
-      <div class="gr-card gr-notes-bar">
+      <!-- Notes Bar -->
+      <div v-if="uiStore.exportOptions.showNotes" class="gr-card gr-notes-bar">
         <label class="gr-notes-label" for="gr-input-notes">NOTES</label>
         <input
           id="gr-input-notes"
@@ -321,9 +322,9 @@
       </div>
 
       <!-- Advantages and Skills -->
-      <div class="gr-mid-grid">
+      <div v-if="uiStore.exportOptions.showAdvantages || uiStore.exportOptions.showSkills" class="gr-mid-grid">
         <!-- Left: Advantages (Clean flowing list, matching physical character sheet) -->
-        <div class="gr-card gr-advantages-card">
+        <div v-if="uiStore.exportOptions.showAdvantages" class="gr-card gr-advantages-card">
           <span class="gr-card-title">ADVANTAGES</span>
           <div v-if="heroStore.character.advantages?.length" class="gr-advantages-prose">
             <span v-for="(adv, aIdx) in heroStore.character.advantages" :key="adv.id || adv.name">
@@ -337,10 +338,10 @@
         </div>
 
         <!-- Right: Skills (2 Tabular Columns with neat dotted leader lines) -->
-        <div class="gr-card gr-skills-card">
+        <div v-if="uiStore.exportOptions.showSkills" class="gr-card gr-skills-card">
           <span class="gr-card-title">SKILLS</span>
-          <div v-if="trainedSkills.length" class="gr-skills-columns">
-            <div v-for="sk in trainedSkills" :key="sk.id" class="gr-skill-row">
+          <div v-if="displaySkills.length" class="gr-skills-columns">
+            <div v-for="sk in displaySkills" :key="sk.id" class="gr-skill-row">
               <div class="gr-skill-name-wrap">
                 <span class="gr-skill-title">{{ sk.displayName }}</span>
                 <span class="gr-skill-stat">({{ sk.abilityCode }})</span>
@@ -356,7 +357,7 @@
       </div>
 
       <!-- Powers & Devices -->
-      <div class="gr-card gr-powers-card">
+      <div v-if="uiStore.exportOptions.showPowers" class="gr-card gr-powers-card">
         <span class="gr-card-title">POWERS &amp; DEVICES</span>
         <div v-if="primaryPowers.length" class="gr-powers-list">
           <div v-for="p in primaryPowers" :key="p.id" class="gr-power-entry">
@@ -369,19 +370,20 @@
             </div>
 
             <!-- Mechanics Line (Action, Range, Duration, DC) -->
-            <div v-if="getPowerBlock(p).mechanicsLine" class="gr-power-row gr-power-mechanics-line">
+            <div v-if="uiStore.exportOptions.powerMechanics && getPowerBlock(p).mechanicsLine" class="gr-power-row gr-power-mechanics-line">
               <span class="gr-power-mech-text">{{ getPowerBlock(p).mechanicsLine }}</span>
             </div>
 
             <!-- Special Config or Modifiers -->
-            <div v-if="getPowerBlock(p).specialConfigLine || getPowerBlock(p).modifiersLine" class="gr-power-row gr-power-detail-line">
-              <span v-if="getPowerBlock(p).specialConfigLine" class="gr-power-config-text">{{ getPowerBlock(p).specialConfigLine }}</span>
-              <span v-if="getPowerBlock(p).specialConfigLine && getPowerBlock(p).modifiersLine" class="gr-power-sep">•</span>
+            <div v-if="(uiStore.exportOptions.powerMechanics && getPowerBlock(p).specialConfigLine) || getPowerBlock(p).modifiersLine" class="gr-power-row gr-power-detail-line">
+              <span v-if="uiStore.exportOptions.powerMechanics && getPowerBlock(p).specialConfigLine" class="gr-power-config-text">{{ getPowerBlock(p).specialConfigLine }}</span>
+              <span v-if="uiStore.exportOptions.powerMechanics && getPowerBlock(p).specialConfigLine && getPowerBlock(p).modifiersLine" class="gr-power-sep">•</span>
               <span v-if="getPowerBlock(p).modifiersLine" class="gr-power-mods-text">{{ getPowerBlock(p).modifiersLine }}</span>
             </div>
 
             <!-- Rule description -->
             <div
+              v-if="uiStore.exportOptions.effectRules"
               v-for="(descLine, dIdx) in (getPowerBlock(p).effectRuleDescs?.length ? getPowerBlock(p).effectRuleDescs : [getPowerBlock(p).effectRuleDesc].filter(Boolean))"
               :key="'p1-desc-' + dIdx"
               class="gr-power-row gr-power-rule-desc"
@@ -393,7 +395,7 @@
             </div>
 
             <!-- Applied modifiers -->
-            <template v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules" :key="'p1-mod-' + mIdx">
+            <template v-if="uiStore.exportOptions.modifierRules" v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules" :key="'p1-mod-' + mIdx">
               <div
                 v-for="(line, lIdx) in (modRule.lines?.length ? modRule.lines : [modRule.desc])"
                 :key="'p1-mod-' + mIdx + '-l-' + lIdx"
@@ -416,6 +418,7 @@
                 <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
               </div>
               <div
+                v-if="uiStore.exportOptions.effectRules"
                 v-for="(subDesc, sdIdx) in (sub.effectRuleDescs?.length ? sub.effectRuleDescs : [sub.effectRuleDesc].filter(Boolean))"
                 :key="'p1-subdesc-' + sIdx + '-' + sdIdx"
                 class="gr-power-row gr-power-sub-rule-desc"
@@ -425,7 +428,7 @@
                 </strong>
                 <span class="gr-power-rule-text">{{ subDesc }}</span>
               </div>
-              <template v-for="(smRule, smIdx) in sub.modifierRules" :key="'p1-submod-' + sIdx + '-' + smIdx">
+              <template v-if="uiStore.exportOptions.modifierRules" v-for="(smRule, smIdx) in sub.modifierRules" :key="'p1-submod-' + sIdx + '-' + smIdx">
                 <div
                   v-for="(sLine, slIdx) in (smRule.lines?.length ? smRule.lines : [smRule.desc])"
                   :key="'p1-submod-' + sIdx + '-' + smIdx + '-l-' + slIdx"
@@ -467,7 +470,7 @@
       </div>
 
       <!-- Gear & Equipment -->
-      <div class="gr-card gr-gear-card">
+      <div v-if="uiStore.exportOptions.showEquipment" class="gr-card gr-gear-card">
         <span class="gr-card-title">GEAR &amp; EQUIPMENT</span>
         <div v-if="heroStore.character.resources?.length" class="gr-gear-list">
           <span v-for="(item, idx) in heroStore.character.resources.slice(0, 8)" :key="item.id || item.name" class="gr-gear-item">
@@ -482,7 +485,7 @@
       <!-- Complications & Points -->
       <div class="gr-footer-layout">
         <!-- Complications (Left) -->
-        <div class="gr-card gr-complications-card">
+        <div v-if="uiStore.exportOptions.showComplications" class="gr-card gr-complications-card">
           <span class="gr-card-title">COMPLICATIONS</span>
           <div v-if="heroStore.character.complications?.length" class="gr-complications-content">
             <div v-for="c in heroStore.character.complications.slice(0, 3)" :key="c.id" class="gr-comp-line">
@@ -531,7 +534,7 @@
 
       <div class="gr-page-2-content">
         <!-- Overflow Powers -->
-        <div class="gr-card gr-overflow-powers">
+        <div v-if="uiStore.exportOptions.showPowers" class="gr-card gr-overflow-powers">
           <span class="gr-card-title">POWERS &amp; DEVICES (CONTINUED)</span>
           <div v-if="overflowPowers.length" class="gr-powers-list">
             <div v-for="p in overflowPowers" :key="p.id" class="gr-power-entry">
@@ -544,19 +547,20 @@
               </div>
 
               <!-- Mechanics Line (Action, Range, Duration, DC) -->
-              <div v-if="getPowerBlock(p).mechanicsLine" class="gr-power-row gr-power-mechanics-line">
+              <div v-if="uiStore.exportOptions.powerMechanics && getPowerBlock(p).mechanicsLine" class="gr-power-row gr-power-mechanics-line">
                 <span class="gr-power-mech-text">{{ getPowerBlock(p).mechanicsLine }}</span>
               </div>
 
               <!-- Special Config or Modifiers -->
-              <div v-if="getPowerBlock(p).specialConfigLine || getPowerBlock(p).modifiersLine" class="gr-power-row gr-power-detail-line">
-                <span v-if="getPowerBlock(p).specialConfigLine" class="gr-power-config-text">{{ getPowerBlock(p).specialConfigLine }}</span>
-                <span v-if="getPowerBlock(p).specialConfigLine && getPowerBlock(p).modifiersLine" class="gr-power-sep">•</span>
+              <div v-if="(uiStore.exportOptions.powerMechanics && getPowerBlock(p).specialConfigLine) || getPowerBlock(p).modifiersLine" class="gr-power-row gr-power-detail-line">
+                <span v-if="uiStore.exportOptions.powerMechanics && getPowerBlock(p).specialConfigLine" class="gr-power-config-text">{{ getPowerBlock(p).specialConfigLine }}</span>
+                <span v-if="uiStore.exportOptions.powerMechanics && getPowerBlock(p).specialConfigLine && getPowerBlock(p).modifiersLine" class="gr-power-sep">•</span>
                 <span v-if="getPowerBlock(p).modifiersLine" class="gr-power-mods-text">{{ getPowerBlock(p).modifiersLine }}</span>
               </div>
 
               <!-- Rule description -->
               <div
+                v-if="uiStore.exportOptions.effectRules"
                 v-for="(descLine, dIdx) in (getPowerBlock(p).effectRuleDescs?.length ? getPowerBlock(p).effectRuleDescs : [getPowerBlock(p).effectRuleDesc].filter(Boolean))"
                 :key="'p2-desc-' + dIdx"
                 class="gr-power-row gr-power-rule-desc"
@@ -568,7 +572,7 @@
               </div>
 
               <!-- Applied modifiers -->
-              <template v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules" :key="'p2-mod-' + mIdx">
+              <template v-if="uiStore.exportOptions.modifierRules" v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules" :key="'p2-mod-' + mIdx">
                 <div
                   v-for="(line, lIdx) in (modRule.lines?.length ? modRule.lines : [modRule.desc])"
                   :key="'p2-mod-' + mIdx + '-l-' + lIdx"
@@ -591,6 +595,7 @@
                   <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
                 </div>
                 <div
+                  v-if="uiStore.exportOptions.effectRules"
                   v-for="(subDesc, sdIdx) in (sub.effectRuleDescs?.length ? sub.effectRuleDescs : [sub.effectRuleDesc].filter(Boolean))"
                   :key="'p2-subdesc-' + sIdx + '-' + sdIdx"
                   class="gr-power-row gr-power-sub-rule-desc"
@@ -600,7 +605,7 @@
                   </strong>
                   <span class="gr-power-rule-text">{{ subDesc }}</span>
                 </div>
-                <template v-for="(smRule, smIdx) in sub.modifierRules" :key="'p2-submod-' + sIdx + '-' + smIdx">
+                <template v-if="uiStore.exportOptions.modifierRules" v-for="(smRule, smIdx) in sub.modifierRules" :key="'p2-submod-' + sIdx + '-' + smIdx">
                   <div
                     v-for="(sLine, slIdx) in (smRule.lines?.length ? smRule.lines : [smRule.desc])"
                     :key="'p2-submod-' + sIdx + '-' + smIdx + '-l-' + slIdx"
@@ -642,7 +647,7 @@
         </div>
 
         <!-- Overflow Equipment & Vehicles -->
-        <div class="gr-card gr-overflow-equipment">
+        <div v-if="uiStore.exportOptions.showEquipment" class="gr-card gr-overflow-equipment">
           <span class="gr-card-title">EQUIPMENT, WEAPONS &amp; VEHICLES</span>
           <div v-if="heroStore.character.resources?.length" class="gr-gear-list">
             <span v-for="item in heroStore.character.resources" :key="item.id || item.name" class="gr-gear-pill">
@@ -657,10 +662,10 @@
         </div>
 
         <!-- Background & Full Complications -->
-        <div class="gr-card gr-overflow-bio">
+        <div v-if="uiStore.exportOptions.showNotes || uiStore.exportOptions.showComplications" class="gr-card gr-overflow-bio">
           <span class="gr-card-title">HERO BACKGROUND &amp; COMPLICATIONS DETAIL</span>
           <div class="gr-bio-edit-wrap">
-            <div style="margin-bottom: 8px;">
+            <div v-if="uiStore.exportOptions.showNotes" style="margin-bottom: 8px;">
               <label class="gr-bio-heading" for="gr-bio-tactics">
                 <strong>Background Story &amp; Tactics:</strong>
               </label>
@@ -673,7 +678,7 @@
                 @change="heroStore.pushHistory()"
               ></textarea>
             </div>
-            <div v-if="heroStore.character.complications?.length">
+            <div v-if="uiStore.exportOptions.showComplications && heroStore.character.complications?.length">
               <strong style="color: #0f172a;">All Complications:</strong>
               <div v-for="c in heroStore.character.complications" :key="c.id" class="gr-comp-detail-row">
                 <strong class="gr-comp-name">• {{ c.name }}:</strong>
@@ -700,6 +705,7 @@ import { useUiStore } from '../../stores/uiStore.js';
 import { compileTargetedAttacks } from '../../rules/attacks.js';
 import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
 import { formatPowerStatblock } from '../../rules/powerFormatter.js';
+import { getAllCharacterSkills } from '../../utils/exporters/helpers.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -763,8 +769,22 @@ const trainedSkills = computed(() => {
     });
 });
 
+// Display Skills (handles All 16 Core Skills vs Trained Only switch)
+const displaySkills = computed(() => {
+  if (uiStore.exportOptions.skillsMode === 'all') {
+    return getAllCharacterSkills(heroStore.character, heroStore).map((sk, idx) => ({
+      id: sk.id || `${sk.name}-${sk.subtype || idx}`,
+      displayName: sk.displayName,
+      abilityCode: sk.abilityCode,
+      ranks: sk.ranks,
+      totalBonus: sk.totalBonus
+    }));
+  }
+  return trainedSkills.value;
+});
+
 function getPowerBlock(power) {
-  return formatPowerStatblock(power);
+  return formatPowerStatblock(power, { powerMechanics: uiStore.exportOptions.powerMechanics });
 }
 
 // Layout row limits for A4 page budget
@@ -788,17 +808,25 @@ function getPowerRowCount(power) {
   if (!power) return 0;
   const block = getPowerBlock(power);
   let count = 1;
-  if (block.mechanicsLine) count += 1;
-  if (block.specialConfigLine || block.modifiersLine) count += 1;
-  count += (block.effectRuleDescs?.length || (block.effectRuleDesc ? 1 : 0));
-  for (const mr of (block.modifierRules || [])) {
-    count += (mr.lines?.length || 1);
+  if (uiStore.exportOptions.powerMechanics && block.mechanicsLine) count += 1;
+  if ((uiStore.exportOptions.powerMechanics && block.specialConfigLine) || block.modifiersLine) count += 1;
+  if (uiStore.exportOptions.effectRules) {
+    count += (block.effectRuleDescs?.length || (block.effectRuleDesc ? 1 : 0));
+  }
+  if (uiStore.exportOptions.modifierRules) {
+    for (const mr of (block.modifierRules || [])) {
+      count += (mr.lines?.length || 1);
+    }
   }
   for (const sub of (block.subEntries || [])) {
     count += 1;
-    count += (sub.effectRuleDescs?.length || (sub.effectRuleDesc ? 1 : 0));
-    for (const smr of (sub.modifierRules || [])) {
-      count += (smr.lines?.length || 1);
+    if (uiStore.exportOptions.effectRules) {
+      count += (sub.effectRuleDescs?.length || (sub.effectRuleDesc ? 1 : 0));
+    }
+    if (uiStore.exportOptions.modifierRules) {
+      for (const smr of (sub.modifierRules || [])) {
+        count += (smr.lines?.length || 1);
+      }
     }
   }
   return count;
@@ -856,10 +884,10 @@ const emptyOverflowLinesCount = computed(() => {
 const hasPage2Content = computed(() => {
   return (
     Boolean(uiStore.alwaysIncludePage2) ||
-    overflowPowers.value.length > 0 ||
-    (heroStore.character.resources?.length || 0) > 8 ||
-    (heroStore.character.notes?.length || 0) > 160 ||
-    (heroStore.character.complications?.length || 0) > 3
+    (uiStore.exportOptions.showPowers && overflowPowers.value.length > 0) ||
+    (uiStore.exportOptions.showEquipment && (heroStore.character.resources?.length || 0) > 8) ||
+    (uiStore.exportOptions.showNotes && (heroStore.character.notes?.length || 0) > 160) ||
+    (uiStore.exportOptions.showComplications && (heroStore.character.complications?.length || 0) > 3)
   );
 });
 </script>

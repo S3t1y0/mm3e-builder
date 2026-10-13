@@ -66,6 +66,13 @@
           </div>
 
           <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <button
+              class="btn btn-secondary btn-sm"
+              @click="uiStore.openModal('exportStructure')"
+              title="Configure export structure, rules depth and visible sections"
+            >
+              <i class="ri-equalizer-line"></i> Options
+            </button>
             <label class="gr-page-toggle-label" title="Always include Page 2 (Continuation sheet) for extra manual notes & powers">
               <input type="checkbox" v-model="uiStore.alwaysIncludePage2" class="gr-page-toggle-checkbox" />
               <span>Page 2</span>

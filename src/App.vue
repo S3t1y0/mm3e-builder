@@ -124,6 +124,13 @@
               </div>
             </button>
 
+            <button class="dropdown-item" @click="handleToolAction('exportStructure')">
+              <i class="ri-equalizer-line icon-teal"></i>
+              <div class="dropdown-item-text">
+                <strong>Export Structure &amp; Options</strong>
+              </div>
+            </button>
+
             <div class="dropdown-divider"></div>
             <div class="dropdown-section-label">Roll20 VTT Extension</div>
 
@@ -241,6 +248,7 @@
     <MarkdownExportModal />
     <AdvantageLibraryModal />
     <ConditionPickerModal />
+    <ExportStructureModal />
 
     <!-- FLOATING TACTICAL DICE ROLL HUD -->
     <DiceRollHud />
@@ -280,6 +288,7 @@ import Roll20PrintModal from './components/modals/Roll20PrintModal.vue';
 import MarkdownExportModal from './components/modals/MarkdownExportModal.vue';
 import AdvantageLibraryModal from './components/modals/AdvantageLibraryModal.vue';
 import ConditionPickerModal from './components/modals/ConditionPickerModal.vue';
+import ExportStructureModal from './components/modals/ExportStructureModal.vue';
 import DiceRollHud from './components/sheet/DiceRollHud.vue';
 
 const heroStore = useHeroStore();
@@ -363,6 +372,8 @@ function handleToolAction(action) {
     uiStore.openModal('markdown');
   } else if (action === 'roll20') {
     uiStore.openModal('roll20');
+  } else if (action === 'exportStructure') {
+    uiStore.openModal('exportStructure');
   } else if (action === 'reset') {
     if (window.confirm('Reset this character sheet? All current hero stats and powers will be cleared.')) {
       heroStore.resetCharacter();

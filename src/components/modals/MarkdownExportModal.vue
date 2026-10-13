@@ -11,9 +11,18 @@
             <h2 class="modal-title">Text Character Sheet Export</h2>
           </div>
         </div>
-        <button class="btn btn-ghost btn-sm" @click="uiStore.closeModal('markdown')" aria-label="Close">
-          <i class="ri-close-line" style="font-size: 1.25rem;"></i>
-        </button>
+        <div style="display: flex; align-items: center; gap: 0.5rem;">
+          <button
+            class="btn btn-secondary btn-sm"
+            @click="uiStore.openModal('exportStructure')"
+            title="Configure export structure and detail options"
+          >
+            <i class="ri-equalizer-line"></i> Configure Structure
+          </button>
+          <button class="btn btn-ghost btn-sm" @click="uiStore.closeModal('markdown')" aria-label="Close">
+            <i class="ri-close-line" style="font-size: 1.25rem;"></i>
+          </button>
+        </div>
       </div>
 
       <!-- BODY -->
@@ -95,13 +104,14 @@ const textFormat = ref('markdown');
 const { copy, copied } = useClipboard({ copiedDuring: 2000 });
 
 const activeTextContent = computed(() => {
+  const opts = uiStore.exportOptions;
   if (textFormat.value === 'markdown') {
-    return buildMarkdownSheet(heroStore.character, heroStore);
+    return buildMarkdownSheet(heroStore.character, heroStore, opts);
   }
   if (textFormat.value === 'bbcode') {
-    return buildBBCodeSheet(heroStore.character, heroStore);
+    return buildBBCodeSheet(heroStore.character, heroStore, opts);
   }
-  return buildPlainTextSheet(heroStore.character, heroStore);
+  return buildPlainTextSheet(heroStore.character, heroStore, opts);
 });
 
 async function copyTextExport() {
@@ -270,6 +280,54 @@ function downloadTextFile() {
   background: rgba(45, 212, 191, 0.15);
   border-color: rgba(45, 212, 191, 0.4);
   color: #2dd4bf;
+}
+
+.mode-toggle-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.mode-toggle-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--text-muted, #64748b);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.mode-pills {
+  display: flex;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-sm, 6px);
+  padding: 2px;
+  gap: 2px;
+}
+
+.mode-pill-btn {
+  background: transparent;
+  border: none;
+  border-radius: 4px;
+  color: var(--text-secondary, #94a3b8);
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.35rem 0.65rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all var(--trans-fast, 0.15s ease);
+}
+
+.mode-pill-btn:hover {
+  color: #fff;
+}
+
+.mode-pill-btn.active {
+  background: rgba(45, 212, 191, 0.2);
+  color: #2dd4bf;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
 }
 
 .format-actions {

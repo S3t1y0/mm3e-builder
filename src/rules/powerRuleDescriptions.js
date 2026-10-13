@@ -172,50 +172,50 @@ export function getDynamicEffectRuleSummary(effect) {
 
   if (baseKey === 'speed') {
     const spd = formatSpeedRank(ranks);
-    return [`Runs overland up to ${spd} as a move action (Speed Rank ${ranks}).`];
+    return [`Increases ground movement speed up to ${spd} as a move action (Speed Rank ${ranks}).`];
   }
 
   if (baseKey === 'flight') {
     const spd = formatSpeedRank(ranks);
-    return [`Flies through the air up to ${spd} including hovering in place (Flight Rank ${ranks}).`];
+    return [`Enables airborne flight and hovering up to ${spd} as a move action (Flight Rank ${ranks}).`];
   }
 
   if (baseKey === 'swimming') {
     const swRank = Math.max(0, ranks - 2);
     const spd = formatSpeedRank(swRank);
-    return [`Swims through water up to ${spd} (Water Speed Rank ${swRank}).`];
+    return [`Enables aquatic swimming up to ${spd} as a move action (Water Speed Rank ${swRank}).`];
   }
 
   if (baseKey === 'burrowing') {
     const buRank = Math.max(0, ranks - 5);
     const spd = formatSpeedRank(buRank);
-    return [`Tunnels through earth/stone up to ${spd} (Burrowing Rank ${buRank}).`];
+    return [`Tunnels through soil and rock up to ${spd} as a move action (Burrowing Rank ${buRank}).`];
   }
 
   if (baseKey === 'leaping') {
     const standDist = formatDistanceRank(ranks - 2);
     const runDist = formatDistanceRank(ranks - 1);
-    return [`Leaps up to ${standDist} standing (${runDist} running) in a single bound as a free action without landing damage (Leaping Rank ${ranks}).`];
+    return [`Propels yourself up to ${standDist} standing (${runDist} running) in a single bound as a free action without landing damage (Leaping Rank ${ranks}).`];
   }
 
   if (baseKey === 'teleport') {
     const dist = formatDistanceRank(ranks);
-    return [`Instantly teleports up to ${dist} carrying up to 50 lbs default as a move action (Teleport Rank ${ranks}).`];
+    return [`Instantly transports yourself up to ${dist} (carrying up to 50 lbs) as a move action without crossing intervening space (Teleport Rank ${ranks}).`];
   }
 
   if (baseKey === 'protection') {
-    return [`Grants +${ranks} bonus to Toughness defense against physical and energy harm.`];
+    return [`Grants a +${ranks} bonus to Toughness defense against damage.`];
   }
 
-  if (baseKey === 'damage') {
+  if (baseKey === 'damage' || baseKey.includes('damage')) {
     const res = effect.resistance || 'Toughness';
-    return [`Delivers a close damaging strike resisted by ${res} (DC ${15 + ranks} vs ${res}).`];
+    return [`Inflicts close damage resisted by ${res} defense (DC ${15 + ranks} vs ${res}).`];
   }
 
   if (baseKey === 'blast') {
     const res = effect.resistance || 'Toughness';
     const rangeDist = `${ranks * 25}/${ranks * 50}/${ranks * 100} ft`;
-    return [`Delivers ranged damage (${rangeDist}), resisted by ${res} (DC ${15 + ranks} vs ${res}).`];
+    return [`Inflicts ranged damage (${rangeDist}), resisted by ${res} defense (DC ${15 + ranks} vs ${res}).`];
   }
 
   if (baseKey === 'affliction') {
@@ -223,17 +223,17 @@ export function getDynamicEffectRuleSummary(effect) {
     const second = c.secondDegree || 'Stunned';
     const third = c.thirdDegree || 'Incapacitated';
     const res = effect.resistance || 'Fortitude';
-    return [`Imposes debilitating conditions: ${first} / ${second} / ${third} (DC ${10 + ranks} vs ${res}).`];
+    return [`Imposes debilitating conditions (${first}, ${second}, ${third}), resisted by ${res} check (DC ${10 + ranks} vs ${res}).`];
   }
 
   if (baseKey === 'weaken') {
     const trait = c.trait || c.targetTrait || 'target trait';
     const res = effect.resistance || 'Fortitude';
-    return [`Drains target's ${trait} by 1 point per point check result is below DC ${10 + ranks} vs ${res} (up to ${ranks} max, recovers 1 pt/round).`];
+    return [`Temporarily drains target's ${trait} by 1 point per point failed below DC ${10 + ranks} vs ${res} (max ${ranks} points, recovers 1 pt/round).`];
   }
 
   if (baseKey === 'healing') {
-    return [`Heals touched subject via DC 10 check: removes 1 damage condition per degree of success (most severe first) and stabilizes dying subjects.`];
+    return [`Removes damage conditions via DC 10 check (1 condition per degree of success, highest severity first) and stabilizes dying subjects.`];
   }
 
   if (baseKey === 'nullify') {
@@ -253,11 +253,11 @@ export function getDynamicEffectRuleSummary(effect) {
 
     if (names.length > 4) {
       return [
-        `Superhuman faculties (1/2): ${names.slice(0, 4).join(', ')}`,
-        `Superhuman faculties (2/2): ${names.slice(4).join(', ')}`
+        `Sensory faculties (1/2): ${names.slice(0, 4).join(', ')}`,
+        `Sensory faculties (2/2): ${names.slice(4).join(', ')}`
       ];
     }
-    return [`Superhuman sensory faculties: ${names.join(', ')}`];
+    return [`Enhances sensory capabilities (${names.join(', ')}), allowing perception beyond normal human limitations.`];
   }
 
   if (baseKey === 'movement') {
@@ -275,11 +275,11 @@ export function getDynamicEffectRuleSummary(effect) {
 
     if (names.length > 4) {
       return [
-        `Special movement modes (1/2): ${names.slice(0, 4).join(', ')}`,
-        `Special movement modes (2/2): ${names.slice(4).join(', ')}`
+        `Movement modes (1/2): ${names.slice(0, 4).join(', ')}`,
+        `Movement modes (2/2): ${names.slice(4).join(', ')}`
       ];
     }
-    return [`Special movement modes: ${names.join(', ')}`];
+    return [`Provides specialized movement modes (${names.join(', ')}).`];
   }
 
   if (baseKey === 'immunity') {
@@ -294,11 +294,11 @@ export function getDynamicEffectRuleSummary(effect) {
 
     if (names.length > 4) {
       return [
-        `Complete immunity against (1/2): ${names.slice(0, 4).join(', ')}`,
-        `Complete immunity against (2/2): ${names.slice(4).join(', ')}`
+        `Immunity (1/2): ${names.slice(0, 4).join(', ')}`,
+        `Immunity (2/2): ${names.slice(4).join(', ')}`
       ];
     }
-    return [`Complete immunity against: ${names.join(', ')}`];
+    return [`Grants complete immunity against ${names.join(', ')}, automatically ignoring consequences without a resistance check.`];
   }
 
   if (baseKey === 'comprehend') {
@@ -310,7 +310,7 @@ export function getDynamicEffectRuleSummary(effect) {
       const match = modes.find(m => m.id === item || m.name === item);
       return match ? match.name : String(item);
     });
-    return [`Superhuman comprehension: ${names.join(', ')}`];
+    return [`Enables comprehension of ${names.join(', ')}.`];
   }
 
   if (baseKey === 'concealment') {
@@ -322,14 +322,14 @@ export function getDynamicEffectRuleSummary(effect) {
       const match = options.find(o => o.id === item || o.name === item);
       return match ? match.name : String(item);
     });
-    return [`Total concealment against: ${names.join(', ')}`];
+    return [`Provides concealment against designated senses (${names.join(', ')}).`];
   }
 
   if (baseKey === 'enhanced trait') {
     const targets = Array.isArray(c.selectedTraits) && c.selectedTraits.length > 0
       ? c.selectedTraits
       : [c.traitName || 'Strength'];
-    return [`Superhumanly enhances traits: ${targets.map(t => `${t} +${ranks}`).join(', ')} while active.`];
+    return [`Increases designated traits (${targets.map(t => `${t} +${ranks}`).join(', ')}) while sustained.`];
   }
 
   if (baseKey === 'move object') {
@@ -461,32 +461,12 @@ export function getModifierRuleSummary(modName, modType = 'extra') {
   return '';
 }
 
-export const OBVIOUS_EFFECT_BASES = new Set([
-  'protection',
-  'enhanced trait',
-  'immunity',
-  'senses',
-  'speed',
-  'leaping',
-  'flight',
-  'swimming',
-  'burrowing',
-  'damage',
-  'blast',
-  'affliction',
-  'weaken'
-]);
-
 export function resolveEffectRulesBlock(effect) {
   if (!effect) {
     return { effectRuleDesc: '', effectRuleDescs: [], modifierRules: [] };
   }
 
-  const rawBase = effect.baseEffect || effect.name || '';
-  const baseKey = String(rawBase).trim().toLowerCase();
-  const isObvious = OBVIOUS_EFFECT_BASES.has(baseKey);
-
-  const rawRuleDescs = isObvious ? [] : getDynamicEffectRuleSummary(effect);
+  const rawRuleDescs = getDynamicEffectRuleSummary(effect);
   const effectRuleDescs = Array.isArray(rawRuleDescs) ? rawRuleDescs : (rawRuleDescs ? [rawRuleDescs] : []);
   const effectRuleDesc = effectRuleDescs[0] || '';
   const modifierRules = [];
