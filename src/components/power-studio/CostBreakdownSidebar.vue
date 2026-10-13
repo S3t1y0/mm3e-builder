@@ -263,9 +263,24 @@
             {{ combatProfile.dcDescription || (combatProfile.dc ? `DC ${combatProfile.dc}` : 'None') }}
           </span>
         </div>
-        <div class="combat-tile">
-          <span class="tile-label">Range</span>
-          <span class="tile-val" :title="combatProfile.rangeDistance">{{ combatProfile.rangeDistance }}</span>
+        <div class="combat-tile" :class="{ 'tile-range-modified': combatProfile?.rangeDetails?.isModified }">
+          <div class="tile-label-row">
+            <span class="tile-label">Range</span>
+            <span
+              v-if="combatProfile?.rangeDetails?.isModified && combatProfile.rangeDetails.effectiveRange !== combatProfile.rangeDetails.baseRange"
+              class="tile-mod-tag"
+              :title="combatProfile.rangeDetails.tooltip"
+            >
+              {{ combatProfile.rangeDetails.effectiveRange }}
+            </span>
+          </div>
+          <span
+            class="tile-val font-mono"
+            :class="{ 'range-highlight': combatProfile?.rangeDetails?.isModified }"
+            :title="combatProfile.rangeDetails?.tooltip || combatProfile.rangeDistance"
+          >
+            {{ combatProfile.rangeDistance }}
+          </span>
         </div>
         <div class="combat-tile">
           <span class="tile-label">Type</span>
@@ -884,12 +899,38 @@ const budgetPercentages = computed(() => {
   border-color: rgba(56, 189, 248, 0.15);
 }
 
+.tile-label-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.3rem;
+  width: 100%;
+}
+
 .tile-label {
   font-size: 0.62rem;
   font-weight: 700;
   color: var(--text-muted, #94a3b8);
   text-transform: uppercase;
   letter-spacing: 0.04em;
+}
+
+.tile-mod-tag {
+  font-size: 0.58rem;
+  font-weight: 800;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 3px;
+  padding: 0.05rem 0.28rem;
+  line-height: 1.1;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.combat-tile.tile-range-modified {
+  border-color: rgba(56, 189, 248, 0.25);
+  background: rgba(56, 189, 248, 0.03);
 }
 
 .tile-val {
@@ -899,6 +940,10 @@ const budgetPercentages = computed(() => {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.tile-val.range-highlight {
+  color: #7dd3fc;
 }
 
 .combat-tile.dc-tile .tile-val {

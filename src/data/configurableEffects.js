@@ -100,14 +100,16 @@ export const CONFIGURABLE_EFFECTS = {
     label: 'Movement Library',
     modes: [
       { id: 'wall_crawling', name: 'Wall-crawling', maxRanks: 2, ranks: 1, desc: 'Climb walls and ceilings at -1 speed rank (Rank 1) or full speed (Rank 2)', icon: 'ri-footprint-line' },
-      { id: 'safe_fall', name: 'Safe Fall', maxRanks: 1, ranks: 1, desc: 'Fall any distance without suffering damage or injury', icon: 'ri-parachute-line' },
-      { id: 'water_walking', name: 'Water Walking', maxRanks: 1, ranks: 1, desc: 'Walk or run across liquid surfaces without sinking', icon: 'ri-drop-line' },
+      { id: 'safe_fall', name: 'Safe Fall', maxRanks: 1, ranks: 1, desc: 'Fall any distance without suffering damage or injury', icon: 'ri-umbrella-line' },
+      { id: 'water_walking', name: 'Water Walking', maxRanks: 2, ranks: 1, desc: 'Walk or run across liquid surfaces without sinking (Rank 2: lie prone or rest on liquid surfaces)', icon: 'ri-drop-line' },
       { id: 'dimension_travel', name: 'Dimension Travel', maxRanks: 3, ranks: 1, desc: 'Travel across dimensions (Rank 1: single, 2: related, 3: any)', icon: 'ri-planet-line' },
-      { id: 'env_adaptation', name: 'Environmental Adaptation', maxRanks: 1, ranks: 1, desc: 'Move without penalty in hostile environment (Aquatic, Zero-G, Cold, etc.)', icon: 'ri-shield-user-line' },
+      { id: 'env_adaptation', name: 'Environmental Adaptation', maxRanks: 5, ranks: 1, desc: 'Move without penalty in hostile environment (Aquatic, Zero-G, Cold, Vacuum, etc.)', icon: 'ri-shield-user-line' },
       { id: 'permeate', name: 'Permeate', maxRanks: 3, ranks: 1, desc: 'Pass through solid obstacles (Rank 1: speed -2, 2: speed -1, 3: full speed)', icon: 'ri-ghost-line' },
       { id: 'slithering', name: 'Slithering', maxRanks: 1, ranks: 1, desc: 'Move full speed while prone and squeeze through tight openings', icon: 'ri-drag-move-2-line' },
       { id: 'space_travel', name: 'Space Travel', maxRanks: 3, ranks: 1, desc: 'Fly through vacuum of space (Rank 1: solar system, 2: other star systems, 3: galaxies)', icon: 'ri-rocket-line' },
+      { id: 'sure_footed', name: 'Sure-Footed', maxRanks: 2, ranks: 1, desc: 'Reduce speed penalties for obstacles and difficult terrain (Rank 1: -1 penalty, Rank 2: full normal speed)', icon: 'ri-walk-line' },
       { id: 'swinging', name: 'Swinging', maxRanks: 1, ranks: 1, desc: 'Swing through city or forest obstacles at normal movement speed', icon: 'ri-route-line' },
+      { id: 'time_travel', name: 'Time Travel', maxRanks: 3, ranks: 1, desc: 'Travel through time (Rank 1: single era/point, Rank 2: related eras / past or future, Rank 3: any era)', icon: 'ri-history-line' },
       { id: 'trackless', name: 'Trackless', maxRanks: 2, ranks: 1, desc: 'Leave no visual trail (Rank 1) or no sensory trail (Rank 2)', icon: 'ri-eye-off-line' }
     ],
     defaultModes: ['wall_crawling'],
@@ -134,7 +136,7 @@ export const CONFIGURABLE_EFFECTS = {
       { id: 'survival', label: 'Survival & Env (1-2 R)' },
       { id: 'biological', label: 'Biological & Sensory (5 R)' },
       { id: 'descriptors', label: 'Descriptors (10-20 R)' },
-      { id: 'defenses', label: 'Defense Checks (30 R)' }
+      { id: 'defenses', label: 'Defense Checks (30-80 R)' }
     ],
     presets: [
       { id: 'aging', name: 'Aging', ranks: 1, category: 'survival', desc: 'Immune to aging effects and natural death by old age', icon: 'ri-hourglass-line' },
@@ -143,11 +145,13 @@ export const CONFIGURABLE_EFFECTS = {
       { id: 'sleep', name: 'Need for Sleep', ranks: 1, category: 'survival', desc: 'Never need sleep or suffer from exhaustion/sleep deprivation', icon: 'ri-zzz-line' },
       { id: 'starvation', name: 'Starvation & Thirst', ranks: 1, category: 'survival', desc: 'Do not need food, nourishment, or water to survive', icon: 'ri-restaurant-line' },
       { id: 'suffocation_partial', name: 'Suffocation (Hold Breath)', ranks: 1, category: 'survival', desc: 'Can hold breath indefinitely without suffocating', icon: 'ri-lungs-line' },
+      { id: 'suffocation_drowning', name: 'Suffocation (Drowning / Liquids)', ranks: 1, category: 'survival', desc: 'Breathe liquids and water freely without drowning', icon: 'ri-drop-line' },
       { id: 'suffocation_all', name: 'Suffocation (No Breathing)', ranks: 2, category: 'survival', desc: 'Completely do not breathe air or gas; vacuum & gas proof', icon: 'ri-lungs-fill' },
       { id: 'env_cold', name: 'Environmental Cold', ranks: 1, category: 'survival', desc: 'Unaffected by freezing atmospheric cold temperatures', icon: 'ri-temp-cold-line' },
       { id: 'env_heat', name: 'Environmental Heat', ranks: 1, category: 'survival', desc: 'Unaffected by intense desert or atmospheric heat', icon: 'ri-temp-hot-line' },
-      { id: 'radiation', name: 'Radiation', ranks: 1, category: 'survival', desc: 'Immune to ambient, solar, and nuclear environmental radiation', icon: 'ri-radioactive-line' },
-      { id: 'vacuum', name: 'Vacuum', ranks: 1, category: 'survival', desc: 'Unaffected by decompression and zero-pressure vacuum of space', icon: 'ri-space' },
+      { id: 'env_pressure', name: 'Environmental Pressure', ranks: 1, category: 'survival', desc: 'Unaffected by crushing deep-sea water and atmospheric pressure', icon: 'ri-dashboard-3-line' },
+      { id: 'radiation', name: 'Radiation', ranks: 1, category: 'survival', desc: 'Immune to ambient, solar, and nuclear environmental radiation', icon: 'ri-atom-line' },
+      { id: 'vacuum', name: 'Vacuum', ranks: 1, category: 'survival', desc: 'Unaffected by decompression and zero-pressure vacuum of space', icon: 'ri-planet-line' },
       { id: 'critical', name: 'Critical Hits', ranks: 2, category: 'survival', desc: 'Opponents cannot score critical hits against you', icon: 'ri-shield-flash-line' },
 
       { id: 'alteration', name: 'Alteration Effects', ranks: 5, category: 'biological', desc: 'Immune to shape-changing, petrification, transmutation, and morphing attacks', icon: 'ri-magic-line' },
@@ -155,6 +159,7 @@ export const CONFIGURABLE_EFFECTS = {
       { id: 'fatigue', name: 'Fatigue Effects', ranks: 5, category: 'biological', desc: 'Immune to powers that inflict fatigued or exhausted conditions', icon: 'ri-battery-low-line' },
       { id: 'sensory', name: 'Sensory Afflictions', ranks: 5, category: 'biological', desc: 'Immune to dazzle, blinding flash, and sensory overloading attacks', icon: 'ri-eye-off-line' },
       { id: 'interaction', name: 'Interaction Skills', ranks: 5, category: 'biological', desc: 'Immune to Deception, Intimidation, and Persuasion checks', icon: 'ri-chat-voice-line' },
+      { id: 'emotion', name: 'Emotion Effects', ranks: 5, category: 'biological', desc: 'Immune to emotional manipulation, fear, despair, and morale debuffs', icon: 'ri-emotion-happy-line' },
 
       { id: 'life_support', name: 'Life Support', ranks: 10, category: 'descriptors', desc: 'Complete immunity: disease, poison, environmental cold/heat/radiation/vacuum, suffocation, and starvation', icon: 'ri-heart-pulse-line' },
       { id: 'fire', name: 'Common Descriptor: Fire / Heat', ranks: 10, category: 'descriptors', desc: 'Immune to all fire, heat, plasma, and thermal damage effects', icon: 'ri-fire-line' },
@@ -167,7 +172,8 @@ export const CONFIGURABLE_EFFECTS = {
 
       { id: 'fortitude', name: 'All Fortitude Effects', ranks: 30, category: 'defenses', desc: 'Immune to any effect requiring a Fortitude resistance check', icon: 'ri-shield-cross-line' },
       { id: 'will', name: 'All Will Effects', ranks: 30, category: 'defenses', desc: 'Immune to any effect requiring a Will resistance check', icon: 'ri-mental-health-line' },
-      { id: 'lethal', name: 'All Lethal Damage', ranks: 30, category: 'defenses', desc: 'Cannot suffer lethal harm or deadly injury', icon: 'ri-skull-line' }
+      { id: 'lethal', name: 'All Lethal Damage', ranks: 30, category: 'defenses', desc: 'Cannot suffer lethal harm or deadly injury', icon: 'ri-skull-line' },
+      { id: 'damage_all', name: 'All Damage (Toughness)', ranks: 80, category: 'defenses', desc: 'Immune to all damage; automatically succeed Toughness resistance checks', icon: 'ri-shield-star-line' }
     ],
     defaultPresets: ['life_support'],
     computeRanks: (config) => {
@@ -223,7 +229,7 @@ export const CONFIGURABLE_EFFECTS = {
     type: 'comprehend_multiselect_library',
     label: 'Comprehend Library',
     modes: [
-      { id: 'languages_understand', name: 'Languages: Understand Spoken', ranks: 1, desc: 'Understand all spoken languages spoken to you', icon: 'ri-hearing-line' },
+      { id: 'languages_understand', name: 'Languages: Understand Spoken', ranks: 1, desc: 'Understand all spoken languages spoken to you', icon: 'ri-voice-recognition-line' },
       { id: 'languages_speak', name: 'Languages: Speak Any One', ranks: 1, desc: 'Speak any language, one language at a time', icon: 'ri-voiceprint-line' },
       { id: 'languages_read', name: 'Languages: Read All', ranks: 1, desc: 'Understand and read any written language or script', icon: 'ri-book-read-line' },
       { id: 'languages_understood', name: 'Languages: Understood by All', ranks: 1, desc: 'Anyone who can hear you understands your speech', icon: 'ri-broadcast-line' },

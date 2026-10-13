@@ -82,7 +82,7 @@ A dedicated construction workshop for creating superpowers compliant with the M&
   - **Senses**: Multi-select sensory faculties (Darkvision, Infravision, Radar, Counters Concealment, Precognition) with automatic rank summation.
   - **Immunity**: Categorized protections (survival hazards, biological effects, elemental descriptors, lethal damage, defense saves).
   - **Concealment**: Sensory obscurement across visual, auditory, olfactory, radio, mental, or all senses with blending/passive modifiers.
-  - **Movement**: Locomotion modes (Wall-crawling, Safe Fall, Water Walking, Dimension Travel, Permeate, Slithering, Space Travel, Swinging) with rank steppers.
+  - **Movement**: Locomotion modes (Wall-crawling, Safe Fall, Water Walking, Dimension Travel, Environmental Adaptation, Permeate, Slithering, Space Travel, Sure-Footed, Swinging, Time Travel, Trackless) with rank steppers.
   - **Environment**: Ambient hazards (extreme cold, extreme heat, movement impediments, daylight, visibility obscurement) with PP/rank calculations.
   - **Comprehend**: Language understanding, animal/plant communication, machine interfacing, spirit communication, and psychometry.
   - **Enhanced Trait**: Multi-target ability, defense, skill, or advantage enhancements with category-specific cost ratios.

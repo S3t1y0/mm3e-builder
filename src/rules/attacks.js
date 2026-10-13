@@ -1,5 +1,6 @@
 // src/rules/attacks.js
 import { getCombatSkillBonus } from './skills.js';
+import { resolveEffectRangeDetails } from './powerCalculator.js';
 import {
   BASIC_CONDITIONS,
   COMBINED_CONDITIONS,
@@ -414,9 +415,10 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify', 'Move Object'].includes(baseEffect) || isMoveObjectDamaging;
     if (!isOffensive) return null;
 
-    const isRanged = baseEffect === 'Blast' || effect.range === 'Ranged' || (isMoveObjectDamaging && effect.range !== 'Close') || (baseEffect === 'Move Object' && effect.range !== 'Close');
+    const rangeDetails = resolveEffectRangeDetails(effect);
+    const isRanged = rangeDetails.isRanged;
     const isArea = (effect.extras || []).some(e => e.name === 'Area');
-    const isPerception = effect.range === 'Perception';
+    const isPerception = rangeDetails.isPerception;
 
     const isThrown = /thrown/i.test(power.name || '') || /thrown/i.test(effect.name || '') || /thrown/i.test(opt.slotName || '') || (effect.extras || []).some(e => /thrown/i.test(e.name || ''));
 
@@ -435,7 +437,7 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       ],
       description: effect.description || power.description || '',
       isThrown,
-      range: effect.range || (isRanged ? 'Ranged' : 'Close'),
+      range: rangeDetails.effectiveRange,
       deviceType: power.type
     };
 
@@ -474,7 +476,7 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       res = effect.resistance || 'Will';
     }
 
-    const tags = [baseEffect, effect.range || (isRanged ? 'Ranged' : 'Close')];
+    const tags = [baseEffect, rangeDetails.effectiveRange];
     if (isStrengthBased) tags.push('Strength-based');
     if ((effect.extras || []).some(e => e.name === 'Multiattack')) tags.push('Multiattack');
     if ((effect.extras || []).some(e => e.name === 'Penetrating')) tags.push('Penetrating');
@@ -494,7 +496,9 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       powerName: power.name,
       source: opt.sourceTitle || power.name,
       rollBonus: (isArea || isPerception) ? null : rollBonus,
-      range: effect.range || (isRanged ? 'Ranged' : 'Close'),
+      range: rangeDetails.effectiveRange,
+      rangeDistance: rangeDetails.distanceDisplay,
+      rangeDetails,
       action: effect.action || 'Standard',
       effectName: isMoveObjectDamaging ? 'Damage (TK)' : baseEffect,
       effectRank,

@@ -489,7 +489,7 @@ export const ARCHETYPES = [
       { name: 'Power Attack', ranks: 1 },
       { name: 'Takedown', ranks: 1 },
       { name: 'Startle', ranks: 1 },
-      { name: 'Fast Feint', ranks: 1 }
+      { name: 'Diehard', ranks: 1 }
     ],
     samplePowers: [
       {

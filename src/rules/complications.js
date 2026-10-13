@@ -113,7 +113,7 @@ export const COMPLICATIONS_CATALOG = [
     id: 'weakness',
     name: 'Weakness',
     type: 'Complication',
-    icon: 'ri-radioactive-line',
+    icon: 'ri-atom-line',
     summary: 'Vulnerable to a specific substance or condition.',
     defaultDesc: 'Suffers harmful effects, penalties, or power loss when exposed to a specific substance or condition.'
   },

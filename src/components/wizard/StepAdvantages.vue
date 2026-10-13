@@ -184,7 +184,7 @@
               <i class="ri-bookmark-line text-accent"></i>
               <span>Advantages Catalog</span>
             </h4>
-            <span class="catalog-count-hint tabular-nums">{{ filteredCatalog.length }} of 76 Available</span>
+            <span class="catalog-count-hint tabular-nums">{{ filteredCatalog.length }} of 74 Available</span>
           </div>
         </div>
 

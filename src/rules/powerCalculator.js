@@ -514,6 +514,410 @@ export function calculatePowerDetailedBreakdown(rawPower) {
 }
 
 /**
+ * Distance progression for Rank-range effects (Measurements Table)
+ */
+export const MEASUREMENT_DISTANCE_TABLE = {
+  '-5': '6 inches',
+  '-4': '1 foot',
+  '-3': '3 feet',
+  '-2': '6 feet',
+  '-1': '15 feet',
+  '0': '30 feet',
+  '1': '60 feet',
+  '2': '120 feet',
+  '3': '250 feet',
+  '4': '500 feet',
+  '5': '900 feet',
+  '6': '1,800 feet',
+  '7': '0.5 mile',
+  '8': '1 mile',
+  '9': '2 miles',
+  '10': '4 miles',
+  '11': '8 miles',
+  '12': '16 miles',
+  '13': '30 miles',
+  '14': '60 miles',
+  '15': '120 miles',
+  '16': '250 miles',
+  '17': '500 miles',
+  '18': '1,000 miles',
+  '19': '2,000 miles',
+  '20': '4,000 miles',
+  '21': '8,000 miles',
+  '22': '16,000 miles',
+  '23': '32,000 miles',
+  '24': '64,000 miles',
+  '25': '125,000 miles',
+  '26': '250,000 miles',
+  '27': '500,000 miles',
+  '28': '1 million miles',
+  '29': '2 million miles',
+  '30': '4 million miles'
+};
+
+export function formatMeasurementDistance(rank) {
+  const r = parseInt(rank, 10);
+  if (isNaN(r)) return 'Rank Range';
+  if (MEASUREMENT_DISTANCE_TABLE[r]) return MEASUREMENT_DISTANCE_TABLE[r];
+  if (r > 30) return `Cosmic Range (Rank ${r})`;
+  if (r < -5) return '< 6 inches';
+  return `Rank ${r} Distance`;
+}
+
+/**
+ * Resolves the true effective range, distance increments, and tactical modifier contributions
+ * for any given effect according to Mutants & Masterminds 3e rules.
+ *
+ * Accounts for:
+ * - Base Effect default range (Personal, Close, Ranged, Perception, Rank)
+ * - Extras:
+ *   - "Increased Range" (options: ranged [Close->Ranged], perception [Ranged->Perception], close_to_perception [Close->Perception])
+ *   - "Perception (No Attack Check)" -> Perception
+ *   - "Ranged (Remote Touch)" / "Ranged (Remote Burrowing)" -> Ranged
+ *   - "Affects Others" / "Attack" on Personal effects -> Close
+ *   - "Reach" (+5 ft melee range per rank)
+ *   - "Extended Range" (doubles ranged increments: x2^ranks)
+ *   - "Area" (notes area coverage and placement range)
+ * - Flaws:
+ *   - "Reduced Range" (options: one_step [-1 PP/R: Perception->Ranged or Ranged->Close], two_steps [-2 PP/R: Perception->Close])
+ *   - "Close (Touch Range Only)" -> Close
+ *   - "Ranged (Attack Check Required)" -> Ranged
+ *   - "Diminished Range" (reduces ranged increments)
+ */
+export function resolveEffectRangeDetails(rawEffect) {
+  if (!rawEffect) {
+    return {
+      baseRange: 'Close',
+      effectiveRange: 'Close',
+      isPersonal: false,
+      isClose: true,
+      isRanged: false,
+      isPerception: false,
+      isRankRange: false,
+      reachRanks: 0,
+      reachFt: 0,
+      extendedRanks: 0,
+      diminishedRanks: 0,
+      distanceIncrements: null,
+      distanceDisplay: 'Close (5 ft)',
+      summaryLabel: 'Close (5 ft)',
+      isModified: false,
+      appliedRangeModifiers: [],
+      tooltip: 'Range: Close (5 ft)'
+    };
+  }
+
+  const baseRef = BASE_EFFECTS.find(b => b.name === (rawEffect.baseEffect || rawEffect.name));
+  const baseRange = rawEffect.range || (baseRef ? baseRef.range : 'Close');
+  const effectRanks = Math.max(1, Number(rawEffect.ranks) || 1);
+
+  const extras = Array.isArray(rawEffect.extras) ? rawEffect.extras : [];
+  const flaws = Array.isArray(rawEffect.flaws) ? rawEffect.flaws : [];
+
+  let currentRange = baseRange;
+  const appliedRangeModifiers = [];
+
+  // Helper to extract option ID from modifier
+  const getOptId = (mod) => mod.config?.optionId || mod.config?.selectedOption || mod.optionId || '';
+
+  // 1. Check Personal-range converters: Affects Others or Attack
+  const affectsOthers = extras.find(e => (e.name || '').toLowerCase() === 'affects others');
+  const attackExtra = extras.find(e => (e.name || '').toLowerCase() === 'attack');
+  if (currentRange === 'Personal' && (affectsOthers || attackExtra)) {
+    currentRange = 'Close';
+    const sourceName = affectsOthers ? 'Affects Others' : 'Attack';
+    appliedRangeModifiers.push({
+      name: sourceName,
+      type: 'extra',
+      summary: `Converted Personal to Close range (${sourceName})`
+    });
+  }
+
+  // 2. Check "Increased Range" extra
+  const incRangeExtra = extras.find(e => (e.name || '').toLowerCase() === 'increased range');
+  if (incRangeExtra) {
+    const optId = getOptId(incRangeExtra);
+    if (optId === 'close_to_perception') {
+      currentRange = 'Perception';
+      appliedRangeModifiers.push({
+        name: 'Increased Range',
+        type: 'extra',
+        summary: 'Close -> Perception (+2 PP/R)'
+      });
+    } else if (optId === 'perception') {
+      currentRange = 'Perception';
+      appliedRangeModifiers.push({
+        name: 'Increased Range',
+        type: 'extra',
+        summary: 'Ranged -> Perception (+1 PP/R)'
+      });
+    } else if (optId === 'ranged') {
+      currentRange = 'Ranged';
+      appliedRangeModifiers.push({
+        name: 'Increased Range',
+        type: 'extra',
+        summary: 'Close -> Ranged (+1 PP/R)'
+      });
+    } else {
+      // Default fallback when option is not explicitly saved yet
+      if (currentRange === 'Close') {
+        currentRange = 'Ranged';
+        appliedRangeModifiers.push({
+          name: 'Increased Range',
+          type: 'extra',
+          summary: 'Close -> Ranged (+1 PP/R)'
+        });
+      } else if (currentRange === 'Ranged') {
+        currentRange = 'Perception';
+        appliedRangeModifiers.push({
+          name: 'Increased Range',
+          type: 'extra',
+          summary: 'Ranged -> Perception (+1 PP/R)'
+        });
+      }
+    }
+  }
+
+  // 3. Check "Perception (No Attack Check)" extra
+  const percepExtra = extras.find(e => (e.name || '').toLowerCase().includes('perception (no attack check)'));
+  if (percepExtra) {
+    currentRange = 'Perception';
+    appliedRangeModifiers.push({
+      name: 'Perception (No Attack Check)',
+      type: 'extra',
+      summary: 'Upgraded to Perception range'
+    });
+  }
+
+  // 4. Check "Ranged (Remote Touch)" / "Ranged (Remote Burrowing)" extra
+  const rangedTouchExtra = extras.find(e => {
+    const n = (e.name || '').toLowerCase();
+    return n.includes('ranged (remote touch)') || n.includes('ranged (remote burrowing)');
+  });
+  if (rangedTouchExtra) {
+    currentRange = 'Ranged';
+    appliedRangeModifiers.push({
+      name: rangedTouchExtra.name,
+      type: 'extra',
+      summary: 'Upgraded to Ranged'
+    });
+  }
+
+  // 5. Check "Reduced Range" flaw
+  const reducedRangeFlaw = flaws.find(f => (f.name || '').toLowerCase() === 'reduced range');
+  if (reducedRangeFlaw) {
+    const optId = getOptId(reducedRangeFlaw);
+    if (optId === 'two_steps') {
+      currentRange = 'Close';
+      appliedRangeModifiers.push({
+        name: 'Reduced Range',
+        type: 'flaw',
+        summary: '2 Steps: Perception -> Close (-2 PP/R)'
+      });
+    } else {
+      // 1 step
+      if (currentRange === 'Perception') {
+        currentRange = 'Ranged';
+        appliedRangeModifiers.push({
+          name: 'Reduced Range',
+          type: 'flaw',
+          summary: '1 Step: Perception -> Ranged (-1 PP/R)'
+        });
+      } else if (currentRange === 'Ranged') {
+        currentRange = 'Close';
+        appliedRangeModifiers.push({
+          name: 'Reduced Range',
+          type: 'flaw',
+          summary: '1 Step: Ranged -> Close (-1 PP/R)'
+        });
+      }
+    }
+  }
+
+  // 6. Check "Close (Touch Range Only)" flaw
+  const closeTouchFlaw = flaws.find(f => (f.name || '').toLowerCase().includes('close (touch range only)'));
+  if (closeTouchFlaw) {
+    currentRange = 'Close';
+    appliedRangeModifiers.push({
+      name: 'Close (Touch Range Only)',
+      type: 'flaw',
+      summary: 'Reduced to Close (Touch only)'
+    });
+  }
+
+  // 7. Check "Ranged (Attack Check Required)" flaw
+  const rangedAttackFlaw = flaws.find(f => (f.name || '').toLowerCase().includes('ranged (attack check required)'));
+  if (rangedAttackFlaw) {
+    currentRange = 'Ranged';
+    appliedRangeModifiers.push({
+      name: 'Ranged (Attack Check Required)',
+      type: 'flaw',
+      summary: 'Reduced to Ranged (Attack Check Required)'
+    });
+  }
+
+  // 8. Distance Modifier Calculations
+  // Check Reach extra for Close range
+  let reachRanks = 0;
+  const reachExtra = extras.find(e => (e.name || '').toLowerCase() === 'reach');
+  if (reachExtra) {
+    reachRanks = Math.max(1, Number(reachExtra.ranks) || 1);
+    appliedRangeModifiers.push({
+      name: 'Reach',
+      type: 'extra',
+      ranks: reachRanks,
+      summary: `+${reachRanks * 5} ft melee reach (${reachRanks} ranks)`
+    });
+  }
+
+  // Check Extended Range extra for Ranged
+  let extendedRanks = 0;
+  const extExtra = extras.find(e => (e.name || '').toLowerCase() === 'extended range');
+  if (extExtra) {
+    extendedRanks = Math.max(1, Number(extExtra.ranks) || 1);
+    appliedRangeModifiers.push({
+      name: 'Extended Range',
+      type: 'extra',
+      ranks: extendedRanks,
+      summary: `Distance increments multiplied by ${Math.pow(2, extendedRanks)} (${extendedRanks} ranks)`
+    });
+  }
+
+  // Check Diminished Range flaw for Ranged
+  let diminishedRanks = 0;
+  const dimFlaw = flaws.find(f => (f.name || '').toLowerCase() === 'diminished range');
+  if (dimFlaw) {
+    diminishedRanks = Math.max(1, Number(dimFlaw.ranks) || 1);
+    appliedRangeModifiers.push({
+      name: 'Diminished Range',
+      type: 'flaw',
+      ranks: diminishedRanks,
+      summary: `Range increments diminished (${diminishedRanks} ranks)`
+    });
+  }
+
+  // Area extra info (if present)
+  const areaExtra = extras.find(e => (e.name || '').toLowerCase() === 'area');
+  let areaInfo = null;
+  if (areaExtra) {
+    const areaShape = areaExtra.config?.shape || areaExtra.shape || 'Burst';
+    areaInfo = `Area (${areaShape})`;
+  }
+
+  // Format Distance Display
+  let distanceDisplay = '';
+  let distanceIncrements = null;
+
+  if (currentRange === 'Close') {
+    const baseFt = 5;
+    const totalFt = baseFt + (reachRanks * 5);
+    if (reachRanks > 0) {
+      distanceDisplay = `Close (${totalFt} ft) [+${reachRanks * 5} ft Reach]`;
+    } else {
+      distanceDisplay = 'Close (5 ft)';
+    }
+  } else if (currentRange === 'Ranged') {
+    let shortBase = effectRanks * 25;
+    let medBase = effectRanks * 50;
+    let longBase = effectRanks * 100;
+
+    if (diminishedRanks === 1) {
+      shortBase = effectRanks * 10;
+      medBase = effectRanks * 25;
+      longBase = effectRanks * 50;
+    } else if (diminishedRanks === 2) {
+      shortBase = effectRanks * 5;
+      medBase = effectRanks * 10;
+      longBase = effectRanks * 25;
+    } else if (diminishedRanks >= 3) {
+      shortBase = effectRanks * 2;
+      medBase = effectRanks * 5;
+      longBase = effectRanks * 10;
+    }
+
+    if (extendedRanks > 0) {
+      const mult = Math.pow(2, extendedRanks);
+      shortBase *= mult;
+      medBase *= mult;
+      longBase *= mult;
+    }
+
+    distanceIncrements = {
+      short: shortBase,
+      medium: medBase,
+      long: longBase
+    };
+
+    const sStr = shortBase.toLocaleString();
+    const mStr = medBase.toLocaleString();
+    const lStr = longBase.toLocaleString();
+    distanceDisplay = `${sStr} / ${mStr} / ${lStr} ft`;
+
+    if (extendedRanks > 0) {
+      distanceDisplay += ` (Ext ×${Math.pow(2, extendedRanks)})`;
+    }
+    if (diminishedRanks > 0) {
+      distanceDisplay += ` (Dim -${diminishedRanks})`;
+    }
+  } else if (currentRange === 'Perception') {
+    distanceDisplay = 'Visual Range (Perception)';
+  } else if (currentRange === 'Personal') {
+    distanceDisplay = 'Personal (Self)';
+  } else if (currentRange === 'Rank') {
+    distanceDisplay = `Rank Range: ${formatMeasurementDistance(effectRanks)}`;
+  } else {
+    distanceDisplay = currentRange;
+  }
+
+  const isPersonal = currentRange === 'Personal';
+  const isClose = currentRange === 'Close';
+  const isRanged = currentRange === 'Ranged';
+  const isPerception = currentRange === 'Perception';
+  const isRankRange = currentRange === 'Rank';
+
+  const isModified = currentRange !== baseRange || reachRanks > 0 || extendedRanks > 0 || diminishedRanks > 0;
+
+  // Build Tooltip
+  const tooltipLines = [
+    `Base Range: ${baseRange}`,
+    `Effective Range: ${currentRange}`
+  ];
+  if (appliedRangeModifiers.length > 0) {
+    tooltipLines.push('Applied Range Modifiers:');
+    appliedRangeModifiers.forEach(m => tooltipLines.push(`• ${m.name}: ${m.summary}`));
+  }
+  tooltipLines.push(`Distance: ${distanceDisplay}`);
+  if (isPerception) {
+    tooltipLines.push('Perception Attack: Requires no attack roll; hits automatically within sensory range.');
+  } else if (isRanged) {
+    tooltipLines.push('Ranged Attack: Short (no penalty) / Medium (-2 check) / Long (-5 check). Max range is Long.');
+  } else if (isClose) {
+    tooltipLines.push('Close Attack: Melee reach check using Fighting / Close Combat.');
+  }
+
+  return {
+    baseRange,
+    effectiveRange: currentRange,
+    isPersonal,
+    isClose,
+    isRanged,
+    isPerception,
+    isRankRange,
+    reachRanks,
+    reachFt: reachRanks * 5,
+    extendedRanks,
+    diminishedRanks,
+    distanceIncrements,
+    distanceDisplay,
+    summaryLabel: isClose ? `Close (${5 + reachRanks * 5} ft)` : isRanged ? `Ranged (${distanceDisplay})` : currentRange,
+    isModified,
+    appliedRangeModifiers,
+    areaInfo,
+    tooltip: tooltipLines.join('\n')
+  };
+}
+
+/**
  * Calculates combat metrics for offensive / targeted effects and checks Power Level (PL) compliance.
  *
  * M&M 3e PL Trade-Off Cap:
@@ -549,12 +953,15 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
 
   const effect = normalizeEffect(rawTarget || power.mainEffect);
 
+  // Dynamic range resolution based on base effect and applied extras/flaws
+  const rangeDetails = resolveEffectRangeDetails(effect);
+
   const isMoveObjectDamaging = effect.baseEffect === 'Move Object' && effect.extras.some(e => e.name === 'Damaging');
   const hasAttackExtra = effect.extras.some(e => (e.name || '').toLowerCase() === 'attack');
   const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify', 'Mind Reading', 'Mind Control'].includes(effect.baseEffect) || isMoveObjectDamaging || hasAttackExtra;
   const isArea = effect.extras.some(e => e.name === 'Area');
-  const isPerception = effect.range === 'Perception';
-  const isClose = effect.range === 'Close';
+  const isPerception = rangeDetails.isPerception;
+  const isClose = rangeDetails.isClose;
   let accurateRanks = 0;
   const accurateExtra = effect.extras.find(e => e.name === 'Accurate');
   if (accurateExtra) accurateRanks += (accurateExtra.ranks || 1);
@@ -635,17 +1042,7 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
     dcDescription = 'None (Utility)';
   }
 
-  let rangeDistance = 'Close (5 ft)';
-  if (effect.range === 'Ranged') {
-    const shortR = effect.ranks * 25;
-    const medR = effect.ranks * 50;
-    const longR = effect.ranks * 100;
-    rangeDistance = `${shortR} / ${medR} / ${longR} ft`;
-  } else if (effect.range === 'Perception') {
-    rangeDistance = 'Visual Range (No penalty)';
-  } else if (effect.range === 'Personal') {
-    rangeDistance = 'Personal';
-  }
+  const rangeDistance = rangeDetails.distanceDisplay;
 
   let isCompliant = true;
   let maxAllowed = 2 * heroPL;
@@ -685,6 +1082,9 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
     dc,
     dcDescription,
     rangeDistance,
+    effectiveRange: rangeDetails.effectiveRange,
+    baseRange: rangeDetails.baseRange,
+    rangeDetails,
     isArea,
     isPerception,
     plCompliance: {

@@ -370,7 +370,10 @@ const AVAILABLE_CUSTOM_ICONS = [
   'ri-fire-fill', 'ri-snowflake-line', 'ri-temp-cold-line',
   'ri-pulse-line', 'ri-brain-line', 'ri-earth-line',
   'ri-flashlight-line', 'ri-speed-line', 'ri-footprint-line',
-  'ri-broadcast-line', 'ri-cpu-line', 'ri-settings-4-line', 'ri-drop-line'
+  'ri-broadcast-line', 'ri-cpu-line', 'ri-settings-4-line', 'ri-drop-line',
+  'ri-route-line', 'ri-planet-line', 'ri-rocket-line', 'ri-ghost-line',
+  'ri-atom-line', 'ri-history-line', 'ri-umbrella-line', 'ri-walk-line',
+  'ri-boxing-line', 'ri-drag-move-2-line'
 ];
 
 const customCategoryOptions = computed(() => {

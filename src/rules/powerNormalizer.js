@@ -654,11 +654,13 @@ export function normalizeModifier(rawMod) {
 
   // If modifier has options and an option is selected, sync cost and type from selected option
   if (ref && ref.options && ref.options.length > 0) {
-    let chosenOpt = ref.options.find(o => o.id === mod.config.selectedOption);
+    const desiredId = mod.config?.optionId || mod.config?.selectedOption || mod.optionId;
+    let chosenOpt = ref.options.find(o => o.id === desiredId);
     if (!chosenOpt) {
       chosenOpt = ref.options[0];
-      mod.config.selectedOption = chosenOpt.id;
     }
+    mod.config.selectedOption = chosenOpt.id;
+    mod.config.optionId = chosenOpt.id;
     mod.cost = chosenOpt.cost;
     mod.type = chosenOpt.type || ref.type || 'per_rank';
   } else {

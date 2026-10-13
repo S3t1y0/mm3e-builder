@@ -1652,7 +1652,7 @@ function getEffectConfigDetails(eff) {
       advantages: 'Combat Advantages'
     };
     const catIcons = {
-      abilities: 'ri-bicep-line',
+      abilities: 'ri-boxing-line',
       defenses: 'ri-shield-line',
       skills: 'ri-tools-line',
       advantages: 'ri-award-line'

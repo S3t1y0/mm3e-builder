@@ -1,6 +1,6 @@
 <template>
   <div class="complications-hub">
-    <!-- Toolbar Header -->
+    <!-- Unified Toolbar Header -->
     <div class="comp-toolbar">
       <div class="comp-toolbar-left">
         <div class="comp-title-wrap">
@@ -16,7 +16,7 @@
         >
           <i :class="narrativeStatus.isValid ? 'ri-shield-check-fill' : 'ri-error-warning-fill'"></i>
           <span v-if="narrativeStatus.isValid">
-            Rules Met ({{ motivations.length }} Motivation, {{ generalComplications.length }} Complications)
+            Rules Met ({{ motivations.length }} Mot, {{ generalComplications.length }} Comp)
           </span>
           <span v-else-if="!narrativeStatus.hasMotivation">
             Needs 1 motivation
@@ -30,65 +30,42 @@
         </div>
       </div>
 
-      <div class="comp-toolbar-actions">
-        <button
-          type="button"
-          class="btn-action-add btn-action-mot"
-          @click="openAdd('motivation')"
-          title="Add a motivation"
-        >
-          <i class="ri-compass-3-line"></i>
-          <span>Add Motivation</span>
-        </button>
-        <button
-          type="button"
-          class="btn-action-add btn-action-comp"
-          @click="openAdd('complication')"
-          title="Add a complication"
-        >
-          <i class="ri-alert-line"></i>
-          <span>Add Complication</span>
-        </button>
-      </div>
-    </div>
-
-    <!-- Tactical Hero Points HUD -->
-    <div class="comp-hp-hud">
-      <div class="hp-stepper-block">
-        <span class="hp-label">HERO POINTS</span>
-        <div class="hp-stepper">
-          <button
-            type="button"
-            class="hp-btn-step hp-btn-minus"
-            :disabled="(heroStore.character.heroPoints || 0) <= 0"
-            @click="adjustHeroPoints(-1)"
-            title="Spend 1 Hero Point"
-            aria-label="Spend 1 Hero Point"
-          >
-            <i class="ri-subtract-line"></i>
-          </button>
-          <div class="hp-token-badge" title="Current Hero Points balance">
-            <i class="ri-copper-diamond-fill hp-token-icon"></i>
-            <span class="hp-token-count">{{ heroStore.character.heroPoints || 0 }}</span>
+      <!-- Integrated Hero Points HUD Quick Counter -->
+      <div class="comp-toolbar-right">
+        <div class="hp-inline-tracker" title="Hero Points balance (earned via motivation/complication triggers)">
+          <span class="hp-inline-label">HERO POINTS</span>
+          <div class="hp-stepper-compact">
+            <button
+              type="button"
+              class="hp-step-btn hp-step-minus"
+              :disabled="(heroStore.character.heroPoints || 0) <= 0"
+              @click="adjustHeroPoints(-1)"
+              title="Spend 1 Hero Point"
+              aria-label="Spend 1 Hero Point"
+            >
+              <i class="ri-subtract-line"></i>
+            </button>
+            <div class="hp-token-pill">
+              <i class="ri-copper-diamond-fill hp-token-glyph"></i>
+              <span class="hp-token-num">{{ heroStore.character.heroPoints || 0 }}</span>
+            </div>
+            <button
+              type="button"
+              class="hp-step-btn hp-step-plus"
+              @click="adjustHeroPoints(1)"
+              title="Award +1 Hero Point"
+              aria-label="Award +1 Hero Point"
+            >
+              <i class="ri-add-line"></i>
+            </button>
           </div>
-          <button
-            type="button"
-            class="hp-btn-step hp-btn-plus"
-            @click="adjustHeroPoints(1)"
-            title="Award +1 Hero Point"
-            aria-label="Award +1 Hero Point"
+          <span
+            class="hp-info-tip"
+            title="Earned when a motivation creates a dilemma or complication causes trouble. Spend on re-rolls, recovery, or extra effort."
           >
-            <i class="ri-add-line"></i>
-          </button>
+            <i class="ri-information-line"></i>
+          </span>
         </div>
-      </div>
-
-      <div class="hp-mechanics-guide">
-        <p class="hp-guide-desc">
-          Earned when your <span class="text-mot-accent">motivation</span> creates a dilemma or
-          <span class="text-comp-accent">complication</span> causes trouble.
-          Spend on re-rolls, recovery, or extra effort.
-        </p>
       </div>
     </div>
 
@@ -134,7 +111,7 @@
           class="comp-preset-btn complication"
           @click="quickAdd('Weakness', 'Weakness', 'Vulnerable to a specific substance, mineral, or frequency that bypasses defenses.')"
         >
-          <i class="ri-radioactive-line"></i> Weakness
+          <i class="ri-atom-line"></i> Weakness
         </button>
       </div>
     </div>
@@ -168,14 +145,25 @@
           >
             <div class="comp-card-top">
               <div class="comp-card-identity">
-                <div class="comp-icon-indicator indicator-mot" title="Heroic Motivation">
-                  <i :class="getComplicationIcon(item)"></i>
+                <div class="comp-identity-header">
+                  <div class="comp-icon-indicator indicator-mot" title="Heroic Motivation">
+                    <i :class="getComplicationIcon(item)"></i>
+                  </div>
+                  <h4 class="comp-name">{{ item.name }}</h4>
                 </div>
-                <h4 class="comp-name">{{ item.name }}</h4>
               </div>
 
-              <!-- Secondary Actions -->
+              <!-- Action Cluster: Inline Trigger Pill + Secondary Actions -->
               <div class="comp-card-actions">
+                <button
+                  type="button"
+                  class="btn-trigger-pill trigger-mot-pill"
+                  @click="triggerTrait(item)"
+                  title="Award +1 Hero Point when this motivation creates a dilemma or setback"
+                >
+                  <i class="ri-shield-star-fill"></i>
+                  <span>+1 HP Trigger</span>
+                </button>
                 <button
                   type="button"
                   class="card-act-btn"
@@ -215,23 +203,8 @@
               </div>
             </div>
 
-            <!-- Creed / Narrative Description -->
-            <div v-if="item.desc" class="comp-narrative-quote quote-mot">
-              <p class="comp-desc">{{ item.desc }}</p>
-            </div>
-
-            <!-- Primary Action: Trigger (+1 HP) -->
-            <div class="comp-card-bottom">
-              <button
-                type="button"
-                class="btn-trigger-hp trigger-motivation"
-                @click="triggerTrait(item)"
-                title="Award +1 Hero Point when this motivation creates a dilemma or setback"
-              >
-                <i class="ri-shield-star-fill"></i>
-                <span>Trigger (+1 Hero Point)</span>
-              </button>
-            </div>
+            <!-- Creed / Narrative Description (Clean, No Nested Box) -->
+            <p v-if="item.desc" class="comp-card-desc desc-mot">{{ item.desc }}</p>
           </article>
         </div>
       </section>
@@ -263,15 +236,25 @@
           >
             <div class="comp-card-top">
               <div class="comp-card-identity">
-                <span class="comp-category-tag">
-                  <i :class="getComplicationIcon(item)"></i>
-                  {{ getCategoryLabel(item) }}
-                </span>
-                <h4 class="comp-name">{{ item.name }}</h4>
+                <div class="comp-identity-header">
+                  <div class="comp-icon-indicator indicator-comp" :title="getCategoryLabel(item)">
+                    <i :class="getComplicationIcon(item)"></i>
+                  </div>
+                  <h4 class="comp-name">{{ item.name }}</h4>
+                </div>
               </div>
 
-              <!-- Secondary Actions -->
+              <!-- Action Cluster: Inline Trigger Pill + Secondary Actions -->
               <div class="comp-card-actions">
+                <button
+                  type="button"
+                  class="btn-trigger-pill trigger-comp-pill"
+                  @click="triggerTrait(item)"
+                  title="Award +1 Hero Point when this complication causes trouble"
+                >
+                  <i class="ri-shield-star-fill"></i>
+                  <span>+1 HP Trigger</span>
+                </button>
                 <button
                   type="button"
                   class="card-act-btn"
@@ -311,23 +294,8 @@
               </div>
             </div>
 
-            <!-- Hazard / Story Hook Description -->
-            <div v-if="item.desc" class="comp-narrative-quote quote-comp">
-              <p class="comp-desc">{{ item.desc }}</p>
-            </div>
-
-            <!-- Primary Tactical Action: Trigger (+1 HP) -->
-            <div class="comp-card-bottom">
-              <button
-                type="button"
-                class="btn-trigger-hp trigger-complication"
-                @click="triggerTrait(item)"
-                title="Award +1 Hero Point when this complication causes trouble"
-              >
-                <i class="ri-shield-star-fill"></i>
-                <span>Trigger (+1 Hero Point)</span>
-              </button>
-            </div>
+            <!-- Hazard / Story Hook Description (Clean, No Nested Box) -->
+            <p v-if="item.desc" class="comp-card-desc desc-comp">{{ item.desc }}</p>
           </article>
         </div>
       </section>
@@ -700,14 +668,15 @@ function broadcastComplication(item) {
   justify-content: space-between;
   flex-wrap: wrap;
   gap: 0.75rem;
-  padding: 0.2rem 0;
+  padding: 0.35rem 0 0.5rem 0;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .comp-toolbar-left {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
 .comp-title-wrap {
@@ -752,93 +721,55 @@ function broadcastComplication(item) {
   color: #fbbf24;
 }
 
-.comp-toolbar-actions {
+/* Toolbar Right: Integrated Compact Hero Points Tracker */
+.comp-toolbar-right {
   display: flex;
   align-items: center;
   gap: 0.45rem;
 }
 
-.btn-action-add {
-  font-size: 0.75rem;
-  font-weight: 700;
-  padding: 0.35rem 0.75rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
+.hp-inline-tracker {
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
+  gap: 0.45rem;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.28);
+  border-radius: var(--radius-sm);
+  padding: 2px 7px 2px 9px;
   transition: all var(--trans-fast);
 }
 
-.btn-action-mot {
-  background: rgba(168, 85, 247, 0.14);
-  border: 1px solid rgba(168, 85, 247, 0.4);
-  color: #d8b4fe;
+.hp-inline-tracker:hover {
+  border-color: rgba(245, 158, 11, 0.45);
+  background: rgba(245, 158, 11, 0.12);
 }
 
-.btn-action-mot:hover {
-  background: #a855f7;
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-.btn-action-comp {
-  background: rgba(244, 63, 94, 0.14);
-  border: 1px solid rgba(244, 63, 94, 0.4);
-  color: #fda4af;
-}
-
-.btn-action-comp:hover {
-  background: #f43f5e;
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-/* Tactical Hero Points HUD */
-.comp-hp-hud {
-  display: flex;
-  align-items: center;
-  gap: 1.15rem;
-  background: linear-gradient(135deg, rgba(245, 158, 11, 0.09) 0%, rgba(17, 24, 39, 0.6) 100%);
-  border: 1px solid rgba(245, 158, 11, 0.28);
-  border-radius: var(--radius-md);
-  padding: 0.65rem 1rem;
-  flex-wrap: wrap;
-}
-
-.hp-stepper-block {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-  align-items: center;
-}
-
-.hp-label {
-  font-size: 0.64rem;
+.hp-inline-label {
+  font-size: 0.62rem;
   font-weight: 800;
   letter-spacing: 0.05em;
   color: #f59e0b;
   text-transform: uppercase;
 }
 
-.hp-stepper {
+.hp-stepper-compact {
   display: inline-flex;
   align-items: center;
-  background: rgba(11, 15, 23, 0.85);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-  border-radius: var(--radius-sm);
-  padding: 2px;
-  gap: 3px;
+  background: rgba(11, 15, 23, 0.9);
+  border: 1px solid rgba(245, 158, 11, 0.22);
+  border-radius: var(--radius-xs);
+  padding: 1px;
+  gap: 2px;
 }
 
-.hp-btn-step {
-  width: 26px;
-  height: 26px;
+.hp-step-btn {
+  width: 22px;
+  height: 22px;
   background: rgba(255, 255, 255, 0.06);
   border: none;
-  border-radius: calc(var(--radius-sm) - 2px);
+  border-radius: 2px;
   color: #ffffff;
-  font-size: 0.85rem;
+  font-size: 0.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -846,57 +777,48 @@ function broadcastComplication(item) {
   transition: all var(--trans-fast);
 }
 
-.hp-btn-step:hover:not(:disabled) {
+.hp-step-btn:hover:not(:disabled) {
   background: #f59e0b;
   color: #0b0f17;
 }
 
-.hp-btn-step:disabled {
+.hp-step-btn:disabled {
   opacity: 0.3;
   cursor: not-allowed;
 }
 
-.hp-token-badge {
-  display: flex;
+.hp-token-pill {
+  display: inline-flex;
   align-items: center;
-  gap: 0.35rem;
-  padding: 0 0.55rem;
-  min-width: 48px;
+  gap: 0.3rem;
+  padding: 0 0.45rem;
+  min-width: 32px;
   justify-content: center;
 }
 
-.hp-token-icon {
+.hp-token-glyph {
   color: #fbbf24;
-  font-size: 0.95rem;
+  font-size: 0.85rem;
 }
 
-.hp-token-count {
-  font-size: 1.05rem;
+.hp-token-num {
+  font-size: 0.95rem;
   font-weight: 900;
   color: #ffffff;
   font-family: var(--font-mono, monospace);
 }
 
-.hp-mechanics-guide {
-  flex: 1;
-  min-width: 240px;
+.hp-info-tip {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  cursor: help;
+  display: inline-flex;
+  align-items: center;
+  transition: color var(--trans-fast);
 }
 
-.hp-guide-desc {
-  font-size: 0.76rem;
-  color: var(--text-secondary);
-  line-height: 1.45;
-  margin: 0;
-}
-
-.text-mot-accent {
-  color: #c084fc;
-  font-weight: 700;
-}
-
-.text-comp-accent {
-  color: #fb7185;
-  font-weight: 700;
+.hp-info-tip:hover {
+  color: #f59e0b;
 }
 
 /* Empty State */
@@ -1080,7 +1002,7 @@ function broadcastComplication(item) {
   gap: 0.5rem;
 }
 
-/* Cards Grid */
+/* Cards Grid & Dossier Card Architecture (Anti Card-in-Card) */
 .comp-items-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -1088,33 +1010,35 @@ function broadcastComplication(item) {
 }
 
 .comp-card {
-  background: rgba(17, 24, 39, 0.55);
-  border: 1px solid var(--border-color);
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: var(--radius-md);
-  padding: 0.85rem;
+  padding: 0.75rem 0.85rem;
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.45rem;
   transition: all var(--trans-fast);
   position: relative;
 }
 
 .card-motivation {
-  border: 1px solid rgba(168, 85, 247, 0.25);
+  border-left: 3px solid #8b5cf6;
 }
 
 .card-motivation:hover {
-  border-color: rgba(168, 85, 247, 0.45);
-  background: rgba(28, 23, 48, 0.75);
+  background: rgba(26, 21, 48, 0.8);
+  border-color: rgba(139, 92, 246, 0.35);
+  border-left-color: #a78bfa;
 }
 
 .card-complication {
-  border: 1px solid rgba(244, 63, 94, 0.25);
+  border-left: 3px solid #f43f5e;
 }
 
 .card-complication:hover {
-  border-color: rgba(244, 63, 94, 0.45);
-  background: rgba(36, 20, 30, 0.75);
+  background: rgba(38, 19, 29, 0.8);
+  border-color: rgba(244, 63, 94, 0.35);
+  border-left-color: #fb7185;
 }
 
 .comp-card-top {
@@ -1132,15 +1056,22 @@ function broadcastComplication(item) {
   min-width: 0;
 }
 
+.comp-identity-header {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+}
+
 .comp-icon-indicator {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
+  width: 22px;
+  height: 22px;
   border-radius: var(--radius-xs);
-  font-size: 0.85rem;
-  margin-bottom: 0.2rem;
+  font-size: 0.82rem;
+  flex-shrink: 0;
 }
 
 .indicator-mot {
@@ -1149,8 +1080,14 @@ function broadcastComplication(item) {
   color: #c084fc;
 }
 
+.indicator-comp {
+  background: rgba(244, 63, 94, 0.16);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  color: #fda4af;
+}
+
 .comp-category-tag {
-  font-size: 0.65rem;
+  font-size: 0.64rem;
   font-weight: 800;
   color: #fda4af;
   background: rgba(244, 63, 94, 0.14);
@@ -1162,6 +1099,7 @@ function broadcastComplication(item) {
   gap: 0.25rem;
   letter-spacing: 0.04em;
   width: fit-content;
+  flex-shrink: 0;
 }
 
 .comp-name {
@@ -1172,20 +1110,59 @@ function broadcastComplication(item) {
   line-height: 1.3;
 }
 
+/* Card Action Cluster: Inline Trigger Pill + Secondary Icons */
 .comp-card-actions {
   display: flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.3rem;
+  flex-shrink: 0;
+}
+
+.btn-trigger-pill {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0.22rem 0.55rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  white-space: nowrap;
+  transition: all var(--trans-fast);
+}
+
+.trigger-mot-pill {
+  background: rgba(139, 92, 246, 0.15);
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  color: #c4b5fd;
+}
+
+.trigger-mot-pill:hover {
+  background: #8b5cf6;
+  border-color: #a78bfa;
+  color: #ffffff;
+}
+
+.trigger-comp-pill {
+  background: rgba(244, 63, 94, 0.15);
+  border: 1px solid rgba(244, 63, 94, 0.4);
+  color: #fda4af;
+}
+
+.trigger-comp-pill:hover {
+  background: #f43f5e;
+  border-color: #fb7185;
+  color: #ffffff;
 }
 
 .card-act-btn {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #94a3b8;
   cursor: pointer;
-  font-size: 0.82rem;
+  font-size: 0.8rem;
   border-radius: var(--radius-sm);
   transition: all var(--trans-fast);
   display: inline-flex;
@@ -1204,75 +1181,21 @@ function broadcastComplication(item) {
   border-color: rgba(239, 68, 68, 0.5);
 }
 
-.comp-narrative-quote {
-  background: rgba(0, 0, 0, 0.25);
-  padding: 0.45rem 0.65rem;
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-}
-
-.quote-mot {
-  border: 1px solid rgba(168, 85, 247, 0.2);
-  border-radius: var(--radius-sm);
-}
-
-.quote-comp {
-  border: 1px solid rgba(244, 63, 94, 0.2);
-  border-radius: var(--radius-sm);
-}
-
-.comp-desc {
-  font-size: 0.76rem;
-  color: var(--text-secondary);
-  line-height: 1.45;
+/* Narrative Creed & Hazard Description (Clean, No Box-in-a-Box) */
+.comp-card-desc {
+  font-size: 0.77rem;
+  color: #94a3b8;
+  line-height: 1.5;
   margin: 0;
+  padding-left: 0.05rem;
 }
 
-/* Tactical Trigger Action Bottom */
-.comp-card-bottom {
-  display: flex;
-  align-items: center;
-  margin-top: auto;
-  padding-top: 0.25rem;
+.desc-mot {
+  color: #cbd5e1;
 }
 
-.btn-trigger-hp {
-  width: 100%;
-  font-size: 0.72rem;
-  font-weight: 800;
-  padding: 0.35rem 0.6rem;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
-  transition: all var(--trans-fast);
-}
-
-.trigger-motivation {
-  background: rgba(168, 85, 247, 0.16);
-  border: 1px solid rgba(168, 85, 247, 0.45);
-  color: #d8b4fe;
-}
-
-.trigger-motivation:hover {
-  background: #a855f7;
-  border-color: #c084fc;
-  color: #ffffff;
-  transform: translateY(-1px);
-}
-
-.trigger-complication {
-  background: rgba(244, 63, 94, 0.16);
-  border: 1px solid rgba(244, 63, 94, 0.45);
-  color: #fda4af;
-}
-
-.trigger-complication:hover {
-  background: #f43f5e;
-  border-color: #fb7185;
-  color: #ffffff;
-  transform: translateY(-1px);
+.desc-comp {
+  color: #cbd5e1;
 }
 
 /* Modal Dialog */

@@ -44,7 +44,7 @@
 
           <div v-if="isMovementModeActive(mode.id)" class="mode-ranks-stepper">
             <span class="stepper-label">Purchased Ranks:</span>
-            <div class="stepper-controls">
+            <div v-if="(mode.maxRanks || 5) > 1" class="stepper-controls">
               <button
                 type="button"
                 class="step-btn"
@@ -58,6 +58,9 @@
                 :disabled="getMovementModeRanks(mode.id) >= (mode.maxRanks || 5)"
                 @click="stepMovementMode(mode.id, 1)"
               >+</button>
+            </div>
+            <div v-else class="stepper-controls">
+              <span class="step-value">Rank 1 (Fixed)</span>
             </div>
           </div>
         </div>

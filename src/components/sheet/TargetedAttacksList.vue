@@ -156,7 +156,7 @@
 
           <div class="spec-metric">
             <span class="spec-label">Range</span>
-            <span class="spec-val">{{ atk.range }}</span>
+            <span class="spec-val" :title="atk.rangeDetails?.tooltip || atk.rangeDistance || atk.range">{{ atk.rangeDistance || atk.range }}</span>
           </div>
 
           <div class="spec-metric">

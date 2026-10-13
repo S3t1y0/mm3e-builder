@@ -230,9 +230,29 @@
           <span class="param-val">{{ effect.action || 'Standard' }}</span>
         </div>
         <div class="param-status-divider"></div>
-        <div class="param-status-item">
+        <div class="param-status-item" :class="{ 'is-modified': effectRangeDetails.isModified }">
           <span class="param-lbl">Range:</span>
-          <span class="param-val">{{ effect.range || 'Close' }}</span>
+          <span class="param-val" :title="effectRangeDetails.tooltip">
+            {{ effectRangeDetails.effectiveRange }}
+            <span
+              v-if="effectRangeDetails.isModified && effectRangeDetails.effectiveRange !== effectRangeDetails.baseRange"
+              class="param-badge-mod"
+            >
+              (from {{ effectRangeDetails.baseRange }})
+            </span>
+            <span
+              v-else-if="effectRangeDetails.reachRanks > 0"
+              class="param-badge-mod"
+            >
+              (+{{ effectRangeDetails.reachRanks * 5 }} ft)
+            </span>
+            <span
+              v-else-if="effectRangeDetails.extendedRanks > 0"
+              class="param-badge-mod"
+            >
+              (Ext ×{{ Math.pow(2, effectRangeDetails.extendedRanks) }})
+            </span>
+          </span>
         </div>
         <div class="param-status-divider"></div>
         <div class="param-status-item">
@@ -518,7 +538,7 @@
 import { computed, ref } from 'vue';
 import { usePowerBuilderStore } from '../../stores/powerBuilderStore.js';
 import { useHeroStore } from '../../stores/heroStore.js';
-import { BASE_EFFECTS, EXTRAS, FLAWS, calculateEffectCost, hasResistanceCheck, getBaseEffectIcon } from '../../rules/powerEngine.js';
+import { BASE_EFFECTS, EXTRAS, FLAWS, calculateEffectCost, hasResistanceCheck, getBaseEffectIcon, resolveEffectRangeDetails } from '../../rules/powerEngine.js';
 import EffectsLibraryModal from './EffectsLibraryModal.vue';
 import EffectConfigurator from './EffectConfigurator.vue';
 
@@ -581,6 +601,10 @@ function getEffectsByCategory(category) {
 
 const effectCost = computed(() => {
   return calculateEffectCost(props.effect, 0);
+});
+
+const effectRangeDetails = computed(() => {
+  return resolveEffectRangeDetails(props.effect);
 });
 
 const currentBaseInfo = computed(() => {
@@ -1022,6 +1046,23 @@ function calculateModSubtotal(mod, isFlaw = false) {
 
 .param-status-item.highlight .param-val {
   color: #38bdf8;
+}
+
+.param-status-item.is-modified .param-val {
+  color: #38bdf8;
+}
+
+.param-badge-mod {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 3px;
+  padding: 0.05rem 0.3rem;
+  margin-left: 0.25rem;
+  display: inline-block;
+  vertical-align: middle;
 }
 
 .param-status-divider {
