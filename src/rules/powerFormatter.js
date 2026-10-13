@@ -36,16 +36,17 @@ const SPEED_RANK_TABLE = {
  */
 export function formatSpeedRank(rank, options = {}) {
   const r = parseInt(rank, 10) || 0;
-  if (options.compact) {
-    if (r === 0) return '2 MPH';
-    if (r > 20) return `FTL (Rank ${r})`;
-    const mph = Math.round(Math.pow(2, r) * 2);
-    return `${mph.toLocaleString()} MPH`;
+  if (SPEED_RANK_TABLE[r]) {
+    const raw = SPEED_RANK_TABLE[r];
+    if (options.compact || options.inline) {
+      return raw.replace(/\s*\((.*?)\)\s*/, (match, p1) => ` • ${p1}`);
+    }
+    return raw;
   }
-  if (SPEED_RANK_TABLE[r]) return SPEED_RANK_TABLE[r];
   if (r > 20) return `Faster Than Light (Rank ${r})`;
   const mph = Math.round(Math.pow(2, r) * 2);
-  return `${mph.toLocaleString()} MPH`;
+  const ftRound = Math.round((mph * 5280) / 600);
+  return `${mph.toLocaleString()} MPH • ${ftRound.toLocaleString()} ft/round`;
 }
 
 /**
