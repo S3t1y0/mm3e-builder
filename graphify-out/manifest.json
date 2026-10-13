@@ -474,9 +474,9 @@
     "semantic_hash": ""
   },
   "src/rules/powerFormatter.js": {
-    "mtime": 1791900592.1187236,
-    "seen": 1791903971.9983454,
-    "ast_hash": "2afd8e80d3d47a392f6abcc4d8cefd93",
+    "mtime": 1791904758.1713488,
+    "seen": 1791904956.9219348,
+    "ast_hash": "248f8cf2c0aff7b9617608975031cd02",
     "semantic_hash": ""
   },
   "src/rules/powerNormalizer.js": {
@@ -486,9 +486,9 @@
     "semantic_hash": ""
   },
   "src/rules/powerRuleDescriptions.js": {
-    "mtime": 1791902016.1253936,
-    "seen": 1791903971.998347,
-    "ast_hash": "573b4b4c44ff8f869e52eb73afecd553",
+    "mtime": 1791904932.6759675,
+    "seen": 1791904956.9219368,
+    "ast_hash": "8fee102ef167f1ba822d418701e4379c",
     "semantic_hash": ""
   },
   "src/rules/powerValidator.js": {
@@ -546,9 +546,9 @@
     "semantic_hash": ""
   },
   "src/stores/uiStore.js": {
-    "mtime": 1791901272.9820693,
-    "seen": 1791903971.9983559,
-    "ast_hash": "182e367b88200e2d65859b91326e7146",
+    "mtime": 1791904813.845618,
+    "seen": 1791904956.921946,
+    "ast_hash": "d3875fbb59abac311d2a8d353d9f27cc",
     "semantic_hash": ""
   },
   "src/utils/diceRoller.js": {
@@ -570,15 +570,15 @@
     "semantic_hash": ""
   },
   "src/utils/exporters/bbcode.js": {
-    "mtime": 1791901980.8919828,
-    "seen": 1791903971.9983594,
-    "ast_hash": "2c1f473d2b2d23c617f0b0acf85b089e",
+    "mtime": 1791904892.8325944,
+    "seen": 1791904956.9219496,
+    "ast_hash": "3012f2d6d3bfd9f07124669b6ad1e0e3",
     "semantic_hash": ""
   },
   "src/utils/exporters/helpers.js": {
-    "mtime": 1791901359.0970635,
-    "seen": 1791903971.9983604,
-    "ast_hash": "0c8cab817f2ba5cef2aaffad4adda2a8",
+    "mtime": 1791904792.823526,
+    "seen": 1791904956.9219506,
+    "ast_hash": "4f335515f7f9b680bc92395f58de6fbd",
     "semantic_hash": ""
   },
   "src/utils/exporters/index.js": {
@@ -594,21 +594,21 @@
     "semantic_hash": ""
   },
   "src/utils/exporters/markdown.js": {
-    "mtime": 1791901940.9573004,
-    "seen": 1791903971.9983628,
-    "ast_hash": "5934f59f22bef0aa93ccf8ff94c010bb",
+    "mtime": 1791904871.0203621,
+    "seen": 1791904956.9219532,
+    "ast_hash": "1cecaa78454f5394430ad1a4fc0da71a",
     "semantic_hash": ""
   },
   "src/utils/exporters/plainText.js": {
-    "mtime": 1791901958.7856164,
-    "seen": 1791903971.998364,
-    "ast_hash": "d6687b6084aafe421cd3b7641e724484",
+    "mtime": 1791904848.9851868,
+    "seen": 1791904956.9219542,
+    "ast_hash": "bd725f408d46948c6a6016fc40ff050d",
     "semantic_hash": ""
   },
   "src/utils/exporters/roll20.js": {
-    "mtime": 1791877322.4702978,
-    "seen": 1791877449.1112058,
-    "ast_hash": "9b951199fb7de69fb348d3051cad20a7",
+    "mtime": 1791904922.183947,
+    "seen": 1791904956.9219549,
+    "ast_hash": "bd7cd5044ec8b9b4348278a488eada6a",
     "semantic_hash": ""
   },
   "src/utils/seamlessScroll.js": {
@@ -942,15 +942,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/ExportStructureModal.vue": {
-    "mtime": 1791903934.7059574,
-    "seen": 1791903971.998279,
-    "ast_hash": "482eb4f4cf1519c4101b3d3928d41808",
-    "semantic_hash": ""
-  },
-  "anti-slop/audit-001-2026-10-13.md": {
-    "mtime": 1791903683.7788148,
-    "seen": 1791903971.9983706,
-    "ast_hash": "7d6309ef4e6b5381540159d36e0c71d4",
+    "mtime": 1791904723.5737247,
+    "seen": 1791904956.9218693,
+    "ast_hash": "e7e63b9217e72c9f381ca3aa3c58f5de",
     "semantic_hash": ""
   }
 }

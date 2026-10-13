@@ -12,9 +12,9 @@
     "semantic_hash": ""
   },
   "src/App.vue": {
-    "mtime": 1791777350.9403934,
-    "seen": 1791877449.1109893,
-    "ast_hash": "2546914d793f80418686998084ddd463",
+    "mtime": 1791900015.3149972,
+    "seen": 1791903971.9982731,
+    "ast_hash": "838b7b35d147e8ba8ce54cad59240201",
     "semantic_hash": ""
   },
   "src/components/modals/AdvantageLibraryModal.vue": {
@@ -42,21 +42,21 @@
     "semantic_hash": ""
   },
   "src/components/modals/GreenRoninPrintModal.vue": {
-    "mtime": 1791778882.6921382,
-    "seen": 1791877449.1110065,
-    "ast_hash": "7d626f6ec411ff246d5e9f822a0bbbba",
+    "mtime": 1791900044.83791,
+    "seen": 1791903971.9982805,
+    "ast_hash": "b9bab45cadef700d4d5d093cea31b950",
     "semantic_hash": ""
   },
   "src/components/modals/GreenRoninSheet.vue": {
-    "mtime": 1791874342.065603,
-    "seen": 1791877449.1110077,
-    "ast_hash": "8c5a1eaac627b7b8f36aa24fcd55d9cb",
+    "mtime": 1791900816.4168184,
+    "seen": 1791903971.9982815,
+    "ast_hash": "044ab3018d2fdc9f67398f7ebc6afab4",
     "semantic_hash": ""
   },
   "src/components/modals/MarkdownExportModal.vue": {
-    "mtime": 1791877374.9963164,
-    "seen": 1791877449.1110096,
-    "ast_hash": "fcd85718d97912ba37af1461f6985c88",
+    "mtime": 1791900088.5650609,
+    "seen": 1791903971.9982822,
+    "ast_hash": "780f363aba6bdaf570d00c0b60edd46c",
     "semantic_hash": ""
   },
   "src/components/modals/Roll20PrintModal.vue": {
@@ -474,9 +474,9 @@
     "semantic_hash": ""
   },
   "src/rules/powerFormatter.js": {
-    "mtime": 1791874797.2559087,
-    "seen": 1791877449.111164,
-    "ast_hash": "bba4879353596fcaad9d430287f7092c",
+    "mtime": 1791900592.1187236,
+    "seen": 1791903971.9983454,
+    "ast_hash": "2afd8e80d3d47a392f6abcc4d8cefd93",
     "semantic_hash": ""
   },
   "src/rules/powerNormalizer.js": {
@@ -486,9 +486,9 @@
     "semantic_hash": ""
   },
   "src/rules/powerRuleDescriptions.js": {
-    "mtime": 1791874816.7699976,
-    "seen": 1791877449.1111677,
-    "ast_hash": "f0258ceea98d236f20a549fa1fec63fd",
+    "mtime": 1791902016.1253936,
+    "seen": 1791903971.998347,
+    "ast_hash": "573b4b4c44ff8f869e52eb73afecd553",
     "semantic_hash": ""
   },
   "src/rules/powerValidator.js": {
@@ -546,9 +546,9 @@
     "semantic_hash": ""
   },
   "src/stores/uiStore.js": {
-    "mtime": 1791775513.1712143,
-    "seen": 1791877449.1111887,
-    "ast_hash": "63cd1368beeea8fe72d20147d252ea0d",
+    "mtime": 1791901272.9820693,
+    "seen": 1791903971.9983559,
+    "ast_hash": "182e367b88200e2d65859b91326e7146",
     "semantic_hash": ""
   },
   "src/utils/diceRoller.js": {
@@ -570,15 +570,15 @@
     "semantic_hash": ""
   },
   "src/utils/exporters/bbcode.js": {
-    "mtime": 1791877284.9056282,
-    "seen": 1791877449.1111953,
-    "ast_hash": "c35bd6b4a16a83b15e619ce0b9c76da7",
+    "mtime": 1791901980.8919828,
+    "seen": 1791903971.9983594,
+    "ast_hash": "2c1f473d2b2d23c617f0b0acf85b089e",
     "semantic_hash": ""
   },
   "src/utils/exporters/helpers.js": {
-    "mtime": 1791877164.8047776,
-    "seen": 1791877449.1111972,
-    "ast_hash": "40cc1fd220391b3376eb345f42a5d645",
+    "mtime": 1791901359.0970635,
+    "seen": 1791903971.9983604,
+    "ast_hash": "0c8cab817f2ba5cef2aaffad4adda2a8",
     "semantic_hash": ""
   },
   "src/utils/exporters/index.js": {
@@ -594,15 +594,15 @@
     "semantic_hash": ""
   },
   "src/utils/exporters/markdown.js": {
-    "mtime": 1791877255.1358995,
-    "seen": 1791877449.1112022,
-    "ast_hash": "e73ece8af5b6f7d6b20e0af9aac99571",
+    "mtime": 1791901940.9573004,
+    "seen": 1791903971.9983628,
+    "ast_hash": "5934f59f22bef0aa93ccf8ff94c010bb",
     "semantic_hash": ""
   },
   "src/utils/exporters/plainText.js": {
-    "mtime": 1791877218.2145894,
-    "seen": 1791877449.1112041,
-    "ast_hash": "c188e62f61bc73fc7effc7348775331d",
+    "mtime": 1791901958.7856164,
+    "seen": 1791903971.998364,
+    "ast_hash": "d6687b6084aafe421cd3b7641e724484",
     "semantic_hash": ""
   },
   "src/utils/exporters/roll20.js": {
@@ -939,6 +939,12 @@
     "mtime": 1788926468.817566,
     "seen": 1791877449.1113398,
     "ast_hash": "af49a38b296c08b7527ab1e410e3c8ec",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ExportStructureModal.vue": {
+    "mtime": 1791904396.6074634,
+    "seen": 1791904413.2370958,
+    "ast_hash": "0f5e949df3245e08e898cca3a78da529",
     "semantic_hash": ""
   }
 }

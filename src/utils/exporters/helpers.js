@@ -461,7 +461,6 @@ export function compileExportData(character = {}, heroStore = null, options = {}
   const baseOfOps = character.baseOfOperations || 'Freedom City';
   const heroPoints = character.heroPoints ?? 1;
 
-  // Demographics
   const demographics = [];
   if (character.gender) demographics.push({ label: 'Gender', value: character.gender });
   if (character.age) demographics.push({ label: 'Age', value: character.age });
@@ -470,7 +469,6 @@ export function compileExportData(character = {}, heroStore = null, options = {}
   if (character.eyes) demographics.push({ label: 'Eyes', value: character.eyes });
   if (character.hair) demographics.push({ label: 'Hair', value: character.hair });
 
-  // Power Point Accounting
   const abilitiesCost = heroStore?.abilitiesCost ?? Object.values(character.abilities || {}).reduce((sum, v) => sum + (Number(v) || 0) * 2, 0);
   const defensesCost = heroStore?.defensesCost ?? Object.entries(character.defensesBought || {}).reduce((sum, [k, v]) => k !== 'TOUGHNESS' ? sum + (Number(v) || 0) : sum, 0);
   const totalSkillRanks = (character.skills || []).reduce((sum, s) => sum + (Number(s.ranks ?? s.rank) || 0), 0);
@@ -484,7 +482,6 @@ export function compileExportData(character = {}, heroStore = null, options = {}
   const effAbilities = heroStore?.effectiveAbilities ?? (character.abilities || {});
   const activeTraits = heroStore?.activeEnhancedTraits || { abilities: {}, defenses: {}, skills: {}, advantages: {} };
 
-  // Abilities (8 Core Abilities)
   const ablDefs = [
     { code: 'STR', name: 'Strength' },
     { code: 'STA', name: 'Stamina' },
@@ -529,7 +526,6 @@ export function compileExportData(character = {}, heroStore = null, options = {}
     };
   });
 
-  // Defenses
   const shieldBonus = heroStore?.equipmentShieldBonus || 0;
   const armorBonus = heroStore?.equipmentArmorBonus || 0;
   const powerProt = heroStore?.protectionBonus || 0;
@@ -613,7 +609,6 @@ export function compileExportData(character = {}, heroStore = null, options = {}
     }
   ];
 
-  // Offense (Initiative & Attacks)
   const initBonus = heroStore?.initiativeTotal ?? (heroStore?.getDefenseBase('INITIATIVE') ?? (effAbilities.AGL || 0));
   const initAdvRanks = heroStore?.getAdvantageRanks ? heroStore.getAdvantageRanks('Improved Initiative') : 0;
   const initNotesParts = [`AGL ${formatMod(effAbilities.AGL || 0)}`];
@@ -643,7 +638,6 @@ export function compileExportData(character = {}, heroStore = null, options = {}
     };
   });
 
-  // Advantages
   const rawAdvs = Array.isArray(character.advantages) ? character.advantages : [];
   const advantages = rawAdvs.map(adv => {
     const advName = adv.name || 'Advantage';
@@ -660,13 +654,11 @@ export function compileExportData(character = {}, heroStore = null, options = {}
     };
   }).sort((a, b) => a.label.localeCompare(b.label));
 
-  // Skills (All 16 core skills + subskills, filtered if trained only)
   let skills = getAllCharacterSkills(character, heroStore);
   if (opts.skillsMode === 'trained') {
     skills = skills.filter(sk => (Number(sk.ranks) || 0) > 0 || sk.subtype);
   }
 
-  // Powers
   const rawPowers = Array.isArray(character.powers) ? character.powers : [];
   const powers = rawPowers.map(p => {
     const statblock = formatPowerStatblock(p, opts);
@@ -677,15 +669,12 @@ export function compileExportData(character = {}, heroStore = null, options = {}
     };
   });
 
-  // Movement Modes
   const movement = getMovementModes(character);
 
-  // Equipment / Resources
   const resources = character.resources || [];
   const totalEP = heroStore?.totalEP ?? resources.reduce((sum, r) => sum + (Number(r.epCost ?? r.cost) || 0), 0);
   const maxEP = (heroStore?.getAdvantageRanks ? heroStore.getAdvantageRanks('Equipment') : 0) * 5;
 
-  // Complications
   const comps = character.complications || [];
   const motivations = comps.filter(isMotivation);
   const complications = comps.filter(c => !isMotivation(c));

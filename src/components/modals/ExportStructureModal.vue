@@ -9,7 +9,6 @@
       aria-labelledby="export-structure-modal-title"
     >
     <div class="modal-dialog export-structure-dialog">
-      <!-- Modal Header -->
       <header class="export-modal-header">
         <div class="header-title-wrap">
           <div class="header-icon-badge">
@@ -28,7 +27,6 @@
         </button>
       </header>
 
-      <!-- Presets Quick Bar -->
       <div class="presets-banner">
         <div class="presets-banner-left">
           <span class="presets-label">QUICK PRESET:</span>
@@ -71,11 +69,8 @@
         </div>
       </div>
 
-      <!-- Main Two-Column Body -->
       <div class="export-modal-body">
-        <!-- Left Column: Controls & Toggles -->
         <div class="options-controls-col">
-          <!-- Group 1: Power Rules Depth -->
           <div class="options-group">
             <div class="group-header">
               <i class="ri-book-read-line group-icon"></i>
@@ -124,7 +119,6 @@
             </div>
           </div>
 
-          <!-- Group 2: Section Visibility -->
           <div class="options-group">
             <div class="group-header">
               <i class="ri-layout-grid-line group-icon"></i>
@@ -132,7 +126,6 @@
             </div>
 
             <div class="group-items">
-              <!-- Powers -->
               <label class="toggle-card" :class="{ active: uiStore.exportOptions.showPowers }">
                 <div class="toggle-info">
                   <span class="toggle-name">Powers &amp; Devices</span>
@@ -146,7 +139,6 @@
                 />
               </label>
 
-              <!-- Offense -->
               <label class="toggle-card" :class="{ active: uiStore.exportOptions.showOffense }">
                 <div class="toggle-info">
                   <span class="toggle-name">Offense &amp; Attack Matrix</span>
@@ -160,7 +152,6 @@
                 />
               </label>
 
-              <!-- Skills & Mode Switch -->
               <div class="toggle-card toggle-card-complex" :class="{ active: uiStore.exportOptions.showSkills }">
                 <div class="toggle-complex-row">
                   <div class="toggle-info">
@@ -198,7 +189,6 @@
                 </div>
               </div>
 
-              <!-- Advantages -->
               <label class="toggle-card" :class="{ active: uiStore.exportOptions.showAdvantages }">
                 <div class="toggle-info">
                   <span class="toggle-name">Combat Advantages</span>
@@ -212,7 +202,6 @@
                 />
               </label>
 
-              <!-- Equipment -->
               <label class="toggle-card" :class="{ active: uiStore.exportOptions.showEquipment }">
                 <div class="toggle-info">
                   <span class="toggle-name">Gear, Equipment &amp; Vehicles</span>
@@ -226,7 +215,6 @@
                 />
               </label>
 
-              <!-- Movement -->
               <label class="toggle-card" :class="{ active: uiStore.exportOptions.showMovement }">
                 <div class="toggle-info">
                   <span class="toggle-name">Movement Modes</span>
@@ -240,7 +228,6 @@
                 />
               </label>
 
-              <!-- Complications -->
               <label class="toggle-card" :class="{ active: uiStore.exportOptions.showComplications }">
                 <div class="toggle-info">
                   <span class="toggle-name">Motivations &amp; Complications</span>
@@ -254,7 +241,6 @@
                 />
               </label>
 
-              <!-- Notes -->
               <label class="toggle-card" :class="{ active: uiStore.exportOptions.showNotes }">
                 <div class="toggle-info">
                   <span class="toggle-name">Background Notes &amp; Tactics</span>
@@ -271,7 +257,6 @@
           </div>
         </div>
 
-        <!-- Right Column: Real-Time Live Preview -->
         <div class="preview-col">
           <div class="preview-header">
             <div class="preview-title-wrap">
@@ -310,7 +295,6 @@
         </div>
       </div>
 
-      <!-- Modal Footer -->
       <footer class="export-modal-footer">
         <div class="footer-hint">
           <i class="ri-save-line"></i>
@@ -455,7 +439,6 @@ async function copyPreviewText() {
   }
 }
 
-/* Header */
 .export-modal-header {
   display: flex;
   align-items: center;
@@ -520,7 +503,6 @@ async function copyPreviewText() {
   color: #f1f5f9;
 }
 
-/* Presets Bar */
 .presets-banner {
   display: flex;
   align-items: center;
@@ -626,7 +608,6 @@ async function copyPreviewText() {
   border: 1px solid #475569;
 }
 
-/* Body Two Columns */
 .export-modal-body {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -635,7 +616,6 @@ async function copyPreviewText() {
   overflow: hidden;
 }
 
-/* Left Column: Options Controls */
 .options-controls-col {
   padding: 1.25rem 1.5rem;
   overflow-y: auto;
@@ -898,7 +878,6 @@ async function copyPreviewText() {
   user-select: text;
 }
 
-/* Footer */
 .export-modal-footer {
   display: flex;
   align-items: center;
@@ -941,7 +920,7 @@ async function copyPreviewText() {
   transform: translateY(-1px);
 }
 
-/* Keyboard Focus Indicators (R-32 & WCAG AA) */
+/* Keyboard focus indicators */
 .btn-modal-close:focus-visible,
 .preset-btn:focus-visible,
 .submode-pill:focus-visible,

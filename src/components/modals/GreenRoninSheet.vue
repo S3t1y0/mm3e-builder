@@ -422,6 +422,7 @@
                 v-for="(subDesc, sdIdx) in (sub.effectRuleDescs?.length ? sub.effectRuleDescs : [sub.effectRuleDesc].filter(Boolean))"
                 :key="'p1-subdesc-' + sIdx + '-' + sdIdx"
                 class="gr-power-row gr-power-sub-rule-desc"
+                :class="{ 'gr-power-linked-rule-desc': sub.isLinked }"
               >
                 <strong class="gr-effect-rule-name">
                   {{ sdIdx === 0 ? (sub.effectBaseName || 'Effect') + ':' : '•' }}
@@ -433,7 +434,7 @@
                   v-for="(sLine, slIdx) in (smRule.lines?.length ? smRule.lines : [smRule.desc])"
                   :key="'p1-submod-' + sIdx + '-' + smIdx + '-l-' + slIdx"
                   class="gr-power-row gr-power-sub-mod-rule"
-                  :class="{ 'gr-mod-rule-continuation-row': slIdx > 0 }"
+                  :class="{ 'gr-mod-rule-continuation-row': slIdx > 0, 'gr-power-linked-mod-rule': sub.isLinked }"
                 >
                   <span v-if="slIdx === 0" class="gr-mod-rule-bullet">•</span>
                   <span v-else class="gr-mod-rule-indent"></span>
@@ -599,6 +600,7 @@
                   v-for="(subDesc, sdIdx) in (sub.effectRuleDescs?.length ? sub.effectRuleDescs : [sub.effectRuleDesc].filter(Boolean))"
                   :key="'p2-subdesc-' + sIdx + '-' + sdIdx"
                   class="gr-power-row gr-power-sub-rule-desc"
+                  :class="{ 'gr-power-linked-rule-desc': sub.isLinked }"
                 >
                   <strong class="gr-effect-rule-name">
                     {{ sdIdx === 0 ? (sub.effectBaseName || 'Effect') + ':' : '•' }}
@@ -610,7 +612,7 @@
                     v-for="(sLine, slIdx) in (smRule.lines?.length ? smRule.lines : [smRule.desc])"
                     :key="'p2-submod-' + sIdx + '-' + smIdx + '-l-' + slIdx"
                     class="gr-power-row gr-power-sub-mod-rule"
-                    :class="{ 'gr-mod-rule-continuation-row': slIdx > 0 }"
+                    :class="{ 'gr-mod-rule-continuation-row': slIdx > 0, 'gr-power-linked-mod-rule': sub.isLinked }"
                   >
                     <span v-if="slIdx === 0" class="gr-mod-rule-bullet">•</span>
                     <span v-else class="gr-mod-rule-indent"></span>

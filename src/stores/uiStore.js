@@ -2,23 +2,20 @@ import { defineStore } from 'pinia';
 import { syncUiStateToUrl } from '../utils/urlSync.js';
 
 export const DEFAULT_EXPORT_OPTIONS = {
-  // Power Details Depth
-  powerMechanics: true,      // Action, Range, Duration, DC, Speed line
-  effectRules: false,        // Base effect rules definitions
-  modifierRules: false,      // Extra and Flaw rules definitions
-
-  // Section Visibility
-  showAbilities: true,       // Abilities table
-  showDefenses: true,        // Defenses table
-  showOffense: true,         // Offense & Attacks Matrix
-  showAdvantages: true,      // Advantages listing
-  showSkills: true,          // Skills table
-  skillsMode: 'all',         // 'all' (16 skills) | 'trained' (trained only)
-  showPowers: true,          // Powers & Devices block
-  showMovement: true,        // Movement Modes breakdown
-  showEquipment: true,       // Equipment, Vehicles & HQ
-  showComplications: true,   // Motivations & Complications
-  showNotes: true            // Background Notes & Tactics
+  powerMechanics: true,
+  effectRules: false,
+  modifierRules: false,
+  showAbilities: true,
+  showDefenses: true,
+  showOffense: true,
+  showAdvantages: true,
+  showSkills: true,
+  skillsMode: 'all', // 'all' | 'trained'
+  showPowers: true,
+  showMovement: true,
+  showEquipment: true,
+  showComplications: true,
+  showNotes: true
 };
 
 function loadStoredExportOptions() {
@@ -28,8 +25,8 @@ function loadStoredExportOptions() {
     if (raw) {
       return { ...DEFAULT_EXPORT_OPTIONS, ...JSON.parse(raw) };
     }
-  } catch (e) {
-    // fallback
+  } catch {
+    /* Fallback to default options if storage read fails */
   }
   return { ...DEFAULT_EXPORT_OPTIONS };
 }
@@ -172,8 +169,8 @@ export const useUiStore = defineStore('ui', {
       if (typeof window !== 'undefined') {
         try {
           localStorage.setItem('mm3e_export_config', JSON.stringify(this.exportOptions));
-        } catch (e) {
-          // ignore
+        } catch {
+          /* Ignore quota exceeded or storage disabled errors */
         }
       }
     },

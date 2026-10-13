@@ -1,4 +1,3 @@
-// js/rules/powerFormatter.js
 import { BASE_EFFECTS, CONFIGURABLE_EFFECTS, calculatePowerTotalCost, calculateEffectCost } from './powerEngine.js';
 import { resolveEffectRulesBlock, formatTimeRank, formatDistanceRank } from './powerRuleDescriptions.js';
 import { formatMeasurementDistance } from './powerCalculator.js';
@@ -504,7 +503,7 @@ export function formatLinkedSubEntry(linked, options = {}) {
   const inlineSummary = formatEffectInlineSummary(eff, options);
 
   return {
-    label: `↳ ${labelText}`,
+    label: labelText,
     effectName: `${effBase}${rankStr}`,
     effectBaseName: effBase,
     mechanics: includeMech ? formatEffectMechanics(eff) : '',
@@ -554,7 +553,6 @@ export function formatPowerStatblock(power, options = {}) {
     ? `Activation: ${power.activation === 'move' ? 'Move Action (-1 PP)' : 'Standard Action (-2 PP)'}`
     : '';
 
-  // Device container
   if (type === 'device') {
     const isEasily = power.deviceConfig?.type === 'easily_removable';
     const discPerFive = isEasily ? 2 : 1;
@@ -624,7 +622,7 @@ export function formatPowerStatblock(power, options = {}) {
           } else {
             // Adaptive overflow: flows to the next ruled line cleanly
             overflowSubEntries.push({
-              label: `↳ ${rawLName || leEff.baseEffect || 'Effect'}`,
+              label: rawLName || leEff.baseEffect || 'Effect',
               effectName: `${leEff.baseEffect || 'Effect'} ${leEff.ranks || 1}`,
               effectBaseName: leEff.baseEffect || rawLName || 'Effect',
               mechanics: includeMech ? formatEffectMechanics(leEff) : '',
@@ -652,7 +650,6 @@ export function formatPowerStatblock(power, options = {}) {
           modifierRules: combinedModifierRules
         });
 
-        // Add any overflow linked rows
         overflowSubEntries.forEach(of => subEntries.push(of));
       }
 
@@ -717,7 +714,6 @@ export function formatPowerStatblock(power, options = {}) {
     };
   }
 
-  // Compound power
   if (type === 'compound') {
     const compoundEffects = power.compoundEffects || [];
     const hasLinked = compoundEffects.some(cp => cp.isLinked) || (Array.isArray(power.linkedEffects) && power.linkedEffects.length > 0);
@@ -779,7 +775,6 @@ export function formatPowerStatblock(power, options = {}) {
     };
   }
 
-  // Power array
   const hasAlternateEffects = Array.isArray(power.alternateEffects) && power.alternateEffects.length > 0;
   if (type === 'array' || hasAlternateEffects) {
     const mainEff = power.mainEffect || power;
@@ -791,7 +786,6 @@ export function formatPowerStatblock(power, options = {}) {
 
     const subEntries = [];
 
-    // Primary effect linked effects
     const primaryLinked = Array.isArray(power.linkedEffects) && power.linkedEffects.length > 0
       ? power.linkedEffects
       : (Array.isArray(mainEff.linkedEffects) ? mainEff.linkedEffects : []);
@@ -852,7 +846,6 @@ export function formatPowerStatblock(power, options = {}) {
     };
   }
 
-  // Standard single-effect power
   const eff = power.mainEffect || power;
   const base = eff.baseEffect || 'Effect';
   const ranks = eff.ranks || 1;
@@ -897,7 +890,7 @@ export function formatPowerStatblock(power, options = {}) {
         }
       } else {
         subEntries.push({
-          label: `↳ ${rawLName || leEff.baseEffect || 'Effect'}`,
+          label: rawLName || leEff.baseEffect || 'Effect',
           effectName: `${leEff.baseEffect || 'Effect'} ${leEff.ranks || 1}`,
           effectBaseName: leEff.baseEffect || rawLName || 'Effect',
           mechanics: includeMech ? formatEffectMechanics(leEff) : '',

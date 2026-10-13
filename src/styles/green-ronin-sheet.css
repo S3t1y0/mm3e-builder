@@ -858,12 +858,25 @@
 }
 
 .gr-power-linked-row {
-  padding-left: 22px;
+  padding-left: 26px;
+  color: #000000;
 }
 
 .gr-power-linked-row .gr-sub-label {
-  color: #0369a1;
+  color: #000000;
   font-weight: 700;
+}
+
+.gr-power-linked-row .gr-sub-details {
+  color: #000000;
+}
+
+.gr-power-linked-rule-desc {
+  padding-left: 28px;
+}
+
+.gr-power-linked-mod-rule {
+  padding-left: 30px;
 }
 
 .gr-sub-bullet {
@@ -876,7 +889,7 @@
 
 .gr-sub-label {
   font-weight: 800;
-  color: #0f172a;
+  color: #000000;
   white-space: nowrap;
 }
 

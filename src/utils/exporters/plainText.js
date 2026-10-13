@@ -27,7 +27,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
   }
   txt += `Hero Points: ${data.identity.heroPoints}\n\n`;
 
-  // 1. POWER POINT ACCOUNTING
   txt += `${subDivider}\n`;
   txt += `POWER POINT ACCOUNTING\n`;
   txt += `${subDivider}\n`;
@@ -39,7 +38,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
   txt += `${subDivider}\n`;
   txt += `TOTAL SPENT: ${data.ppAccounting.totalSpent} / ${data.ppAccounting.totalBudget} PP (${data.ppAccounting.remaining} PP Remaining)\n\n`;
 
-  // 2. ABILITIES
   if (opts.showAbilities) {
     txt += `${subDivider}\n`;
     txt += `ABILITIES (${data.ppAccounting.abilitiesCost} PP)\n`;
@@ -57,7 +55,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
     txt += `\n`;
   }
 
-  // 3. DEFENSES
   if (opts.showDefenses) {
     txt += `${subDivider}\n`;
     txt += `DEFENSES (${data.ppAccounting.defensesCost} PP)\n`;
@@ -73,7 +70,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
     txt += `\n`;
   }
 
-  // 4. OFFENSE / ATTACKS & INITIATIVE
   if (opts.showOffense) {
     txt += `${subDivider}\n`;
     txt += `OFFENSE & INITIATIVE\n`;
@@ -92,7 +88,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
     }
   }
 
-  // 5. ADVANTAGES
   if (opts.showAdvantages) {
     txt += `${subDivider}\n`;
     txt += `ADVANTAGES (${data.ppAccounting.advantagesCost} PP)\n`;
@@ -116,7 +111,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
     }
   }
 
-  // 6. SKILLS
   if (opts.showSkills) {
     txt += `${subDivider}\n`;
     const modeLabel = opts.skillsMode === 'trained' ? 'TRAINED SKILLS' : 'SKILLS';
@@ -138,7 +132,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
     }
   }
 
-  // 7. POWERS & DEVICES
   if (opts.showPowers) {
     txt += `${subDivider}\n`;
     txt += `POWERS & DEVICES (${data.ppAccounting.powersCost} PP)\n`;
@@ -169,13 +162,24 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
           }
           if (p.subEntries && p.subEntries.length > 0) {
             p.subEntries.forEach(sub => {
-              txt += `   • ${sub.label}: ${sub.details || sub.effectName} [${sub.costBadge}]\n`;
-              if (showMech && sub.mechanics) txt += `     Mechanics: ${sub.mechanics}\n`;
-              if (showEffRules && sub.effectRuleDescs && sub.effectRuleDescs.length > 0) {
-                sub.effectRuleDescs.forEach(r => txt += `     * Rule: ${r}\n`);
-              }
-              if (showModRules && sub.modifierRules && sub.modifierRules.length > 0) {
-                sub.modifierRules.forEach(m => txt += `     * Modifier (${m.name}): ${m.desc}\n`);
+              if (sub.isLinked) {
+                txt += `       ${sub.label}: ${sub.details || sub.effectName} [${sub.costBadge}]\n`;
+                if (showMech && sub.mechanics) txt += `         Mechanics: ${sub.mechanics}\n`;
+                if (showEffRules && sub.effectRuleDescs && sub.effectRuleDescs.length > 0) {
+                  sub.effectRuleDescs.forEach(r => txt += `         * Rule: ${r}\n`);
+                }
+                if (showModRules && sub.modifierRules && sub.modifierRules.length > 0) {
+                  sub.modifierRules.forEach(m => txt += `         * Modifier (${m.name}): ${m.desc}\n`);
+                }
+              } else {
+                txt += `   • ${sub.label}: ${sub.details || sub.effectName} [${sub.costBadge}]\n`;
+                if (showMech && sub.mechanics) txt += `     Mechanics: ${sub.mechanics}\n`;
+                if (showEffRules && sub.effectRuleDescs && sub.effectRuleDescs.length > 0) {
+                  sub.effectRuleDescs.forEach(r => txt += `     * Rule: ${r}\n`);
+                }
+                if (showModRules && sub.modifierRules && sub.modifierRules.length > 0) {
+                  sub.modifierRules.forEach(m => txt += `     * Modifier (${m.name}): ${m.desc}\n`);
+                }
               }
             });
           }
@@ -183,7 +187,11 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
           if (p.subEntries && p.subEntries.length > 0) {
             if (showMech && p.mechanicsLine) txt += `   ${p.mechanicsLine}\n`;
             p.subEntries.forEach(sub => {
-              txt += `   • ${sub.label}: ${sub.details || sub.effectName} [${sub.costBadge}]\n`;
+              if (sub.isLinked) {
+                txt += `       ${sub.label}: ${sub.details || sub.effectName} [${sub.costBadge}]\n`;
+              } else {
+                txt += `   • ${sub.label}: ${sub.details || sub.effectName} [${sub.costBadge}]\n`;
+              }
             });
           } else {
             const parts = [
@@ -209,7 +217,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
     txt += `\n`;
   }
 
-  // 8. EQUIPMENT, VEHICLES & HEADQUARTERS
   if (opts.showEquipment) {
     txt += `${subDivider}\n`;
     txt += `EQUIPMENT, VEHICLES & HEADQUARTERS (${data.equipment.totalEP} / ${data.equipment.maxEP} EP)\n`;
@@ -228,7 +235,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
     }
   }
 
-  // 9. MOTIVATIONS & COMPLICATIONS
   if (opts.showComplications) {
     txt += `${subDivider}\n`;
     txt += `MOTIVATIONS & COMPLICATIONS\n`;
@@ -254,7 +260,6 @@ export function buildPlainTextSheet(character, heroStore, options = {}) {
     }
   }
 
-  // 10. NOTES
   if (opts.showNotes && data.notes && data.notes.trim()) {
     txt += `${subDivider}\n`;
     txt += `BACKGROUND STORY, TACTICS & NOTES\n`;

@@ -23,7 +23,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
   bb += `[b]Hero Points:[/b] ${data.identity.heroPoints}\n\n`;
   bb += `[hr]\n\n`;
 
-  // 1. POWER POINT ACCOUNTING
   bb += `[b][size=4][color=#2563eb]■ POWER POINT ACCOUNTING[/color][/size][/b]\n`;
   bb += `• [b]Abilities:[/b] ${data.ppAccounting.abilitiesCost} PP\n`;
   bb += `• [b]Defenses:[/b] ${data.ppAccounting.defensesCost} PP\n`;
@@ -33,7 +32,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
   bb += `[b]TOTAL SPENT:[/b] [b]${data.ppAccounting.totalSpent} / ${data.ppAccounting.totalBudget} PP[/b] [i](${data.ppAccounting.remaining} PP Remaining)[/i]\n\n`;
   bb += `[hr]\n\n`;
 
-  // 2. ABILITIES
   if (opts.showAbilities) {
     bb += `[b][size=4][color=#2563eb]■ ABILITIES (${data.ppAccounting.abilitiesCost} PP)[/color][/size][/b]\n`;
     const ablLines = data.abilities.map(abl => {
@@ -48,7 +46,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
     bb += `[hr]\n\n`;
   }
 
-  // 3. DEFENSES
   if (opts.showDefenses) {
     bb += `[b][size=4][color=#2563eb]■ DEFENSES (${data.ppAccounting.defensesCost} PP)[/color][/size][/b]\n`;
     data.defenses.forEach(def => {
@@ -58,7 +55,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
     bb += `\n[hr]\n\n`;
   }
 
-  // 4. OFFENSE / ATTACKS & INITIATIVE
   if (opts.showOffense) {
     bb += `[b][size=4][color=#2563eb]■ COMBAT OFFENSE & INITIATIVE[/color][/size][/b]\n`;
     bb += `• [b]Initiative:[/b] ${data.offense.initiative.total} [i](${data.offense.initiative.notes})[/i]\n\n`;
@@ -72,7 +68,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
     bb += `[hr]\n\n`;
   }
 
-  // 5. ADVANTAGES
   if (opts.showAdvantages) {
     bb += `[b][size=4][color=#2563eb]■ ADVANTAGES (${data.ppAccounting.advantagesCost} PP)[/color][/size][/b]\n`;
     if (data.advantages.length === 0) {
@@ -83,7 +78,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
     bb += `[hr]\n\n`;
   }
 
-  // 6. SKILLS
   if (opts.showSkills) {
     const modeLabel = opts.skillsMode === 'trained' ? 'TRAINED SKILLS' : 'SKILLS';
     bb += `[b][size=4][color=#2563eb]■ ${modeLabel} (${data.ppAccounting.skillsCost} PP / ${data.ppAccounting.totalSkillRanks} RANKS)[/color][/size][/b]\n`;
@@ -102,7 +96,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
     bb += `[hr]\n\n`;
   }
 
-  // 7. POWERS & DEVICES
   if (opts.showPowers) {
     bb += `[b][size=4][color=#2563eb]■ POWERS & DEVICES (${data.ppAccounting.powersCost} PP)[/color][/size][/b]\n`;
     if (data.powers.length === 0) {
@@ -130,13 +123,15 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
           }
           if (p.subEntries && p.subEntries.length > 0) {
             p.subEntries.forEach(sub => {
-              bb += `  • [b]${sub.label}:[/b] ${sub.details || sub.effectName} [color=#16a34a][${sub.costBadge}][/color]\n`;
-              if (showMech && sub.mechanics) bb += `      - Mechanics: ${sub.mechanics}\n`;
+              const prefix = sub.isLinked ? '    • ' : '  • ';
+              const ruleIndent = sub.isLinked ? '        - ' : '      - ';
+              bb += `${prefix}[b]${sub.label}:[/b] ${sub.details || sub.effectName} [color=#16a34a][${sub.costBadge}][/color]\n`;
+              if (showMech && sub.mechanics) bb += `${ruleIndent}Mechanics: ${sub.mechanics}\n`;
               if (showEffRules && sub.effectRuleDescs && sub.effectRuleDescs.length > 0) {
-                sub.effectRuleDescs.forEach(r => bb += `      - [i]Rule:[/i] ${r}\n`);
+                sub.effectRuleDescs.forEach(r => bb += `${ruleIndent}[i]Rule:[/i] ${r}\n`);
               }
               if (showModRules && sub.modifierRules && sub.modifierRules.length > 0) {
-                sub.modifierRules.forEach(m => bb += `      - [i]Modifier (${m.name}):[/i] ${m.desc}\n`);
+                sub.modifierRules.forEach(m => bb += `${ruleIndent}[i]Modifier (${m.name}):[/i] ${m.desc}\n`);
               }
             });
           }
@@ -144,7 +139,8 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
           if (p.subEntries && p.subEntries.length > 0) {
             if (showMech && p.mechanicsLine) bb += `  [i]${p.mechanicsLine}[/i]\n`;
             p.subEntries.forEach(sub => {
-              bb += `  • [b]${sub.label}:[/b] ${sub.details || sub.effectName} [color=#16a34a][${sub.costBadge}][/color]\n`;
+              const prefix = sub.isLinked ? '    • ' : '  • ';
+              bb += `${prefix}[b]${sub.label}:[/b] ${sub.details || sub.effectName} [color=#16a34a][${sub.costBadge}][/color]\n`;
             });
           } else {
             const parts = [
@@ -171,7 +167,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
   }
   bb += `[hr]\n\n`;
 
-  // 8. EQUIPMENT, VEHICLES & HEADQUARTERS
   if (opts.showEquipment) {
     bb += `[b][size=4][color=#2563eb]■ EQUIPMENT, VEHICLES & HEADQUARTERS (${data.equipment.totalEP} / ${data.equipment.maxEP} EP)[/color][/size][/b]\n`;
     if (data.equipment.resources.length === 0) {
@@ -189,7 +184,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
     bb += `[hr]\n\n`;
   }
 
-  // 9. MOTIVATIONS & COMPLICATIONS
   if (opts.showComplications) {
     bb += `[b][size=4][color=#2563eb]■ MOTIVATIONS & COMPLICATIONS[/color][/size][/b]\n`;
     if (data.complications.all.length === 0) {
@@ -213,7 +207,6 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
     }
   }
 
-  // 10. NOTES
   if (opts.showNotes && data.notes && data.notes.trim()) {
     bb += `[hr]\n\n`;
     bb += `[b][size=4][color=#2563eb]■ BACKGROUND STORY, TACTICS & NOTES[/color][/size][/b]\n`;

@@ -23,7 +23,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
   md += `**Hero Points:** ${data.identity.heroPoints}\n\n`;
   md += `---\n\n`;
 
-  // 1. POWER POINT SUMMARY
   md += `## Power Point Summary\n\n`;
   md += `| Category | Cost |\n`;
   md += `|:---|---:|\n`;
@@ -36,7 +35,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
   md += `| **REMAINING** | **${data.ppAccounting.remaining} PP** |\n\n`;
   md += `---\n\n`;
 
-  // 2. ABILITIES
   if (opts.showAbilities) {
     md += `## Abilities (${data.ppAccounting.abilitiesCost} PP)\n\n`;
     md += `| Ability | Score | Mod | Base Rank | Enhanced Rank | Cost |\n`;
@@ -52,7 +50,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
     md += `\n---\n\n`;
   }
 
-  // 3. DEFENSES
   if (opts.showDefenses) {
     md += `## Defenses (${data.ppAccounting.defensesCost} PP)\n\n`;
     md += `| Defense | Total | Base Ability | Bought Ranks | Notes / Bonuses |\n`;
@@ -64,7 +61,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
     md += `\n---\n\n`;
   }
 
-  // 4. OFFENSE / ATTACKS & INITIATIVE
   if (opts.showOffense) {
     md += `## Combat Offense & Initiative\n\n`;
     md += `- **Initiative:** ${data.offense.initiative.total} (${data.offense.initiative.notes})\n\n`;
@@ -80,7 +76,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
     md += `---\n\n`;
   }
 
-  // 5. ADVANTAGES
   if (opts.showAdvantages) {
     md += `## Advantages (${data.ppAccounting.advantagesCost} PP)\n\n`;
     if (data.advantages.length === 0) {
@@ -91,7 +86,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
     md += `---\n\n`;
   }
 
-  // 6. SKILLS
   if (opts.showSkills) {
     const modeLabel = opts.skillsMode === 'trained' ? 'Trained Skills' : 'Skills';
     md += `## ${modeLabel} (${data.ppAccounting.skillsCost} PP / ${data.ppAccounting.totalSkillRanks} Ranks)\n\n`;
@@ -111,7 +105,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
     md += `---\n\n`;
   }
 
-  // 7. POWERS & DEVICES
   if (opts.showPowers) {
     md += `## Powers & Devices (${data.ppAccounting.powersCost} PP)\n\n`;
     if (data.powers.length === 0) {
@@ -139,13 +132,14 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
           }
           if (p.subEntries && p.subEntries.length > 0) {
             p.subEntries.forEach(sub => {
-              md += `- **${sub.label}:** ${sub.details || sub.effectName} *(${sub.costBadge})*\n`;
-              if (showMech && sub.mechanics) md += `  - Mechanics: ${sub.mechanics}\n`;
+              const indent = sub.isLinked ? '  ' : '';
+              md += `${indent}- **${sub.label}:** ${sub.details || sub.effectName} *(${sub.costBadge})*\n`;
+              if (showMech && sub.mechanics) md += `${indent}  - Mechanics: ${sub.mechanics}\n`;
               if (showEffRules && sub.effectRuleDescs && sub.effectRuleDescs.length > 0) {
-                sub.effectRuleDescs.forEach(r => md += `  - *Rule Reference:* ${r}\n`);
+                sub.effectRuleDescs.forEach(r => md += `${indent}  - *Rule Reference:* ${r}\n`);
               }
               if (showModRules && sub.modifierRules && sub.modifierRules.length > 0) {
-                sub.modifierRules.forEach(m => md += `  - *Modifier (${m.name}):* ${m.desc}\n`);
+                sub.modifierRules.forEach(m => md += `${indent}  - *Modifier (${m.name}):* ${m.desc}\n`);
               }
             });
           }
@@ -153,7 +147,8 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
           if (p.subEntries && p.subEntries.length > 0) {
             if (showMech && p.mechanicsLine) md += `*${p.mechanicsLine}*\n\n`;
             p.subEntries.forEach(sub => {
-              md += `- **${sub.label}:** ${sub.details || sub.effectName} *(${sub.costBadge})*\n`;
+              const indent = sub.isLinked ? '  ' : '';
+              md += `${indent}- **${sub.label}:** ${sub.details || sub.effectName} *(${sub.costBadge})*\n`;
             });
           } else {
             const parts = [
@@ -180,7 +175,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
   }
   md += `---\n\n`;
 
-  // 8. EQUIPMENT, VEHICLES & HEADQUARTERS
   if (opts.showEquipment) {
     md += `## Equipment, Vehicles & Headquarters (${data.equipment.totalEP} / ${data.equipment.maxEP} EP)\n\n`;
     if (data.equipment.resources.length === 0) {
@@ -198,7 +192,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
     md += `---\n\n`;
   }
 
-  // 9. MOTIVATIONS & COMPLICATIONS
   if (opts.showComplications) {
     md += `## Motivations & Complications\n\n`;
     if (data.complications.all.length === 0) {
@@ -222,7 +215,6 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
     }
   }
 
-  // 10. NOTES
   if (opts.showNotes && data.notes && data.notes.trim()) {
     md += `---\n\n`;
     md += `## Background Story, Tactics & Notes\n\n`;

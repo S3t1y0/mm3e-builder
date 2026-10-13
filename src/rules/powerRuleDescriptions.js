@@ -1,4 +1,3 @@
-// src/rules/powerRuleDescriptions.js
 import { BASE_EFFECTS, CONFIGURABLE_EFFECTS, EXTRAS, FLAWS } from './powerEngine.js';
 import { MEASUREMENT_DISTANCE_TABLE, formatMeasurementDistance } from './powerCalculator.js';
 

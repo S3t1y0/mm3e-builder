@@ -44,7 +44,6 @@ export function generateRoll20Macros(character, heroStore) {
   const name = character.name || 'Hero';
   const macros = [];
 
-  // 1. Initiative Check
   const effAbilities = heroStore?.effectiveAbilities ?? (character.abilities || {});
   const initBonus = heroStore?.initiativeTotal ?? (heroStore?.getDefenseBase('INITIATIVE') ?? (effAbilities.AGL || 0));
   macros.push({
@@ -54,7 +53,6 @@ export function generateRoll20Macros(character, heroStore) {
     simpleCommand: `/roll 1d20+${initBonus} &{tracker}`
   });
 
-  // 2. 8 Abilities
   const abilities = [
     { code: 'STR', label: 'Strength' },
     { code: 'STA', label: 'Stamina' },
@@ -87,7 +85,6 @@ export function generateRoll20Macros(character, heroStore) {
     });
   });
 
-  // 3. 5 Defenses
   const defenses = [
     { code: 'DODGE', label: 'Dodge Defense' },
     { code: 'PARRY', label: 'Parry Defense' },
@@ -117,7 +114,6 @@ export function generateRoll20Macros(character, heroStore) {
     });
   });
 
-  // 4. Skills (All 16 Skills + Specialties)
   const allSkills = getAllCharacterSkills(character, heroStore);
   allSkills.forEach(sk => {
     if (sk.isAbsent) {
@@ -138,7 +134,6 @@ export function generateRoll20Macros(character, heroStore) {
     });
   });
 
-  // 5. Targeted Attacks
   let attacks = heroStore?.targetedAttacks || [];
   if (attacks.length === 0) {
     attacks = compileTargetedAttacks(character, effAbilities, (n) => heroStore?.getAdvantageRanks ? heroStore.getAdvantageRanks(n) : 0);
@@ -162,7 +157,7 @@ export function generateRoll20Macros(character, heroStore) {
     });
   });
 
-  // 6. Active Powers (Healing, Affliction condition stages, Deflect, Nullify, Movement)
+  /* Extract interactive macros for active powers */
   const powerEffects = extractAllPowerEffects(character.powers || []);
   const seenPowerTitles = new Set();
 
@@ -171,7 +166,6 @@ export function generateRoll20Macros(character, heroStore) {
     const base = (eff.baseEffect || eff.name || '').trim().toLowerCase();
     const ranks = Number(eff.ranks ?? eff.rank ?? 1) || 1;
 
-    // Healing Check
     if (base === 'healing') {
       const title = `${powerName} (Healing Check)`;
       if (!seenPowerTitles.has(title)) {
@@ -185,7 +179,6 @@ export function generateRoll20Macros(character, heroStore) {
       }
     }
 
-    // Affliction Condition Stages
     if (base === 'affliction') {
       const title = `${powerName} (Affliction Save)`;
       if (!seenPowerTitles.has(title)) {
@@ -204,7 +197,6 @@ export function generateRoll20Macros(character, heroStore) {
       }
     }
 
-    // Deflect Defense
     if (base === 'deflect') {
       const title = `${powerName} (Deflect Check)`;
       if (!seenPowerTitles.has(title)) {
@@ -218,7 +210,6 @@ export function generateRoll20Macros(character, heroStore) {
       }
     }
 
-    // Nullify Opposed Check
     if (base === 'nullify') {
       const title = `${powerName} (Nullify Check)`;
       if (!seenPowerTitles.has(title)) {
@@ -232,7 +223,6 @@ export function generateRoll20Macros(character, heroStore) {
       }
     }
 
-    // Movement Powers Activation
     if (['flight', 'speed', 'teleport', 'burrowing', 'swimming'].includes(base)) {
       const title = `${powerName} (Activate Movement)`;
       if (!seenPowerTitles.has(title)) {

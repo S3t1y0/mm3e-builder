@@ -1,27 +1,27 @@
 # Graph Report - mm3e-builder-vue  (2026-10-13)
 
 ## Corpus Check
-- 108 files · ~615,560 words
+- 109 files · ~618,832 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 12 file(s) not represented in the graph (top: .css 7, (none) 2, .ico 1)
 
 ## Summary
-- 1368 nodes · 2377 edges · 69 communities (66 shown, 3 thin omitted)
-- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 26 edges (avg confidence: 0.85)
+- 1379 nodes · 2408 edges · 73 communities (70 shown, 3 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 27 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `be078773`
+- Built from commit: `04b2944a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
-- helpers.js
+- GreenRoninSheet.vue
 - package.json
 - PowersDeck.vue
 - StepEquipment.vue
 - CustomEquipmentModal.vue
-- GreenRoninSheet.vue
+- GreenRoninPrintModal.vue
 - ModifierInspectorModal.vue
 - TabbedActionHub.vue
 - CharacterWizard.vue
@@ -29,15 +29,15 @@
 - SkillsTable.vue
 - StepAdvantages.vue
 - EffectEditorCanvas.vue
-- powerCalculator.js
+- powerBuilderStore.js
 - DiceRollHud.vue
 - EquipmentWorkshop.vue
 - AfflictionConfig.vue
 - EffectConfigurator.vue
 - StepSkills.vue
-- calculateEffectCost
+- PowerStudioWorkspace.vue
 - AdvantageLibraryModal.vue
-- powerBuilderStore.js
+- DeviceContainerStudio.vue
 - Mutants & Masterminds 3e Character Builder
 - ComplicationsHub.vue
 - EnhancedTraitConfig.vue
@@ -45,7 +45,7 @@
 - StepComplications.vue
 - App.vue
 - equipmentCalculator.js
-- EffectsLibraryModal.vue
+- powerEngine.js
 - ConcealmentConfig.vue
 - SensesConfig.vue
 - ConditionsTracker.vue
@@ -53,30 +53,30 @@
 - ConditionPickerModal.vue
 - attacks.js
 - Roll20PrintModal.vue
-- exporters/index.js
+- ExportStructureModal.vue
 - ImmunityConfig.vue
 - CostBreakdownSidebar.vue
 - MovementConfig.vue
 - DefensesBlock.vue
 - ComprehendConfig.vue
 - EnvironmentConfig.vue
-- ShareModal.vue
+- powerFormatter.js
 - RulesReference.vue
 - HeroHeader.vue
 - advantages.js
 - WeakenConfig.vue
 - CombatInitiativeCard.vue
 - Mutants & Masterminds 3e Character Builder - Design System
-- SubPowerArrayWorkbench.vue
-- useUiStore
+- helpers.js
+- AbilitiesMatrix.vue
 - isMotivation
 - regenerateDescription
-- vue
+- MorphConfig.vue
 - IllusionConfig.vue
-- StepConcept.vue
+- uiStore.js
 - NullifyConfig.vue
-- VariableConfig.vue
-- TacticalCharacterSheet.vue
+- vue
+- calculateEffectCost
 - StepAbilities.vue
 - saveEquipmentItem
 - complications.js
@@ -85,12 +85,16 @@
 - onVehicleSizeChange
 - abilities.js
 - vercel.json
+- StepDefenses.vue
+- calculatePowerTotalCost
+- SensesCard.vue
+- roll20.js
 
 ## God Nodes (most connected - your core abstractions)
-1. `vue` - 57 edges
-2. `useHeroStore` - 45 edges
+1. `vue` - 58 edges
+2. `useHeroStore` - 46 edges
 3. `calculateEffectCost()` - 33 edges
-4. `useUiStore` - 31 edges
+4. `useUiStore` - 33 edges
 5. `calculatePowerTotalCost()` - 21 edges
 6. `usePowerBuilderStore` - 17 edges
 7. `normalizePower()` - 15 edges
@@ -113,15 +117,15 @@
 ## Import Cycles
 - None detected.
 
-## Communities (69 total, 3 thin omitted)
+## Communities (73 total, 3 thin omitted)
 
-### Community 0 - "helpers.js"
-Cohesion: 0.05
-Nodes (63): activeTextContent, { copy, copied }, exportMode, heroStore, textFormat, uiStore, macrosList, activePerceptionMod (+55 more)
+### Community 0 - "GreenRoninSheet.vue"
+Cohesion: 0.14
+Nodes (16): allPowers, displayAttacks, emptyOverflowLinesCount, emptyPrimaryLinesCount, getPowerBlock(), getPowerRowCount(), getSkillAbility(), hasPage2Content (+8 more)
 
 ### Community 1 - "package.json"
 Cohesion: 0.05
-Nodes (49): dependencies, lz-string, pinia, radash, remixicon, valibot, @vercel/analytics, vue (+41 more)
+Nodes (50): dependencies, lz-string, pinia, radash, remixicon, valibot, @vercel/analytics, vue (+42 more)
 
 ### Community 2 - "PowersDeck.vue"
 Cohesion: 0.07
@@ -135,24 +139,24 @@ Nodes (32): getCalculatedAtkBonus(), activeFilter, budgetInfo, customStudioCateg
 Cohesion: 0.05
 Nodes (22): armorConfig, budgetInfo, calculatedTotalCost, categoryCards, currentStep, customDescription, gadgetConfig, getHQBaseTough() (+14 more)
 
-### Community 5 - "GreenRoninSheet.vue"
-Cohesion: 0.07
-Nodes (31): addZoomListeners(), adjustZoom(), calculateDefaultZoom(), handleKeyDown(), handleWheelZoom(), removeZoomListeners(), scalerStyle, scaleValue (+23 more)
+### Community 5 - "GreenRoninPrintModal.vue"
+Cohesion: 0.14
+Nodes (15): addZoomListeners(), adjustZoom(), calculateDefaultZoom(), handleKeyDown(), handleWheelZoom(), removeZoomListeners(), scalerStyle, scaleValue (+7 more)
 
 ### Community 6 - "ModifierInspectorModal.vue"
 Cohesion: 0.07
-Nodes (29): activeCategory, activeTab, baseCatalog, builderStore, calculatedExtrasPerRank, calculatedFlawsPerRank, categories, compatibleCount (+21 more)
+Nodes (30): activeCategory, activeTab, baseCatalog, builderStore, calculatedExtrasPerRank, calculatedFlawsPerRank, categories, compatibleCount (+22 more)
 
 ### Community 7 - "TabbedActionHub.vue"
 Cohesion: 0.07
 Nodes (26): activeTab, advantagesCount, attacksCount, complicationsCount, conditionsCount, equipmentCount, heroStore, powersCount (+18 more)
 
 ### Community 8 - "CharacterWizard.vue"
-Cohesion: 0.08
-Nodes (30): activeStepComponent, activeStepInfo, currentStep, finishWizard(), heroStore, steps, uiStore, dodgeTotal (+22 more)
+Cohesion: 0.15
+Nodes (20): activeStepComponent, activeStepInfo, currentStep, finishWizard(), heroStore, steps, uiStore, finishWizard() (+12 more)
 
 ### Community 9 - "ExportImportModal.vue"
-Cohesion: 0.07
+Cohesion: 0.06
 Nodes (24): valibot, activeMode, { copy, copied }, exportJsonString, exportSizeKb, fileInputRef, formattedLastSaved, handleDownload() (+16 more)
 
 ### Community 10 - "SkillsTable.vue"
@@ -167,9 +171,9 @@ Nodes (25): activeCategory, activeCategoryBreakdown, activeSpecAdv, addAdvantage
 Cohesion: 0.07
 Nodes (22): activeSub, builderStore, editorCanvasTitle, getEffectIcon(), getSubEffectCost(), validation, builderStore, currentBaseInfo (+14 more)
 
-### Community 13 - "powerCalculator.js"
-Cohesion: 0.14
-Nodes (23): EXTRAS, FLAWS, src_data_index_base_effects, src_data_index_configurable_effects, src_data_index_extras, src_data_index_flaws, MODIFIER_CATEGORIES, calculateComponentCost() (+15 more)
+### Community 13 - "powerBuilderStore.js"
+Cohesion: 0.12
+Nodes (31): BASE_EFFECTS, CONFIGURABLE_EFFECTS, EXTRAS, FLAWS, src_data_index_base_effects, src_data_index_configurable_effects, src_data_index_extras, src_data_index_flaws (+23 more)
 
 ### Community 14 - "DiceRollHud.vue"
 Cohesion: 0.08
@@ -180,8 +184,8 @@ Cohesion: 0.09
 Nodes (19): activeFilter, budgetInfo, customStudioCategory, filteredPresets, filteredResources, getCategoryCount(), getResIconClass(), getSubtypeLabel() (+11 more)
 
 ### Community 16 - "AfflictionConfig.vue"
-Cohesion: 0.09
-Nodes (26): afflictionResistanceOptions, altResistanceMod, applyAfflictionPreset(), cfg, conditionsPerDegree, emit, extraConditionMod, extraConditionRanks (+18 more)
+Cohesion: 0.08
+Nodes (28): afflictionResistanceOptions, altResistanceMod, applyAfflictionPreset(), cfg, conditionsPerDegree, emit, extraConditionMod, extraConditionRanks (+20 more)
 
 ### Community 17 - "EffectConfigurator.vue"
 Cohesion: 0.08
@@ -191,17 +195,17 @@ Nodes (26): activeSubConfigComponent, AVAILABLE_CUSTOM_ICONS, calculatedBaseCost
 Cohesion: 0.09
 Nodes (22): activeCategory, calculateTotalBonus(), categories, filteredSkills, focusInputRef, getAdvantageBonusForSkill(), getAdvantageNameForSkill(), getEnhancedRanks() (+14 more)
 
-### Community 19 - "calculateEffectCost"
-Cohesion: 0.09
-Nodes (22): calculatedTotalPPDisplay, effectCost, netEffectCost, builderStore, canvasKey, canvasTitle, currentPowerSelectValue, getSlotCombinedValue() (+14 more)
+### Community 19 - "PowerStudioWorkspace.vue"
+Cohesion: 0.13
+Nodes (11): builderStore, canvasKey, canvasTitle, currentPowerSelectValue, getSlotCombinedValue(), getSubEffectCost(), getSubPowerCost(), heroStore (+3 more)
 
 ### Community 20 - "AdvantageLibraryModal.vue"
 Cohesion: 0.08
 Nodes (15): activeCategory, activeSpecAdv, customForm, filteredAdvantages, gridRef, heroStore, searchInputRef, searchQuery (+7 more)
 
-### Community 21 - "powerBuilderStore.js"
-Cohesion: 0.10
-Nodes (20): builderStore, discountAmount, editorCanvasTitle, getSubPowerCost(), hasActiveSubArray, builderStore, calculateDeviceDiscount(), src_rules_powerengine_calculatedevicediscount (+12 more)
+### Community 21 - "DeviceContainerStudio.vue"
+Cohesion: 0.20
+Nodes (8): builderStore, discountAmount, editorCanvasTitle, getSubPowerCost(), hasActiveSubArray, calculateDeviceDiscount(), calculatePowerDetailedBreakdown(), src_rules_powerengine_calculatedevicediscount
 
 ### Community 22 - "Mutants & Masterminds 3e Character Builder"
 Cohesion: 0.08
@@ -213,7 +217,7 @@ Nodes (14): activeCatalogPresets, allComplications, editingId, formDesc, formKin
 
 ### Community 24 - "EnhancedTraitConfig.vue"
 Cohesion: 0.11
-Nodes (16): applyTraitPreset(), calculatedBaseCostDisplay, cfg, currentCategoryObj, currentTraitCategory, customSubModal, emit, filteredTraits (+8 more)
+Nodes (17): applyTraitPreset(), calculatedBaseCostDisplay, calculatedTotalPPDisplay, cfg, currentCategoryObj, currentTraitCategory, customSubModal, emit (+9 more)
 
 ### Community 25 - "AdvantagesList.vue"
 Cohesion: 0.13
@@ -231,9 +235,9 @@ Nodes (12): builderStore, heroStore, isEmbed, isToolsOpen, runtimeError, toolsDr
 Cohesion: 0.16
 Nodes (17): costBreakdown, ARMOR_EXTRAS, calculateArmorCost(), calculateGadgetCost(), calculateHQCost(), calculateTotalEquipmentCost(), calculateVehicleCost(), calculateWeaponCost() (+9 more)
 
-### Community 29 - "EffectsLibraryModal.vue"
-Cohesion: 0.12
-Nodes (11): activeCategory, builderStore, filteredEffects, rangeFilter, searchInputRef, searchQuery, BASE_EFFECT_ICONS, BASE_EFFECTS (+3 more)
+### Community 29 - "powerEngine.js"
+Cohesion: 0.09
+Nodes (11): activeCategory, builderStore, filteredEffects, rangeFilter, searchInputRef, searchQuery, BASE_EFFECT_ICONS, EFFECT_CATEGORIES (+3 more)
 
 ### Community 30 - "ConcealmentConfig.vue"
 Cohesion: 0.14
@@ -263,9 +267,9 @@ Nodes (15): allConditions, compiledAttacks, effectRangeDetails, activeConditionI
 Cohesion: 0.12
 Nodes (11): abilityList, basicConditions, { copy }, currentTab, defenseList, filteredMacros, heroStore, macroFilter (+3 more)
 
-### Community 37 - "exporters/index.js"
-Cohesion: 0.20
-Nodes (10): lz-string, loadFromHash(), generateLink(), base64UrlToUint8(), clearShareHash(), CLOUDFLARE_WORKER_URL, fetchSharedCharacterFromKv(), generateShareUrl() (+2 more)
+### Community 37 - "ExportStructureModal.vue"
+Cohesion: 0.06
+Nodes (39): loadFromHash(), closeModal(), copied, currentPreset, currentPresetLabel, heroStore, livePreviewText, onKeyDown() (+31 more)
 
 ### Community 38 - "ImmunityConfig.vue"
 Cohesion: 0.16
@@ -291,9 +295,9 @@ Nodes (8): allComprehendModes, cfg, customSubModal, emit, openCustomSubModal(), 
 Cohesion: 0.21
 Nodes (8): allEnvironmentElements, cfg, customSubModal, emit, openCustomSubModal(), props, toggleEnvironment(), updateConfig()
 
-### Community 44 - "ShareModal.vue"
-Cohesion: 0.18
-Nodes (8): characterShareInfo, { copy, copied }, forceOffline, hasActiveShareLink, heroStore, isGenerating, shareData, uiStore
+### Community 44 - "powerFormatter.js"
+Cohesion: 0.29
+Nodes (15): formatMeasurementDistance(), calculateDC(), formatEffectInlineSummary(), formatEffectMechanics(), formatLinkedSubEntry(), formatModifiers(), formatPowerStatblock(), formatRange() (+7 more)
 
 ### Community 45 - "RulesReference.vue"
 Cohesion: 0.18
@@ -304,8 +308,8 @@ Cohesion: 0.18
 Nodes (6): conditionDescMap, heroInitials, heroStore, rollInitiative(), showBioDrawer, uiStore
 
 ### Community 47 - "advantages.js"
-Cohesion: 0.22
-Nodes (8): deleteInstance(), CONFIGURABLE_EFFECTS, ADVANTAGE_CATEGORIES, ADVANTAGE_COST_PER_RANK, ADVANTAGES, ADVANTAGES_CATALOG, formatAdvantageDisplayName(), getAdvantageRule()
+Cohesion: 0.25
+Nodes (7): deleteInstance(), ADVANTAGE_CATEGORIES, ADVANTAGE_COST_PER_RANK, ADVANTAGES, ADVANTAGES_CATALOG, formatAdvantageDisplayName(), getAdvantageRule()
 
 ### Community 48 - "WeakenConfig.vue"
 Cohesion: 0.29
@@ -319,13 +323,13 @@ Nodes (7): baseAgl, hasSeizeInitiative, heroStore, improvedInitBonus, improvedIn
 Cohesion: 0.22
 Nodes (8): 1. Dials & Tone, 2. Color System, 3. Typography, 4. Mobile Ergonomics & Accessibility, Core Brand Tokens, Mutants & Masterminds 3e Character Builder - Design System, Rule Category Accents (Calibrated for WCAG AA >= 4.5:1), Theme Foundations (Dark Mode - Default Tabletop Theme)
 
-### Community 51 - "SubPowerArrayWorkbench.vue"
-Cohesion: 0.25
-Nodes (8): arrayCapacity, builderStore, capacityPercent, getSlotEffectCost(), headroom, highestSlotCost, isCapacityOverflow, props
+### Community 51 - "helpers.js"
+Cohesion: 0.20
+Nodes (14): MEASUREMENT_DISTANCE_TABLE, EFFECT_RULE_SUMMARIES, formatSpeedRank(), getDynamicEffectRuleSummary(), getEffectRuleSummary(), getModifierRuleSummary(), resolveEffectRulesBlock(), SPEED_RANK_TABLE (+6 more)
 
-### Community 52 - "useUiStore"
-Cohesion: 0.28
-Nodes (7): ABILITIES_CONFIG, getEffectiveRank(), getEnhancedRanks(), handleRollCheck(), heroStore, uiStore, useUiStore
+### Community 52 - "AbilitiesMatrix.vue"
+Cohesion: 0.32
+Nodes (6): ABILITIES_CONFIG, getEffectiveRank(), getEnhancedRanks(), handleRollCheck(), heroStore, uiStore
 
 ### Community 53 - "isMotivation"
 Cohesion: 0.25
@@ -335,29 +339,29 @@ Nodes (9): adjustHeroPoints(), getCategoryLabel(), getComplicationIcon(), openEd
 Cohesion: 0.32
 Nodes (8): ensureItemName(), getNameSuggestions(), goToStep(), nextStep(), regenerateDescription(), selectCategory(), selectGadgetPack(), generateEquipmentDescription()
 
-### Community 55 - "vue"
-Cohesion: 0.38
-Nodes (6): vue, cfg, emit, props, selectMorphScope(), updateConfig()
+### Community 55 - "MorphConfig.vue"
+Cohesion: 0.47
+Nodes (5): cfg, emit, props, selectMorphScope(), updateConfig()
 
 ### Community 56 - "IllusionConfig.vue"
 Cohesion: 0.38
 Nodes (5): cfg, emit, props, toggleIllusionSense(), updateConfig()
 
-### Community 57 - "StepConcept.vue"
-Cohesion: 0.29
-Nodes (3): heroStore, origins, uiStore
+### Community 57 - "uiStore.js"
+Cohesion: 0.22
+Nodes (6): heroStore, origins, uiStore, DEFAULT_EXPORT_OPTIONS, loadStoredExportOptions(), useUiStore
 
 ### Community 58 - "NullifyConfig.vue"
 Cohesion: 0.47
 Nodes (5): cfg, emit, props, selectNullifyDescriptor(), updateConfig()
 
-### Community 59 - "VariableConfig.vue"
-Cohesion: 0.47
-Nodes (5): cfg, emit, props, selectVariableTheme(), updateConfig()
+### Community 59 - "vue"
+Cohesion: 0.38
+Nodes (6): vue, cfg, emit, props, selectVariableTheme(), updateConfig()
 
-### Community 60 - "TacticalCharacterSheet.vue"
-Cohesion: 0.40
-Nodes (3): colLeftRef, sheetGridRef, sheetViewRef
+### Community 60 - "calculateEffectCost"
+Cohesion: 0.11
+Nodes (21): effectCost, netEffectCost, arrayCapacity, builderStore, capacityPercent, getSlotEffectCost(), headroom, highestSlotCost (+13 more)
 
 ### Community 62 - "saveEquipmentItem"
 Cohesion: 0.67
@@ -379,25 +383,41 @@ Nodes (3): addAdvantage(), confirmAddWithSpec(), confirmCreateCustomAdv()
 Cohesion: 0.67
 Nodes (3): getVehicleBaseStr(), getVehicleBaseTough(), onVehicleSizeChange()
 
+### Community 69 - "StepDefenses.vue"
+Cohesion: 0.15
+Nodes (10): dodgeTotal, fortitudeTotal, heroStore, isStaAbsent, maxCap, parryTotal, setDefense(), singleWillCap (+2 more)
+
+### Community 70 - "calculatePowerTotalCost"
+Cohesion: 0.33
+Nodes (5): builderStore, getPowerCost(), heroStore, calculatePowerTotalCost(), src_rules_powerengine_calculatepowertotalcost
+
+### Community 75 - "SensesCard.vue"
+Cohesion: 0.13
+Nodes (11): activePerceptionMod, aweMod, heroStore, passivePerception, percRanks, specialSenses, uiStore, colLeftRef (+3 more)
+
+### Community 79 - "roll20.js"
+Cohesion: 0.38
+Nodes (6): displaySkills, macrosList, getAllCharacterSkills(), getSkillAbility(), extractAllPowerEffects(), generateRoll20Macros()
+
 ## Knowledge Gaps
-- **532 isolated node(s):** `name`, `private`, `version`, `description`, `type` (+527 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 798 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **537 isolated node(s):** `name`, `private`, `version`, `description`, `type` (+532 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 803 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **3 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `vue` connect `vue` to `helpers.js`, `package.json`, `PowersDeck.vue`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `GreenRoninSheet.vue`, `ModifierInspectorModal.vue`, `TabbedActionHub.vue`, `CharacterWizard.vue`, `ExportImportModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `EffectEditorCanvas.vue`, `DiceRollHud.vue`, `EquipmentWorkshop.vue`, `AfflictionConfig.vue`, `EffectConfigurator.vue`, `StepSkills.vue`, `calculateEffectCost`, `AdvantageLibraryModal.vue`, `powerBuilderStore.js`, `ComplicationsHub.vue`, `EnhancedTraitConfig.vue`, `AdvantagesList.vue`, `StepComplications.vue`, `App.vue`, `EffectsLibraryModal.vue`, `ConcealmentConfig.vue`, `SensesConfig.vue`, `ConditionsTracker.vue`, `ConditionPickerModal.vue`, `Roll20PrintModal.vue`, `ImmunityConfig.vue`, `CostBreakdownSidebar.vue`, `MovementConfig.vue`, `DefensesBlock.vue`, `ComprehendConfig.vue`, `EnvironmentConfig.vue`, `ShareModal.vue`, `RulesReference.vue`, `HeroHeader.vue`, `WeakenConfig.vue`, `CombatInitiativeCard.vue`, `SubPowerArrayWorkbench.vue`, `IllusionConfig.vue`, `NullifyConfig.vue`, `VariableConfig.vue`, `TacticalCharacterSheet.vue`?**
-  _High betweenness centrality (0.393) - this node is a cross-community bridge._
-- **Why does `useHeroStore` connect `heroStore.js` to `helpers.js`, `PowersDeck.vue`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `GreenRoninSheet.vue`, `TabbedActionHub.vue`, `CharacterWizard.vue`, `ExportImportModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `EffectEditorCanvas.vue`, `powerCalculator.js`, `DiceRollHud.vue`, `EquipmentWorkshop.vue`, `StepSkills.vue`, `calculateEffectCost`, `AdvantageLibraryModal.vue`, `powerBuilderStore.js`, `ComplicationsHub.vue`, `AdvantagesList.vue`, `StepComplications.vue`, `App.vue`, `ConditionsTracker.vue`, `ConditionPickerModal.vue`, `Roll20PrintModal.vue`, `CostBreakdownSidebar.vue`, `DefensesBlock.vue`, `ShareModal.vue`, `HeroHeader.vue`, `CombatInitiativeCard.vue`, `useUiStore`, `StepConcept.vue`, `StepAbilities.vue`?**
-  _High betweenness centrality (0.071) - this node is a cross-community bridge._
-- **Why does `useUiStore` connect `useUiStore` to `helpers.js`, `PowersDeck.vue`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `GreenRoninSheet.vue`, `ModifierInspectorModal.vue`, `TabbedActionHub.vue`, `CharacterWizard.vue`, `ExportImportModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `EquipmentWorkshop.vue`, `StepSkills.vue`, `calculateEffectCost`, `AdvantageLibraryModal.vue`, `ComplicationsHub.vue`, `AdvantagesList.vue`, `App.vue`, `ConditionPickerModal.vue`, `Roll20PrintModal.vue`, `DefensesBlock.vue`, `ShareModal.vue`, `HeroHeader.vue`, `CombatInitiativeCard.vue`, `StepConcept.vue`?**
-  _High betweenness centrality (0.047) - this node is a cross-community bridge._
+- **Why does `vue` connect `vue` to `GreenRoninSheet.vue`, `package.json`, `PowersDeck.vue`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `GreenRoninPrintModal.vue`, `ModifierInspectorModal.vue`, `TabbedActionHub.vue`, `CharacterWizard.vue`, `ExportImportModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `EffectEditorCanvas.vue`, `DiceRollHud.vue`, `EquipmentWorkshop.vue`, `AfflictionConfig.vue`, `EffectConfigurator.vue`, `StepSkills.vue`, `PowerStudioWorkspace.vue`, `AdvantageLibraryModal.vue`, `DeviceContainerStudio.vue`, `ComplicationsHub.vue`, `EnhancedTraitConfig.vue`, `AdvantagesList.vue`, `StepComplications.vue`, `App.vue`, `powerEngine.js`, `ConcealmentConfig.vue`, `SensesConfig.vue`, `ConditionsTracker.vue`, `ConditionPickerModal.vue`, `Roll20PrintModal.vue`, `ExportStructureModal.vue`, `ImmunityConfig.vue`, `CostBreakdownSidebar.vue`, `MovementConfig.vue`, `DefensesBlock.vue`, `ComprehendConfig.vue`, `EnvironmentConfig.vue`, `RulesReference.vue`, `HeroHeader.vue`, `WeakenConfig.vue`, `CombatInitiativeCard.vue`, `MorphConfig.vue`, `IllusionConfig.vue`, `NullifyConfig.vue`, `calculateEffectCost`, `StepDefenses.vue`, `SensesCard.vue`?**
+  _High betweenness centrality (0.383) - this node is a cross-community bridge._
+- **Why does `useHeroStore` connect `heroStore.js` to `GreenRoninSheet.vue`, `PowersDeck.vue`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `TabbedActionHub.vue`, `CharacterWizard.vue`, `ExportImportModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `EffectEditorCanvas.vue`, `powerBuilderStore.js`, `DiceRollHud.vue`, `EquipmentWorkshop.vue`, `StepSkills.vue`, `PowerStudioWorkspace.vue`, `AdvantageLibraryModal.vue`, `ComplicationsHub.vue`, `AdvantagesList.vue`, `StepComplications.vue`, `App.vue`, `ConditionsTracker.vue`, `ConditionPickerModal.vue`, `Roll20PrintModal.vue`, `ExportStructureModal.vue`, `CostBreakdownSidebar.vue`, `DefensesBlock.vue`, `HeroHeader.vue`, `CombatInitiativeCard.vue`, `AbilitiesMatrix.vue`, `uiStore.js`, `StepAbilities.vue`, `StepDefenses.vue`, `calculatePowerTotalCost`, `SensesCard.vue`?**
+  _High betweenness centrality (0.081) - this node is a cross-community bridge._
+- **Why does `useUiStore` connect `uiStore.js` to `GreenRoninSheet.vue`, `PowersDeck.vue`, `StepEquipment.vue`, `CustomEquipmentModal.vue`, `GreenRoninPrintModal.vue`, `ModifierInspectorModal.vue`, `TabbedActionHub.vue`, `CharacterWizard.vue`, `ExportImportModal.vue`, `SkillsTable.vue`, `StepAdvantages.vue`, `EquipmentWorkshop.vue`, `StepSkills.vue`, `PowerStudioWorkspace.vue`, `AdvantageLibraryModal.vue`, `ComplicationsHub.vue`, `AdvantagesList.vue`, `App.vue`, `ConditionPickerModal.vue`, `Roll20PrintModal.vue`, `ExportStructureModal.vue`, `DefensesBlock.vue`, `HeroHeader.vue`, `CombatInitiativeCard.vue`, `AbilitiesMatrix.vue`, `SensesCard.vue`?**
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
 - **What connects `name`, `private`, `version` to the rest of the system?**
-  _532 weakly-connected nodes found - possible documentation gaps or missing edges._
-- **Should `helpers.js` be split into smaller, more focused modules?**
-  _Cohesion score 0.052531645569620256 - nodes in this community are weakly interconnected._
+  _537 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **Should `GreenRoninSheet.vue` be split into smaller, more focused modules?**
+  _Cohesion score 0.14035087719298245 - nodes in this community are weakly interconnected._
 - **Should `package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.05152394775036284 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.050314465408805034 - nodes in this community are weakly interconnected._
 - **Should `PowersDeck.vue` be split into smaller, more focused modules?**
   _Cohesion score 0.06787330316742081 - nodes in this community are weakly interconnected._
