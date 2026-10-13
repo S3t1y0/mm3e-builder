@@ -1,5 +1,58 @@
 // src/rules/powerRuleDescriptions.js
 import { BASE_EFFECTS, CONFIGURABLE_EFFECTS, EXTRAS, FLAWS } from './powerEngine.js';
+import { MEASUREMENT_DISTANCE_TABLE, formatMeasurementDistance } from './powerCalculator.js';
+
+export { MEASUREMENT_DISTANCE_TABLE };
+export const formatDistanceRank = formatMeasurementDistance;
+
+// M&M 3E Measurements Table Time progression
+export const TIME_RANK_TABLE = {
+  '-5': '1/8 second',
+  '-4': '1/4 second',
+  '-3': '1/2 second',
+  '-2': '1 second',
+  '-1': '3 seconds',
+  '0': '6 seconds (1 round)',
+  '1': '12 seconds',
+  '2': '24 seconds',
+  '3': '1 minute',
+  '4': '2 minutes',
+  '5': '4 minutes',
+  '6': '8 minutes',
+  '7': '15 minutes',
+  '8': '30 minutes',
+  '9': '1 hour',
+  '10': '2 hours',
+  '11': '4 hours',
+  '12': '8 hours',
+  '13': '16 hours',
+  '14': '1 day',
+  '15': '2 days',
+  '16': '4 days',
+  '17': '1 week',
+  '18': '2 weeks',
+  '19': '1 month',
+  '20': '2 months',
+  '21': '4 months',
+  '22': '8 months',
+  '23': '1.5 years',
+  '24': '3 years',
+  '25': '6 years',
+  '26': '12 years',
+  '27': '25 years',
+  '28': '50 years',
+  '29': '100 years',
+  '30': '200 years'
+};
+
+export function formatTimeRank(rank) {
+  const r = parseInt(rank, 10);
+  if (isNaN(r)) return 'Rank Time';
+  if (TIME_RANK_TABLE[r]) return TIME_RANK_TABLE[r];
+  if (r > 30) return `Rank ${r} Time`;
+  if (r < -5) return '< 1/8 second';
+  return `Rank ${r} Time`;
+}
 
 // M&M 3E Measurements Table velocity progression (doubles per rank from rank 0 at 2 MPH).
 export const SPEED_RANK_TABLE = {
@@ -26,8 +79,14 @@ export const SPEED_RANK_TABLE = {
   20: 'Speed of Light (186,000 miles/sec)'
 };
 
-export function formatSpeedRank(rank) {
+export function formatSpeedRank(rank, options = {}) {
   const r = parseInt(rank, 10) || 0;
+  if (options.compact) {
+    if (r === 0) return '2 MPH';
+    if (r > 20) return `FTL (Rank ${r})`;
+    const mph = Math.round(Math.pow(2, r) * 2);
+    return `${mph.toLocaleString()} MPH`;
+  }
   if (SPEED_RANK_TABLE[r]) return SPEED_RANK_TABLE[r];
   if (r > 20) return `Faster Than Light (Rank ${r})`;
   const mph = Math.round(Math.pow(2, r) * 2);
@@ -36,15 +95,15 @@ export function formatSpeedRank(rank) {
 
 // Concise d20herosrd rules distillations used as default reference.
 export const EFFECT_RULE_SUMMARIES = {
-  'affliction': 'Imposes debilitating conditions (Dazed, Stunned, Incapacitated, etc.) via Fortitude or Will check.',
+  'affliction': 'Imposes debilitating conditions (Dazed, Stunned, Incapacitated, etc.) via Fortitude or Will check (DC 10 + rank).',
   'blast': 'Delivers a ranged damaging attack resisted by Toughness defense (DC 15 + rank).',
-  'burrowing': 'Tunnels through solid earth, ice, or rock at speed determined by effect rank.',
-  'communication': 'Transmits speech, radio, or mental messages over distances up to rank range.',
+  'burrowing': 'Tunnels through solid earth, sand, or rock at speed rank equal to rank minus 5.',
+  'communication': 'Transmits speech, radio, or mental messages over distances up to rank range on Measurements Table.',
   'comprehend': 'Enables understanding, speaking, or reading languages, animals, spirits, or objects.',
   'concealment': 'Conceals the user from designated sensory types (visual, auditory, scent, etc.).',
   'create': 'Manifests solid, three-dimensional objects composed of solid light, force, or matter.',
   'damage': 'Inflicts physical or energy harm with a close attack check, resisted by Toughness (DC 15 + rank).',
-  'deflect': 'Actively defends against ranged attacks targeting yourself or nearby allies.',
+  'deflect': 'Actively defends against ranged attacks targeting yourself or nearby allies (d20 + rank, min 10 on die).',
   'elongation': 'Elongates limbs and reach up to rank distance, granting extended melee strikes.',
   'enhanced trait': 'Superhumanly increases abilities, skills, or defenses while active (subject to PL caps).',
   'environment': 'Alters ambient environment (light/dark, cold/heat, precipitation, or movement impediment).',
@@ -52,12 +111,12 @@ export const EFFECT_RULE_SUMMARIES = {
   'feature': 'Provides a minor, utilitarian, or cosmetic superhuman trait with negligible combat impact.',
   'flight': 'Enables airborne flight, hovering, and movement at speed rank on Measurements Table.',
   'growth': 'Increases physical size and mass, boosting Strength, Stamina, and reach at penalty to stealth.',
-  'healing': 'Restores damage conditions (bruises, dazed, staggered) on touched subjects via DC 10 check.',
+  'healing': 'Restores damage conditions (1 condition per degree of success, highest first, stabilizes dying) via DC 10 check.',
   'illusion': 'Projects holographic, phantom, or sensory impressions into an area (resisted by Insight).',
-  'immortality': 'Recovers from fatal death, returning to life after a duration determined by rank.',
+  'immortality': 'Recovers from death after time rank 19 - rank (2 weeks at rank 1, 1 day at rank 5, 6 sec at rank 19; hero points reset to 0).',
   'immunity': 'Grants complete immunity against specific hazards, environments, damage types, or Fortitude checks.',
-  'insubstantial': 'Shifts physical state into fluid, gas, coherent energy, or incorporeal intangibility.',
-  'leaping': 'Propels the user through prodigious leaping distances up to rank distance as a move action.',
+  'insubstantial': 'Shifts physical state: Rank 1 Fluid, Rank 2 Gaseous, Rank 3 Energy, or Rank 4 Incorporeal (immune to physical harm).',
+  'leaping': 'Propels the user in prodigious jumps covering (rank - 2) distance standing (15 ft at rank 1, 30 ft at rank 2, up to 1,000 miles at rank 20) or (rank - 1) running as a free action without landing damage.',
   'luck control': 'Manipulates probability, forcing re-rolls, negating enemy criticals, or awarding hero points.',
   'mind reading': 'Probes target thoughts, surface emotions, and subconscious memories vs Will resistance.',
   'morph': 'Alters cosmetic appearance and form (+20 Deception bonus to disguises).',
@@ -73,10 +132,10 @@ export const EFFECT_RULE_SUMMARIES = {
   'speed': 'Runs overland at superhuman speed rank on the Measurements Table.',
   'summon': 'Calls forth an independent minion or creature with (rank × 15) character points.',
   'swimming': 'Swims effortlessly through water at water speed equal to rank minus 2.',
-  'teleport': 'Instantly relocates without crossing intervening space up to rank distance as a move action.',
+  'teleport': 'Instantly relocates without crossing intervening space up to rank distance (carrying up to 50 lbs default) as a move action.',
   'transform': 'Transmutes inanimate objects into different forms or materials via touch.',
   'variable': 'Allocates a versatile pool of (rank × 5) character points to powers fitting a central theme.',
-  'weaken': 'Temporarily drains a designated ability, defense, or power rank on the target (resisted by Fort/Will).'
+  'weaken': 'Temporarily drains a designated trait by 1 point per point check fails DC 10 + rank (up to rank max, resisted by Fort/Will).'
 };
 
 export function getEffectRuleSummary(effectOrName) {
@@ -133,13 +192,14 @@ export function getDynamicEffectRuleSummary(effect) {
   }
 
   if (baseKey === 'leaping') {
-    const dist = ranks >= 4 ? `${Math.round(Math.pow(2, ranks - 4) * 30)} ft` : `Rank ${ranks} distance`;
-    return [`Leaps up to ${dist} in a single bound as a move action (Leaping Rank ${ranks}).`];
+    const standDist = formatDistanceRank(ranks - 2);
+    const runDist = formatDistanceRank(ranks - 1);
+    return [`Leaps up to ${standDist} standing (${runDist} running) in a single bound as a free action without landing damage (Leaping Rank ${ranks}).`];
   }
 
   if (baseKey === 'teleport') {
-    const dist = ranks >= 7 ? `${Math.round(Math.pow(2, ranks - 7))} miles` : `${Math.round(Math.pow(2, ranks) * 30)} ft`;
-    return [`Instantly teleports up to ${dist} carrying normal mass as a move action.`];
+    const dist = formatDistanceRank(ranks);
+    return [`Instantly teleports up to ${dist} carrying up to 50 lbs default as a move action (Teleport Rank ${ranks}).`];
   }
 
   if (baseKey === 'protection') {
@@ -168,7 +228,11 @@ export function getDynamicEffectRuleSummary(effect) {
   if (baseKey === 'weaken') {
     const trait = c.trait || c.targetTrait || 'target trait';
     const res = effect.resistance || 'Fortitude';
-    return [`Temporarily drains target's ${trait} by 1 per degree of failure (DC ${10 + ranks} vs ${res}).`];
+    return [`Drains target's ${trait} by 1 point per point check result is below DC ${10 + ranks} vs ${res} (up to ${ranks} max, recovers 1 pt/round).`];
+  }
+
+  if (baseKey === 'healing') {
+    return [`Heals touched subject via DC 10 check: removes 1 damage condition per degree of success (most severe first) and stabilizes dying subjects.`];
   }
 
   if (baseKey === 'nullify') {
@@ -291,15 +355,17 @@ export function getDynamicEffectRuleSummary(effect) {
   }
 
   if (baseKey === 'immortality') {
-    return [`Recovers from fatal death and returns to life after Immortality Rank ${ranks} time period.`];
+    const recTimeRank = 19 - ranks;
+    const timeStr = formatTimeRank(recTimeRank);
+    return [`Recovers from death and returns to life after ${timeStr} (Time Rank ${recTimeRank}; hero points reset to 0 upon recovery).`];
   }
 
   if (baseKey === 'insubstantial') {
     const formNames = {
-      1: 'Fluid (flow through openings)',
-      2: 'Gaseous (gas/smoke cloud)',
-      3: 'Energy (coherent energy form)',
-      4: 'Incorporeal (intangible ghost, immune to physical harm)'
+      1: 'Fluid (flow through openings, physical attacks can still harm)',
+      2: 'Gaseous (gas/cloud form, immune to physical damage, affected by energy/air)',
+      3: 'Energy (coherent energy form, immune to physical damage, vulnerable to opposing energy)',
+      4: 'Incorporeal (completely intangible ghost, immune to physical and energy damage)'
     };
     return [`Assumes Insubstantial form: ${formNames[ranks] || `Rank ${ranks}`}.`];
   }
@@ -326,7 +392,7 @@ export function getDynamicEffectRuleSummary(effect) {
   }
 
   if (baseKey === 'deflect') {
-    return [`Actively deflects ranged attacks targeting self or nearby allies (Deflect bonus +${ranks}).`];
+    return [`Actively defends against ranged attacks targeting allies (or self): d20 + ${ranks} active defense check (minimum roll of 10 if d20 is 1-10).`];
   }
 
   if (baseKey === 'illusion') {
@@ -336,6 +402,37 @@ export function getDynamicEffectRuleSummary(effect) {
 
   const fallback = getEffectRuleSummary(baseKey);
   return fallback ? [fallback] : [];
+}
+
+export function splitDescriptionIntoLines(text, firstLineMax = 110, nextLinesMax = 130) {
+  if (!text) return [];
+  const cleanText = String(text)
+    .replace(/\r\n/g, '\n')
+    .replace(/\n+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+  if (!cleanText) return [];
+
+  const words = cleanText.split(' ');
+  const lines = [];
+  let currentLine = '';
+  let maxLen = firstLineMax;
+
+  for (const word of words) {
+    if (!currentLine) {
+      currentLine = word;
+    } else if ((currentLine + ' ' + word).length <= maxLen) {
+      currentLine += ' ' + word;
+    } else {
+      lines.push(currentLine);
+      currentLine = word;
+      maxLen = nextLinesMax;
+    }
+  }
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+  return lines;
 }
 
 export function getModifierRuleSummary(modName, modType = 'extra') {
@@ -357,31 +454,54 @@ export function getModifierRuleSummary(modName, modType = 'extra') {
   }
 
   if (match && match.desc) {
-    const firstLine = match.desc.split('\n')[0].trim();
-    const firstSentence = firstLine.split(/\.(?:\s|$)/)[0];
-    return firstSentence.length > 120 ? firstSentence.slice(0, 117) + '...' : firstSentence + '.';
+    return match.desc.replace(/\r\n/g, '\n').replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
   }
 
   return '';
 }
+
+export const OBVIOUS_EFFECT_BASES = new Set([
+  'protection',
+  'enhanced trait',
+  'immunity',
+  'senses',
+  'speed',
+  'leaping',
+  'flight',
+  'swimming',
+  'burrowing',
+  'damage',
+  'blast',
+  'affliction',
+  'weaken'
+]);
 
 export function resolveEffectRulesBlock(effect) {
   if (!effect) {
     return { effectRuleDesc: '', effectRuleDescs: [], modifierRules: [] };
   }
 
-  const effectRuleDescs = getDynamicEffectRuleSummary(effect);
+  const rawBase = effect.baseEffect || effect.name || '';
+  const baseKey = String(rawBase).trim().toLowerCase();
+  const isObvious = OBVIOUS_EFFECT_BASES.has(baseKey);
+
+  const rawRuleDescs = isObvious ? [] : getDynamicEffectRuleSummary(effect);
+  const effectRuleDescs = Array.isArray(rawRuleDescs) ? rawRuleDescs : (rawRuleDescs ? [rawRuleDescs] : []);
   const effectRuleDesc = effectRuleDescs[0] || '';
   const modifierRules = [];
 
   const extras = Array.isArray(effect.extras) ? effect.extras : [];
   for (const ex of extras) {
     const name = ex.name || 'Extra';
+    const fullName = ex.customText ? `${name} [${ex.customText}]` : name;
     const desc = getModifierRuleSummary(name, 'extra');
     if (desc) {
+      const flMax = Math.max(75, 120 - Math.round(fullName.length * 1.0));
+      const lines = splitDescriptionIntoLines(desc, flMax, 130);
       modifierRules.push({
-        name: ex.customText ? `${name} [${ex.customText}]` : name,
+        name: fullName,
         desc,
+        lines: lines.length ? lines : [desc],
         type: 'extra'
       });
     }
@@ -390,11 +510,15 @@ export function resolveEffectRulesBlock(effect) {
   const flaws = Array.isArray(effect.flaws) ? effect.flaws : [];
   for (const fl of flaws) {
     const name = fl.name || 'Flaw';
+    const fullName = fl.customText ? `${name} [${fl.customText}]` : name;
     const desc = getModifierRuleSummary(name, 'flaw');
     if (desc) {
+      const flMax = Math.max(75, 120 - Math.round(fullName.length * 1.0));
+      const lines = splitDescriptionIntoLines(desc, flMax, 130);
       modifierRules.push({
-        name: fl.customText ? `${name} [${fl.customText}]` : name,
+        name: fullName,
         desc,
+        lines: lines.length ? lines : [desc],
         type: 'flaw'
       });
     }

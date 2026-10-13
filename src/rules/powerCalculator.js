@@ -559,7 +559,10 @@ export function formatMeasurementDistance(rank) {
   const r = parseInt(rank, 10);
   if (isNaN(r)) return 'Rank Range';
   if (MEASUREMENT_DISTANCE_TABLE[r]) return MEASUREMENT_DISTANCE_TABLE[r];
-  if (r > 30) return `Cosmic Range (Rank ${r})`;
+  if (r > 30) {
+    const miles = Math.round(Math.pow(2, r - 8));
+    return `${miles.toLocaleString()} miles`;
+  }
   if (r < -5) return '< 6 inches';
   return `Rank ${r} Distance`;
 }

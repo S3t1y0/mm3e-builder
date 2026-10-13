@@ -1,6 +1,7 @@
 // js/rules/powerFormatter.js
-import { BASE_EFFECTS, CONFIGURABLE_EFFECTS, calculatePowerTotalCost } from './powerEngine.js';
-import { resolveEffectRulesBlock } from './powerRuleDescriptions.js';
+import { BASE_EFFECTS, CONFIGURABLE_EFFECTS, calculatePowerTotalCost, calculateEffectCost } from './powerEngine.js';
+import { resolveEffectRulesBlock, formatTimeRank, formatDistanceRank } from './powerRuleDescriptions.js';
+import { formatMeasurementDistance } from './powerCalculator.js';
 
 /**
  * Speed rank table for real-world velocity in Mutants & Masterminds 3E.
@@ -33,8 +34,14 @@ const SPEED_RANK_TABLE = {
 /**
  * Calculates speed description for movement powers.
  */
-export function formatSpeedRank(rank) {
+export function formatSpeedRank(rank, options = {}) {
   const r = parseInt(rank, 10) || 0;
+  if (options.compact) {
+    if (r === 0) return '2 MPH';
+    if (r > 20) return `FTL (Rank ${r})`;
+    const mph = Math.round(Math.pow(2, r) * 2);
+    return `${mph.toLocaleString()} MPH`;
+  }
   if (SPEED_RANK_TABLE[r]) return SPEED_RANK_TABLE[r];
   if (r > 20) return `Faster Than Light (Rank ${r})`;
   const mph = Math.round(Math.pow(2, r) * 2);
@@ -103,7 +110,7 @@ export function formatRange(effect) {
     return 'Personal';
   }
   if (range === 'Rank') {
-    return `Rank Distance (${Math.round(Math.pow(2, Math.max(0, ranks - 1)))} miles)`;
+    return `Rank Range (${formatMeasurementDistance(ranks)})`;
   }
   return 'Close Range';
 }
@@ -112,33 +119,62 @@ export function formatRange(effect) {
  * Resolves specialized configurable effect selections (Senses, Movement, Immunities, Affliction, etc.)
  */
 export function resolveSpecialConfig(effect) {
-  if (!effect || !effect.baseEffect) return '';
-  const base = effect.baseEffect;
-  const cfg = CONFIGURABLE_EFFECTS[base];
+  if (!effect) return '';
+  const rawBase = effect.baseEffect || effect.name || '';
+  const baseKey = String(rawBase).trim().toLowerCase();
+  const cfg = CONFIGURABLE_EFFECTS[rawBase] || CONFIGURABLE_EFFECTS[Object.keys(CONFIGURABLE_EFFECTS).find(k => k.toLowerCase() === baseKey)];
   const c = effect.config || {};
   const ranks = Number(effect.ranks) || 1;
 
-  if (base === 'Flight' || base === 'Speed') {
+  if (baseKey === 'flight' || baseKey === 'speed') {
     return `Speed Rank ${ranks} (${formatSpeedRank(ranks)})`;
   }
-  if (base === 'Swimming') {
+  if (baseKey === 'swimming') {
     const swRank = Math.max(0, ranks - 2);
     return `Water Speed Rank ${swRank} (${formatSpeedRank(swRank)})`;
   }
-  if (base === 'Burrowing') {
+  if (baseKey === 'burrowing') {
     const buRank = Math.max(0, ranks - 5);
     return `Burrowing Speed Rank ${buRank} (${formatSpeedRank(buRank)})`;
   }
-  if (base === 'Leaping') {
-    const dist = ranks >= 4 ? `${Math.round(Math.pow(2, ranks - 4) * 30)} ft` : `Rank ${ranks}`;
-    return `Leap Distance: ${dist} as move action`;
+  if (baseKey === 'leaping') {
+    const standDist = formatDistanceRank(ranks - 2);
+    const runDist = formatDistanceRank(ranks - 1);
+    return `Leap Distance: ${standDist} standing (${runDist} running) • Free action`;
   }
-  if (base === 'Teleport') {
-    const dist = ranks >= 7 ? `${Math.round(Math.pow(2, ranks - 7))} miles` : `${Math.round(Math.pow(2, ranks) * 30)} ft`;
-    return `Distance: ${dist} per move action`;
+  if (baseKey === 'teleport') {
+    const dist = formatDistanceRank(ranks);
+    return `Teleport Distance: ${dist} • Max 50 lbs default • Move action`;
+  }
+  if (baseKey === 'weaken') {
+    const trait = c.trait || c.targetTrait || 'Target Trait';
+    return `Drains: ${trait} (1 pt per pt below DC, max ${ranks})`;
+  }
+  if (baseKey === 'healing') {
+    return 'Healing: DC 10 check removes 1 condition/degree • Stabilizes dying';
+  }
+  if (baseKey === 'immortality') {
+    const recTimeRank = 19 - ranks;
+    const timeStr = formatTimeRank(recTimeRank);
+    return `Recovery Time: ${timeStr} (Time Rank ${recTimeRank})`;
+  }
+  if (baseKey === 'insubstantial') {
+    const formNames = {
+      1: 'Fluid (flow through openings)',
+      2: 'Gaseous (gas/cloud form)',
+      3: 'Energy (coherent energy)',
+      4: 'Incorporeal (intangible ghost)'
+    };
+    return `Form: ${formNames[ranks] || `Rank ${ranks}`}`;
+  }
+  if (baseKey === 'deflect') {
+    return `Deflect Bonus: d20 + ${ranks} (min 10 on die)`;
+  }
+  if (baseKey === 'protection') {
+    return `Toughness Bonus: +${ranks}`;
   }
 
-  if (base === 'Senses') {
+  if (baseKey === 'senses') {
     const faculties = [...(cfg?.faculties || []), ...(c.customItems || [])];
     const selected = Array.isArray(c.selectedFaculties) && c.selectedFaculties.length > 0
       ? c.selectedFaculties
@@ -151,7 +187,7 @@ export function resolveSpecialConfig(effect) {
     return `Senses: ${names.join(', ')}`;
   }
 
-  if (base === 'Affliction') {
+  if (baseKey === 'affliction') {
     const first = c.firstDegree || 'Dazed';
     const second = c.secondDegree || 'Stunned';
     const third = c.thirdDegree || 'Incapacitated';
@@ -164,7 +200,7 @@ export function resolveSpecialConfig(effect) {
     return `Conditions: ${degrees}${mod}`;
   }
 
-  if (base === 'Immunity') {
+  if (baseKey === 'immunity') {
     const presets = [...(cfg?.presets || []), ...(c.customItems || [])];
     const selected = Array.isArray(c.selectedPresets) && c.selectedPresets.length > 0
       ? c.selectedPresets
@@ -177,14 +213,14 @@ export function resolveSpecialConfig(effect) {
     return `Immunities: ${names.join(', ')}`;
   }
 
-  if (base === 'Enhanced Trait') {
+  if (baseKey === 'enhanced trait') {
     const targets = Array.isArray(c.selectedTraits) && c.selectedTraits.length > 0
       ? c.selectedTraits
       : [c.traitName || 'Strength'];
     return `Enhanced: ${targets.map(t => `${t} +${ranks}`).join(', ')}`;
   }
 
-  if (base === 'Movement') {
+  if (baseKey === 'movement') {
     const modes = [...(cfg?.modes || []), ...(c.customItems || [])];
     const selected = Array.isArray(c.selectedModes) && c.selectedModes.length > 0
       ? c.selectedModes
@@ -200,7 +236,7 @@ export function resolveSpecialConfig(effect) {
     return `Modes: ${names.join(', ')}`;
   }
 
-  if (base === 'Concealment') {
+  if (baseKey === 'concealment') {
     const options = [...(cfg?.options || []), ...(c.customItems || [])];
     const selected = Array.isArray(c.selectedSenses) && c.selectedSenses.length > 0
       ? c.selectedSenses
@@ -213,7 +249,7 @@ export function resolveSpecialConfig(effect) {
     return `Concealment from: ${names.join(', ')}`;
   }
 
-  if (base === 'Comprehend') {
+  if (baseKey === 'comprehend') {
     const modes = [...(cfg?.modes || []), ...(c.customItems || [])];
     const selected = Array.isArray(c.selectedModes) && c.selectedModes.length > 0
       ? c.selectedModes
@@ -226,12 +262,12 @@ export function resolveSpecialConfig(effect) {
     return `Comprehend: ${names.join(', ')}`;
   }
 
-  if (base === 'Variable') {
+  if (baseKey === 'variable') {
     const theme = c.theme || 'Versatile Theme';
     return `Variable Pool: up to ${ranks * 5} PP allocated to "${theme}"`;
   }
 
-  if (base === 'Morph') {
+  if (baseKey === 'morph') {
     const scopeNames = {
       1: 'Single Appearance',
       2: 'Narrow Group',
@@ -248,39 +284,43 @@ export function resolveSpecialConfig(effect) {
 /**
  * Formats extras and flaws lists with costs and ranks.
  */
-export function formatModifiers(effect) {
+export function formatModifiers(effect, options = {}) {
   const parts = [];
 
   const extras = (Array.isArray(effect.extras) ? effect.extras : []).map(e => {
     let name = e.name || 'Extra';
     if (e.customText) name += ` [${e.customText}]`;
     if (e.rank && e.rank > 1) name += ` ${e.rank}`;
-    const cost = e.cost ?? e.costPerRank;
-    const isFlat = e.isFlat || e.type === 'flat';
-    if (cost !== undefined) {
-      name += ` (${cost > 0 ? '+' : ''}${cost}${isFlat ? ' flat' : '/rank'})`;
+    if (!options.compact) {
+      const cost = e.cost ?? e.costPerRank;
+      const isFlat = e.isFlat || e.type === 'flat';
+      if (cost !== undefined) {
+        name += ` (${cost > 0 ? '+' : ''}${cost}${isFlat ? ' flat' : '/rank'})`;
+      }
     }
     return name;
   });
 
   if (extras.length) {
-    parts.push(`Extras: ${extras.join(', ')}`);
+    parts.push(options.compact ? extras.join(', ') : `Extras: ${extras.join(', ')}`);
   }
 
   const flaws = (Array.isArray(effect.flaws) ? effect.flaws : []).map(f => {
     let name = f.name || 'Flaw';
     if (f.customText) name += ` [${f.customText}]`;
     if (f.rank && f.rank > 1) name += ` ${f.rank}`;
-    const cost = f.cost ?? f.costPerRank;
-    const isFlat = f.isFlat || f.type === 'flat';
-    if (cost !== undefined) {
-      name += ` (${cost > 0 ? '+' : ''}${cost}${isFlat ? ' flat' : '/rank'})`;
+    if (!options.compact) {
+      const cost = f.cost ?? f.costPerRank;
+      const isFlat = f.isFlat || e.type === 'flat';
+      if (cost !== undefined) {
+        name += ` (${cost > 0 ? '+' : ''}${cost}${isFlat ? ' flat' : '/rank'})`;
+      }
     }
     return name;
   });
 
   if (flaws.length) {
-    parts.push(`Flaws: ${flaws.join(', ')}`);
+    parts.push(options.compact ? flaws.join(', ') : `Flaws: ${flaws.join(', ')}`);
   }
 
   return parts.join(' • ');
@@ -288,26 +328,182 @@ export function formatModifiers(effect) {
 
 /**
  * Formats a clean mechanics line: Action, Range, Duration, Resistance DC.
+ * Intelligently suppresses default passive metadata (Action: None, Range: Personal, Duration: Continuous/Permanent).
  */
-export function formatEffectMechanics(effect) {
+export function formatEffectMechanics(effect, options = {}) {
   if (!effect) return '';
   const tokens = [];
+  const baseKey = String(effect.baseEffect || effect.name || '').trim().toLowerCase();
 
-  const act = effect.action || 'Standard';
-  tokens.push(`Action: ${act}`);
+  const isPassive = ['protection', 'immunity', 'senses'].includes(baseKey);
 
+  const act = effect.action || (isPassive ? 'None' : 'Standard');
   const rng = formatRange(effect);
-  tokens.push(`Range: ${rng}`);
+  const dur = effect.duration || (isPassive ? 'Continuous' : 'Instant');
 
-  const dur = effect.duration || 'Instant';
-  tokens.push(`Duration: ${dur}`);
+  // Only show Action if it is not default passive None or standard active
+  if (!isPassive && act !== 'Standard') {
+    tokens.push(act === 'Free' ? 'Free Action' : (act === 'Move' ? 'Move Action' : `Action: ${act}`));
+  } else if (isPassive && act !== 'None') {
+    tokens.push(`${act} Action`);
+  }
 
-  const dc = calculateDC(effect);
-  if (dc) {
-    tokens.push(`Resist: ${dc}`);
+  // Only show Range if non-personal on passive, or non-close on active
+  if (isPassive) {
+    if (rng !== 'Personal' && rng !== 'Close Range') {
+      tokens.push(rng);
+    }
+  } else {
+    if (rng === 'Personal') {
+      tokens.push('Personal Range');
+    } else if (rng !== 'Close Range') {
+      tokens.push(rng);
+    }
+  }
+
+  // Only show Duration if non-default
+  if (isPassive) {
+    if (dur !== 'Continuous' && dur !== 'Permanent') {
+      tokens.push(dur);
+    }
+  } else {
+    if (dur === 'Sustained') {
+      tokens.push('Sustained');
+    } else if (dur === 'Concentration' || dur === 'Continuous') {
+      tokens.push(dur);
+    } else if (dur !== 'Instant') {
+      tokens.push(`Duration: ${dur}`);
+    }
+  }
+
+  if (options.includeDC !== false) {
+    const dc = calculateDC(effect);
+    if (dc) {
+      tokens.push(`Resist: ${dc}`);
+    }
   }
 
   return tokens.join(' • ');
+}
+
+/**
+ * Creates a punchy, compact summary of an individual effect for inline statblock presentation.
+ */
+export function formatEffectInlineSummary(effect) {
+  if (!effect) return '';
+  const eff = effect.effect || effect;
+  const rawBase = eff.baseEffect || eff.name || 'Effect';
+  const baseKey = String(rawBase).trim().toLowerCase();
+  const ranks = Number(eff.ranks) || 1;
+  const rankStr = eff.ranks ? ` ${eff.ranks}` : '';
+  const spec = resolveSpecialConfig(eff);
+  const c = eff.config || {};
+
+  let coreDesc = '';
+  if (baseKey === 'protection') {
+    const imp = (eff.extras || []).find(e => (e.name || '').toLowerCase() === 'impervious');
+    const impStr = imp ? ' (Impervious)' : '';
+    coreDesc = `Protection ${ranks}${impStr}`;
+  } else if (baseKey === 'immunity') {
+    const immList = spec ? spec.replace(/^Immunities:\s*/i, '') : 'Broad Trait';
+    coreDesc = `Immunity ${ranks} (${immList})`;
+  } else if (baseKey === 'senses') {
+    const sensList = spec ? spec.replace(/^Senses:\s*/i, '') : 'Sensory';
+    coreDesc = `Senses ${ranks} (${sensList})`;
+  } else if (baseKey === 'enhanced trait') {
+    coreDesc = spec ? spec.replace(/^Enhanced:\s*/i, 'Enhanced ') : `Enhanced Trait ${ranks}`;
+  } else if (baseKey === 'speed') {
+    coreDesc = `Speed ${ranks} (${formatSpeedRank(ranks, { compact: true })})`;
+  } else if (baseKey === 'leaping') {
+    const standDist = formatDistanceRank(ranks - 2);
+    coreDesc = `Leaping ${ranks} (${standDist})`;
+  } else if (baseKey === 'flight') {
+    coreDesc = `Flight ${ranks} (${formatSpeedRank(ranks, { compact: true })})`;
+  } else if (baseKey === 'swimming') {
+    const swRank = Math.max(0, ranks - 2);
+    coreDesc = `Swimming ${ranks} (${formatSpeedRank(swRank, { compact: true })})`;
+  } else if (baseKey === 'burrowing') {
+    const buRank = Math.max(0, ranks - 5);
+    coreDesc = `Burrowing ${ranks} (${formatSpeedRank(buRank, { compact: true })})`;
+  } else if (baseKey === 'damage' || baseKey === 'blast') {
+    const dc = 15 + ranks;
+    const res = eff.resistance || 'Toughness';
+    const rng = eff.range === 'Ranged' ? 'Ranged ' : (eff.range === 'Perception' ? 'Perception ' : '');
+    coreDesc = `${rng}${rawBase} ${ranks} (DC ${dc} vs ${res})`;
+  } else if (baseKey === 'affliction') {
+    const dc = 10 + ranks;
+    const res = eff.resistance || 'Fortitude';
+    const first = c.firstDegree || 'Dazed';
+    const second = c.secondDegree || 'Stunned';
+    const third = c.thirdDegree || 'Incapacitated';
+    const degrees = [first, second, third].filter(Boolean).join('/');
+    const rng = eff.range === 'Ranged' ? 'Ranged ' : (eff.range === 'Perception' ? 'Perception ' : '');
+    coreDesc = `${rng}Affliction ${ranks} (DC ${dc} vs ${res}; ${degrees})`;
+  } else if (baseKey === 'weaken') {
+    const dc = 10 + ranks;
+    const res = eff.resistance || 'Fortitude';
+    const trait = c.trait || c.targetTrait || 'Trait';
+    const rng = eff.range === 'Ranged' ? 'Ranged ' : '';
+    coreDesc = `${rng}Weaken ${trait} ${ranks} (DC ${dc} vs ${res})`;
+  } else if (baseKey === 'nullify') {
+    const dc = 10 + ranks;
+    const res = eff.resistance || 'Will';
+    const target = c.targetEffect || c.theme || 'Effects';
+    coreDesc = `Nullify ${target} ${ranks} (DC ${dc} vs ${res})`;
+  } else {
+    const parts = [`${rawBase}${rankStr}`];
+    if (spec) parts.push(spec);
+    coreDesc = parts.join(' • ');
+  }
+
+  // Mechanically suppress DC duplication
+  const mech = formatEffectMechanics(eff, { includeDC: false });
+  // Filter out impervious from mods on Protection since it is already inline
+  const mods = baseKey === 'protection' ? '' : formatModifiers(eff, { compact: true });
+
+  const finalParts = [coreDesc];
+  if (mech) finalParts.push(mech);
+  if (mods) finalParts.push(mods);
+
+  return finalParts.join(' • ');
+}
+
+/**
+ * Formats a linked effect as a sub-entry for the statblock.
+ */
+export function formatLinkedSubEntry(linked) {
+  if (!linked) return null;
+  const eff = linked.effect || linked;
+  const lCost = calculateEffectCost(eff, 0)?.totalCost || eff.cost || 0;
+  const sRules = resolveEffectRulesBlock(eff);
+
+  const rawName = (linked.name || '').trim();
+  const cleanName = rawName
+    .replace(/^linked\s*:\s*/i, '')
+    .replace(/\s*[\(\[]linked(?: effect)?[\)\]]\s*$/i, '')
+    .trim();
+
+  const effBase = eff.baseEffect || 'Effect';
+  const rankStr = eff.ranks ? ` ${eff.ranks}` : '';
+  const isSameAsBase = !cleanName || cleanName.toLowerCase() === effBase.toLowerCase();
+  const labelText = isSameAsBase
+    ? `${effBase}${rankStr}`
+    : `${cleanName} (${effBase}${rankStr})`;
+
+  const inlineSummary = formatEffectInlineSummary(eff);
+
+  return {
+    label: `↳ ${labelText}`,
+    effectName: `${effBase}${rankStr}`,
+    effectBaseName: effBase,
+    mechanics: '',
+    details: inlineSummary || `${effBase}${rankStr}`,
+    costBadge: `${lCost} PP`,
+    effectRuleDesc: sRules.effectRuleDesc,
+    effectRuleDescs: sRules.effectRuleDescs,
+    modifierRules: sRules.modifierRules,
+    isLinked: true
+  };
 }
 
 /**
@@ -354,28 +550,142 @@ export function formatPowerStatblock(power) {
     const toughness = power.deviceConfig?.toughness || 10;
     const deviceDesc = power.deviceConfig?.descriptor || 'Technological Device';
 
-    const subEntries = (power.devicePowers || []).map(sp => {
+    const subEntries = [];
+    (power.devicePowers || []).forEach(sp => {
       const eff = sp.effect || sp;
-      const sCost = calculatePowerTotalCost(sp) || eff.cost || 0;
-      const sMech = formatEffectMechanics(eff);
-      const sMods = formatModifiers(eff);
+      const sCost = calculateEffectCost(eff, 0)?.totalCost || calculatePowerTotalCost(sp) || eff.cost || 0;
+      const spLinked = Array.isArray(sp.linkedEffects) ? sp.linkedEffects : (Array.isArray(eff.linkedEffects) ? eff.linkedEffects : []);
       const sRules = resolveEffectRulesBlock(eff);
+      const combinedModifierRules = [...sRules.modifierRules];
 
-      const bodyParts = [sMech, sMods].filter(Boolean).join(' • ');
-      return {
-        label: sp.name || eff.baseEffect || 'System',
-        effectName: `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`,
-        effectBaseName: eff.baseEffect || sp.name || 'Effect',
-        mechanics: sMech,
-        details: bodyParts,
-        costBadge: `${sCost} PP`,
-        effectRuleDesc: sRules.effectRuleDesc,
-        effectRuleDescs: sRules.effectRuleDescs,
-        modifierRules: sRules.modifierRules
-      };
+      if (spLinked.length === 0) {
+        const sMech = formatEffectMechanics(eff);
+        const sMods = formatModifiers(eff);
+        const sSpecial = resolveSpecialConfig(eff);
+        const inlineSummary = formatEffectInlineSummary(eff);
+        const bodyParts = inlineSummary || [sSpecial, sMech, sMods].filter(Boolean).join(' • ') || `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`;
+
+        subEntries.push({
+          label: sp.name || eff.baseEffect || 'System',
+          effectName: `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`,
+          effectBaseName: eff.baseEffect || sp.name || 'Effect',
+          mechanics: sMech,
+          details: bodyParts,
+          costBadge: `${sCost} PP`,
+          effectRuleDesc: sRules.effectRuleDesc,
+          effectRuleDescs: sRules.effectRuleDescs,
+          modifierRules: combinedModifierRules
+        });
+      } else {
+        // Linked combo: combine inline with adaptive line splitting
+        let totalComboCost = sCost;
+        const mainSummary = formatEffectInlineSummary(eff);
+        const inlineLinkedParts = [];
+        const overflowSubEntries = [];
+
+        spLinked.forEach(le => {
+          const leEff = le.effect || le;
+          const leCost = calculateEffectCost(leEff, 0)?.totalCost || leEff.cost || 0;
+          totalComboCost += leCost;
+
+          const leRules = resolveEffectRulesBlock(leEff);
+
+          const rawLName = (le.name || '').trim()
+            .replace(/^linked\s*:\s*/i, '')
+            .replace(/\s*[\(\[]linked(?: effect)?[\)\]]\s*$/i, '')
+            .trim();
+          const isSame = !rawLName || rawLName.toLowerCase() === (leEff.baseEffect || '').toLowerCase();
+          const leSummary = formatEffectInlineSummary(leEff);
+          const leText = isSame ? leSummary : `${rawLName} (${leSummary})`;
+
+          // Test current total length for adaptive 100-character line wrapping
+          const prospectiveLine = [mainSummary, ...inlineLinkedParts, leText].join(' & ');
+          if (prospectiveLine.length <= 100 && overflowSubEntries.length === 0) {
+            inlineLinkedParts.push(leText);
+            if (leRules.modifierRules?.length) {
+              for (const mr of leRules.modifierRules) {
+                if (!combinedModifierRules.some(c => c.name.toLowerCase() === mr.name.toLowerCase())) {
+                  combinedModifierRules.push(mr);
+                }
+              }
+            }
+          } else {
+            // Adaptive overflow: flows to the next ruled line cleanly
+            overflowSubEntries.push({
+              label: `↳ ${rawLName || leEff.baseEffect || 'Effect'}`,
+              effectName: `${leEff.baseEffect || 'Effect'} ${leEff.ranks || 1}`,
+              effectBaseName: leEff.baseEffect || rawLName || 'Effect',
+              mechanics: '',
+              details: leSummary,
+              costBadge: `${leCost} PP`,
+              effectRuleDesc: leRules.effectRuleDesc,
+              effectRuleDescs: leRules.effectRuleDescs,
+              modifierRules: leRules.modifierRules,
+              isLinked: true
+            });
+          }
+        });
+
+        const combinedDetails = [mainSummary, ...inlineLinkedParts].join(' & ');
+
+        subEntries.push({
+          label: sp.name || eff.baseEffect || 'System',
+          effectName: `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`,
+          effectBaseName: eff.baseEffect || sp.name || 'Effect',
+          mechanics: '',
+          details: combinedDetails,
+          costBadge: `${totalComboCost} PP`,
+          effectRuleDesc: sRules.effectRuleDesc,
+          effectRuleDescs: sRules.effectRuleDescs,
+          modifierRules: combinedModifierRules
+        });
+
+        // Add any overflow linked rows
+        overflowSubEntries.forEach(of => subEntries.push(of));
+      }
+
+      // Alternate effects on this device sub-power (if any)
+      if (Array.isArray(sp.alternateEffects)) {
+        sp.alternateEffects.forEach(alt => {
+          const altEff = alt.effect || alt;
+          const altCost = alt.isDynamic ? 2 : 1;
+          const altRules = resolveEffectRulesBlock(altEff);
+          const altSummary = formatEffectInlineSummary(altEff);
+
+          subEntries.push({
+            label: `Alternate Effect: ${alt.name || altEff.baseEffect}`,
+            effectName: `${altEff.baseEffect || 'Effect'} ${altEff.ranks || 1}`,
+            effectBaseName: altEff.baseEffect || alt.name || 'Effect',
+            mechanics: '',
+            details: altSummary,
+            costBadge: `${altCost} PP Slot`,
+            effectRuleDesc: altRules.effectRuleDesc,
+            effectRuleDescs: altRules.effectRuleDescs,
+            modifierRules: altRules.modifierRules
+          });
+
+          const altLinked = Array.isArray(alt.linkedEffects) ? alt.linkedEffects : (Array.isArray(altEff.linkedEffects) ? altEff.linkedEffects : []);
+          altLinked.forEach(ale => {
+            const item = formatLinkedSubEntry(ale);
+            if (item) subEntries.push(item);
+          });
+        });
+      }
     });
 
-    const specLine = `Device Toughness ${toughness} • Discount: -${discPerFive} PP per 5 PP • ${deviceDesc}`;
+    if (Array.isArray(power.linkedEffects)) {
+      power.linkedEffects.forEach(le => {
+        const item = formatLinkedSubEntry(le);
+        if (item) subEntries.push(item);
+      });
+    }
+
+    const specLine = [
+      `Device Toughness ${toughness}`,
+      `Discount: -${discPerFive} PP per 5 PP`,
+      activation ? activation.replace(/^Activation:\s*/i, '') : '',
+      deviceDesc
+    ].filter(Boolean).join(' • ');
 
     return {
       title: name,
@@ -384,7 +694,7 @@ export function formatPowerStatblock(power) {
       descriptorsText: descriptors,
       mainLine: descriptors,
       mechanicsLine: specLine,
-      modifiersLine: activation,
+      modifiersLine: '',
       specialConfigLine: '',
       effectBaseName: '',
       effectRuleDesc: '',
@@ -398,30 +708,44 @@ export function formatPowerStatblock(power) {
   // Compound power
   if (type === 'compound') {
     const compoundEffects = power.compoundEffects || [];
-    const hasLinked = compoundEffects.some(cp => cp.isLinked);
+    const hasLinked = compoundEffects.some(cp => cp.isLinked) || (Array.isArray(power.linkedEffects) && power.linkedEffects.length > 0);
     const badge = hasLinked ? 'COMPOUND (LINKED COMBO)' : `COMPOUND (${compoundEffects.length} EFFECTS)`;
 
-    const subEntries = compoundEffects.map((cp, idx) => {
+    const subEntries = [];
+    compoundEffects.forEach((cp, idx) => {
       const eff = cp.effect || cp;
-      const cCost = calculatePowerTotalCost(cp) || eff.cost || 0;
+      const cCost = calculateEffectCost(eff, 0)?.totalCost || calculatePowerTotalCost(cp) || eff.cost || 0;
       const tag = cp.isPrimaryAction ? 'Primary Action' : (cp.isLinked ? 'Linked Effect' : `Trait ${idx + 1}`);
-      const sMech = formatEffectMechanics(eff);
-      const sMods = formatModifiers(eff);
       const cRules = resolveEffectRulesBlock(eff);
+      const cSummary = formatEffectInlineSummary(eff);
 
-      const bodyParts = [sMech, sMods].filter(Boolean).join(' • ');
-      return {
-        label: `${tag}: ${cp.name || eff.baseEffect}`,
+      const rawCpName = (cp.name || eff.baseEffect || '').trim();
+      const cleanCpName = rawCpName.replace(/\s*[\(\[]linked(?: effect)?[\)\]]\s*$/i, '').trim() || eff.baseEffect;
+      subEntries.push({
+        label: `${tag}: ${cleanCpName}`,
         effectName: `${eff.baseEffect || 'Effect'} ${eff.ranks || 1}`,
-        effectBaseName: eff.baseEffect || cp.name || 'Effect',
-        mechanics: sMech,
-        details: bodyParts,
+        effectBaseName: eff.baseEffect || cleanCpName || 'Effect',
+        mechanics: '',
+        details: cSummary,
         costBadge: `${cCost} PP`,
         effectRuleDesc: cRules.effectRuleDesc,
         effectRuleDescs: cRules.effectRuleDescs,
         modifierRules: cRules.modifierRules
-      };
+      });
+
+      const cpLinked = Array.isArray(cp.linkedEffects) ? cp.linkedEffects : (Array.isArray(eff.linkedEffects) ? eff.linkedEffects : []);
+      cpLinked.forEach(le => {
+        const item = formatLinkedSubEntry(le);
+        if (item) subEntries.push(item);
+      });
     });
+
+    if (Array.isArray(power.linkedEffects)) {
+      power.linkedEffects.forEach(le => {
+        const item = formatLinkedSubEntry(le);
+        if (item) subEntries.push(item);
+      });
+    }
 
     const sharedMods = formatModifiers({ extras: power.sharedModifiers || [], flaws: [] });
     const sharedRules = resolveEffectRulesBlock({ extras: power.sharedModifiers || [], flaws: [] });
@@ -453,37 +777,60 @@ export function formatPowerStatblock(power) {
     const mainMods = formatModifiers(mainEff);
     const mainRules = resolveEffectRulesBlock(mainEff);
 
-    const subEntries = (power.alternateEffects || []).map(alt => {
+    const subEntries = [];
+
+    // Primary effect linked effects
+    const primaryLinked = Array.isArray(power.linkedEffects) && power.linkedEffects.length > 0
+      ? power.linkedEffects
+      : (Array.isArray(mainEff.linkedEffects) ? mainEff.linkedEffects : []);
+
+    primaryLinked.forEach(le => {
+      const item = formatLinkedSubEntry(le);
+      if (item) subEntries.push(item);
+    });
+
+    (power.alternateEffects || []).forEach(alt => {
       const altEff = alt.effect || alt;
       const isDynamic = Boolean(alt.isDynamic || alt.dynamic);
       const slotCost = isDynamic ? 2 : 1;
-      const altMech = formatEffectMechanics(altEff);
-      const altMods = formatModifiers(altEff);
       const altRules = resolveEffectRulesBlock(altEff);
+      const altSummary = formatEffectInlineSummary(altEff);
 
-      const bodyParts = [altMech, altMods].filter(Boolean).join(' • ');
-      return {
+      subEntries.push({
         label: `Alternate Effect: ${alt.name || altEff.baseEffect}`,
         effectName: `${altEff.baseEffect || 'Effect'} ${altEff.ranks || 1}`,
         effectBaseName: altEff.baseEffect || alt.name || 'Effect',
-        mechanics: altMech,
-        details: bodyParts,
+        mechanics: '',
+        details: altSummary,
         costBadge: `${slotCost} PP Slot`,
         effectRuleDesc: altRules.effectRuleDesc,
         effectRuleDescs: altRules.effectRuleDescs,
         modifierRules: altRules.modifierRules
-      };
+      });
+
+      const altLinked = Array.isArray(alt.linkedEffects) ? alt.linkedEffects : (Array.isArray(altEff.linkedEffects) ? altEff.linkedEffects : []);
+      altLinked.forEach(ale => {
+        const item = formatLinkedSubEntry(ale);
+        if (item) subEntries.push(item);
+      });
     });
+
+    const hasLinked = primaryLinked.length > 0 || (power.alternateEffects || []).some(alt => {
+      const ae = alt.effect || alt;
+      return (alt.linkedEffects && alt.linkedEffects.length > 0) || (ae.linkedEffects && ae.linkedEffects.length > 0);
+    });
+    const altCount = (power.alternateEffects || []).length;
+    const badge = hasLinked ? `ARRAY (${altCount + 1} MODES • LINKED)` : `ARRAY (${altCount + 1} MODES)`;
 
     return {
       title: name,
       totalCost: cost,
-      structureBadge: `ARRAY (${subEntries.length + 1} MODES)`,
+      structureBadge: badge,
       descriptorsText: descriptors,
       mainLine: descriptors ? `${mainBase} ${mainRanks} ${descriptors}` : `${mainBase} ${mainRanks}`,
       mechanicsLine: mainMech,
       modifiersLine: [mainMods, activation].filter(Boolean).join(' • '),
-      specialConfigLine: '',
+      specialConfigLine: resolveSpecialConfig(mainEff),
       effectBaseName: mainBase,
       effectRuleDesc: mainRules.effectRuleDesc,
       effectRuleDescs: mainRules.effectRuleDescs,
@@ -500,23 +847,83 @@ export function formatPowerStatblock(power) {
   const mech = formatEffectMechanics(eff);
   const mods = formatModifiers(eff);
   const rules = resolveEffectRulesBlock(eff);
+  const combinedModifierRules = [...rules.modifierRules];
 
+  const subEntries = [];
+  const linkedList = Array.isArray(power.linkedEffects) && power.linkedEffects.length > 0
+    ? power.linkedEffects
+    : (Array.isArray(eff.linkedEffects) ? eff.linkedEffects : []);
+
+  let displayMainLine = descriptors ? `${base} ${ranks} ${descriptors}` : `${base} ${ranks}`;
+  let displayTotalCost = cost;
+
+  if (linkedList.length > 0) {
+    const inlineLinked = [];
+
+    linkedList.forEach(le => {
+      const leEff = le.effect || le;
+      const leCost = calculateEffectCost(leEff, 0)?.totalCost || leEff.cost || 0;
+      const leRules = resolveEffectRulesBlock(leEff);
+
+      const rawLName = (le.name || '').trim()
+        .replace(/^linked\s*:\s*/i, '')
+        .replace(/\s*[\(\[]linked(?: effect)?[\)\]]\s*$/i, '')
+        .trim();
+      const isSame = !rawLName || rawLName.toLowerCase() === (leEff.baseEffect || '').toLowerCase();
+      const leSummary = formatEffectInlineSummary(leEff);
+      const leText = isSame ? leSummary : `${rawLName} (${leSummary})`;
+
+      const prospective = [displayMainLine, ...inlineLinked, leText].join(' & ');
+      if (prospective.length <= 95 && subEntries.length === 0) {
+        inlineLinked.push(leText);
+        if (leRules.modifierRules?.length) {
+          for (const mr of leRules.modifierRules) {
+            if (!combinedModifierRules.some(c => c.name.toLowerCase() === mr.name.toLowerCase())) {
+              combinedModifierRules.push(mr);
+            }
+          }
+        }
+      } else {
+        subEntries.push({
+          label: `↳ ${rawLName || leEff.baseEffect || 'Effect'}`,
+          effectName: `${leEff.baseEffect || 'Effect'} ${leEff.ranks || 1}`,
+          effectBaseName: leEff.baseEffect || rawLName || 'Effect',
+          mechanics: '',
+          details: leSummary,
+          costBadge: `${leCost} PP`,
+          effectRuleDesc: leRules.effectRuleDesc,
+          effectRuleDescs: leRules.effectRuleDescs,
+          modifierRules: leRules.modifierRules,
+          isLinked: true
+        });
+      }
+    });
+
+    if (inlineLinked.length > 0) {
+      displayMainLine = [displayMainLine, ...inlineLinked].join(' & ');
+    }
+  }
+
+  const hasLinked = linkedList.length > 0;
+  const structureBadge = hasLinked ? 'LINKED COMBO' : '';
 
   return {
     title: name,
-    totalCost: cost,
-    structureBadge: '',
+    totalCost: displayTotalCost,
+    structureBadge,
     descriptorsText: descriptors,
-    mainLine: descriptors ? `${base} ${ranks} ${descriptors}` : `${base} ${ranks}`,
+    mainLine: displayMainLine,
     mechanicsLine: mech,
     modifiersLine: [mods, activation].filter(Boolean).join(' • '),
-    specialConfigLine: '',
+    specialConfigLine: resolveSpecialConfig(eff),
     effectBaseName: base,
     effectRuleDesc: rules.effectRuleDesc,
     effectRuleDescs: rules.effectRuleDescs,
-    modifierRules: rules.modifierRules,
-    subEntries: [],
-    summaryText: `${name}: ${base} ${ranks} [${cost} PP]`
+    modifierRules: combinedModifierRules,
+    subEntries,
+    summaryText: hasLinked
+      ? `${name}: ${displayMainLine} [${displayTotalCost} PP]`
+      : `${name}: ${base} ${ranks} [${displayTotalCost} PP]`
   };
 }
 

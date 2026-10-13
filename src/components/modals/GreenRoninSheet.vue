@@ -393,20 +393,24 @@
             </div>
 
             <!-- Applied modifiers -->
-            <div
-              v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules"
-              :key="'p1-mod-' + mIdx"
-              class="gr-power-row gr-power-mod-rule"
-            >
-              <span class="gr-mod-rule-bullet">•</span>
-              <strong class="gr-mod-rule-name">{{ modRule.name }}:</strong>
-              <span class="gr-mod-rule-text">{{ modRule.desc }}</span>
-            </div>
+            <template v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules" :key="'p1-mod-' + mIdx">
+              <div
+                v-for="(line, lIdx) in (modRule.lines?.length ? modRule.lines : [modRule.desc])"
+                :key="'p1-mod-' + mIdx + '-l-' + lIdx"
+                class="gr-power-row gr-power-mod-rule"
+                :class="{ 'gr-mod-rule-continuation-row': lIdx > 0 }"
+              >
+                <span v-if="lIdx === 0" class="gr-mod-rule-bullet">•</span>
+                <span v-else class="gr-mod-rule-indent"></span>
+                <strong v-if="lIdx === 0" class="gr-mod-rule-name">{{ modRule.name }}:</strong>
+                <span class="gr-mod-rule-text">{{ line }}</span>
+              </div>
+            </template>
 
             <!-- Nested effect systems -->
             <template v-for="(sub, sIdx) in getPowerBlock(p).subEntries" :key="sIdx">
-              <div class="gr-power-row gr-power-sub-entry">
-                <span class="gr-sub-bullet">•</span>
+              <div class="gr-power-row gr-power-sub-entry" :class="{ 'gr-power-linked-row': sub.isLinked }">
+                <span v-if="!sub.isLinked" class="gr-sub-bullet">•</span>
                 <strong class="gr-sub-label">{{ sub.label }}:</strong>
                 <span class="gr-sub-details">{{ sub.details || sub.effectName }}</span>
                 <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
@@ -421,15 +425,19 @@
                 </strong>
                 <span class="gr-power-rule-text">{{ subDesc }}</span>
               </div>
-              <div
-                v-for="(smRule, smIdx) in sub.modifierRules"
-                :key="'p1-submod-' + sIdx + '-' + smIdx"
-                class="gr-power-row gr-power-sub-mod-rule"
-              >
-                <span class="gr-mod-rule-bullet">•</span>
-                <strong class="gr-mod-rule-name">{{ smRule.name }}:</strong>
-                <span class="gr-mod-rule-text">{{ smRule.desc }}</span>
-              </div>
+              <template v-for="(smRule, smIdx) in sub.modifierRules" :key="'p1-submod-' + sIdx + '-' + smIdx">
+                <div
+                  v-for="(sLine, slIdx) in (smRule.lines?.length ? smRule.lines : [smRule.desc])"
+                  :key="'p1-submod-' + sIdx + '-' + smIdx + '-l-' + slIdx"
+                  class="gr-power-row gr-power-sub-mod-rule"
+                  :class="{ 'gr-mod-rule-continuation-row': slIdx > 0 }"
+                >
+                  <span v-if="slIdx === 0" class="gr-mod-rule-bullet">•</span>
+                  <span v-else class="gr-mod-rule-indent"></span>
+                  <strong v-if="slIdx === 0" class="gr-mod-rule-name">{{ smRule.name }}:</strong>
+                  <span class="gr-mod-rule-text">{{ sLine }}</span>
+                </div>
+              </template>
             </template>
           </div>
           <!-- Ruled rows filling remaining capacity for manual filling -->
@@ -560,20 +568,24 @@
               </div>
 
               <!-- Applied modifiers -->
-              <div
-                v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules"
-                :key="'p2-mod-' + mIdx"
-                class="gr-power-row gr-power-mod-rule"
-              >
-                <span class="gr-mod-rule-bullet">•</span>
-                <strong class="gr-mod-rule-name">{{ modRule.name }}:</strong>
-                <span class="gr-mod-rule-text">{{ modRule.desc }}</span>
-              </div>
+              <template v-for="(modRule, mIdx) in getPowerBlock(p).modifierRules" :key="'p2-mod-' + mIdx">
+                <div
+                  v-for="(line, lIdx) in (modRule.lines?.length ? modRule.lines : [modRule.desc])"
+                  :key="'p2-mod-' + mIdx + '-l-' + lIdx"
+                  class="gr-power-row gr-power-mod-rule"
+                  :class="{ 'gr-mod-rule-continuation-row': lIdx > 0 }"
+                >
+                  <span v-if="lIdx === 0" class="gr-mod-rule-bullet">•</span>
+                  <span v-else class="gr-mod-rule-indent"></span>
+                  <strong v-if="lIdx === 0" class="gr-mod-rule-name">{{ modRule.name }}:</strong>
+                  <span class="gr-mod-rule-text">{{ line }}</span>
+                </div>
+              </template>
 
               <!-- Nested effect systems -->
               <template v-for="(sub, sIdx) in getPowerBlock(p).subEntries" :key="sIdx">
-                <div class="gr-power-row gr-power-sub-entry">
-                  <span class="gr-sub-bullet">•</span>
+                <div class="gr-power-row gr-power-sub-entry" :class="{ 'gr-power-linked-row': sub.isLinked }">
+                  <span v-if="!sub.isLinked" class="gr-sub-bullet">•</span>
                   <strong class="gr-sub-label">{{ sub.label }}:</strong>
                   <span class="gr-sub-details">{{ sub.details || sub.effectName }}</span>
                   <span v-if="sub.costBadge" class="gr-sub-cost-badge">{{ sub.costBadge }}</span>
@@ -588,15 +600,19 @@
                   </strong>
                   <span class="gr-power-rule-text">{{ subDesc }}</span>
                 </div>
-                <div
-                  v-for="(smRule, smIdx) in sub.modifierRules"
-                  :key="'p2-submod-' + sIdx + '-' + smIdx"
-                  class="gr-power-row gr-power-sub-mod-rule"
-                >
-                  <span class="gr-mod-rule-bullet">•</span>
-                  <strong class="gr-mod-rule-name">{{ smRule.name }}:</strong>
-                  <span class="gr-mod-rule-text">{{ smRule.desc }}</span>
-                </div>
+                <template v-for="(smRule, smIdx) in sub.modifierRules" :key="'p2-submod-' + sIdx + '-' + smIdx">
+                  <div
+                    v-for="(sLine, slIdx) in (smRule.lines?.length ? smRule.lines : [smRule.desc])"
+                    :key="'p2-submod-' + sIdx + '-' + smIdx + '-l-' + slIdx"
+                    class="gr-power-row gr-power-sub-mod-rule"
+                    :class="{ 'gr-mod-rule-continuation-row': slIdx > 0 }"
+                  >
+                    <span v-if="slIdx === 0" class="gr-mod-rule-bullet">•</span>
+                    <span v-else class="gr-mod-rule-indent"></span>
+                    <strong v-if="slIdx === 0" class="gr-mod-rule-name">{{ smRule.name }}:</strong>
+                    <span class="gr-mod-rule-text">{{ sLine }}</span>
+                  </div>
+                </template>
               </template>
             </div>
             <!-- Ruled lines filling Page 2 capacity for manual filling -->
@@ -775,11 +791,15 @@ function getPowerRowCount(power) {
   if (block.mechanicsLine) count += 1;
   if (block.specialConfigLine || block.modifiersLine) count += 1;
   count += (block.effectRuleDescs?.length || (block.effectRuleDesc ? 1 : 0));
-  count += (block.modifierRules || []).length;
+  for (const mr of (block.modifierRules || [])) {
+    count += (mr.lines?.length || 1);
+  }
   for (const sub of (block.subEntries || [])) {
     count += 1;
     count += (sub.effectRuleDescs?.length || (sub.effectRuleDesc ? 1 : 0));
-    count += (sub.modifierRules || []).length;
+    for (const smr of (sub.modifierRules || [])) {
+      count += (smr.lines?.length || 1);
+    }
   }
   return count;
 }

@@ -219,14 +219,14 @@ export function buildEffectBreakdown(baseEffect, effect = {}, dc = 15, res = 'To
     degrees = [
       {
         degree: 'All',
-        label: 'Per Degree of Failure',
+        label: 'Per Point Failed',
         margin: 'Per Point Failed',
         conditions: ['Weakened'],
-        desc: `Reduces target ${trait} by 1 rank per point of failure against DC ${dc}`,
+        desc: `Reduces target ${trait} by 1 point per point check result is below DC ${dc} (up to rank max)`,
         isSevere: false
       }
     ];
-    summary = `Weaken (-1 rank ${trait} per point of failure)`;
+    summary = `Weaken (-1 point ${trait} per point below DC)`;
     resistanceGuide = `Target makes ${res} check vs DC ${dc}`;
   } else if (baseEffect === 'Nullify') {
     const descText = cfg.descriptor || 'Target Descriptor';
@@ -525,6 +525,67 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
     };
   }
 
+  function mergeLinkedAttackEffects(baseAtk, power, linkedEffects, contextOpt = {}) {
+    if (!baseAtk || !Array.isArray(linkedEffects) || linkedEffects.length === 0) return baseAtk;
+
+    const linkedTargets = [];
+    linkedEffects.forEach((link, lIdx) => {
+      const linkEff = link.effect || link;
+      const rawLinkName = (link.name || linkEff.name || linkEff.baseEffect || '').trim();
+      const cleanLinkName = rawLinkName
+        .replace(/^linked\s*:\s*/i, '')
+        .replace(/\s*[\(\[]linked(?: effect)?[\)\]]\s*$/i, '')
+        .trim() || linkEff.baseEffect || 'Effect';
+
+      const linkAtk = processEffect(power, linkEff, {
+        ...contextOpt,
+        id: `${baseAtk.id}_link_${lIdx}`,
+        slotName: cleanLinkName,
+        sourceTitle: `${baseAtk.source} [Linked]`
+      });
+
+      if (linkAtk) {
+        linkedTargets.push({
+          id: link.id || `${baseAtk.id}_link_${lIdx}`,
+          name: cleanLinkName,
+          baseEffect: linkEff.baseEffect || linkEff.name,
+          ranks: linkAtk.effectRank,
+          dc: linkAtk.dc,
+          resistance: linkAtk.resistance,
+          dcDescription: linkAtk.dcDescription,
+          degrees: linkAtk.degrees,
+          effectBreakdown: linkAtk.effectBreakdown,
+          summaryText: linkAtk.summaryText,
+          tacticalModifiers: linkAtk.tacticalModifiers
+        });
+      }
+    });
+
+    if (linkedTargets.length > 0) {
+      baseAtk.isLinkedCombo = true;
+      baseAtk.linkedTargets = [
+        {
+          id: baseAtk.id,
+          name: baseAtk.name,
+          baseEffect: baseAtk.effectName,
+          ranks: baseAtk.effectRank,
+          dc: baseAtk.dc,
+          resistance: baseAtk.resistance,
+          dcDescription: baseAtk.dcDescription,
+          degrees: baseAtk.degrees,
+          effectBreakdown: baseAtk.effectBreakdown,
+          summaryText: baseAtk.summaryText,
+          tacticalModifiers: baseAtk.tacticalModifiers
+        },
+        ...linkedTargets
+      ];
+      baseAtk.dcDescription = baseAtk.linkedTargets.map(t => t.dcDescription).filter(Boolean).join(' / ');
+      baseAtk.summaryText = baseAtk.linkedTargets.map(t => t.summaryText || t.name).filter(Boolean).join(' + ');
+    }
+
+    return baseAtk;
+  }
+
   // 2. Iterate Powers
   for (const p of (character.powers || [])) {
     const isPowerDisabled = p.active === false;
@@ -549,12 +610,22 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
           isSubPower: true,
           devSubIdx: sIdx
         });
-        if (subAtk) attacks.push(subAtk);
 
-        // Linked effects of sub-power primary effect
-        if (Array.isArray(sub.linkedEffects)) {
-          sub.linkedEffects.forEach((link, lIdx) => {
-            const linkAtk = processEffect(p, link, {
+        const spLinked = Array.isArray(sub.linkedEffects) ? sub.linkedEffects : (Array.isArray(subEff?.linkedEffects) ? subEff.linkedEffects : []);
+        if (subAtk) {
+          if (spLinked.length > 0) {
+            mergeLinkedAttackEffects(subAtk, p, spLinked, {
+              isStandby: !isPrimaryActive,
+              isPowerDisabled: isSubDisabled,
+              isSubPower: true,
+              devSubIdx: sIdx
+            });
+          }
+          attacks.push(subAtk);
+        } else if (spLinked.length > 0) {
+          spLinked.forEach((link, lIdx) => {
+            const linkEff = link.effect || link;
+            const linkAtk = processEffect(p, linkEff, {
               id: `atk_${p.id}_sub_${sIdx}_link_${lIdx}`,
               slotId: `link_${lIdx}`,
               slotName: link.name || `${sub.name} (Linked)`,
@@ -583,12 +654,22 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
               isSubPower: true,
               devSubIdx: sIdx
             });
-            if (altAtk) attacks.push(altAtk);
 
-            // Linked effects of sub-power alternate slot
-            if (Array.isArray(alt.linkedEffects)) {
-              alt.linkedEffects.forEach((link, lIdx) => {
-                const linkAtk = processEffect(p, link, {
+            const altLinked = Array.isArray(alt.linkedEffects) ? alt.linkedEffects : (Array.isArray(altEff?.linkedEffects) ? altEff.linkedEffects : []);
+            if (altAtk) {
+              if (altLinked.length > 0) {
+                mergeLinkedAttackEffects(altAtk, p, altLinked, {
+                  isStandby: !isSlotActive,
+                  isPowerDisabled: isSubDisabled,
+                  isSubPower: true,
+                  devSubIdx: sIdx
+                });
+              }
+              attacks.push(altAtk);
+            } else if (altLinked.length > 0) {
+              altLinked.forEach((link, lIdx) => {
+                const linkEff = link.effect || link;
+                const linkAtk = processEffect(p, linkEff, {
                   id: `atk_${p.id}_sub_${sIdx}_alt_${aIdx}_link_${lIdx}`,
                   slotId: alt.id,
                   slotName: link.name || `${alt.name} (Linked)`,
@@ -616,11 +697,20 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
         isStandby: !isMainActive,
         isPowerDisabled
       });
-      if (mainAtk) attacks.push(mainAtk);
 
-      if (Array.isArray(p.linkedEffects)) {
-        p.linkedEffects.forEach((link, lIdx) => {
-          const linkAtk = processEffect(p, link, {
+      const primaryLinked = Array.isArray(p.linkedEffects) ? p.linkedEffects : (Array.isArray(p.mainEffect?.linkedEffects) ? p.mainEffect.linkedEffects : []);
+      if (mainAtk) {
+        if (primaryLinked.length > 0) {
+          mergeLinkedAttackEffects(mainAtk, p, primaryLinked, {
+            isStandby: !isMainActive,
+            isPowerDisabled
+          });
+        }
+        attacks.push(mainAtk);
+      } else if (primaryLinked.length > 0) {
+        primaryLinked.forEach((link, lIdx) => {
+          const linkEff = link.effect || link;
+          const linkAtk = processEffect(p, linkEff, {
             id: `atk_${p.id}_link_${lIdx}`,
             slotId: `link_${lIdx}`,
             slotName: link.name || `${p.name} (Linked)`,
@@ -643,11 +733,20 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
           isStandby: !isSlotActive,
           isPowerDisabled
         });
-        if (altAtk) attacks.push(altAtk);
 
-        if (Array.isArray(alt.linkedEffects)) {
-          alt.linkedEffects.forEach((link, lIdx) => {
-            const linkAtk = processEffect(p, link, {
+        const altLinked = Array.isArray(alt.linkedEffects) ? alt.linkedEffects : (Array.isArray(altEff?.linkedEffects) ? altEff.linkedEffects : []);
+        if (altAtk) {
+          if (altLinked.length > 0) {
+            mergeLinkedAttackEffects(altAtk, p, altLinked, {
+              isStandby: !isSlotActive,
+              isPowerDisabled
+            });
+          }
+          attacks.push(altAtk);
+        } else if (altLinked.length > 0) {
+          altLinked.forEach((link, lIdx) => {
+            const linkEff = link.effect || link;
+            const linkAtk = processEffect(p, linkEff, {
               id: `atk_${p.id}_slot_${aIdx}_link_${lIdx}`,
               slotId: alt.id,
               slotName: link.name || `${alt.name} (Linked)`,
@@ -783,7 +882,8 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
       }
     } else if (!isContainer) {
       // Standard power (skip outer container shell if it has no direct mainEffect)
-      const atk = processEffect(p, p.mainEffect, {
+      const baseEff = p.mainEffect || p;
+      const atk = processEffect(p, baseEff, {
         id: `atk_${p.id}_main`,
         slotId: 'main',
         slotName: p.name,
@@ -791,11 +891,20 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
         isStandby: false,
         isPowerDisabled
       });
-      if (atk) attacks.push(atk);
 
-      if (Array.isArray(p.linkedEffects)) {
-        p.linkedEffects.forEach((link, lIdx) => {
-          const linkAtk = processEffect(p, link, {
+      const linkedList = Array.isArray(p.linkedEffects) ? p.linkedEffects : (Array.isArray(baseEff?.linkedEffects) ? baseEff.linkedEffects : []);
+      if (atk) {
+        if (linkedList.length > 0) {
+          mergeLinkedAttackEffects(atk, p, linkedList, {
+            isStandby: false,
+            isPowerDisabled
+          });
+        }
+        attacks.push(atk);
+      } else if (linkedList.length > 0) {
+        linkedList.forEach((link, lIdx) => {
+          const linkEff = link.effect || link;
+          const linkAtk = processEffect(p, linkEff, {
             id: `atk_${p.id}_link_${lIdx}`,
             slotId: `link_${lIdx}`,
             slotName: link.name || `${p.name} (Linked)`,

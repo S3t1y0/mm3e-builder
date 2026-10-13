@@ -818,9 +818,22 @@
 
 .gr-mod-rule-text {
   overflow: hidden;
-  text-overflow: ellipsis;
   white-space: nowrap;
   color: #475569;
+}
+
+.gr-mod-rule-continuation-row {
+  padding-left: 22px;
+}
+
+.gr-power-sub-mod-rule.gr-mod-rule-continuation-row {
+  padding-left: 30px;
+}
+
+.gr-mod-rule-indent {
+  width: 6px;
+  display: inline-block;
+  flex-shrink: 0;
 }
 
 .gr-power-sub-rule-desc {
@@ -842,6 +855,15 @@
   gap: 3px;
   font-size: 7.8px;
   color: #334155;
+}
+
+.gr-power-linked-row {
+  padding-left: 22px;
+}
+
+.gr-power-linked-row .gr-sub-label {
+  color: #0369a1;
+  font-weight: 700;
 }
 
 .gr-sub-bullet {

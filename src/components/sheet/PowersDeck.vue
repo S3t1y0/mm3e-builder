@@ -1929,7 +1929,7 @@ function getEffectConfigDetails(eff) {
       quickText: `Drains ${trait}`,
       items: [{
         name: `Target: ${trait}`,
-        desc: `Target makes a ${res} resistance check vs DC 10 + Weaken rank. Each failure degree drains 1 rank of ${trait}.`,
+        desc: `Target makes a ${res} resistance check vs DC 10 + Weaken rank. Each point check fails DC drains 1 point of ${trait} (up to rank max).`,
         icon: 'ri-arrow-down-circle-line'
       }]
     };

@@ -1,5 +1,5 @@
 import { calculateDC, resolveSpecialConfig, formatRange } from '../../rules/powerFormatter.js';
-import { resolveEffectRulesBlock } from '../../rules/powerRuleDescriptions.js';
+import { resolveEffectRulesBlock, formatDistanceRank } from '../../rules/powerRuleDescriptions.js';
 
 /**
  * Format number as a D20 modifier (+5, -2, +0).
@@ -247,15 +247,16 @@ export function getMovementModes(character) {
       } else if (base.includes('speed') && !base.includes('flight')) {
         modes.push({ name: `Enhanced Ground Speed (${title})`, rank: r, speed: formatSpeed(r) });
       } else if (base.includes('teleport')) {
-        const distStr = r >= 7 ? `${Math.round(Math.pow(2, r - 7))} miles` : `${Math.round(Math.pow(2, r) * 30)} ft`;
-        modes.push({ name: `Teleport (${title})`, rank: r, speed: `Rank ${r} • ${distStr}/move` });
+        const distStr = formatDistanceRank(r);
+        modes.push({ name: `Teleport (${title})`, rank: r, speed: `Rank ${r} • ${distStr}/move (up to 50 lbs default)` });
       } else if (base.includes('swimming')) {
         modes.push({ name: `Swimming (${title})`, rank: r, speed: formatSpeed(Math.max(0, r - 2)) });
       } else if (base.includes('burrowing')) {
         modes.push({ name: `Burrowing (${title})`, rank: r, speed: formatSpeed(Math.max(0, r - 5)) });
       } else if (base.includes('leaping')) {
-        const leapDist = r >= 4 ? `${Math.round(Math.pow(2, r - 4) * 30)} ft` : `Rank ${r}`;
-        modes.push({ name: `Leaping (${title})`, rank: r, speed: `Rank ${r} • ${leapDist}` });
+        const standDist = formatDistanceRank(r - 2);
+        const runDist = formatDistanceRank(r - 1);
+        modes.push({ name: `Leaping (${title})`, rank: r, speed: `Rank ${r} • ${standDist} standing (${runDist} running)` });
       } else if (base.includes('movement')) {
         const modeOpt = eff.config?.option || 'Super-Movement';
         modes.push({ name: `Movement: ${modeOpt} (${title})`, rank: r, speed: `Rank ${r}` });
