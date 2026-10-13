@@ -1058,7 +1058,7 @@ function handleSave() {
 .workspace-main-content {
   flex: 1;
   display: grid;
-  grid-template-columns: 310px minmax(0, 1fr) 300px;
+  grid-template-columns: 310px minmax(0, 1fr) 315px;
   gap: 1.15rem;
   padding: 0.85rem 1.15rem;
   box-sizing: border-box;
@@ -1525,6 +1525,7 @@ function handleSave() {
   flex-direction: column;
   overflow-y: auto;
   min-width: 0;
+  padding-bottom: 2rem;
 }
 
 /* ==========================================================================

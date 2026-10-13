@@ -195,11 +195,56 @@
 
       <template v-else>
         <template v-for="ruleSkill in filteredRuleSkills" :key="ruleSkill.name">
-          <!-- 1. Specialization Skills Group (Close Combat, Ranged Combat, Expertise) -->
+          <!-- Specialization skills (Close Combat, Ranged Combat, Expertise) -->
           <template v-if="ruleSkill.requiresSubtype">
-            <div class="spec-group-container" :class="{ 'has-specs': getSubtypeInstances(ruleSkill.name).length > 0 }">
-              <!-- Specialization Category Header / Hub Row -->
-              <div class="spec-parent-row">
+            <!-- Unspecialized row with + Spec prompt when 0 specializations added -->
+            <div
+              v-if="getSubtypeInstances(ruleSkill.name).length === 0"
+              class="sheet-skill-row spec-unspecialized-row"
+              :class="{ 'is-absent-row': heroStore.isAbilityAbsent(ruleSkill.ability) }"
+              :title="ruleSkill.desc"
+            >
+              <span 
+                class="sheet-skill-ab-tag"
+                :class="`ab-${ruleSkill.ability.toLowerCase()}`"
+                :title="`Governed by ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0})`"
+              >
+                {{ ruleSkill.ability }}
+              </span>
+
+              <div class="sheet-skill-info">
+                <div class="sheet-skill-title-row">
+                  <span class="sheet-skill-name">{{ ruleSkill.name }}</span>
+                </div>
+              </div>
+
+              <div class="spec-unspecialized-action">
+                <button
+                  type="button"
+                  class="btn-spec-inline-add"
+                  :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
+                  @click="openInlineSpecModal(ruleSkill.name)"
+                  :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot specialize` : `Add new ${ruleSkill.name} specialization`"
+                >
+                  <i class="ri-add-line"></i> Spec
+                </button>
+              </div>
+            </div>
+
+            <!-- Standalone rows when one or more specializations exist -->
+            <template v-else>
+              <div
+                v-for="inst in getSubtypeInstances(ruleSkill.name)"
+                :key="inst.id || (ruleSkill.name + '_' + inst.subtype)"
+                class="sheet-skill-row"
+                :class="{ 
+                  'is-trained': !heroStore.isAbilityAbsent(ruleSkill.ability) && (Number(inst.ranks ?? inst.rank) || 0) + getEnhancedRanks(ruleSkill.name, inst.subtype) > 0,
+                  'is-signature': !heroStore.isAbilityAbsent(ruleSkill.ability) && isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks),
+                  'is-absent-row': heroStore.isAbilityAbsent(ruleSkill.ability)
+                }"
+                :title="ruleSkill.desc"
+              >
+                <!-- Ability tag -->
                 <span 
                   class="sheet-skill-ab-tag"
                   :class="`ab-${ruleSkill.ability.toLowerCase()}`"
@@ -208,121 +253,74 @@
                   {{ ruleSkill.ability }}
                 </span>
 
-                <div class="sheet-skill-info spec-parent-info">
+                <!-- Name with full category prefix and hover delete button -->
+                <div class="sheet-skill-info">
                   <div class="sheet-skill-title-row">
-                    <span class="spec-parent-name">{{ ruleSkill.name }}</span>
                     <span 
-                      v-if="getSubtypeInstances(ruleSkill.name).length > 0"
-                      class="spec-count-tag"
-                      :title="`${getSubtypeInstances(ruleSkill.name).length} specialization(s) active`"
+                      class="sheet-skill-name" 
+                      :title="`${ruleSkill.name} (${inst.subtype || 'General'}): Base ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0}) + ${inst.ranks || 0} Rk${getEnhancedRanks(ruleSkill.name, inst.subtype) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name, inst.subtype) + 'p' : ''}${getAdvantageBonusForSkill(ruleSkill.name) > 0 ? ' +' + getAdvantageBonusForSkill(ruleSkill.name) + ' Adv' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))}`"
                     >
-                      {{ getSubtypeInstances(ruleSkill.name).length }}
+                      {{ inst.subtype || ruleSkill.name }}
                     </span>
-                    <span
-                      v-if="getAdvantageBonusForSkill(ruleSkill.name) > 0"
-                      class="spec-adv-chip"
-                      :title="`+${getAdvantageBonusForSkill(ruleSkill.name)} from ${getAdvantageNameForSkill(ruleSkill.name)} Advantage`"
-                    >
-                      +{{ getAdvantageBonusForSkill(ruleSkill.name) }} {{ getAdvantageNameForSkill(ruleSkill.name) }}
-                    </span>
-                  </div>
-                </div>
-
-                <!-- Action: Quick Add Specialization -->
-                <div class="spec-parent-actions">
-                  <button
-                    type="button"
-                    class="btn-spec-inline-add"
-                    :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                    @click="openInlineSpecModal(ruleSkill.name)"
-                    :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot specialize` : `Add new ${ruleSkill.name} specialization`"
-                  >
-                    <i class="ri-add-line"></i> Spec
-                  </button>
-                </div>
-              </div>
-
-              <!-- Specialization Child Rows (Zero-Truncation Sub-List) -->
-              <div v-if="getSubtypeInstances(ruleSkill.name).length > 0" class="spec-instances-list">
-                <div
-                  v-for="inst in getSubtypeInstances(ruleSkill.name)"
-                  :key="inst.id || (ruleSkill.name + '_' + inst.subtype)"
-                  class="sheet-skill-row is-specialization"
-                  :class="{ 
-                    'is-trained': !heroStore.isAbilityAbsent(ruleSkill.ability) && (Number(inst.ranks ?? inst.rank) || 0) + getEnhancedRanks(ruleSkill.name, inst.subtype) > 0,
-                    'is-signature': !heroStore.isAbilityAbsent(ruleSkill.ability) && isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks),
-                    'is-absent-row': heroStore.isAbilityAbsent(ruleSkill.ability)
-                  }"
-                  :title="ruleSkill.desc"
-                >
-                  <!-- Name (Zero Truncation) -->
-                  <div class="sheet-skill-info spec-child-info">
-                    <div class="sheet-skill-title-row">
-                      <span 
-                        class="spec-subtype-name" 
-                        :title="`${inst.subtype || 'General'}: Base ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0}) + ${inst.ranks || 0} Rk${getEnhancedRanks(ruleSkill.name, inst.subtype) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name, inst.subtype) + 'p' : ''}${getAdvantageBonusForSkill(ruleSkill.name) > 0 ? ' +' + getAdvantageBonusForSkill(ruleSkill.name) + ' Adv' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))}`"
-                      >{{ inst.subtype || 'General' }}</span>
-                    </div>
-                  </div>
-
-                  <!-- Rank Stepper + Delete -->
-                  <div class="sheet-skill-stepper-col">
-                    <div class="stepper-compact has-ranks" :class="{ 'is-disabled-stepper': heroStore.isAbilityAbsent(ruleSkill.ability) }">
-                      <button
-                        type="button"
-                        class="step-btn-xs"
-                        :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || (inst.ranks || 0) <= 0"
-                        @click="stepSpecialization(inst, -1)"
-                        title="Decrease Rank"
-                      >-</button>
-                      <span class="step-val-xs">
-                        {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : (inst.ranks || 0) }}
-                        <span
-                          v-if="!heroStore.isAbilityAbsent(ruleSkill.ability) && getEnhancedRanks(ruleSkill.name, inst.subtype) > 0"
-                          class="enh-pip-tag"
-                          :title="`+${getEnhancedRanks(ruleSkill.name, inst.subtype)} from Power`"
-                        >+{{ getEnhancedRanks(ruleSkill.name, inst.subtype) }}p</span>
-                      </span>
-                      <button
-                        type="button"
-                        class="step-btn-xs"
-                        :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                        :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
-                        @click="stepSpecialization(inst, 1)"
-                      >+</button>
-                    </div>
-
                     <button
                       type="button"
-                      class="btn-delete-spec"
+                      class="btn-delete-spec-hover"
                       @click="deleteSpecialization(inst)"
                       title="Remove Specialization"
                     >
                       <i class="ri-close-line"></i>
                     </button>
                   </div>
-
-                  <!-- Child Roll Button -->
-                  <button
-                    type="button"
-                    class="sheet-skill-roll-btn"
-                    :class="{ 
-                      'is-absent-btn': heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack),
-                      'btn-trained': !heroStore.isAbilityAbsent(ruleSkill.ability) && (Number(inst.ranks ?? inst.rank) || 0) + getEnhancedRanks(ruleSkill.name, inst.subtype) > 0,
-                      'btn-signature': !heroStore.isAbilityAbsent(ruleSkill.ability) && isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks)
-                    }"
-                    :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)"
-                    @click="!(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) && rollSkill(ruleSkill.name + ': ' + (inst.subtype || 'General'), calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))"
-                    :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Automatic failure. Checks cannot be rolled.` : ((ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack) ? 'Cannot make close attacks while Fighting is Debilitated' : `Roll ${ruleSkill.name} (${inst.subtype}) check`)"
-                  >
-                    <i :class="(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) ? 'ri-close-line' : 'ri-dice-line'"></i>
-                    <span class="skill-roll-val">
-                      {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name)) }}
-                    </span>
-                  </button>
                 </div>
+
+                <!-- Rank Stepper Column -->
+                <div class="sheet-skill-stepper-col">
+                  <div class="stepper-compact" :class="{ 'has-ranks': (inst.ranks || 0) > 0, 'is-disabled-stepper': heroStore.isAbilityAbsent(ruleSkill.ability) }">
+                    <button
+                      type="button"
+                      class="step-btn-xs"
+                      :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || (inst.ranks || 0) <= 0"
+                      @click="stepSpecialization(inst, -1)"
+                      title="Decrease Rank"
+                    >-</button>
+                    <span class="step-val-xs">
+                      {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : (inst.ranks || 0) }}
+                      <span
+                        v-if="!heroStore.isAbilityAbsent(ruleSkill.ability) && getEnhancedRanks(ruleSkill.name, inst.subtype) > 0"
+                        class="enh-pip-tag"
+                        :title="`+${getEnhancedRanks(ruleSkill.name, inst.subtype)} from Power`"
+                      >+{{ getEnhancedRanks(ruleSkill.name, inst.subtype) }}p</span>
+                    </span>
+                    <button
+                      type="button"
+                      class="step-btn-xs"
+                      :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
+                      :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
+                      @click="stepSpecialization(inst, 1)"
+                    >+</button>
+                  </div>
+                </div>
+
+                <!-- Roll Button -->
+                <button
+                  type="button"
+                  class="sheet-skill-roll-btn"
+                  :class="{ 
+                    'is-absent-btn': heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack),
+                    'btn-trained': !heroStore.isAbilityAbsent(ruleSkill.ability) && (Number(inst.ranks ?? inst.rank) || 0) + getEnhancedRanks(ruleSkill.name, inst.subtype) > 0,
+                    'btn-signature': !heroStore.isAbilityAbsent(ruleSkill.ability) && isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks)
+                  }"
+                  :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)"
+                  @click="!(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) && rollSkill(inst.subtype || ruleSkill.name, calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), ruleSkill.name)"
+                  :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Automatic failure. Checks cannot be rolled.` : ((ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack) ? 'Cannot make close attacks while Fighting is Debilitated' : `Roll ${inst.subtype || ruleSkill.name} (${ruleSkill.name}) check`)"
+                >
+                  <i :class="(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) ? 'ri-close-line' : 'ri-dice-line'"></i>
+                  <span class="skill-roll-val">
+                    {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name)) }}
+                  </span>
+                </button>
               </div>
-            </div>
+            </template>
           </template>
 
           <!-- 2. Standard Non-Subtype Skills (Acrobatics, Athletics, Deception, etc.) -->
@@ -616,8 +614,9 @@ function isSignatureSkill(bonus, ranks) {
   return (Number(ranks) || 0) >= 5 || (Number(bonus) || 0) >= 10;
 }
 
-function rollSkill(skillTitle, bonus) {
-  if (skillTitle.toLowerCase().includes('close combat') && heroStore.conditionModifiers.cannotCloseAttack) {
+function rollSkill(skillTitle, bonus, baseSkill = null) {
+  const isCloseCombat = (baseSkill === 'Close Combat') || skillTitle.toLowerCase().includes('close combat');
+  if (isCloseCombat && heroStore.conditionModifiers.cannotCloseAttack) {
     uiStore.showToast('Cannot make close attacks while Fighting is Debilitated', 'error');
     return;
   }
@@ -859,10 +858,10 @@ function rollSkill(skillTitle, bonus) {
 /* 4-Column Table Header */
 .sheet-skills-table-header {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto 60px;
+  grid-template-columns: 30px minmax(0, 1fr) auto 54px;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0.3rem 0.55rem;
+  gap: 0.4rem;
+  padding: 0.3rem 0.45rem;
   font-size: 0.64rem;
   font-weight: 800;
   color: var(--text-muted);
@@ -904,14 +903,14 @@ function rollSkill(skillTitle, bonus) {
 /* Skill Rows (Zero Truncation Grid) */
 .sheet-skill-row {
   display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto 60px;
+  grid-template-columns: 30px minmax(0, 1fr) auto 54px;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid rgba(255, 255, 255, 0.04);
   border-left: 2.5px solid transparent;
   border-radius: var(--radius-sm);
-  padding: 0.32rem 0.55rem;
+  padding: 0.32rem 0.45rem;
   transition: background-color var(--trans-fast), border-color var(--trans-fast);
 }
 
@@ -928,25 +927,6 @@ function rollSkill(skillTitle, bonus) {
 .sheet-skill-row.is-signature {
   background: rgba(0, 111, 184, 0.06);
   border-left-color: var(--accent-primary);
-}
-
-.sheet-skill-row.is-specialization {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto 60px;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.32rem 0.55rem 0.32rem 1.25rem;
-  background: rgba(56, 189, 248, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-left: 2px solid rgba(56, 189, 248, 0.45);
-  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
-  transition: background-color var(--trans-fast), border-color var(--trans-fast);
-}
-
-.sheet-skill-row.is-specialization:hover {
-  background: rgba(56, 189, 248, 0.06);
-  border-color: rgba(56, 189, 248, 0.25);
-  border-left-color: #38bdf8;
 }
 
 /* Ability Badges (Refined Triad Calibration) */
@@ -1004,6 +984,7 @@ function rollSkill(skillTitle, bonus) {
 .sheet-skill-title-row {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 0.35rem;
   min-width: 0;
 }
@@ -1016,6 +997,8 @@ function rollSkill(skillTitle, bonus) {
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.25;
+  flex: 1;
+  min-width: 0;
 }
 
 .sheet-skill-row.is-trained .sheet-skill-name {
@@ -1089,6 +1072,32 @@ function rollSkill(skillTitle, bonus) {
   align-items: center;
   justify-content: center;
   gap: 0.25rem;
+  position: relative;
+}
+
+.btn-delete-spec-hover {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 0.85rem;
+  padding: 0;
+  width: 14px;
+  height: 14px;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color var(--trans-fast);
+}
+
+.sheet-skill-row:hover .btn-delete-spec-hover {
+  display: flex;
+}
+
+.btn-delete-spec-hover:hover {
+  color: #ef4444;
+  opacity: 1;
 }
 
 .stepper-compact {
@@ -1240,71 +1249,16 @@ function rollSkill(skillTitle, bonus) {
   box-shadow: var(--shadow-sm);
 }
 
-/* Specialization grouping */
-.spec-group-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  background: transparent;
-  border: none;
-  padding: 0;
+.spec-unspecialized-row {
+  border-style: dashed;
+  border-color: rgba(255, 255, 255, 0.08);
 }
 
-.spec-group-container.has-specs {
-  border: none;
-}
-
-.spec-parent-row {
-  display: grid;
-  grid-template-columns: 32px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.32rem 0.55rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.04);
-  border-left: 2.5px solid transparent;
-  border-radius: var(--radius-sm);
-  transition: background-color var(--trans-fast), border-color var(--trans-fast);
-}
-
-.spec-parent-row:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(255, 255, 255, 0.1);
-}
-
-.spec-parent-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.1rem;
-  min-width: 0;
-}
-
-.spec-parent-name {
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: #fff;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.spec-count-tag {
-  background: rgba(56, 189, 248, 0.15);
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  color: #38bdf8;
-  font-size: 0.6rem;
-  font-weight: 800;
-  padding: 0.05rem 0.3rem;
-  border-radius: var(--radius-xs, 3px);
-  line-height: 1;
-  flex-shrink: 0;
-}
-
-.spec-parent-actions {
+.spec-unspecialized-action {
+  grid-column: 3 / 5;
+  justify-self: end;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
 }
 
 .btn-spec-inline-add {
@@ -1333,50 +1287,6 @@ function rollSkill(skillTitle, bonus) {
 
 .btn-spec-inline-add:active {
   transform: scale(0.95);
-}
-
-.spec-instances-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-  padding: 0;
-  margin: 0;
-  border: none;
-}
-
-/* Zero Truncation Subtype Name */
-.spec-child-info {
-  min-width: 0;
-}
-
-.spec-subtype-name {
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: #e2e8f0;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  line-height: 1.25;
-}
-
-.sheet-skill-row.is-trained .spec-subtype-name {
-  color: #fff;
-}
-
-.btn-delete-spec {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0.1rem;
-  display: flex;
-  align-items: center;
-  transition: color var(--trans-fast);
-}
-
-.btn-delete-spec:hover {
-  color: #ef4444;
 }
 
 .empty-hint {

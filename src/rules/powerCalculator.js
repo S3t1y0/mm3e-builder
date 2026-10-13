@@ -522,12 +522,36 @@ export function calculatePowerDetailedBreakdown(rawPower) {
  * Area or Perception attacks have NO attack check, so:
  *   Effect Rank <= Power Level
  */
-export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {}, skills = []) {
+export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {}, skills = [], targetEffect = null) {
   const power = normalizePower(rawPower);
-  const effect = power.mainEffect;
+
+  // Resolve effective target effect:
+  // 1. Explicit targetEffect parameter if provided
+  // 2. For Device container: active sub-power or first offensive/available sub-power
+  // 3. For Compound power: active component or primary/offensive component
+  // 4. Fallback to power.mainEffect
+  let rawTarget = targetEffect;
+  if (!rawTarget) {
+    if (power.type === 'device' && Array.isArray(power.devicePowers) && power.devicePowers.length > 0) {
+      const offensiveSub = power.devicePowers.find(sp => {
+        const b = (sp.effect?.baseEffect || sp.effect?.name || '').toLowerCase();
+        return ['damage', 'blast', 'affliction', 'weaken', 'nullify', 'mind reading', 'mind control'].includes(b);
+      });
+      rawTarget = offensiveSub?.effect || power.devicePowers[0]?.effect;
+    } else if (power.type === 'compound' && Array.isArray(power.compoundEffects) && power.compoundEffects.length > 0) {
+      const primaryComp = power.compoundEffects.find(c => c.isPrimaryAction) || power.compoundEffects.find(c => {
+        const b = (c.effect?.baseEffect || c.effect?.name || '').toLowerCase();
+        return ['damage', 'blast', 'affliction', 'weaken', 'nullify', 'mind reading', 'mind control'].includes(b);
+      }) || power.compoundEffects[0];
+      rawTarget = primaryComp?.effect;
+    }
+  }
+
+  const effect = normalizeEffect(rawTarget || power.mainEffect);
 
   const isMoveObjectDamaging = effect.baseEffect === 'Move Object' && effect.extras.some(e => e.name === 'Damaging');
-  const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify'].includes(effect.baseEffect) || isMoveObjectDamaging;
+  const hasAttackExtra = effect.extras.some(e => (e.name || '').toLowerCase() === 'attack');
+  const isOffensive = ['Damage', 'Blast', 'Affliction', 'Weaken', 'Nullify', 'Mind Reading', 'Mind Control'].includes(effect.baseEffect) || isMoveObjectDamaging || hasAttackExtra;
   const isArea = effect.extras.some(e => e.name === 'Area');
   const isPerception = effect.range === 'Perception';
   const isClose = effect.range === 'Close';
@@ -553,12 +577,12 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
     baseBonus = Number(abilities.FGT) || 0;
     const isThrown = /thrown/i.test(power.name || '') || /thrown/i.test(effect.name || '') || effect.extras.some(e => /thrown/i.test(e.name || ''));
     const attackContext = {
-      name: power.name || effect.name,
-      powerName: power.name,
-      effectName: effect.name,
+      name: effect.name || power.name,
+      powerName: power.name || effect.name,
+      effectName: effect.name || effect.baseEffect,
       baseEffect: effect.baseEffect,
-      descriptors: Array.isArray(power.descriptors) ? power.descriptors : [],
-      description: power.description || effect.description || '',
+      descriptors: Array.isArray(effect.descriptors && effect.descriptors.length > 0 ? effect.descriptors : power.descriptors) ? (effect.descriptors?.length ? effect.descriptors : power.descriptors) : [],
+      description: effect.description || power.description || '',
       isThrown,
       range: 'Close'
     };
@@ -568,12 +592,12 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
     baseBonus = Number(abilities.DEX) || 0;
     const isThrown = /thrown/i.test(power.name || '') || /thrown/i.test(effect.name || '') || effect.extras.some(e => /thrown/i.test(e.name || ''));
     const attackContext = {
-      name: power.name || effect.name,
-      powerName: power.name,
-      effectName: effect.name,
+      name: effect.name || power.name,
+      powerName: power.name || effect.name,
+      effectName: effect.name || effect.baseEffect,
       baseEffect: effect.baseEffect,
-      descriptors: Array.isArray(power.descriptors) ? power.descriptors : [],
-      description: power.description || effect.description || '',
+      descriptors: Array.isArray(effect.descriptors && effect.descriptors.length > 0 ? effect.descriptors : power.descriptors) ? (effect.descriptors?.length ? effect.descriptors : power.descriptors) : [],
+      description: effect.description || power.description || '',
       isThrown,
       range: 'Ranged'
     };
@@ -602,10 +626,15 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
   } else if (effect.baseEffect === 'Nullify') {
     dc = 10 + effect.ranks;
     dcDescription = `DC ${dc} vs Will`;
-  } else {
+  } else if (isOffensive || hasAttackExtra || (effect.resistance && effect.resistance.toLowerCase() !== 'none' && effect.resistance !== '-')) {
     dc = 10 + effect.ranks;
-    dcDescription = `DC ${dc}`;
+    const resDefense = effect.resistance || 'Dodge or Will';
+    dcDescription = `DC ${dc} vs ${resDefense}`;
+  } else {
+    dc = null;
+    dcDescription = 'None (Utility)';
   }
+
   let rangeDistance = 'Close (5 ft)';
   if (effect.range === 'Ranged') {
     const shortR = effect.ranks * 25;
@@ -617,6 +646,7 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
   } else if (effect.range === 'Personal') {
     rangeDistance = 'Personal';
   }
+
   let isCompliant = true;
   let maxAllowed = 2 * heroPL;
   let currentTotal = 0;
@@ -646,6 +676,8 @@ export function calculatePowerCombatMetrics(rawPower, heroPL = 10, abilities = {
   }
 
   return {
+    effectName: effect.name || effect.baseEffect,
+    baseEffect: effect.baseEffect,
     isOffensive,
     attackType,
     attackBonus: finalAttackBonus,

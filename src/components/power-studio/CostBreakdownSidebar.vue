@@ -1,34 +1,30 @@
 <template>
-  <aside class="cost-breakdown-sidebar">
-    <!-- Big Point Total Badge -->
-    <div class="total-cost-card">
-      <span class="total-badge-label">Total Power Points</span>
-      <div class="total-badge-value">
-        <span class="number">{{ builderStore.totalCost }}</span>
+  <aside class="cost-breakdown-sidebar pro-inspector-panel">
+    <!-- ZONE 1: MINIMALIST COST HEADER -->
+    <header class="inspector-cost-header">
+      <span class="inspector-badge-label">Total Power Points</span>
+      <div class="inspector-badge-value">
+        <span class="number font-mono">{{ builderStore.totalCost }}</span>
         <span class="unit">PP</span>
       </div>
       <span class="structure-caption">{{ structureText }}</span>
+    </header>
 
-      <!-- Quick Hero Budget Impact Chip -->
-      <div class="power-budget-chip" :class="isOverBudget ? 'chip-over' : 'chip-ok'">
-        <i :class="isOverBudget ? 'ri-error-warning-fill' : 'ri-wallet-3-line'"></i>
-        <span>Hero: {{ projectedTotalSpentPP }}/{{ totalBudgetPP }} PP ({{ isOverBudget ? `${Math.abs(projectedRemainingPP)} PP over` : `${projectedRemainingPP} PP left` }})</span>
-      </div>
-    </div>
+    <div class="inspector-divider"></div>
 
-    <!-- Math Formula Card -->
-    <div class="sidebar-section-card">
-      <div class="section-title">
-        <i class="ri-calculator-line"></i>
-        <span>Power Point Breakdown</span>
+    <!-- ZONE 2: PRO FORMULA LEDGER (POWER POINT BREAKDOWN) -->
+    <section class="inspector-section">
+      <div class="inspector-section-header">
+        <i class="ri-calculator-line section-icon"></i>
+        <span class="section-title-text">Power Point Breakdown</span>
       </div>
 
-      <div v-if="builderStore.breakdown" class="breakdown-lines">
+      <div v-if="builderStore.breakdown" class="ledger-table">
         <!-- If Device -->
         <template v-if="builderStore.power.type === 'device'">
-          <div class="math-line">
-            <span class="line-label">Sub-Powers Raw Total:</span>
-            <span class="line-val">{{ builderStore.breakdown.subtotalBeforeDiscount || 0 }} PP</span>
+          <div class="ledger-row">
+            <span class="ledger-label">Sub-Powers Raw Total:</span>
+            <span class="ledger-val font-mono">{{ builderStore.breakdown.subtotalBeforeDiscount || 0 }} PP</span>
           </div>
 
           <div
@@ -37,261 +33,271 @@
             class="sub-breakdown-row"
           >
             <span class="sub-name-txt">• {{ sub.name }}:</span>
-            <span class="sub-cost-txt">{{ sub.totalCost }} PP</span>
+            <span class="sub-cost-txt font-mono">{{ sub.totalCost }} PP</span>
           </div>
 
-          <div v-if="builderStore.power.activation && builderStore.power.activation !== 'none'" class="math-line discount-line">
-            <span class="line-label">
+          <div v-if="builderStore.power.activation && builderStore.power.activation !== 'none'" class="ledger-row discount-row">
+            <span class="ledger-label">
               Activation ({{ builderStore.power.activation === 'move' ? 'Move Action' : 'Standard Action' }}):
             </span>
-            <span class="line-val discount">{{ builderStore.breakdown.activationCost }} PP</span>
+            <span class="ledger-val discount font-mono">{{ builderStore.breakdown.activationCost }} PP</span>
           </div>
 
-          <div class="math-line discount-line">
-            <span class="line-label">
+          <div class="ledger-row discount-row">
+            <span class="ledger-label">
               {{ builderStore.power.deviceConfig?.type === 'easily_removable' ? 'Easily Removable (-2/5 PP):' : 'Removable (-1/5 PP):' }}
             </span>
-            <span class="line-val discount">-{{ builderStore.breakdown.discount || 0 }} PP</span>
+            <span class="ledger-val discount font-mono">-{{ builderStore.breakdown.discount || 0 }} PP</span>
           </div>
 
-          <div class="math-divider"></div>
+          <div class="ledger-divider"></div>
 
-          <div class="math-line total-line">
-            <span class="line-label">Final Device Cost:</span>
-            <span class="line-val highlight">{{ builderStore.totalCost }} PP</span>
+          <div class="ledger-row total-row">
+            <span class="ledger-label">Final Device Cost:</span>
+            <span class="ledger-val highlight font-mono">{{ builderStore.totalCost }} PP</span>
           </div>
         </template>
 
         <!-- If Compound Power -->
         <template v-else-if="builderStore.power.type === 'compound'">
-          <div class="math-line">
-            <span class="line-label">Sub-Effects Total:</span>
-            <span class="line-val">{{ builderStore.breakdown.subtotalEffects || 0 }} PP</span>
+          <div class="ledger-row">
+            <span class="ledger-label">Sub-Effects Total:</span>
+            <span class="ledger-val font-mono">{{ builderStore.breakdown.effectsSum ?? builderStore.breakdown.subtotalEffects ?? 0 }} PP</span>
           </div>
 
           <div
-            v-for="(sub, sIdx) in (builderStore.breakdown.subEffectBreakdowns || [])"
+            v-for="(sub, sIdx) in (builderStore.breakdown.compoundBreakdowns || builderStore.breakdown.subEffectBreakdowns || [])"
             :key="sub.id || sIdx"
             class="sub-breakdown-row"
           >
             <span class="sub-name-txt">
-              • {{ sub.name }} (Rank {{ sub.rank }}):
-              <small v-if="sub.isPrimary" class="primary-badge">PRIMARY</small>
+              • {{ sub.name }} (Rank {{ sub.ranks ?? sub.rank ?? 1 }}):
+              <small v-if="sub.isPrimaryAction || sub.isPrimary" class="primary-badge">PRIMARY</small>
             </span>
-            <span class="sub-cost-txt">{{ sub.totalCost }} PP</span>
+            <span class="sub-cost-txt font-mono">{{ sub.totalCost ?? sub.cost }} PP</span>
           </div>
 
-          <div v-if="(builderStore.power.sharedModifiers || []).length > 0" class="math-line">
-            <span class="line-label">Suite Modifiers:</span>
-            <span class="line-val">
-              {{ (builderStore.breakdown.sharedModifiersCost || 0) >= 0 ? `+${builderStore.breakdown.sharedModifiersCost || 0}` : builderStore.breakdown.sharedModifiersCost }} PP
+          <div v-if="(builderStore.power.sharedModifiers || []).length > 0" class="ledger-row">
+            <span class="ledger-label">Suite Modifiers:</span>
+            <span class="ledger-val font-mono">
+              {{ (builderStore.breakdown.sharedFlatTotal ?? builderStore.breakdown.sharedModifiersCost ?? 0) >= 0 ? `+${builderStore.breakdown.sharedFlatTotal ?? builderStore.breakdown.sharedModifiersCost ?? 0}` : (builderStore.breakdown.sharedFlatTotal ?? builderStore.breakdown.sharedModifiersCost) }} PP
             </span>
           </div>
 
-          <div v-if="builderStore.power.activation && builderStore.power.activation !== 'none'" class="math-line discount-line">
-            <span class="line-label">
+          <div v-if="builderStore.power.activation && builderStore.power.activation !== 'none'" class="ledger-row discount-row">
+            <span class="ledger-label">
               Activation ({{ builderStore.power.activation === 'move' ? 'Move Action' : 'Standard Action' }}):
             </span>
-            <span class="line-val discount">{{ builderStore.breakdown.activationCost }} PP</span>
+            <span class="ledger-val discount font-mono">{{ builderStore.breakdown.activationCost }} PP</span>
           </div>
 
-          <div class="math-divider"></div>
+          <div class="ledger-divider"></div>
 
-          <div class="math-line total-line">
-            <span class="line-label">Final Compound Cost:</span>
-            <span class="line-val highlight">{{ builderStore.totalCost }} PP</span>
+          <div class="ledger-row total-row">
+            <span class="ledger-label">Final Compound Cost:</span>
+            <span class="ledger-val highlight font-mono">{{ builderStore.totalCost }} PP</span>
           </div>
         </template>
 
         <!-- Standard or Array -->
         <template v-else>
-          <div class="math-line">
-            <span class="line-label">Base Effect ({{ activeEffCost.netPerRank }} PP/Rank):</span>
-            <span class="line-val">{{ activeEffCost.basePointCost }} PP</span>
+          <div class="ledger-row">
+            <span class="ledger-label">
+              Base Effect ({{ activeEffCost.divisor ? `1 PP/${activeEffCost.divisor} Rk` : `${activeEffCost.netPerRank} PP/Rk` }} × {{ builderStore.currentEditingEffect?.ranks ?? builderStore.currentEditingEffect?.rank ?? builderStore.power.mainEffect?.ranks ?? 1 }} Rk):
+            </span>
+            <span class="ledger-val font-mono">{{ activeEffCost.basePointCost }} PP</span>
           </div>
 
-          <div v-if="activeEffCost.flatTotal !== 0" class="math-line">
-            <span class="line-label">Flat Extras / Flaws:</span>
-            <span class="line-val">{{ activeEffCost.flatTotal > 0 ? `+${activeEffCost.flatTotal}` : activeEffCost.flatTotal }} PP</span>
+          <div v-if="activeEffCost.flatTotal !== 0" class="ledger-row">
+            <span class="ledger-label">Flat Extras / Flaws:</span>
+            <span class="ledger-val font-mono">{{ activeEffCost.flatTotal > 0 ? `+${activeEffCost.flatTotal}` : activeEffCost.flatTotal }} PP</span>
           </div>
 
-          <div v-if="builderStore.power.linkedEffects?.length > 0" class="math-line">
-            <span class="line-label">Linked Effects ({{ builderStore.power.linkedEffects.length }}):</span>
-            <span class="line-val">+{{ builderStore.power.linkedEffects.reduce((s, l) => s + (calculateEffectCost(l, 0).totalCost), 0) }} PP</span>
+          <div v-if="builderStore.power.linkedEffects?.length > 0" class="ledger-row">
+            <span class="ledger-label">Linked Effects ({{ builderStore.power.linkedEffects.length }}):</span>
+            <span class="ledger-val font-mono">+{{ builderStore.power.linkedEffects.reduce((s, l) => s + (calculateEffectCost(l, 0).totalCost), 0) }} PP</span>
           </div>
 
-          <div v-if="(builderStore.power.alternateEffects || []).length > 0" class="math-line">
-            <span class="line-label">Alternate Effects ({{ builderStore.power.alternateEffects.length }}):</span>
-            <span class="line-val">+{{ (builderStore.power.alternateEffects || []).reduce((s, a) => s + (a.isDynamic ? 2 : 1), 0) }} PP</span>
+          <div v-if="(builderStore.power.alternateEffects || []).length > 0" class="ledger-row">
+            <span class="ledger-label">Alternate Effects ({{ builderStore.power.alternateEffects.length }}):</span>
+            <span class="ledger-val font-mono">+{{ (builderStore.power.alternateEffects || []).reduce((s, a) => s + (a.isDynamic ? 2 : 1), 0) }} PP</span>
           </div>
 
-          <div v-if="builderStore.power.activation && builderStore.power.activation !== 'none'" class="math-line discount-line">
-            <span class="line-label">
+          <div v-if="builderStore.power.activation && builderStore.power.activation !== 'none'" class="ledger-row discount-row">
+            <span class="ledger-label">
               Activation ({{ builderStore.power.activation === 'move' ? 'Move Action' : 'Standard Action' }}):
             </span>
-            <span class="line-val discount">{{ builderStore.breakdown.activationCost }} PP</span>
+            <span class="ledger-val discount font-mono">{{ builderStore.breakdown.activationCost }} PP</span>
           </div>
 
-          <div class="math-divider"></div>
+          <div class="ledger-divider"></div>
 
-          <div class="math-line total-line">
-            <span class="line-label">Final Power Cost:</span>
-            <span class="line-val highlight">{{ builderStore.totalCost }} PP</span>
+          <div class="ledger-row total-row">
+            <span class="ledger-label">Final Power Cost:</span>
+            <span class="ledger-val highlight font-mono">{{ builderStore.totalCost }} PP</span>
           </div>
         </template>
       </div>
-    </div>
+    </section>
 
-    <!-- Character PP Spend & Budget Impact Card -->
-    <div class="sidebar-section-card pp-spend-card">
-      <div class="section-title">
-        <i class="ri-pie-chart-2-line"></i>
-        <span>Character PP Spend</span>
+    <div class="inspector-divider"></div>
+
+    <!-- ZONE 3: CHARACTER BUDGET & SEGMENTED DISTRIBUTION -->
+    <section class="inspector-section">
+      <div class="inspector-section-header">
+        <i class="ri-pie-chart-2-line section-icon"></i>
+        <span class="section-title-text">Character PP Spend</span>
         <span class="hero-pl-tag">PL {{ heroStore.character.powerLevel || 10 }}</span>
       </div>
 
-      <!-- Budget Status Summary -->
-      <div class="spend-summary-box">
-        <div class="spend-val-row">
-          <div class="spend-main-col">
-            <span class="spend-sub-label">Projected Total</span>
-            <div class="spend-num-row font-mono">
-              <span class="spend-spent" :class="{ 'over-budget': isOverBudget }">{{ projectedTotalSpentPP }}</span>
-              <span class="spend-slash">/</span>
-              <span class="spend-budget">{{ totalBudgetPP }}</span>
-              <span class="spend-unit">PP</span>
-            </div>
-          </div>
-          <div class="spend-badge-col">
-            <span
-              class="pp-status-pill"
-              :class="isOverBudget ? 'pill-over' : 'pill-ok'"
-            >
-              <i :class="isOverBudget ? 'ri-error-warning-fill' : 'ri-checkbox-circle-fill'"></i>
-              {{ isOverBudget ? `${Math.abs(projectedRemainingPP)} PP Over` : `${projectedRemainingPP} PP Left` }}
-            </span>
+      <!-- Budget Status Line -->
+      <div class="budget-status-row">
+        <div class="budget-spent-block">
+          <span class="budget-sub-label">Projected Spend</span>
+          <div class="budget-figures font-mono">
+            <span class="num-spent" :class="{ 'over-budget': isOverBudget }">{{ projectedTotalSpentPP }}</span>
+            <span class="num-slash">/</span>
+            <span class="num-budget">{{ totalBudgetPP }}</span>
+            <span class="num-unit">PP</span>
           </div>
         </div>
-
-        <!-- Dynamic Progress Meter -->
-        <div class="pp-meter-track" :title="`${projectedPercent}% of ${totalBudgetPP} PP spent`">
-          <div
-            class="pp-meter-fill"
-            :class="{ 'meter-over': isOverBudget }"
-            :style="{ width: projectedPercent + '%' }"
-          ></div>
+        <div class="budget-status-pill" :class="isOverBudget ? 'pill-over' : 'pill-ok'">
+          <i :class="isOverBudget ? 'ri-error-warning-fill' : 'ri-checkbox-circle-fill'"></i>
+          <span>{{ isOverBudget ? `${Math.abs(projectedRemainingPP)} PP Over` : `${projectedRemainingPP} PP Left` }}</span>
         </div>
+      </div>
 
-        <!-- Delta Context Line -->
-        <div class="spend-delta-row">
-          <span class="delta-label">
-            {{ isEditingExisting ? 'Modifying Power:' : 'New Power:' }}
-          </span>
-          <span class="delta-val" :class="powerCostDelta > 0 ? 'delta-increase' : powerCostDelta < 0 ? 'delta-decrease' : 'delta-zero'">
-            {{ powerCostDelta > 0 ? `+${powerCostDelta}` : powerCostDelta }} PP
-            <small v-if="isEditingExisting && originalPowerCost !== builderStore.totalCost" class="delta-prev">
-              (was {{ originalPowerCost }} PP)
+      <!-- Segmented Multi-Color Progress Meter -->
+      <div
+        class="segmented-meter-track"
+        :title="`Abilities: ${heroStore.totalAbilityPP} PP, Defenses: ${heroStore.totalDefensePP} PP, Skills: ${heroStore.totalSkillPP} PP, Advantages: ${heroStore.totalAdvantagePP} PP, Powers: ${projectedPowersCost} PP`"
+      >
+        <div class="segment segment-abilities" :style="{ width: budgetPercentages.abilities + '%' }" title="Abilities"></div>
+        <div class="segment segment-defenses" :style="{ width: budgetPercentages.defenses + '%' }" title="Defenses"></div>
+        <div class="segment segment-skills" :style="{ width: budgetPercentages.skills + '%' }" title="Skills"></div>
+        <div class="segment segment-advantages" :style="{ width: budgetPercentages.advantages + '%' }" title="Advantages"></div>
+        <div class="segment segment-powers" :class="{ 'segment-over': isOverBudget }" :style="{ width: budgetPercentages.powers + '%' }" title="Powers & Devices"></div>
+      </div>
+
+      <!-- Delta Context Line -->
+      <div class="spend-delta-row">
+        <span class="delta-label">
+          {{ isEditingExisting ? 'Modifying Power:' : 'New Power:' }}
+        </span>
+        <span class="delta-val font-mono" :class="powerCostDelta > 0 ? 'delta-increase' : powerCostDelta < 0 ? 'delta-decrease' : 'delta-zero'">
+          {{ powerCostDelta > 0 ? `+${powerCostDelta}` : powerCostDelta }} PP
+          <small v-if="isEditingExisting && originalPowerCost !== builderStore.totalCost" class="delta-prev">
+            (was {{ originalPowerCost }} PP)
+          </small>
+        </span>
+      </div>
+
+      <!-- Category Allocation Distribution Grid -->
+      <div class="allocation-grid">
+        <div class="alloc-item">
+          <span class="alloc-dot dot-abilities"></span>
+          <span class="alloc-name">Abilities:</span>
+          <span class="alloc-num font-mono">{{ heroStore.totalAbilityPP }} PP</span>
+        </div>
+        <div class="alloc-item">
+          <span class="alloc-dot dot-defenses"></span>
+          <span class="alloc-name">Defenses:</span>
+          <span class="alloc-num font-mono">{{ heroStore.totalDefensePP }} PP</span>
+        </div>
+        <div class="alloc-item">
+          <span class="alloc-dot dot-skills"></span>
+          <span class="alloc-name">Skills:</span>
+          <span class="alloc-num font-mono">{{ heroStore.totalSkillPP }} PP</span>
+        </div>
+        <div class="alloc-item">
+          <span class="alloc-dot dot-advantages"></span>
+          <span class="alloc-name">Advantages:</span>
+          <span class="alloc-num font-mono">{{ heroStore.totalAdvantagePP }} PP</span>
+        </div>
+        <div class="alloc-item alloc-highlight">
+          <span class="alloc-dot dot-powers"></span>
+          <span class="alloc-name">Powers:</span>
+          <span class="alloc-num font-mono highlight">
+            {{ projectedPowersCost }} PP
+            <small v-if="projectedPowersCost !== heroStore.totalPowerPP" class="alloc-sub">
+              ({{ heroStore.totalPowerPP }} now)
             </small>
           </span>
         </div>
       </div>
+    </section>
 
-      <!-- Category Breakdown (Abilities, Defenses, Skills, Advantages, Powers) -->
-      <div class="spend-breakdown-wrap">
-        <button
-          type="button"
-          class="btn-toggle-categories"
-          @click="showCategoryDetails = !showCategoryDetails"
-          title="Toggle detailed point allocation breakdown"
-        >
-          <span class="btn-toggle-title">Allocation Breakdown</span>
-          <i class="ri-arrow-down-s-line chevron" :class="{ rotated: showCategoryDetails }"></i>
-        </button>
+    <div class="inspector-divider"></div>
 
-        <div v-if="showCategoryDetails" class="category-breakdown-list">
-          <div class="cat-math-line">
-            <span class="cat-label"><i class="ri-user-star-line icon-cat"></i> Abilities:</span>
-            <span class="cat-val">{{ heroStore.totalAbilityPP }} PP</span>
-          </div>
-          <div class="cat-math-line">
-            <span class="cat-label"><i class="ri-shield-line icon-cat"></i> Defenses:</span>
-            <span class="cat-val">{{ heroStore.totalDefensePP }} PP</span>
-          </div>
-          <div class="cat-math-line">
-            <span class="cat-label"><i class="ri-focus-2-line icon-cat"></i> Skills:</span>
-            <span class="cat-val">{{ heroStore.totalSkillPP }} PP</span>
-          </div>
-          <div class="cat-math-line">
-            <span class="cat-label"><i class="ri-medal-line icon-cat"></i> Advantages:</span>
-            <span class="cat-val">{{ heroStore.totalAdvantagePP }} PP</span>
-          </div>
-          <div class="cat-math-line cat-highlight">
-            <span class="cat-label"><i class="ri-flashlight-line icon-cat"></i> Powers & Devices:</span>
-            <span class="cat-val highlight">
-              {{ projectedPowersCost }} PP
-              <small v-if="projectedPowersCost !== heroStore.totalPowerPP" class="cat-sub">
-                ({{ heroStore.totalPowerPP }} now)
-              </small>
-            </span>
-          </div>
+    <!-- ZONE 4: COMBAT PROFILE & TACTICAL VALIDATION -->
+    <section class="inspector-section">
+      <div class="inspector-section-header">
+        <div class="header-title-group">
+          <i class="ri-sword-line section-icon"></i>
+          <span class="section-title-text">Combat Profile</span>
         </div>
-      </div>
-    </div>
-
-    <!-- Combat Profile Preview & PL Cap Check -->
-    <div class="sidebar-section-card">
-      <div class="section-title">
-        <i class="ri-sword-line"></i>
-        <span>Combat Profile & PL Check</span>
-      </div>
-
-      <div v-if="combatProfile" class="combat-profile-lines">
-        <div class="combat-line">
-          <span class="c-label">Difficulty Class:</span>
-          <span class="c-val dc-val">{{ combatProfile.dcDescription || `DC ${combatProfile.dc}` }}</span>
-        </div>
-
-        <div class="combat-line">
-          <span class="c-label">Range Distance:</span>
-          <span class="c-val">{{ combatProfile.rangeDistance }}</span>
-        </div>
-
-        <div class="combat-line">
-          <span class="c-label">Offensive Attack:</span>
-          <span class="c-val">{{ combatProfile.isOffensive ? 'Yes (Attack Roll / Save)' : 'Non-Offensive / Utility' }}</span>
-        </div>
-
-        <!-- PL Cap Indicator -->
-        <div
-          v-if="combatProfile.plCompliance"
-          class="pl-compliance-banner"
-          :class="combatProfile.plCompliance.isCompliant ? 'compliant' : 'exceeded'"
+        <!-- Inline PL Badge -->
+        <span
+          v-if="combatProfile?.plCompliance"
+          class="inline-pl-badge"
+          :class="combatProfile.plCompliance.isCompliant ? 'badge-pl-compliant' : 'badge-pl-exceeded'"
         >
           <i :class="combatProfile.plCompliance.isCompliant ? 'ri-shield-check-line' : 'ri-alert-line'"></i>
-          <div class="pl-text">
-            <span class="pl-title">
-              {{ combatProfile.plCompliance.isCompliant ? 'PL 10 Compliant' : 'Exceeds PL 10 Cap!' }}
-            </span>
-            <span v-if="!combatProfile.plCompliance.isCompliant" class="pl-warn">
-              {{ combatProfile.plCompliance.warningMessage }}
-            </span>
-          </div>
+          {{ combatProfile.plCompliance.isCompliant ? `PL ${heroStore.character.powerLevel || 10} Valid` : 'Cap Exceeded' }}
+        </span>
+      </div>
+
+      <!-- Active Effect Indicator Sub-Bar -->
+      <div v-if="combatProfile.effectName" class="combat-target-indicator">
+        <span class="target-indicator-label">Target:</span>
+        <span class="target-indicator-name font-mono" :title="combatProfile.effectName">
+          {{ combatProfile.effectName }}
+        </span>
+      </div>
+
+      <div class="combat-grid">
+        <!-- DC Check: Full Width Prominent Tile -->
+        <div class="combat-tile dc-tile">
+          <span class="tile-label">DC Check</span>
+          <span class="tile-val font-mono" :title="combatProfile.dcDescription || (combatProfile.dc ? `DC ${combatProfile.dc}` : 'None')">
+            {{ combatProfile.dcDescription || (combatProfile.dc ? `DC ${combatProfile.dc}` : 'None') }}
+          </span>
+        </div>
+        <div class="combat-tile">
+          <span class="tile-label">Range</span>
+          <span class="tile-val" :title="combatProfile.rangeDistance">{{ combatProfile.rangeDistance }}</span>
+        </div>
+        <div class="combat-tile">
+          <span class="tile-label">Type</span>
+          <span class="tile-val" :title="combatProfile.isOffensive ? (combatProfile.attackBonus !== null ? `Offensive (+${combatProfile.attackBonus})` : 'Offensive') : 'Utility'">
+            {{ combatProfile.isOffensive ? (combatProfile.attackBonus !== null ? `Offensive (+${combatProfile.attackBonus})` : 'Offensive') : 'Utility' }}
+          </span>
         </div>
       </div>
-    </div>
+
+      <!-- Warning Banner only if PL Cap is Exceeded -->
+      <div
+        v-if="combatProfile?.plCompliance && !combatProfile.plCompliance.isCompliant"
+        class="pl-exceeded-alert"
+      >
+        <i class="ri-alert-line alert-icon"></i>
+        <div class="alert-content">
+          <span class="alert-title">Exceeds Power Level Cap</span>
+          <span class="alert-msg">{{ combatProfile.plCompliance.warningMessage }}</span>
+        </div>
+      </div>
+    </section>
   </aside>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { computed } from 'vue';
 import { usePowerBuilderStore } from '../../stores/powerBuilderStore.js';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { calculateEffectCost, calculatePowerTotalCost } from '../../rules/powerEngine.js';
 
 const builderStore = usePowerBuilderStore();
 const heroStore = useHeroStore();
-
-const showCategoryDetails = ref(true);
 
 const totalBudgetPP = computed(() => heroStore.totalBudgetPP);
 
@@ -336,11 +342,6 @@ const projectedPowersCost = computed(() => {
   return heroStore.totalPowerPP + builderStore.totalCost;
 });
 
-const projectedPercent = computed(() => {
-  if (!totalBudgetPP.value || totalBudgetPP.value <= 0) return 0;
-  return Math.min(100, Math.max(0, Math.round((projectedTotalSpentPP.value / totalBudgetPP.value) * 100)));
-});
-
 const isOverBudget = computed(() => projectedRemainingPP.value < 0);
 
 const structureText = computed(() => {
@@ -370,109 +371,132 @@ const activeEffCost = computed(() => {
 const combatProfile = computed(() => {
   return builderStore.combatMetrics;
 });
+
+const budgetPercentages = computed(() => {
+  const total = totalBudgetPP.value || 150;
+  return {
+    abilities: Math.min(100, Math.max(0, ((heroStore.totalAbilityPP || 0) / total) * 100)),
+    defenses: Math.min(100, Math.max(0, ((heroStore.totalDefensePP || 0) / total) * 100)),
+    skills: Math.min(100, Math.max(0, ((heroStore.totalSkillPP || 0) / total) * 100)),
+    advantages: Math.min(100, Math.max(0, ((heroStore.totalAdvantagePP || 0) / total) * 100)),
+    powers: Math.min(100, Math.max(0, ((projectedPowersCost.value || 0) / total) * 100))
+  };
+});
 </script>
 
 <style scoped>
 .cost-breakdown-sidebar {
+  padding-bottom: 2rem;
+}
+
+/* Pro Inspector Panel Container (Single Cohesive Box, Zero Card-in-Card) */
+.pro-inspector-panel {
   display: flex;
   flex-direction: column;
-  gap: 0.85rem;
+  background: var(--bg-surface, #0f172a);
+  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
+  border-radius: var(--radius-md, 6px);
+  padding: 0.95rem 0.9rem 1.25rem;
   width: 100%;
   max-width: 100%;
   box-sizing: border-box;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
 }
 
-.total-cost-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 1.15rem 1.25rem;
+/* Subtle Interior Dividers */
+.inspector-divider {
+  height: 1px;
+  background: var(--border-subtle, rgba(255, 255, 255, 0.07));
+  margin: 0.65rem 0;
+  width: 100%;
+}
+
+/* Zone 1: Minimalist Cost Header */
+.inspector-cost-header {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   gap: 0.2rem;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 }
 
-.total-badge-label {
-  font-size: 0.72rem;
+.inspector-badge-label {
+  font-size: 0.7rem;
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
 }
 
-.total-badge-value {
+.inspector-badge-value {
   display: flex;
   align-items: baseline;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
-.total-badge-value .number {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: var(--accent-primary);
+.inspector-badge-value .number {
+  font-size: 2.3rem;
+  font-weight: 900;
+  color: var(--accent-primary, #38bdf8);
   font-variant-numeric: tabular-nums;
-  line-height: 1.1;
+  line-height: 1;
 }
 
-.total-badge-value .unit {
-  font-size: 1.1rem;
+.inspector-badge-value .unit {
+  font-size: 1.05rem;
   font-weight: 800;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #cbd5e1);
 }
 
 .structure-caption {
-  font-size: 0.72rem;
-  color: var(--text-secondary);
-  margin-top: 0.15rem;
+  font-size: 0.74rem;
+  color: var(--text-secondary, #cbd5e1);
+  margin-top: 0.2rem;
   line-height: 1.35;
   word-break: break-word;
 }
 
-.sidebar-section-card {
-  background: var(--bg-surface);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
-  padding: 0.95rem;
+/* Generic Section Styles */
+.inspector-section {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 0.65rem;
 }
 
-.section-title {
+.inspector-section-header {
   display: flex;
   align-items: center;
   gap: 0.45rem;
-  font-size: 0.76rem;
+}
+
+.section-icon {
+  font-size: 0.9rem;
+  color: var(--accent-primary, #38bdf8);
+}
+
+.section-title-text {
+  font-size: 0.74rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: var(--text-secondary);
-  letter-spacing: 0.06em;
-  border-bottom: 1px solid var(--border-subtle);
-  padding-bottom: 0.45rem;
+  color: var(--text-secondary, #cbd5e1);
+  letter-spacing: 0.05em;
 }
 
-.section-title i {
-  color: var(--accent-primary);
-}
-
-.breakdown-lines {
+/* Zone 2: Formula Ledger */
+.ledger-table {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 0.35rem;
 }
 
-.math-line {
+.ledger-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
-  font-size: 0.76rem;
+  font-size: 0.75rem;
 }
 
-.line-label {
-  color: var(--text-secondary);
+.ledger-label {
+  color: var(--text-secondary, #cbd5e1);
   flex: 1;
   min-width: 0;
   overflow: hidden;
@@ -480,9 +504,9 @@ const combatProfile = computed(() => {
   white-space: nowrap;
 }
 
-.line-val {
+.ledger-val {
   font-weight: 700;
-  color: var(--text-primary);
+  color: var(--text-primary, #fff);
   font-variant-numeric: tabular-nums;
   flex-shrink: 0;
   text-align: right;
@@ -496,7 +520,7 @@ const combatProfile = computed(() => {
   gap: 0.5rem;
   font-size: 0.72rem;
   padding-left: 0.5rem;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
 }
 
 .sub-name-txt {
@@ -510,7 +534,7 @@ const combatProfile = computed(() => {
 .sub-cost-txt {
   font-variant-numeric: tabular-nums;
   font-weight: 700;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #cbd5e1);
   flex-shrink: 0;
   text-align: right;
   white-space: nowrap;
@@ -524,235 +548,103 @@ const combatProfile = computed(() => {
   letter-spacing: 0.05em;
 }
 
-.linked-badge {
-  color: #38bdf8;
-  font-weight: 700;
-  font-size: 0.65rem;
-  margin-left: 0.3rem;
-  letter-spacing: 0.05em;
-}
-
-.discount-line .discount {
+.discount-row .discount {
   color: #34d399;
-  font-variant-numeric: tabular-nums;
 }
 
-.math-divider {
+.ledger-divider {
   height: 1px;
-  background: var(--border-subtle);
+  background: var(--border-subtle, rgba(255, 255, 255, 0.06));
   margin: 0.2rem 0;
 }
 
-.total-line {
-  font-size: 0.84rem;
+.total-row {
+  font-size: 0.82rem;
+  padding-top: 0.15rem;
 }
 
-.total-line .highlight {
-  color: var(--accent-primary);
+.total-row .highlight {
+  color: var(--accent-primary, #38bdf8);
   font-size: 0.95rem;
   font-weight: 900;
-  font-variant-numeric: tabular-nums;
 }
 
-.combat-profile-lines {
-  display: flex;
-  flex-direction: column;
-  gap: 0.55rem;
-}
-
-.combat-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  font-size: 0.76rem;
-}
-
-.c-label {
-  color: var(--text-muted);
-  flex-shrink: 0;
-  white-space: nowrap;
-}
-
-.c-val {
-  font-weight: 700;
-  color: var(--text-primary);
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  min-width: 0;
-}
-
-.c-val.dc-val {
-  color: var(--text-primary);
-}
-
-.pl-compliance-banner {
-  display: flex;
-  align-items: flex-start;
-  gap: 0.5rem;
-  padding: 0.55rem 0.75rem;
-  border-radius: var(--radius-xs);
-  margin-top: 0.35rem;
-}
-
-.pl-compliance-banner.compliant {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid var(--border-color);
-  color: var(--text-secondary);
-}
-
-.pl-compliance-banner.compliant i {
-  color: #34d399;
-}
-
-.pl-compliance-banner.exceeded {
-  background: rgba(239, 68, 68, 0.08);
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  color: #f87171;
-}
-
-.pl-compliance-banner i {
-  font-size: 1.1rem;
-  flex-shrink: 0;
-  margin-top: 0.1rem;
-}
-
-.pl-text {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.pl-title {
-  font-size: 0.76rem;
-  font-weight: 800;
-}
-
-.pl-warn {
-  font-size: 0.68rem;
-  color: #fca5a5;
-  line-height: 1.3;
-}
-
-/* Quick Budget Impact Pill inside Total Cost Card */
-.power-budget-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.25rem 0.6rem;
-  border-radius: var(--radius-xs);
-  margin-top: 0.5rem;
-  width: 100%;
-  box-sizing: border-box;
-}
-
-.power-budget-chip.chip-ok {
-  background: rgba(16, 185, 129, 0.12);
-  border: 1px solid rgba(16, 185, 129, 0.28);
-  color: #34d399;
-}
-
-.power-budget-chip.chip-over {
-  background: rgba(239, 68, 68, 0.14);
-  border: 1px solid rgba(239, 68, 68, 0.32);
-  color: #f87171;
-}
-
-/* PP Spend Card & Metrics */
-.pp-spend-card {
-  position: relative;
-}
-
+/* Zone 3: Character Budget & Segmented Distribution */
 .hero-pl-tag {
   margin-left: auto;
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
-  padding: 0.12rem 0.45rem;
+  padding: 0.1rem 0.4rem;
   background: rgba(0, 111, 184, 0.2);
   border: 1px solid rgba(0, 111, 184, 0.4);
-  border-radius: 999px;
+  border-radius: var(--radius-xs, 4px);
   color: #38bdf8;
   letter-spacing: 0.04em;
 }
 
-.spend-summary-box {
-  background: rgba(11, 17, 34, 0.85);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-sm);
-  padding: 0.75rem 0.85rem;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.spend-val-row {
+.budget-status-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 0.5rem;
 }
 
-.spend-main-col {
+.budget-spent-block {
   display: flex;
   flex-direction: column;
   gap: 0.1rem;
 }
 
-.spend-sub-label {
-  font-size: 0.68rem;
+.budget-sub-label {
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
   letter-spacing: 0.05em;
 }
 
-.spend-num-row {
+.budget-figures {
   display: flex;
   align-items: baseline;
-  gap: 0.25rem;
+  gap: 0.2rem;
   line-height: 1.1;
 }
 
-.spend-spent {
-  font-size: 1.35rem;
+.num-spent {
+  font-size: 1.25rem;
   font-weight: 900;
-  color: var(--text-primary);
+  color: var(--text-primary, #fff);
   font-variant-numeric: tabular-nums;
 }
 
-.spend-spent.over-budget {
+.num-spent.over-budget {
   color: #f87171;
 }
 
-.spend-slash {
-  font-size: 0.95rem;
-  color: var(--text-muted);
+.num-slash {
+  font-size: 0.85rem;
+  color: var(--text-muted, #94a3b8);
 }
 
-.spend-budget {
-  font-size: 1.1rem;
+.num-budget {
+  font-size: 1rem;
   font-weight: 800;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #cbd5e1);
   font-variant-numeric: tabular-nums;
 }
 
-.spend-unit {
-  font-size: 0.75rem;
+.num-unit {
+  font-size: 0.72rem;
   font-weight: 700;
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
   margin-left: 0.1rem;
 }
 
-.pp-status-pill {
+.budget-status-pill {
   font-size: 0.7rem;
   font-weight: 800;
-  padding: 0.25rem 0.55rem;
-  border-radius: 999px;
+  padding: 0.22rem 0.55rem;
+  border-radius: var(--radius-xs, 4px);
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
@@ -760,50 +652,69 @@ const combatProfile = computed(() => {
   white-space: nowrap;
 }
 
-.pp-status-pill.pill-ok {
-  background: rgba(16, 185, 129, 0.15);
-  border: 1px solid rgba(16, 185, 129, 0.35);
+.budget-status-pill.pill-ok {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
   color: #34d399;
 }
 
-.pp-status-pill.pill-over {
-  background: rgba(239, 68, 68, 0.18);
-  border: 1px solid rgba(239, 68, 68, 0.4);
+.budget-status-pill.pill-over {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
   color: #f87171;
 }
 
-.pp-meter-track {
+/* Multi-Color Segmented Meter Track */
+.segmented-meter-track {
   width: 100%;
   height: 6px;
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 3px;
+  display: flex;
   overflow: hidden;
-  margin: 0.35rem 0 0.15rem;
+  margin: 0.2rem 0;
 }
 
-.pp-meter-fill {
+.segment {
   height: 100%;
-  background: linear-gradient(90deg, #006fb8, #38bdf8);
-  border-radius: 999px;
   transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.pp-meter-fill.meter-over {
-  background: linear-gradient(90deg, #f59e0b, #ef4444);
+.segment-abilities {
+  background: #38bdf8;
 }
 
+.segment-defenses {
+  background: #10b981;
+}
+
+.segment-skills {
+  background: #a855f7;
+}
+
+.segment-advantages {
+  background: #f59e0b;
+}
+
+.segment-powers {
+  background: #006fb8;
+}
+
+.segment-powers.segment-over {
+  background: #ef4444;
+}
+
+/* Delta Context Line */
 .spend-delta-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
   font-size: 0.72rem;
-  padding-top: 0.25rem;
-  border-top: 1px dashed var(--border-subtle);
-  margin-top: 0.2rem;
+  padding-top: 0.15rem;
 }
 
 .delta-label {
-  color: var(--text-secondary);
+  color: var(--text-muted, #94a3b8);
 }
 
 .delta-val {
@@ -820,111 +731,214 @@ const combatProfile = computed(() => {
 }
 
 .delta-val.delta-zero {
-  color: var(--text-muted);
+  color: var(--text-muted, #94a3b8);
 }
 
 .delta-prev {
-  font-size: 0.66rem;
+  font-size: 0.65rem;
   font-weight: 500;
-  color: var(--text-muted);
-  margin-left: 0.25rem;
+  color: var(--text-muted, #94a3b8);
+  margin-left: 0.2rem;
 }
 
-/* Category Breakdown List */
-.spend-breakdown-wrap {
-  display: flex;
-  flex-direction: column;
-  gap: 0.4rem;
+/* Allocation Grid (Clean 2-Column Distribution) */
+.allocation-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.3rem 0.6rem;
+  padding-top: 0.3rem;
+  border-top: 1px dashed var(--border-subtle, rgba(255, 255, 255, 0.06));
 }
 
-.btn-toggle-categories {
+.alloc-item {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
-  background: transparent;
-  border: none;
-  padding: 0.25rem 0.1rem;
-  color: var(--text-secondary);
-  font-size: 0.72rem;
+  gap: 0.3rem;
+  font-size: 0.7rem;
+}
+
+.alloc-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.dot-abilities { background: #38bdf8; }
+.dot-defenses { background: #10b981; }
+.dot-skills { background: #a855f7; }
+.dot-advantages { background: #f59e0b; }
+.dot-powers { background: #006fb8; }
+
+.alloc-name {
+  color: var(--text-muted, #94a3b8);
+}
+
+.alloc-num {
+  margin-left: auto;
   font-weight: 700;
-  cursor: pointer;
-  border-radius: var(--radius-xs);
-  transition: color 0.15s ease;
-}
-
-.btn-toggle-categories:hover {
-  color: var(--text-primary);
-}
-
-.btn-toggle-categories .chevron {
-  font-size: 0.95rem;
-  transition: transform 0.2s ease;
-}
-
-.btn-toggle-categories .chevron.rotated {
-  transform: rotate(180deg);
-}
-
-.category-breakdown-list {
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-  padding: 0.35rem 0.5rem;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-}
-
-.cat-math-line {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 0.72rem;
-}
-
-.cat-label {
-  color: var(--text-muted);
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.icon-cat {
-  font-size: 0.85rem;
-  color: var(--text-secondary);
-}
-
-.cat-val {
-  font-weight: 700;
-  color: var(--text-secondary);
+  color: var(--text-secondary, #cbd5e1);
   font-variant-numeric: tabular-nums;
 }
 
-.cat-math-line.cat-highlight {
-  border-top: 1px dashed var(--border-subtle);
-  padding-top: 0.25rem;
-  margin-top: 0.15rem;
+.alloc-item.alloc-highlight {
+  grid-column: 1 / -1;
+  padding-top: 0.15rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.04);
 }
 
-.cat-math-line.cat-highlight .cat-label {
-  color: var(--text-primary);
+.alloc-item.alloc-highlight .alloc-name {
+  color: var(--text-primary, #fff);
   font-weight: 700;
 }
 
-.cat-math-line.cat-highlight .icon-cat {
-  color: var(--accent-primary);
-}
-
-.cat-math-line.cat-highlight .cat-val.highlight {
-  color: var(--accent-primary);
+.alloc-item.alloc-highlight .alloc-num.highlight {
+  color: var(--accent-primary, #38bdf8);
   font-weight: 800;
 }
 
-.cat-sub {
-  font-size: 0.65rem;
-  color: var(--text-muted);
+.alloc-sub {
+  font-size: 0.63rem;
+  color: var(--text-muted, #94a3b8);
   font-weight: 500;
-  margin-left: 0.2rem;
+}
+
+/* Zone 4: Combat Profile & PL Check */
+.header-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.combat-target-indicator {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  border-radius: var(--radius-xs, 4px);
+  padding: 0.2rem 0.5rem;
+  font-size: 0.7rem;
+}
+
+.target-indicator-label {
+  color: var(--text-muted, #94a3b8);
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+}
+
+.target-indicator-name {
+  color: var(--accent-primary, #38bdf8);
+  font-weight: 800;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.inline-pl-badge {
+  margin-left: auto;
+  font-size: 0.68rem;
+  font-weight: 800;
+  padding: 0.12rem 0.45rem;
+  border-radius: var(--radius-xs, 4px);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.badge-pl-compliant {
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  color: #34d399;
+}
+
+.badge-pl-exceeded {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  color: #f87171;
+}
+
+.combat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.4rem;
+}
+
+.combat-tile {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-xs, 4px);
+  padding: 0.45rem 0.55rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.combat-tile.dc-tile {
+  grid-column: span 2;
+  background: rgba(56, 189, 248, 0.03);
+  border-color: rgba(56, 189, 248, 0.15);
+}
+
+.tile-label {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: var(--text-muted, #94a3b8);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.tile-val {
+  font-size: 0.76rem;
+  font-weight: 800;
+  color: var(--text-primary, #fff);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.combat-tile.dc-tile .tile-val {
+  font-size: 0.82rem;
+  color: var(--accent-primary, #38bdf8);
+}
+
+.pl-exceeded-alert {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.45rem;
+  padding: 0.5rem 0.65rem;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-xs, 4px);
+  margin-top: 0.25rem;
+}
+
+.alert-icon {
+  font-size: 1rem;
+  color: #f87171;
+  flex-shrink: 0;
+  margin-top: 0.05rem;
+}
+
+.alert-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.alert-title {
+  font-size: 0.74rem;
+  font-weight: 800;
+  color: #f87171;
+}
+
+.alert-msg {
+  font-size: 0.68rem;
+  color: #fca5a5;
+  line-height: 1.3;
 }
 </style>

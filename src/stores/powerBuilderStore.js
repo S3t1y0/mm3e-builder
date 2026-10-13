@@ -155,8 +155,14 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
 
     combatMetrics(state) {
       try {
-        return calculatePowerCombatMetrics(state.power, 10);
+        const heroStore = useHeroStore();
+        const heroPL = heroStore.character?.powerLevel || 10;
+        const abilities = heroStore.effectiveAbilities || heroStore.character?.abilities || {};
+        const skills = heroStore.character?.skills || [];
+        const activeEff = this.currentEditingEffect || state.power.mainEffect;
+        return calculatePowerCombatMetrics(state.power, heroPL, abilities, skills, activeEff);
       } catch (e) {
+        console.warn('Error calculating combat metrics:', e);
         return null;
       }
     },

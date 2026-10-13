@@ -82,27 +82,13 @@
 
             <template v-else>
               <template v-for="ruleSkill in filteredSkills" :key="ruleSkill.name">
-                <!-- 1. Specialization Skills (Close Combat, Ranged Combat, Expertise) -->
+                <!-- Specialization skills (Close Combat, Ranged Combat, Expertise) -->
                 <template v-if="ruleSkill.requiresSubtype">
-                  <!-- Group Header Row -->
-                  <tr class="spec-group-row">
+                  <!-- Case A: No specializations added yet -> show generic prompt row -->
+                  <tr v-if="getSubtypeInstances(ruleSkill.name).length === 0" class="spec-group-row">
                     <td>
-                      <div class="spec-header-title-wrap">
-                        <span class="spec-parent-name">{{ ruleSkill.name }}</span>
-                        <span 
-                          v-if="getSubtypeInstances(ruleSkill.name).length > 0"
-                          class="spec-count-tag"
-                          :title="`${getSubtypeInstances(ruleSkill.name).length} specialization(s) trained`"
-                        >
-                          {{ getSubtypeInstances(ruleSkill.name).length }}
-                        </span>
-                        <span
-                          v-if="getAdvantageBonusForSkill(ruleSkill.name) > 0"
-                          class="badge badge-warning tabular-nums"
-                          style="font-size: 0.62rem; padding: 0.1rem 0.35rem; margin-left: 0.3rem;"
-                        >
-                          +{{ getAdvantageBonusForSkill(ruleSkill.name) }} {{ getAdvantageNameForSkill(ruleSkill.name) }}
-                        </span>
+                      <div class="skill-name-block">
+                        <span class="skill-title">{{ ruleSkill.name }}</span>
                       </div>
                     </td>
                     <td style="text-align: center;">
@@ -127,23 +113,19 @@
                     </td>
                   </tr>
 
-                  <!-- Specialization Child Rows (If instances exist) -->
-                  <template v-if="getSubtypeInstances(ruleSkill.name).length > 0">
+                  <!-- Case B: One or more specializations exist -> render each as a standard row -->
+                  <template v-else>
                     <tr
                       v-for="inst in getSubtypeInstances(ruleSkill.name)"
                       :key="inst.id || (ruleSkill.name + '_' + inst.subtype)"
-                      class="spec-child-row"
+                      class="standard-skill-row spec-standalone-row"
                     >
                       <td>
-                        <div class="spec-child-title-wrap">
-                          <div class="spec-child-name-block">
-                            <div class="spec-name-tag-row">
-                              <span 
-                                class="spec-subtype-name"
-                                :title="`${inst.subtype || 'General'}: Base ${ruleSkill.ability} (${heroStore.effectiveAbilities[ruleSkill.ability] || 0}) + ${inst.ranks || 0} Rk${getEnhancedRanks(ruleSkill.name, inst.subtype) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name, inst.subtype) + 'p' : ''}${getAdvantageBonusForSkill(ruleSkill.name) > 0 ? ' +' + getAdvantageBonusForSkill(ruleSkill.name) + ' Adv' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))}`"
-                              >{{ inst.subtype || 'General' }}</span>
-                            </div>
-                          </div>
+                        <div class="skill-name-block">
+                          <span 
+                            class="skill-title"
+                            :title="`${ruleSkill.name} (${inst.subtype || 'General'}): Base ${ruleSkill.ability} (${heroStore.effectiveAbilities[ruleSkill.ability] || 0}) + ${inst.ranks || 0} Rk${getEnhancedRanks(ruleSkill.name, inst.subtype) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name, inst.subtype) + 'p' : ''}${getAdvantageBonusForSkill(ruleSkill.name) > 0 ? ' +' + getAdvantageBonusForSkill(ruleSkill.name) + ' Adv' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))}`"
+                          >{{ inst.subtype || ruleSkill.name }}</span>
                         </div>
                       </td>
                       <td style="text-align: center;">
@@ -156,7 +138,7 @@
                         <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                       </td>
                       <td style="text-align: center;">
-                        <div class="stepper-wrap" :class="{ 'is-disabled-stepper': heroStore.isAbilityAbsent(ruleSkill.ability) }">
+                        <div class="stepper-wrap" :class="{ 'is-disabled-stepper': heroStore.isAbilityAbsent(ruleSkill.ability) }" style="position: relative;">
                           <button
                             type="button"
                             class="btn-step-sm"
@@ -174,7 +156,7 @@
                           >+</button>
                           <button
                             type="button"
-                            class="btn-delete-row"
+                            class="btn-delete-row btn-delete-spec-hover"
                             title="Remove Specialization"
                             @click="removeSpecialtySkill(inst)"
                           >
@@ -200,17 +182,6 @@
                       </td>
                     </tr>
                   </template>
-
-                  <!-- Empty State for Specialization Group -->
-                  <tr v-else class="spec-empty-row">
-                    <td colspan="5">
-                      <div class="spec-empty-box" @click="!heroStore.isAbilityAbsent(ruleSkill.ability) && openAddSpecialtyDialog(ruleSkill.name)">
-                        <i :class="heroStore.isAbilityAbsent(ruleSkill.ability) ? 'ri-close-circle-line' : 'ri-add-circle-line'"></i>
-                        <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)">Absent <strong>{{ ruleSkill.ability }}</strong>: Cannot specialize.</span>
-                        <span v-else>No <strong>{{ ruleSkill.name }}</strong> specializations added yet. Click "+ Add Spec" to specialize.</span>
-                      </div>
-                    </td>
-                  </tr>
                 </template>
 
                 <!-- 2. Standard Non-Subtype Skills (Acrobatics, Athletics, etc.) -->
@@ -1062,22 +1033,21 @@ function confirmSpecialtySkill() {
 }
 
 /* Specialization child */
-.spec-child-row {
-  background: rgba(56, 189, 248, 0.02);
-  border-left: 2px solid rgba(56, 189, 248, 0.45);
-  transition: background-color var(--trans-fast), border-color var(--trans-fast);
+.spec-standalone-row .btn-delete-spec-hover {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--trans-fast);
+  margin-left: 0.25rem;
 }
 
-.spec-child-row:hover {
-  background: rgba(56, 189, 248, 0.05);
-  border-left-color: #38bdf8;
+.spec-standalone-row:hover .btn-delete-spec-hover {
+  opacity: 0.85;
+  pointer-events: auto;
 }
 
-.spec-child-title-wrap {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding-left: 1.5rem;
+.spec-standalone-row:hover .btn-delete-spec-hover:hover {
+  opacity: 1;
+  color: #ef4444;
 }
 
 .spec-child-name-block {
