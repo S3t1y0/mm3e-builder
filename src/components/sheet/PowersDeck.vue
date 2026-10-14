@@ -4296,22 +4296,23 @@ function getModifierInfo(modName, isFlaw = false) {
 }
 
 .dossier-mod-card {
-  background: transparent;
-  border: none;
-  border-left: 2px solid #34d399;
-  border-radius: 0;
-  padding: 0.25rem 0 0.25rem 0.65rem;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.35rem 0.6rem;
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
 }
 
 .dossier-mod-card.extra-mod {
-  border-left: 2px solid #34d399;
+  border-color: rgba(52, 211, 153, 0.3);
+  background: rgba(52, 211, 153, 0.05);
 }
 
 .dossier-mod-card.flaw-mod {
-  border-left: 2px solid #f87171;
+  border-color: rgba(248, 113, 113, 0.3);
+  background: rgba(248, 113, 113, 0.05);
 }
 
 .dossier-mod-top {

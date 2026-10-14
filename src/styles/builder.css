@@ -1371,12 +1371,12 @@
 
 /* Equipment Tactical Styles */
 .res-card.card-equipped {
-  border-left: 3px solid var(--accent-emerald);
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.03);
 }
 
 .res-card.card-unequipped {
   opacity: 0.82;
-  border-left: 3px solid var(--border-color);
 }
 
 .res-status-pill {
@@ -2602,11 +2602,13 @@
 }
 
 .applied-mod-card.extra {
-  border-left: 3px solid #34d399;
+  border-color: rgba(52, 211, 153, 0.35);
+  background: rgba(52, 211, 153, 0.04);
 }
 
 .applied-mod-card.flaw {
-  border-left: 3px solid #f87171;
+  border-color: rgba(248, 113, 113, 0.35);
+  background: rgba(248, 113, 113, 0.04);
 }
 
 .applied-mod-desc {
@@ -4357,7 +4359,6 @@
   background: rgba(239, 68, 68, 0.12);
   border-color: rgba(239, 68, 68, 0.5);
   color: #f87171;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.2);
 }
 
 .compliance-box.info-box {
@@ -5395,11 +5396,13 @@
 }
 
 .mod-applied-chip.extra {
-  border-left: 3px solid #34d399;
+  border-color: rgba(52, 211, 153, 0.4);
+  background: rgba(52, 211, 153, 0.08);
 }
 
 .mod-applied-chip.flaw {
-  border-left: 3px solid #f87171;
+  border-color: rgba(248, 113, 113, 0.4);
+  background: rgba(248, 113, 113, 0.08);
 }
 
 .mod-applied-chip .chip-name {

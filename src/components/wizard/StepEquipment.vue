@@ -62,7 +62,7 @@
     </div>
 
     <!-- CATEGORY FILTER CHIPS -->
-    <div class="card mb-4" style="padding: 0.75rem 1.25rem;">
+    <div class="card mb-4 filter-container-card">
       <div class="filter-pills-bar">
         <button
           v-for="cat in categories"
@@ -82,8 +82,8 @@
     <div v-if="filteredResources.length === 0" class="card empty-equipment-card">
       <i class="ri-inbox-archive-line empty-icon"></i>
       <div v-if="(heroStore.character.resources || []).length === 0">
-        <h4 style="color: #fff; margin: 0 0 0.4rem; font-size: 1rem; font-weight: 800;">No Equipment Added Yet</h4>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); max-width: 480px; margin: 0 auto 1rem;">
+        <h4 class="empty-equip-title">No Equipment Added Yet</h4>
+        <p class="empty-equip-desc">
           Equip your hero with standard weapons, armor, gadgets, vehicles, or headquarters.
         </p>
         <button type="button" class="btn btn-primary btn-sm" @click="showPresetModal = true">
@@ -91,7 +91,7 @@
         </button>
       </div>
       <div v-else>
-        <p style="font-size: 0.82rem; color: var(--text-secondary); margin: 0;">
+        <p class="empty-equip-filter-notice">
           No equipment items found in category "<strong>{{ activeFilter }}</strong>".
         </p>
       </div>
@@ -623,19 +623,41 @@ function getArmorProtection(r) {
   color: #fff;
 }
 
+.filter-container-card {
+  padding: 0.75rem 1.25rem;
+}
+
 .filter-chip.active {
   background: var(--accent-primary);
   border-color: var(--accent-primary);
   color: #fff;
-  box-shadow: 0 2px 8px rgba(0, 111, 184, 0.35);
+  box-shadow: var(--shadow-sm);
 }
-
-
 
 /* Empty Card */
 .empty-equipment-card {
   padding: 3rem 1.5rem;
   text-align: center;
+}
+
+.empty-equip-title {
+  color: #fff;
+  margin: 0 0 0.4rem;
+  font-size: 1rem;
+  font-weight: 800;
+}
+
+.empty-equip-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  max-width: 480px;
+  margin: 0 auto 1rem;
+}
+
+.empty-equip-filter-notice {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin: 0;
 }
 
 .empty-icon {

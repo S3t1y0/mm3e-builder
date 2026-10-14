@@ -50,7 +50,7 @@
             class="btn btn-primary"
             @click="currentStep++"
           >
-            Next Step <i class="ri-arrow-right-line"></i>
+            Next Step
           </button>
           <button
             v-else

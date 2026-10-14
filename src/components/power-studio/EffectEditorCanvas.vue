@@ -2022,7 +2022,7 @@ function calculateModSubtotal(mod, isFlaw = false) {
   background: #ef4444;
   color: #fff;
   border-color: #f87171;
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.4);
+  box-shadow: var(--shadow-sm);
 }
 
 .slot-identity-container {

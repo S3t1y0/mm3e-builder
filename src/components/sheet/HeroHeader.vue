@@ -612,7 +612,7 @@ function rollInitiative() {
 .sub-meta-pill:focus-within {
   background: rgba(15, 23, 42, 0.7);
   border-color: rgba(56, 189, 248, 0.35);
-  box-shadow: 0 0 8px rgba(56, 189, 248, 0.12);
+  box-shadow: var(--shadow-sm);
 }
 
 .sub-meta-icon {

@@ -120,7 +120,7 @@
         <div
           v-for="item in motivations"
           :key="item.id"
-          class="card comp-item item-motivation"
+          class="comp-item item-motivation"
         >
           <div class="comp-item-layout">
             <div class="comp-item-main">
@@ -192,7 +192,7 @@
         <div
           v-for="item in generalComplications"
           :key="item.id"
-          class="card comp-item item-complication"
+          class="comp-item item-complication"
         >
           <div class="comp-item-layout">
             <div class="comp-item-main">
@@ -234,7 +234,7 @@
     </div>
 
     <!-- NOTES & BACKSTORY -->
-    <div class="card" style="padding: 1.25rem;">
+    <div class="card notes-backstory-card">
       <h4 class="section-title"><i class="ri-file-text-line text-accent"></i> Character Notes & Backstory</h4>
       <textarea
         v-model="heroStore.character.notes"
@@ -628,6 +628,10 @@ function removeTrait(item) {
 }
 
 /* Rule Checklist Card */
+.notes-backstory-card {
+  padding: 1.25rem;
+}
+
 .rule-checklist-card {
   padding: 1.15rem;
   background: rgba(15, 23, 42, 0.65);

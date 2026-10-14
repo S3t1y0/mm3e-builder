@@ -847,11 +847,13 @@ const netEffectCost = computed(() => {
 }
 
 .modifier-catalog-card.card-extra {
-  border-left: 3px solid #10b981;
+  border-color: rgba(16, 185, 129, 0.35);
+  background: rgba(16, 185, 129, 0.03);
 }
 
 .modifier-catalog-card.card-flaw {
-  border-left: 3px solid #ef4444;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.03);
 }
 
 .modifier-catalog-card.is-applied {

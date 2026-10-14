@@ -326,7 +326,7 @@ function rollDefense(name, bonus) {
   background: #f59e0b !important;
   border-color: #fbbf24 !important;
   color: #0b1020 !important;
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.4) !important;
+  box-shadow: var(--shadow-sm) !important;
 }
 
 .def-cond-badge {

@@ -9,7 +9,7 @@
     </div>
 
     <!-- PL CAP AUDIT METERS -->
-    <div class="card mb-4" style="padding: 1.25rem;">
+    <div class="card mb-4 def-caps-panel">
       <h4 class="section-title">PL {{ heroStore.character.powerLevel }} Defense Caps (Max {{ heroStore.character.powerLevel * 2 }})</h4>
       <div class="caps-grid">
         <!-- CAP 1: DODGE + TOUGHNESS -->
@@ -92,7 +92,7 @@
     <!-- DEFENSES STEPPER GRID (4 BOUGHT DEFENSES) -->
     <div class="defenses-grid">
       <!-- DODGE -->
-      <div class="card def-card" style="padding: 1rem;">
+      <div class="card def-card">
         <div class="def-header">
           <div>
             <div class="def-name">Dodge</div>
@@ -118,7 +118,7 @@
       </div>
 
       <!-- PARRY -->
-      <div class="card def-card" style="padding: 1rem;">
+      <div class="card def-card">
         <div class="def-header">
           <div>
             <div class="def-name">Parry</div>
@@ -144,7 +144,7 @@
       </div>
 
       <!-- FORTITUDE -->
-      <div class="card def-card" :class="{ 'is-absent-def': isStaAbsent }" style="padding: 1rem;">
+      <div class="card def-card" :class="{ 'is-absent-def': isStaAbsent }">
         <div class="def-header">
           <div>
             <div class="def-name">Fortitude</div>
@@ -178,7 +178,7 @@
       </div>
 
       <!-- WILL -->
-      <div class="card def-card" style="padding: 1rem;">
+      <div class="card def-card">
         <div class="def-header">
           <div>
             <div class="def-name">Will</div>
@@ -205,7 +205,7 @@
     </div>
 
     <!-- TOUGHNESS (DEDICATED DERIVED DEFENSE BANNER) -->
-    <div class="card toughness-banner mt-3" style="padding: 1.15rem 1.25rem;">
+    <div class="card toughness-banner mt-3">
       <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
         <div style="display: flex; align-items: center; gap: 0.85rem;">
           <div style="width: 42px; height: 42px; border-radius: var(--radius-sm); background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.35); display: flex; align-items: center; justify-content: center; font-size: 1.35rem; color: #38bdf8;">
@@ -406,10 +406,15 @@ function setDefense(key, val) {
   }
 }
 
+.def-caps-panel {
+  padding: 1.25rem;
+}
+
 .def-card {
   background: rgba(15, 23, 42, 0.6);
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
+  padding: 1rem;
 }
 
 .def-header {
@@ -476,6 +481,7 @@ function setDefense(key, val) {
 }
 
 .toughness-banner {
+  padding: 1.15rem 1.25rem;
   background: linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(15, 23, 42, 0.85));
   border: 1px solid rgba(56, 189, 248, 0.35);
   border-radius: var(--radius-md);

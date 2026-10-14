@@ -171,34 +171,34 @@
       class="main-content"
       :style="isEmbed ? 'padding: 0.5rem 0.75rem 2rem; max-width: 100%; margin: 0 auto; width: 100%;' : 'padding: 1.25rem 1.5rem; max-width: 1560px; margin: 0 auto; width: 100%;'"
     >
-      <!-- RUNTIME ERROR BOUNDARY FALLBACK (R-27) -->
-      <div v-if="runtimeError" class="card mb-3" style="background: rgba(239, 68, 68, 0.1); border: 1px solid var(--accent-danger); border-radius: var(--radius-md); padding: 1.25rem; text-align: center;">
-        <i class="ri-alert-line" style="font-size: 1.75rem; color: var(--accent-danger); display: block; margin-bottom: 0.5rem;"></i>
-        <h3 style="color: #fff; margin-bottom: 0.35rem; font-size: 1.05rem;">Tactical Sheet Recovery State</h3>
-        <p style="font-size: 0.82rem; color: var(--text-secondary); margin-bottom: 0.85rem;">{{ runtimeError.message || 'An unexpected rendering error occurred.' }}</p>
+      <!-- Runtime Error Boundary Fallback -->
+      <div v-if="runtimeError" class="card mb-3 runtime-error-banner">
+        <i class="ri-alert-line error-icon"></i>
+        <h3 class="error-title">Tactical Sheet Recovery State</h3>
+        <p class="error-desc">{{ runtimeError.message || 'An unexpected rendering error occurred.' }}</p>
         <button class="btn btn-secondary btn-sm" @click="runtimeError = null">
           <i class="ri-refresh-line"></i> Dismiss & Retry
         </button>
       </div>
-      <!-- HERO COMMAND HUB BANNER (For Wizard & Rules Reference views) -->
-      <div v-if="!isEmbed && uiStore.activeTab !== 'sheet'" class="card mb-3" style="background: linear-gradient(135deg, rgba(30, 41, 59, 0.7), rgba(15, 23, 42, 0.9)); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1rem 1.25rem;">
-        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
-          <div style="display: flex; align-items: center; gap: 0.85rem;">
-            <div style="width: 40px; height: 40px; border-radius: var(--radius-sm); background: rgba(59, 130, 246, 0.15); border: 1px solid rgba(59, 130, 246, 0.35); display: flex; align-items: center; justify-content: center; font-size: 1.25rem; color: var(--accent-primary);">
+      <!-- Hero Command Hub Banner (For Wizard & Rules Reference views) -->
+      <div v-if="!isEmbed && uiStore.activeTab !== 'sheet'" class="card mb-3 hero-command-hub">
+        <div class="hub-inner-row">
+          <div class="hub-identity-block">
+            <div class="hub-avatar">
               <i class="ri-shield-user-line"></i>
             </div>
             <div>
-              <div style="font-size: 0.95rem; font-weight: 800; color: #fff; display: flex; align-items: center; gap: 0.5rem;">
+              <div class="hub-name-row">
                 <span>{{ heroStore.character.name || 'Hero Registry' }}</span>
-                <span class="badge badge-primary" style="font-size: 0.7rem;">PL {{ heroStore.character.powerLevel }}</span>
-                <span v-if="heroStore.character.concept?.archetype" class="badge badge-secondary" style="font-size: 0.7rem;">{{ heroStore.character.concept.archetype }}</span>
+                <span class="badge badge-primary hub-badge">PL {{ heroStore.character.powerLevel }}</span>
+                <span v-if="heroStore.character.concept?.archetype" class="badge badge-secondary hub-badge">{{ heroStore.character.concept.archetype }}</span>
               </div>
-              <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem;">
+              <div class="hub-meta-desc">
                 {{ heroStore.character.identity || 'Secret Identity' }} &bull; {{ heroStore.character.player || 'Player' }} &bull; {{ heroStore.character.concept?.origin || 'Origin Unspecified' }}
               </div>
             </div>
           </div>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
+          <div class="hub-actions">
             <button
               class="btn btn-secondary btn-sm"
               @click="uiStore.openModal('printOfficial')"
@@ -534,13 +534,13 @@ onBeforeUnmount(() => {
   justify-content: center;
   color: #38bdf8;
   font-size: 1.1rem;
-  box-shadow: 0 0 10px rgba(0, 111, 184, 0.25);
-  transition: transform var(--trans-fast), box-shadow var(--trans-fast);
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--trans-fast), border-color var(--trans-fast);
 }
 
 .logo-icon-box:hover {
   transform: scale(1.05);
-  box-shadow: 0 0 14px rgba(0, 111, 184, 0.45);
+  border-color: rgba(0, 111, 184, 0.7);
 }
 
 .logo-text-wrap {
@@ -954,5 +954,83 @@ onBeforeUnmount(() => {
 
 .disclaimer-content strong {
   color: var(--text-secondary);
+}
+
+/* Runtime Error Banner */
+.runtime-error-banner {
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid var(--accent-danger);
+  border-radius: var(--radius-md);
+  padding: 1.25rem;
+  text-align: center;
+}
+.error-icon {
+  font-size: 1.75rem;
+  color: var(--accent-danger);
+  display: block;
+  margin-bottom: 0.5rem;
+}
+.error-title {
+  color: #fff;
+  margin-bottom: 0.35rem;
+  font-size: 1.05rem;
+}
+.error-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  margin-bottom: 0.85rem;
+}
+
+/* Hero Command Hub Banner */
+.hero-command-hub {
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.25rem;
+}
+.hub-inner-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+.hub-identity-block {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+}
+.hub-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-sm);
+  background: rgba(59, 130, 246, 0.15);
+  border: 1px solid rgba(59, 130, 246, 0.35);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  color: var(--accent-primary);
+}
+.hub-name-row {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hub-badge {
+  font-size: 0.7rem;
+}
+.hub-meta-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+}
+.hub-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
 }
 </style>

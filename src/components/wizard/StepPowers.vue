@@ -9,16 +9,16 @@
     </div>
 
     <!-- POWERS SUMMARY STRIP -->
-    <div class="card mb-3" style="padding: 1rem 1.25rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; background: rgba(0, 111, 184, 0.08); border-color: rgba(0, 111, 184, 0.25);">
+    <div class="card mb-3 powers-summary-strip">
       <div>
-        <div style="font-size: 0.88rem; font-weight: 800; color: #fff;">
-          Powers Point Total: <span class="tabular-nums" style="color: var(--accent-primary); font-size: 1.1rem;">{{ heroStore.powersCost }} PP</span> (<span class="tabular-nums">{{ heroStore.character.powers?.length || 0 }}</span> Powers Active)
+        <div class="powers-summary-title">
+          Powers Point Total: <span class="tabular-nums pp-highlight">{{ heroStore.powersCost }} PP</span> (<span class="tabular-nums">{{ heroStore.character.powers?.length || 0 }}</span> Powers Active)
         </div>
-        <div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 0.2rem;">
+        <div class="powers-summary-desc">
           Create and customize power effects, linked suites, and alternate effect arrays using the Power Studio.
         </div>
       </div>
-      <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+      <div class="powers-summary-actions">
         <button class="btn btn-primary btn-sm" @click="builderStore.openNewPower('standard')">
           <i class="ri-flashlight-line"></i> Standard Power
         </button>
@@ -29,10 +29,10 @@
     </div>
 
     <!-- POWERS LIST CARDS -->
-    <div v-if="!heroStore.character.powers || heroStore.character.powers.length === 0" class="card" style="padding: 3rem 1.5rem; text-align: center;">
-      <i class="ri-flashlight-line" style="font-size: 2.5rem; color: var(--text-muted); display: block; margin-bottom: 0.75rem;"></i>
-      <h4 style="font-weight: 800; color: #fff; margin-bottom: 0.35rem;">No Powers Added Yet</h4>
-      <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 450px; margin: 0 auto 1.25rem;">
+    <div v-if="!heroStore.character.powers || heroStore.character.powers.length === 0" class="card empty-powers-card">
+      <i class="ri-flashlight-line empty-powers-icon"></i>
+      <h4 class="empty-powers-title">No Powers Added Yet</h4>
+      <p class="empty-powers-desc">
         Click above to craft powers using the Power Studio.
       </p>
       <button class="btn btn-primary btn-sm" @click="builderStore.openNewPower('standard')">
@@ -188,5 +188,64 @@ function getTypeBadgeClass(type) {
   align-items: center;
   padding-top: 0.65rem;
   border-top: 1px solid var(--border-subtle);
+}
+
+.powers-summary-strip {
+  padding: 1rem 1.25rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  background: rgba(0, 111, 184, 0.08);
+  border-color: rgba(0, 111, 184, 0.25);
+}
+
+.powers-summary-title {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.pp-highlight {
+  color: var(--accent-primary);
+  font-size: 1.1rem;
+}
+
+.powers-summary-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  margin-top: 0.2rem;
+}
+
+.powers-summary-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.empty-powers-card {
+  padding: 3rem 1.5rem;
+  text-align: center;
+}
+
+.empty-powers-icon {
+  font-size: 2.5rem;
+  color: var(--text-muted);
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.empty-powers-title {
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.35rem;
+}
+
+.empty-powers-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  max-width: 450px;
+  margin: 0 auto 1.25rem;
 }
 </style>

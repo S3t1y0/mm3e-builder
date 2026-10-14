@@ -56,6 +56,7 @@
   --line-height-tight: 1.15;
   --line-height-body: 1.55;
   --letter-spacing-tight: -0.02em;
+  --letter-spacing-caps: 0.05em;
 
   /* Systemic Layer Contexts (Z-Index Restraint) */
   --z-normal: 1;
@@ -796,16 +797,16 @@ select optgroup {
 }
 
 .toast-success {
-  border-left: 4px solid var(--accent-emerald);
+  border-color: rgba(16, 185, 129, 0.45);
 }
 .toast-warning {
-  border-left: 4px solid var(--accent-amber);
+  border-color: rgba(245, 158, 11, 0.45);
 }
 .toast-error {
-  border-left: 4px solid var(--accent-danger);
+  border-color: rgba(239, 68, 68, 0.45);
 }
 .toast-info {
-  border-left: 4px solid var(--accent-secondary);
+  border-color: rgba(56, 189, 248, 0.45);
 }
 
 .toast-content {
@@ -1380,7 +1381,7 @@ i[class^="ri-"], i[class*=" ri-"] {
   }
 }
 
-/* ACCESSIBILITY & MOBILE TOUCH TARGETS (R-03 & antislop-human) */
+/* Accessibility & Ergonomic Touch Target Hitboxes */
 .step-btn,
 .step-btn-xs,
 .step-btn-tiny,

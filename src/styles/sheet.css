@@ -3353,7 +3353,6 @@
   padding: 0.55rem 0.85rem;
   background: rgba(239, 68, 68, 0.12);
   border: 1px solid rgba(239, 68, 68, 0.35);
-  border-left: 3px solid #ef4444;
   border-radius: var(--radius-sm);
   color: #fca5a5;
   font-size: 0.76rem;
@@ -3421,19 +3420,17 @@
 /* Array Slot Active vs Standby Styling */
 .array-slot-card.active-slot {
   border-color: rgba(16, 185, 129, 0.45);
-  border-left: 4px solid #10b981;
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.08) 0%, rgba(15, 23, 42, 0.9) 100%);
   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.12);
 }
 
 .array-slot-card.standby-slot {
-  border-left-color: rgba(148, 163, 184, 0.3);
   opacity: 0.85;
 }
 
 .array-slot-card.standby-slot:hover {
   opacity: 1;
-  border-left-color: #38bdf8;
+  border-color: rgba(56, 189, 248, 0.4);
 }
 
 /* Targeted Effects Inactive Attack Styling */
@@ -6092,11 +6089,13 @@
 }
 
 .comp-card.card-motivation {
-  border-left: 3px solid var(--accent-amber);
+  border-color: rgba(245, 158, 11, 0.3);
+  background: rgba(245, 158, 11, 0.03);
 }
 
 .comp-card.card-complication {
-  border-left: 3px solid var(--accent-danger);
+  border-color: rgba(239, 68, 68, 0.3);
+  background: rgba(239, 68, 68, 0.03);
 }
 
 .comp-card-top {

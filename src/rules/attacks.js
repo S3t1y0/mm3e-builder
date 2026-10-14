@@ -580,7 +580,15 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
         ...linkedTargets
       ];
       baseAtk.dcDescription = baseAtk.linkedTargets.map(t => t.dcDescription).filter(Boolean).join(' / ');
-      baseAtk.summaryText = baseAtk.linkedTargets.map(t => t.summaryText || t.name).filter(Boolean).join(' + ');
+      baseAtk.summaryText = baseAtk.linkedTargets
+        .map(t => {
+          const displayName = (t.name && t.name !== baseAtk.name && t.name !== power.name)
+            ? t.name
+            : (t.baseEffect || t.name || 'Effect');
+          return `${displayName}${t.ranks ? ' ' + t.ranks : ''}`.trim();
+        })
+        .filter(Boolean)
+        .join(' + ');
     }
 
     return baseAtk;
@@ -805,8 +813,17 @@ export function compileTargetedAttacks(character, effectiveAbilities = {}, getAd
             };
           });
 
-          baseAtk.dcDescription = baseAtk.linkedTargets.map(t => t.dcDescription).join(' & ');
-          baseAtk.summaryText = baseAtk.linkedTargets.map(t => t.summaryText || t.name).join(' + ');
+          baseAtk.isLinkedCombo = true;
+          baseAtk.dcDescription = baseAtk.linkedTargets.map(t => t.dcDescription).filter(Boolean).join(' / ');
+          baseAtk.summaryText = baseAtk.linkedTargets
+            .map(t => {
+              const displayName = (t.name && t.name !== baseAtk.name && t.name !== p.name)
+                ? t.name
+                : (t.baseEffect || t.name || 'Effect');
+              return `${displayName}${t.ranks ? ' ' + t.ranks : ''}`.trim();
+            })
+            .filter(Boolean)
+            .join(' + ');
           attacks.push(baseAtk);
         }
 

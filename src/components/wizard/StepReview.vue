@@ -78,7 +78,7 @@
     </div>
 
     <!-- ITEMIZED POINT BREAKDOWN -->
-    <div class="card mb-4" style="padding: 1.25rem;">
+    <div class="card mb-4 point-breakdown-card">
       <h4 class="section-title">Point Allocation Breakdown</h4>
       <div class="breakdown-grid">
         <div class="breakdown-item">
@@ -103,20 +103,20 @@
         </div>
         <div class="breakdown-item highlight">
           <span class="breakdown-label">TOTAL SPENT</span>
-          <span class="breakdown-val tabular-nums" style="color: var(--accent-primary);">{{ heroStore.totalSpentPP }} PP</span>
+          <span class="breakdown-val tabular-nums">{{ heroStore.totalSpentPP }} PP</span>
         </div>
       </div>
     </div>
 
     <!-- ACTION CALLOUT -->
-    <div class="card launch-ready-card" style="padding: 1.5rem; text-align: center; background: var(--bg-surface); border: 1px solid rgba(16, 185, 129, 0.3);">
-      <h4 style="font-size: 1.25rem; font-weight: 800; color: #fff; margin: 0 0 0.35rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+    <div class="card launch-ready-card">
+      <h4 class="launch-ready-title">
         <i class="ri-checkbox-circle-fill text-emerald"></i> Hero Ready for Play
       </h4>
-      <p style="font-size: 0.82rem; color: var(--text-secondary); max-width: 520px; margin: 0 auto 1.25rem; line-height: 1.5;">
+      <p class="launch-ready-desc">
         Your hero build is ready. You can switch to the character sheet anytime to view traits, roll dice, and manage attacks.
       </p>
-      <button class="btn btn-primary btn-lg" style="padding: 0.75rem 2rem; font-weight: 800; box-shadow: var(--shadow-sm);" @click="finishWizard">
+      <button class="btn btn-primary btn-lg btn-launch-sheet" @click="finishWizard">
         <i class="ri-file-user-line"></i> Open Character Sheet
       </button>
     </div>
@@ -328,13 +328,13 @@ function finishWizard() {
 .breakdown-item.highlight {
   border-color: rgba(0, 111, 184, 0.5);
   background: rgba(0, 111, 184, 0.12);
-  box-shadow: 0 0 16px rgba(0, 111, 184, 0.15);
+  box-shadow: var(--shadow-sm);
 }
 
 .breakdown-item.highlight:hover {
   border-color: var(--accent-secondary);
   background: rgba(0, 111, 184, 0.2);
-  box-shadow: 0 0 20px rgba(42, 143, 214, 0.25);
+  box-shadow: var(--shadow-md);
 }
 
 .breakdown-label {
@@ -350,5 +350,45 @@ function finishWizard() {
   font-weight: 900;
   color: #fff;
   margin-top: 0.25rem;
+}
+
+.breakdown-item.highlight .breakdown-val {
+  color: var(--accent-primary);
+}
+
+.point-breakdown-card {
+  padding: 1.25rem;
+}
+
+.launch-ready-card {
+  padding: 1.5rem;
+  text-align: center;
+  background: var(--bg-surface);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.launch-ready-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #fff;
+  margin: 0 0 0.35rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.launch-ready-desc {
+  font-size: 0.82rem;
+  color: var(--text-secondary);
+  max-width: 520px;
+  margin: 0 auto 1.25rem;
+  line-height: 1.5;
+}
+
+.btn-launch-sheet {
+  padding: 0.75rem 2rem;
+  font-weight: 800;
+  box-shadow: var(--shadow-sm);
 }
 </style>

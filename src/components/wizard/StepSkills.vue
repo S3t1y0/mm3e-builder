@@ -641,7 +641,7 @@ function confirmSpecialtySkill() {
   background: #eab308;
   border-color: #facc15;
   color: #0f172a;
-  box-shadow: 0 2px 10px rgba(234, 179, 8, 0.4);
+  box-shadow: var(--shadow-sm);
 }
 
 .btn-wizard-add-spec:active {
@@ -694,7 +694,6 @@ function confirmSpecialtySkill() {
   background: rgba(234, 179, 8, 0.25);
   border-color: #facc15;
   color: #fef08a;
-  box-shadow: 0 1px 8px rgba(234, 179, 8, 0.3);
 }
 
 .cat-pill-count {
@@ -979,7 +978,6 @@ function confirmSpecialtySkill() {
   background: rgba(234, 179, 8, 0.15);
   color: #fde047;
   border-color: rgba(234, 179, 8, 0.35);
-  box-shadow: 0 0 8px rgba(234, 179, 8, 0.2);
 }
 
 /* Specialization Group Header */

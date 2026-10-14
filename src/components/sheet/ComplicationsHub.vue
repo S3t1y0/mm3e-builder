@@ -1022,23 +1022,23 @@ function broadcastComplication(item) {
 }
 
 .card-motivation {
-  border-left: 3px solid #8b5cf6;
+  border-color: rgba(139, 92, 246, 0.3);
+  background: rgba(139, 92, 246, 0.04);
 }
 
 .card-motivation:hover {
-  background: rgba(26, 21, 48, 0.8);
-  border-color: rgba(139, 92, 246, 0.35);
-  border-left-color: #a78bfa;
+  background: rgba(139, 92, 246, 0.09);
+  border-color: rgba(139, 92, 246, 0.45);
 }
 
 .card-complication {
-  border-left: 3px solid #f43f5e;
+  border-color: rgba(244, 63, 94, 0.3);
+  background: rgba(244, 63, 94, 0.04);
 }
 
 .card-complication:hover {
-  background: rgba(38, 19, 29, 0.8);
-  border-color: rgba(244, 63, 94, 0.35);
-  border-left-color: #fb7185;
+  background: rgba(244, 63, 94, 0.09);
+  border-color: rgba(244, 63, 94, 0.45);
 }
 
 .comp-card-top {

@@ -64,11 +64,14 @@
           <div class="atk-identity">
             <div class="atk-title-row">
               <span class="atk-title">{{ atk.name }}</span>
-              <span class="atk-source-tag">({{ atk.source }})</span>
+              <span v-if="atk.source && atk.source !== atk.name" class="atk-source-tag">({{ atk.source }})</span>
             </div>
             <div class="atk-meta-row">
               <span class="atk-type-pill" :class="atk.range === 'Ranged' ? 'ranged' : 'close'">
                 {{ atk.range }} Attack
+              </span>
+              <span v-if="(atk.isCompoundLinked || atk.isLinkedCombo) && atk.linkedTargets?.length > 1" class="atk-linked-badge">
+                <i class="ri-git-merge-line"></i> LINKED COMBO
               </span>
               <span
                 v-if="atk.isPowerDisabled || atk.isStandby"
@@ -151,7 +154,17 @@
 
           <div class="spec-metric">
             <span class="spec-label">Effect / DC</span>
-            <span class="spec-val dc">{{ atk.dcDescription || `DC ${atk.dc}` }}</span>
+            <div v-if="(atk.isCompoundLinked || atk.isLinkedCombo) && atk.linkedTargets?.length > 1" class="spec-linked-dc-list">
+              <span
+                v-for="sub in atk.linkedTargets"
+                :key="sub.id"
+                class="spec-linked-dc-pill"
+                :class="getTrackThemeClass(sub)"
+              >
+                DC {{ sub.dc }} vs {{ sub.resistance }}
+              </span>
+            </div>
+            <span v-else class="spec-val dc">{{ atk.dcDescription || `DC ${atk.dc}` }}</span>
           </div>
 
           <div class="spec-metric">
@@ -165,7 +178,7 @@
           </div>
         </div>
 
-        <!-- Effect Summary Strip & Drawer Toggle (Anti Slop R-03: 44px min tap target) -->
+        <!-- Effect Summary Strip & Drawer Toggle -->
         <div class="atk-summary-strip">
           <div class="summary-left">
             <span class="summary-icon-badge" :class="getEffectTypeClass(atk)">
@@ -206,29 +219,45 @@
         <!-- Collapsible Tactical Effects Drawer -->
         <div v-if="isExpanded(atk.id)" class="atk-effects-drawer">
           <!-- Case A: Multi-track Linked Combo (e.g. Damage + Affliction) -->
-          <div v-if="atk.isCompoundLinked && atk.linkedTargets?.length" class="linked-effects-wrap">
+          <div v-if="(atk.isCompoundLinked || atk.isLinkedCombo) && atk.linkedTargets?.length > 1" class="linked-effects-wrap">
             <div class="linked-header-banner">
               <i class="ri-git-merge-line"></i>
-              <span>Linked Attack Combo: Target makes separate resistance checks against each linked effect</span>
+              <span>Linked Hit: Target makes separate resistance checks against each linked effect</span>
             </div>
 
-            <div v-for="(sub, sIdx) in atk.linkedTargets" :key="sub.id || sIdx" class="linked-track-block">
-              <div class="linked-track-header">
-                <span class="track-tag">Track {{ sIdx + 1 }}</span>
-                <span class="track-title">{{ sub.name || sub.baseEffect }}</span>
-                <span class="track-dc-badge">{{ sub.dcDescription || `DC ${sub.dc} vs ${sub.resistance}` }}</span>
+            <!-- Tab Switcher for Tracks -->
+            <div class="linked-tab-nav" role="tablist" aria-label="Linked effect tracks">
+              <button
+                v-for="(sub, sIdx) in atk.linkedTargets"
+                :key="sub.id || sIdx"
+                type="button"
+                role="tab"
+                :aria-selected="getActiveTrackIndex(atk.id) === sIdx"
+                class="track-tab-btn"
+                :class="[
+                  getTrackThemeClass(sub),
+                  { 'is-active': getActiveTrackIndex(atk.id) === sIdx }
+                ]"
+                @click="setActiveTrackIndex(atk.id, sIdx)"
+              >
+                <span class="tab-index-badge">Track {{ sIdx + 1 }}</span>
+                <span class="tab-name">{{ getTrackDisplayName(sub, atk) }}</span>
+                <span class="tab-dc-tag">DC {{ sub.dc }} vs {{ sub.resistance }}</span>
+              </button>
+            </div>
+
+            <!-- Active Track View -->
+            <div v-if="getActiveTrack(atk)" class="active-track-content">
+              <!-- Contextual Resistance Guide -->
+              <div class="resistance-guide-bar contextual" :class="getTrackThemeClass(getActiveTrack(atk))">
+                <i class="ri-shield-check-line"></i>
+                <span>Target makes <strong>{{ getActiveTrack(atk).resistance }} check vs DC {{ getActiveTrack(atk).dc }}</strong></span>
               </div>
 
-              <!-- Resistance Guide -->
-              <div class="resistance-guide-bar">
-                <i class="ri-shield-check-line icon-teal"></i>
-                <span>Target makes <strong>{{ sub.resistance }} check vs DC {{ sub.dc }}</strong></span>
-              </div>
-
-              <!-- Degree Ladder Grid -->
-              <div v-if="sub.degrees?.length" class="degree-ladder-grid">
+              <!-- Degree Ladder Grid for Active Track -->
+              <div v-if="getActiveTrack(atk).degrees?.length" class="degree-ladder-grid">
                 <div
-                  v-for="deg in sub.degrees"
+                  v-for="deg in getActiveTrack(atk).degrees"
                   :key="deg.degree || deg.label"
                   class="degree-step-card"
                   :class="{ 'is-severe': deg.isSevere }"
@@ -250,6 +279,20 @@
                   <p class="deg-desc-text">{{ deg.desc || deg.label }}</p>
                 </div>
               </div>
+
+              <!-- Tactical Modifiers for Active Track (if any) -->
+              <div v-if="getActiveTrack(atk).tacticalModifiers?.length" class="tactical-modifiers-box mt-2">
+                <div class="tactical-mod-header">
+                  <i class="ri-information-line"></i>
+                  <span>Tactical Modifiers & Traits ({{ getTrackDisplayName(getActiveTrack(atk), atk) }}):</span>
+                </div>
+                <div class="tactical-chips-grid">
+                  <div v-for="mod in getActiveTrack(atk).tacticalModifiers" :key="mod.name" class="tactical-mod-chip">
+                    <strong class="mod-chip-name">{{ mod.name }}:</strong>
+                    <span class="mod-chip-desc">{{ mod.desc }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -258,7 +301,7 @@
             <!-- Resistance Target Guide Bar -->
             <div class="resistance-guide-bar">
               <i class="ri-shield-flash-line icon-teal"></i>
-              <span>Defense Guide: Target makes <strong>{{ atk.resistance }} check vs DC {{ atk.dc }}</strong> ({{ atk.dcDescription }})</span>
+              <span>Defense Guide: Target makes <strong>{{ atk.resistance }} check vs DC {{ atk.dc }}</strong></span>
             </div>
 
             <!-- Degree Ladder Grid -->
@@ -330,8 +373,40 @@ function toggleDrawer(id) {
   }
 }
 
+const activeLinkedTracks = ref({});
+
+function getActiveTrackIndex(atkId) {
+  return activeLinkedTracks.value[atkId] ?? 0;
+}
+
+function setActiveTrackIndex(atkId, index) {
+  activeLinkedTracks.value[atkId] = index;
+}
+
+function getActiveTrack(atk) {
+  if (!atk?.linkedTargets?.length) return null;
+  const idx = getActiveTrackIndex(atk.id);
+  return atk.linkedTargets[idx] || atk.linkedTargets[0];
+}
+
+function getTrackDisplayName(sub, atk) {
+  if (sub.name && sub.name !== atk?.name && sub.name !== sub.baseEffect) {
+    return sub.name;
+  }
+  return sub.baseEffect || sub.name || 'Effect';
+}
+
+function getTrackThemeClass(track) {
+  const eff = (track?.baseEffect || track?.effectName || track?.name || '').toLowerCase();
+  if (eff.includes('affliction')) return 'theme-affliction';
+  if (eff.includes('damage') || eff.includes('blast')) return 'theme-damage';
+  if (eff.includes('weaken')) return 'theme-weaken';
+  if (eff.includes('nullify')) return 'theme-nullify';
+  return 'theme-default';
+}
+
 function getEffectIcon(atk) {
-  if (atk.isCompoundLinked) return 'ri-git-merge-line';
+  if (atk.isCompoundLinked || atk.isLinkedCombo) return 'ri-git-merge-line';
   const eff = (atk.effectName || '').toLowerCase();
   if (eff.includes('affliction')) return 'ri-virus-line';
   if (eff.includes('weaken')) return 'ri-arrow-down-circle-line';
@@ -341,7 +416,7 @@ function getEffectIcon(atk) {
 }
 
 function getEffectTypeClass(atk) {
-  if (atk.isCompoundLinked) return 'effect-linked';
+  if (atk.isCompoundLinked || atk.isLinkedCombo) return 'effect-linked';
   const eff = (atk.effectName || '').toLowerCase();
   if (eff.includes('affliction')) return 'effect-affliction';
   if (eff.includes('damage') || eff.includes('blast')) return 'effect-damage';
@@ -672,6 +747,21 @@ function handleTurnOnAndRoll(atk) {
   color: #ddd6fe;
 }
 
+.atk-linked-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #2dd4bf;
+  background: rgba(20, 184, 166, 0.12);
+  border: 1px solid rgba(20, 184, 166, 0.35);
+  padding: 0.08rem 0.42rem;
+  border-radius: var(--radius-xs);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
 .atk-status-pill {
   display: inline-flex;
   align-items: center;
@@ -879,6 +969,51 @@ function handleTurnOnAndRoll(atk) {
   font-weight: 800;
 }
 
+.spec-linked-dc-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.spec-linked-dc-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: var(--font-mono);
+  padding: 0.1rem 0.45rem;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.spec-linked-dc-pill.theme-damage {
+  color: #fca5a5;
+  border-color: rgba(239, 68, 68, 0.35);
+  background: rgba(239, 68, 68, 0.1);
+}
+
+.spec-linked-dc-pill.theme-affliction {
+  color: #fda4af;
+  border-color: rgba(244, 63, 94, 0.35);
+  background: rgba(244, 63, 94, 0.1);
+}
+
+.spec-linked-dc-pill.theme-weaken {
+  color: #c4b5fd;
+  border-color: rgba(139, 92, 246, 0.35);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.spec-linked-dc-pill.theme-nullify,
+.spec-linked-dc-pill.theme-default {
+  color: #5eead4;
+  border-color: rgba(20, 184, 166, 0.35);
+  background: rgba(20, 184, 166, 0.1);
+}
+
 .spec-val.crit {
   color: #f87171;
 }
@@ -936,7 +1071,7 @@ function handleTurnOnAndRoll(atk) {
   text-transform: uppercase;
 }
 
-/* Effect Summary Strip (Anti Slop R-03: 44px min touch target) */
+/* Effect Summary Strip */
 .atk-summary-strip {
   display: flex;
   align-items: center;
@@ -1283,47 +1418,149 @@ function handleTurnOnAndRoll(atk) {
   border-radius: var(--radius-xs);
 }
 
-.linked-track-block {
-  background: rgba(15, 23, 42, 0.5);
+/* Linked Tab Navigation */
+.linked-tab-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.track-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.7rem;
+  min-height: 36px;
+  background: rgba(15, 23, 42, 0.6);
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-xs);
-  padding: 0.65rem 0.75rem;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all var(--trans-fast);
+}
+
+.track-tab-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border-color: var(--border-color);
+}
+
+.track-tab-btn:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+.tab-index-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 0.06rem 0.35rem;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-muted);
+}
+
+.tab-name {
+  color: var(--text-primary);
+}
+
+.tab-dc-tag {
+  font-size: 0.68rem;
+  font-family: var(--font-mono);
+  color: var(--text-muted);
+}
+
+/* Functional theme accents for active tabs */
+.track-tab-btn.is-active {
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+
+.track-tab-btn.is-active.theme-damage {
+  border-color: rgba(239, 68, 68, 0.7);
+  background: rgba(239, 68, 68, 0.12);
+  color: #fca5a5;
+}
+.track-tab-btn.is-active.theme-damage .tab-index-badge {
+  background: rgba(239, 68, 68, 0.25);
+  color: #f87171;
+}
+.track-tab-btn.is-active.theme-damage .tab-dc-tag {
+  color: #fca5a5;
+}
+
+.track-tab-btn.is-active.theme-affliction {
+  border-color: rgba(244, 63, 94, 0.7);
+  background: rgba(244, 63, 94, 0.12);
+  color: #fda4af;
+}
+.track-tab-btn.is-active.theme-affliction .tab-index-badge {
+  background: rgba(244, 63, 94, 0.25);
+  color: #fb7185;
+}
+.track-tab-btn.is-active.theme-affliction .tab-dc-tag {
+  color: #fda4af;
+}
+
+.track-tab-btn.is-active.theme-weaken {
+  border-color: rgba(139, 92, 246, 0.7);
+  background: rgba(139, 92, 246, 0.12);
+  color: #c4b5fd;
+}
+.track-tab-btn.is-active.theme-weaken .tab-index-badge {
+  background: rgba(139, 92, 246, 0.25);
+  color: #a78bfa;
+}
+.track-tab-btn.is-active.theme-weaken .tab-dc-tag {
+  color: #c4b5fd;
+}
+
+.track-tab-btn.is-active.theme-nullify,
+.track-tab-btn.is-active.theme-default {
+  border-color: rgba(20, 184, 166, 0.7);
+  background: rgba(20, 184, 166, 0.12);
+  color: #5eead4;
+}
+.track-tab-btn.is-active.theme-nullify .tab-index-badge,
+.track-tab-btn.is-active.theme-default .tab-index-badge {
+  background: rgba(20, 184, 166, 0.25);
+  color: #2dd4bf;
+}
+.track-tab-btn.is-active.theme-nullify .tab-dc-tag,
+.track-tab-btn.is-active.theme-default .tab-dc-tag {
+  color: #5eead4;
+}
+
+.active-track-content {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
 }
 
-.linked-track-header {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+.resistance-guide-bar.contextual {
+  margin-bottom: 0.35rem;
 }
 
-.track-tag {
-  font-size: 0.62rem;
-  font-weight: 800;
-  text-transform: uppercase;
-  background: rgba(59, 130, 246, 0.15);
-  color: #93c5fd;
-  padding: 0.08rem 0.38rem;
-  border-radius: 3px;
-  border: 1px solid rgba(59, 130, 246, 0.3);
+.resistance-guide-bar.contextual.theme-damage {
+  border-color: rgba(239, 68, 68, 0.4);
+  background: rgba(239, 68, 68, 0.08);
 }
-
-.track-title {
-  font-size: 0.82rem;
-  font-weight: 800;
-  color: #fff;
+.resistance-guide-bar.contextual.theme-affliction {
+  border-color: rgba(244, 63, 94, 0.4);
+  background: rgba(244, 63, 94, 0.08);
 }
-
-.track-dc-badge {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  background: rgba(255, 255, 255, 0.06);
-  padding: 0.08rem 0.45rem;
-  border-radius: 3px;
-  margin-left: auto;
+.resistance-guide-bar.contextual.theme-weaken {
+  border-color: rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.08);
+}
+.resistance-guide-bar.contextual.theme-nullify,
+.resistance-guide-bar.contextual.theme-default {
+  border-color: rgba(20, 184, 166, 0.4);
+  background: rgba(20, 184, 166, 0.08);
 }
 </style>

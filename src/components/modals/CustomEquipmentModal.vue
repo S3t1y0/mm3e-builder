@@ -1024,7 +1024,7 @@
                 class="btn-step-next"
                 @click="nextStep"
               >
-                Next Step <i class="ri-arrow-right-line"></i>
+                Next Step
               </button>
               <button
                 v-else
