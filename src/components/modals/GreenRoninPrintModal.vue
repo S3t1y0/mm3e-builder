@@ -12,7 +12,7 @@
           </div>
 
           <!-- Custom Percentage Zoom Control -->
-          <div class="gr-custom-zoom" role="group" aria-label="Custom View Scale" title="Zoom controls (Ctrl + Mouse Scroll / Ctrl + +/-)">
+          <div class="gr-custom-zoom" role="group" aria-label="Custom View Scale">
             <span class="gr-zoom-label">
               <i class="ri-zoom-in-line"></i> View:
             </span>
@@ -21,7 +21,6 @@
               <button
                 type="button"
                 class="gr-zoom-btn-step"
-                title="Zoom Out (-5%)"
                 :disabled="zoomPercent <= 25"
                 @click="adjustZoom(-5)"
               >
@@ -35,13 +34,11 @@
                 max="200"
                 step="1"
                 class="gr-zoom-slider"
-                title="Drag or use Ctrl + Mouse Scroll to zoom PDF"
               />
 
               <button
                 type="button"
                 class="gr-zoom-btn-step"
-                title="Zoom In (+5%)"
                 :disabled="zoomPercent >= 200"
                 @click="adjustZoom(5)"
               >
@@ -58,7 +55,6 @@
                   @input="onDirectInput"
                   @change="commitDirectInput"
                   @keydown.enter="commitDirectInput"
-                  title="Type custom percentage (25 - 200) and press Enter"
                 />
                 <span class="gr-zoom-percent-sign font-mono">%</span>
               </div>
@@ -69,11 +65,10 @@
             <button
               class="btn btn-secondary btn-sm"
               @click="uiStore.openModal('exportStructure')"
-              title="Configure export structure, rules depth and visible sections"
             >
               <i class="ri-equalizer-line"></i> Options
             </button>
-            <label class="gr-page-toggle-label" title="Always include Page 2 (Continuation sheet) for extra manual notes & powers">
+            <label class="gr-page-toggle-label">
               <input type="checkbox" v-model="uiStore.alwaysIncludePage2" class="gr-page-toggle-checkbox" />
               <span>Page 2</span>
             </label>

@@ -46,7 +46,7 @@
               <i class="ri-medal-line"></i>
               <span>Add Specialized Skill</span>
             </h4>
-            <button type="button" class="spec-modal-close" @click="showSpecModal = false" title="Close">
+            <button type="button" class="spec-modal-close" @click="showSpecModal = false" aria-label="Close">
               <i class="ri-close-line"></i>
             </button>
           </div>

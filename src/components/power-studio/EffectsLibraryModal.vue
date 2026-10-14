@@ -20,7 +20,7 @@
               type="button"
               class="modal-close-btn"
               @click="builderStore.closeEffectsLibrary"
-              title="Close Effects Library"
+              aria-label="Close"
             >
               <i class="ri-close-line"></i>
             </button>

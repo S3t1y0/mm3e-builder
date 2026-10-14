@@ -80,7 +80,7 @@
               <span class="toggle-status-text">{{ pow.active !== false ? 'ACTIVE' : 'OFFLINE' }}</span>
             </button>
 
-            <h4 class="pow-name" :title="pow.name || 'Unnamed Power'">{{ pow.name || 'Unnamed Power' }}</h4>
+            <h4 class="pow-name">{{ pow.name || 'Unnamed Power' }}</h4>
 
             <!-- Structure Type Badge (Device / Compound / Array) -->
             <span v-if="pow.type && pow.type !== 'standard'" class="structure-badge" :class="`badge-${pow.type}`">

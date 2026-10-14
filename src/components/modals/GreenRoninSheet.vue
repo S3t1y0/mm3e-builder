@@ -248,7 +248,7 @@
 
             <div class="gr-attack-rows">
               <div v-for="(atk, aIdx) in displayAttacks" :key="atk.id || aIdx" class="gr-attack-row">
-                <span class="gr-attack-name" :title="atk.name">{{ atk.name }}</span>
+                <span class="gr-attack-name">{{ atk.name }}</span>
                 <span class="gr-attack-bonus-box">{{ atk.rollBonus !== null ? formatMod(atk.rollBonus) : 'Area' }}</span>
                 <span class="gr-attack-dc-line">{{ atk.dcDescription || `DC ${atk.dc} vs ${atk.resistance || 'Toughness'}` }}</span>
                 <span class="gr-attack-crit">{{ atk.range || 'Close' }} • {{ atk.crit ? `Crit ${atk.crit}` : 'Crit 20' }}</span>

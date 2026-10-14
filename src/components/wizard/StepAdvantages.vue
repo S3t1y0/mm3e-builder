@@ -19,7 +19,6 @@
           type="button"
           class="btn btn-primary btn-sm btn-custom-adv"
           @click="openCustomModal"
-          title="Create Custom / Homebrew Advantage"
         >
           <i class="ri-add-line"></i>
           <span>Custom Advantage</span>
@@ -28,7 +27,6 @@
           type="button"
           class="btn btn-secondary btn-sm btn-open-modal"
           @click="uiStore.openModal('advantage')"
-          title="Open Full Advantage Library"
         >
           <i class="ri-book-open-line"></i>
           <span>Browse Library</span>
@@ -410,7 +408,7 @@
               type="button"
               class="spec-modal-close"
               @click="closeSpecModal"
-              title="Close"
+              aria-label="Close"
             >
               <i class="ri-close-line"></i>
             </button>
@@ -534,7 +532,7 @@
               type="button"
               class="spec-modal-close"
               @click="showCustomModal = false"
-              title="Close"
+              aria-label="Close"
             >
               <i class="ri-close-line"></i>
             </button>

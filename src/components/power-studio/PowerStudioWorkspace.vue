@@ -51,7 +51,6 @@
           type="button"
           class="btn-studio-action btn-new-power"
           @click="builderStore.openNewPower('standard')"
-          title="Create a new fresh power"
         >
           <i class="ri-add-line"></i>
           <span>New</span>
@@ -70,7 +69,7 @@
           type="button"
           class="btn-close-window"
           @click="builderStore.closeModal"
-          title="Close Window"
+          aria-label="Close"
         >
           <i class="ri-close-line"></i>
         </button>

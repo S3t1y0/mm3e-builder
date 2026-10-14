@@ -22,7 +22,7 @@
           </div>
         </div>
 
-        <button class="btn-modal-close" @click="closeModal" title="Close Settings">
+        <button class="btn-modal-close" @click="closeModal">
           <i class="ri-close-line"></i>
         </button>
       </header>
@@ -58,7 +58,6 @@
             <button
               class="preset-btn preset-reset-btn"
               @click="uiStore.resetExportOptions()"
-              title="Reset all settings to default Mutants & Masterminds 3E structure"
             >
               <i class="ri-restart-line"></i> Reset Defaults
             </button>
@@ -282,7 +281,7 @@
                 </button>
               </div>
 
-              <button class="btn-copy-preview" @click="copyPreviewText" :title="copied ? 'Copied!' : 'Copy Preview'">
+              <button class="btn-copy-preview" @click="copyPreviewText">
                 <i :class="copied ? 'ri-check-line' : 'ri-file-copy-line'"></i>
                 <span>{{ copied ? 'Copied' : 'Copy' }}</span>
               </button>

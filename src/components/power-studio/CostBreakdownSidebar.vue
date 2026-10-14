@@ -172,11 +172,11 @@
         class="segmented-meter-track"
         :title="`Abilities: ${heroStore.totalAbilityPP} PP, Defenses: ${heroStore.totalDefensePP} PP, Skills: ${heroStore.totalSkillPP} PP, Advantages: ${heroStore.totalAdvantagePP} PP, Powers: ${projectedPowersCost} PP`"
       >
-        <div class="segment segment-abilities" :style="{ width: budgetPercentages.abilities + '%' }" title="Abilities"></div>
-        <div class="segment segment-defenses" :style="{ width: budgetPercentages.defenses + '%' }" title="Defenses"></div>
-        <div class="segment segment-skills" :style="{ width: budgetPercentages.skills + '%' }" title="Skills"></div>
-        <div class="segment segment-advantages" :style="{ width: budgetPercentages.advantages + '%' }" title="Advantages"></div>
-        <div class="segment segment-powers" :class="{ 'segment-over': isOverBudget }" :style="{ width: budgetPercentages.powers + '%' }" title="Powers & Devices"></div>
+        <div class="segment segment-abilities" :style="{ width: budgetPercentages.abilities + '%' }"></div>
+        <div class="segment segment-defenses" :style="{ width: budgetPercentages.defenses + '%' }"></div>
+        <div class="segment segment-skills" :style="{ width: budgetPercentages.skills + '%' }"></div>
+        <div class="segment segment-advantages" :style="{ width: budgetPercentages.advantages + '%' }"></div>
+        <div class="segment segment-powers" :class="{ 'segment-over': isOverBudget }" :style="{ width: budgetPercentages.powers + '%' }"></div>
       </div>
 
       <!-- Delta Context Line -->
@@ -250,7 +250,7 @@
       <!-- Active Effect Indicator Sub-Bar -->
       <div v-if="combatProfile.effectName" class="combat-target-indicator">
         <span class="target-indicator-label">Target:</span>
-        <span class="target-indicator-name font-mono" :title="combatProfile.effectName">
+        <span class="target-indicator-name font-mono">
           {{ combatProfile.effectName }}
         </span>
       </div>

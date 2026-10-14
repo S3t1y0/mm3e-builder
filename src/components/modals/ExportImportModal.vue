@@ -66,7 +66,6 @@
                 class="btn btn-secondary btn-sm"
                 @click="handleForceSave"
                 :disabled="heroStore.isSaving"
-                title="Force save to LocalStorage now"
               >
                 <i :class="heroStore.isSaving ? 'ri-loader-4-line spin' : 'ri-save-line'"></i>
                 <span>{{ heroStore.isSaving ? 'Saving...' : 'Save Now' }}</span>
@@ -74,7 +73,6 @@
               <button
                 class="btn btn-primary btn-sm"
                 @click="handleSaveSnapshot"
-                title="Save permanent backup slot to vault"
               >
                 <i class="ri-bookmark-3-line"></i>
                 <span>Save Snapshot to Vault</span>
@@ -154,7 +152,6 @@
                 <button
                   class="btn btn-outline-primary btn-sm"
                   @click="handleLoadSlot(slot)"
-                  title="Load this character into active sheet"
                 >
                   <i class="ri-login-box-line"></i> Load
                 </button>

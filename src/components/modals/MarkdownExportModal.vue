@@ -15,7 +15,6 @@
           <button
             class="btn btn-secondary btn-sm"
             @click="uiStore.openModal('exportStructure')"
-            title="Configure export structure and detail options"
           >
             <i class="ri-equalizer-line"></i> Configure Structure
           </button>

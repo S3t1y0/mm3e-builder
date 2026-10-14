@@ -22,7 +22,6 @@
               type="button"
               class="modal-close-btn"
               @click="uiStore.closeModal('conditions')"
-              title="Close Condition Picker"
               aria-label="Close"
             >
               <i class="ri-close-line"></i>

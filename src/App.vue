@@ -68,7 +68,7 @@
 
       <div class="menubar-right">
         <!-- Primary Action: Share -->
-        <button class="nav-btn-share" @click="uiStore.openModal('share')" title="Share Hero Link">
+        <button class="nav-btn-share" @click="uiStore.openModal('share')">
           <i class="ri-share-forward-line"></i>
           <span>Share</span>
         </button>
@@ -79,7 +79,6 @@
             class="nav-btn-tools"
             :class="{ active: isToolsOpen }"
             @click="isToolsOpen = !isToolsOpen"
-            title="File, Export & Sheet Utilities"
           >
             <i class="ri-tools-line"></i>
             <span>Tools</span>
@@ -140,7 +139,6 @@
               rel="noopener noreferrer"
               class="dropdown-item"
               @click="isToolsOpen = false"
-              title="Download Roll20 companion extension from Google Drive"
             >
               <i class="ri-download-cloud-2-line icon-amber"></i>
               <div class="dropdown-item-text">
@@ -204,7 +202,6 @@
             <button
               class="btn btn-secondary btn-sm"
               @click="uiStore.openModal('printOfficial')"
-              title="Print Deluxe Character Sheet (PDF)"
             >
               <i class="ri-printer-line"></i> Print Sheet
             </button>

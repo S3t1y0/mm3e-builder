@@ -30,7 +30,7 @@
             </button>
           </div>
 
-          <button type="button" class="studio-close-btn" @click="closeModal" title="Close Studio">
+          <button type="button" class="studio-close-btn" @click="closeModal" aria-label="Close">
             <i class="ri-close-line"></i>
           </button>
         </div>

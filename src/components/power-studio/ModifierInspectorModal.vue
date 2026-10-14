@@ -22,7 +22,7 @@
               type="button"
               class="modal-close-btn"
               @click="builderStore.closeModifierInspector"
-              title="Close Modifiers Library"
+              aria-label="Close"
             >
               <i class="ri-close-line"></i>
             </button>

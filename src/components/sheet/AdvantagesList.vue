@@ -215,7 +215,7 @@
               type="button"
               class="del-btn-tiny"
               @click="editingAdv = null"
-              title="Cancel"
+              aria-label="Close"
             >
               <i class="ri-close-line"></i>
             </button>

@@ -32,7 +32,6 @@
           type="button"
           class="btn-unlink-current"
           @click="builderStore.removeLinkedEffect(null, builderStore.activeLinkedIndex)"
-          title="Remove this linked effect"
         >
           <i class="ri-delete-bin-line"></i>
           <span>Remove Linked</span>

@@ -18,7 +18,6 @@
               type="button"
               class="btn-create-custom-adv"
               @click="openCustomModal"
-              title="Create Custom / Homebrew Advantage"
             >
               <i class="ri-add-circle-line"></i>
               <span>+ Custom Advantage</span>
@@ -30,7 +29,7 @@
               type="button"
               class="modal-close-btn"
               @click="uiStore.closeModal('advantage')"
-              title="Close Advantage Catalog"
+              aria-label="Close"
             >
               <i class="ri-close-line"></i>
             </button>
@@ -110,7 +109,7 @@
                 <strong class="adv-card-title">{{ adv.name }}</strong>
               </div>
 
-              <p class="adv-card-desc" :title="adv.desc">{{ adv.desc }}</p>
+              <p class="adv-card-desc">{{ adv.desc }}</p>
 
               <div class="adv-card-footer">
                 <!-- Specifiable advantage controls (e.g. Benefit, Favored Foe) -->
@@ -245,7 +244,6 @@
                 type="button"
                 class="del-btn-tiny"
                 @click="activeSpecAdv = null"
-                title="Cancel"
               >
                 <i class="ri-close-line"></i>
               </button>
@@ -345,7 +343,6 @@
                 type="button"
                 class="del-btn-tiny"
                 @click="showCustomModal = false"
-                title="Cancel"
               >
                 <i class="ri-close-line"></i>
               </button>
