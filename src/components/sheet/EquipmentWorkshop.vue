@@ -16,45 +16,58 @@
       </div>
     </div>
 
-    <!-- EP Budget Banner -->
-    <div class="equipment-budget-banner" :class="budgetInfo.isOverBudget ? 'banner-warn' : 'banner-ok'">
-      <div class="budget-banner-left">
-        <div class="budget-stat-group">
-          <span class="budget-label">Total EP Used</span>
-          <span class="budget-val highlight">{{ budgetInfo.totalEP }} EP</span>
+    <!-- Minimalist Stat Strip (Tactical EP Budget Bar) -->
+    <div class="eq-stat-strip" :class="budgetInfo.isOverBudget ? 'strip-deficit' : 'strip-balanced'">
+      <div class="strip-metrics-cluster">
+        <div class="strip-metric-item">
+          <span class="strip-label">USED</span>
+          <span class="strip-value font-mono highlight">{{ budgetInfo.totalEP }} <small>EP</small></span>
         </div>
-        <div class="budget-divider">/</div>
-        <div class="budget-stat-group">
-          <span class="budget-label">Equipment Capacity</span>
-          <span class="budget-val">{{ budgetInfo.maxEP }} EP ({{ budgetInfo.ranks }} Ranks)</span>
+        <span class="strip-sep">/</span>
+        <div class="strip-metric-item">
+          <span class="strip-label">CAPACITY</span>
+          <span class="strip-value font-mono">{{ budgetInfo.maxEP }} <small>EP</small></span>
+          <span class="strip-sub">({{ budgetInfo.ranks }} Rks)</span>
+        </div>
+        <span class="strip-sep">|</span>
+        <div class="strip-metric-item" :class="budgetInfo.isOverBudget ? 'status-deficit' : 'status-ok'">
+          <template v-if="budgetInfo.isOverBudget">
+            <span class="strip-label">DEFICIT</span>
+            <span class="strip-value font-mono val-warn">{{ budgetInfo.totalEP - budgetInfo.maxEP }} <small>EP</small></span>
+            <span class="strip-sub">(Req Rk {{ budgetInfo.neededRanks }})</span>
+          </template>
+          <template v-else>
+            <span class="strip-label">REMAINING</span>
+            <span class="strip-value font-mono val-ok">{{ budgetInfo.remainingEP }} <small>EP</small></span>
+          </template>
         </div>
       </div>
 
-      <div class="budget-banner-right">
-        <template v-if="budgetInfo.isOverBudget">
-          <div class="budget-status-alert">
-            <span class="status-icon"><i class="ri-alert-line"></i></span>
-            <span>Deficit: <strong>{{ budgetInfo.totalEP - budgetInfo.maxEP }} EP</strong> (Requires Rank {{ budgetInfo.neededRanks }} Equipment)</span>
-          </div>
-          <button type="button" class="btn-sync-warn" @click="syncEquipmentAdvantage">
-            <i class="ri-refresh-line"></i> Auto-Sync Advantage ({{ budgetInfo.neededRanks }} Ranks / {{ budgetInfo.neededRanks }} PP)
-          </button>
-        </template>
-        <template v-else>
-          <div class="budget-status-ok">
-            <span class="status-icon"><i class="ri-checkbox-circle-line"></i></span>
-            <span>Budget OK (Remaining: <strong>{{ budgetInfo.remainingEP }} EP</strong>)</span>
-          </div>
-          <button
-            v-if="budgetInfo.ranks > budgetInfo.neededRanks"
-            type="button"
-            class="btn-sync-adjust"
-            @click="syncEquipmentAdvantage"
-            title="Adjust advantage to exact needed ranks"
-          >
-            <i class="ri-refresh-line"></i> Adjust to {{ budgetInfo.neededRanks }} Ranks
-          </button>
-        </template>
+      <div class="strip-actions-cluster">
+        <button
+          v-if="budgetInfo.isOverBudget"
+          type="button"
+          class="btn-strip-sync btn-sync-deficit"
+          @click="syncEquipmentAdvantage"
+          title="Auto-Sync Advantage ranks to cover deficit"
+        >
+          <i class="ri-flashlight-line"></i>
+          <span>Auto-Sync (+{{ budgetInfo.neededRanks - budgetInfo.ranks }} PP)</span>
+        </button>
+        <button
+          v-else-if="budgetInfo.ranks > budgetInfo.neededRanks"
+          type="button"
+          class="btn-strip-sync btn-sync-adjust"
+          @click="syncEquipmentAdvantage"
+          title="Adjust advantage to exact needed ranks"
+        >
+          <i class="ri-refresh-line"></i>
+          <span>Adjust to {{ budgetInfo.neededRanks }} Rks</span>
+        </button>
+        <div v-else class="strip-badge-ok">
+          <i class="ri-checkbox-circle-fill"></i>
+          <span>Budget OK</span>
+        </div>
       </div>
     </div>
 
@@ -66,11 +79,15 @@
           :key="cat.id"
           type="button"
           class="filter-chip"
-          :class="{ active: activeFilter === cat.id }"
+          :class="[
+            'chip-' + (cat.id.toLowerCase()),
+            { active: activeFilter === cat.id }
+          ]"
           @click="activeFilter = cat.id"
         >
           <i v-if="cat.icon" :class="cat.icon"></i>
-          <span>{{ cat.label }} ({{ getCategoryCount(cat.id) }})</span>
+          <span>{{ cat.label }}</span>
+          <span class="chip-count">({{ getCategoryCount(cat.id) }})</span>
         </button>
       </div>
     </div>
@@ -91,26 +108,27 @@
         v-for="item in filteredResources"
         :key="item.id"
         class="res-card"
-        :class="item.status === 'equipped' ? 'card-equipped' : 'card-unequipped'"
+        :class="[
+          'cat-border-' + getItemCategoryKey(item),
+          item.status === 'equipped' ? 'card-equipped' : 'card-unequipped'
+        ]"
       >
         <div class="res-card-top">
           <div class="res-title-box">
-            <span class="res-icon" :class="item.subtype || item.type">
+            <span class="res-icon" :class="'icon-' + getItemCategoryKey(item)">
               <i :class="getResIconClass(item)"></i>
             </span>
             <div class="res-naming">
               <div class="res-badges-row">
-                <span class="badge-subtle">{{ getSubtypeLabel(item) }}</span>
+                <span class="badge-subtle" :class="'badge-' + getItemCategoryKey(item)">{{ getSubtypeLabel(item) }}</span>
                 <button
                   type="button"
                   class="res-status-pill"
                   :class="'status-' + (item.status || 'equipped')"
                   @click="toggleStatus(item.id)"
-                  title="Click to cycle status (Equipped -> In Bag -> Stored)"
+                  title="Click to cycle status: Equipped → Carried → Stored"
                 >
-                  <i v-if="item.status === 'equipped' || !item.status" class="ri-checkbox-circle-fill"></i>
-                  <i v-else-if="item.status === 'carried'" class="ri-inbox-line"></i>
-                  <i v-else class="ri-archive-line"></i>
+                  <span class="status-dot"></span>
                   <span>{{ formatStatus(item.status) }}</span>
                 </button>
               </div>
@@ -119,7 +137,15 @@
           </div>
 
           <div class="res-top-actions">
-            <span class="ep-tag">{{ item.epCost ?? item.cost ?? 0 }} EP</span>
+            <span class="ep-tag font-mono">{{ item.epCost ?? item.cost ?? 0 }} EP</span>
+            <button
+              type="button"
+              class="btn-icon-subtle"
+              @click="openCustomStudio(item.category || item.type || 'Weapons')"
+              title="Open in Custom Studio"
+            >
+              <i class="ri-edit-line"></i>
+            </button>
             <button
               type="button"
               class="btn-icon-subtle"
@@ -145,7 +171,7 @@
             type="button"
             class="res-chip chip-atk interactive-chip"
             @click="rollWeaponAttack(item)"
-            title="Click to roll attack check"
+            title="Click to roll attack check (d20 + bonus)"
           >
             <i class="ri-dice-line"></i> Atk +{{ getWeaponAttackBonus(item) }}
           </button>
@@ -157,6 +183,9 @@
           </span>
           <span v-if="item.weapon?.crit" class="res-chip chip-crit">
             Crit {{ item.weapon.crit }}
+          </span>
+          <span v-for="tr in (item.weapon?.traits || [])" :key="tr" class="res-chip chip-trait">
+            {{ tr }}
           </span>
         </div>
 
@@ -170,6 +199,21 @@
           <span class="res-chip chip-armor">
             <i class="ri-shield-check-line"></i> +{{ getArmorProtection(item) }} Protection
           </span>
+          <span v-if="item.armor?.imperviousRank" class="res-chip chip-imperv">
+            Impervious {{ item.armor.imperviousRank }}
+          </span>
+        </div>
+
+        <div v-else-if="item.vehicle || item.type === 'Vehicle'" class="res-tactical-chips">
+          <span v-if="item.vehicle?.size" class="res-chip chip-vehicle">Size: {{ item.vehicle.size }}</span>
+          <span v-if="item.vehicle?.speedMph" class="res-chip chip-vehicle">Speed: {{ item.vehicle.speedMph }}</span>
+          <span v-if="item.vehicle?.toughness" class="res-chip chip-vehicle">Tough: {{ item.vehicle.toughness }}</span>
+        </div>
+
+        <div v-else-if="item.hq || item.type === 'Headquarters'" class="res-tactical-chips">
+          <span v-if="item.hq?.size" class="res-chip chip-hq">Size: {{ item.hq.size }}</span>
+          <span v-if="item.hq?.toughness" class="res-chip chip-hq">Tough: {{ item.hq.toughness }}</span>
+          <span v-if="item.hq?.features?.length" class="res-chip chip-hq">{{ item.hq.features.length }} Features</span>
         </div>
 
         <!-- Description -->
@@ -244,222 +288,46 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
-import { RESOURCE_CATEGORIES, RESOURCE_PRESETS } from '../../rules/resources.js';
-import { getCombatSkillBonus } from '../../rules/skills.js';
+import { RESOURCE_CATEGORIES } from '../../rules/resources.js';
 import { sendFeatureToVTT } from '../../services/vttBridge.js';
+import { useEquipmentWorkflow } from '../../rules/useEquipmentWorkflow.js';
 import CustomEquipmentModal from '../modals/CustomEquipmentModal.vue';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
-
-const activeFilter = ref('all');
-const showPresetModal = ref(false);
-const showCustomStudio = ref(false);
-const customStudioCategory = ref('Weapons');
-const presetSearch = ref('');
-
-function openCustomStudio(cat = 'Weapons') {
-  customStudioCategory.value = cat;
-  showCustomStudio.value = true;
-  showPresetModal.value = false;
-}
-
 const categories = RESOURCE_CATEGORIES;
 
-const budgetInfo = computed(() => {
-  return heroStore.getEquipmentBudgetInfo();
-});
-
-function getCategoryCount(catId) {
-  const list = heroStore.character.resources || [];
-  if (catId === 'all') return list.length;
-  if (catId === 'Weapons') {
-    return list.filter(r => isWeapon(r)).length;
-  }
-  if (catId === 'Armor') {
-    return list.filter(r => isArmor(r) || isShield(r)).length;
-  }
-  if (catId === 'Gadget') {
-    return list.filter(r => r.type === 'Gadget' || r.subtype === 'gadget').length;
-  }
-  if (catId === 'Vehicle') {
-    return list.filter(r => r.type === 'Vehicle' || r.subtype === 'vehicle').length;
-  }
-  if (catId === 'Headquarters') {
-    return list.filter(r => r.type === 'Headquarters' || r.subtype === 'headquarters').length;
-  }
-  return list.filter(r => r.type === catId).length;
-}
-
-const filteredResources = computed(() => {
-  const list = heroStore.character.resources || [];
-  if (activeFilter.value === 'all') return list;
-  if (activeFilter.value === 'Weapons') {
-    return list.filter(r => isWeapon(r));
-  }
-  if (activeFilter.value === 'Armor') {
-    return list.filter(r => isArmor(r) || isShield(r));
-  }
-  if (activeFilter.value === 'Gadget') {
-    return list.filter(r => r.type === 'Gadget' || r.subtype === 'gadget');
-  }
-  if (activeFilter.value === 'Vehicle') {
-    return list.filter(r => r.type === 'Vehicle' || r.subtype === 'vehicle');
-  }
-  if (activeFilter.value === 'Headquarters') {
-    return list.filter(r => r.type === 'Headquarters' || r.subtype === 'headquarters');
-  }
-  return list.filter(r => r.type === activeFilter.value);
-});
-
-const filteredPresets = computed(() => {
-  const q = presetSearch.value.toLowerCase().trim();
-  if (!q) return RESOURCE_PRESETS;
-  return RESOURCE_PRESETS.filter(p =>
-    p.name.toLowerCase().includes(q) ||
-    (p.desc && p.desc.toLowerCase().includes(q)) ||
-    (p.subtype && p.subtype.toLowerCase().includes(q)) ||
-    (p.type && p.type.toLowerCase().includes(q))
-  );
-});
-
-function syncEquipmentAdvantage() {
-  heroStore.syncEquipmentAdvantage();
-  uiStore.showToast('Synchronized Equipment Advantage PP budget!', 'success');
-}
-
-function toggleStatus(id) {
-  heroStore.toggleResourceStatus(id);
-}
-
-function formatStatus(status) {
-  if (status === 'carried') return 'In Bag';
-  if (status === 'stored') return 'Stored';
-  return 'Equipped';
-}
-
-function deleteResource(id, name) {
-  heroStore.removeResource(id);
-  uiStore.showToast(`Deleted ${name}`, 'info');
-}
-
-function addPreset(preset) {
-  heroStore.addResource({
-    ...preset,
-    id: 'res_' + Date.now() + Math.random().toString(36).substr(2, 4)
-  });
-  uiStore.showToast(`Added ${preset.name} (${preset.epCost} EP)!`, 'success');
-}
-
-function getResIconClass(r) {
-  if (r.subtype === 'weapon_ranged' || (r.weapon?.range === 'Ranged')) return 'ri-focus-2-line';
-  if (r.subtype?.startsWith('weapon') || r.weapon != null) return 'ri-sword-line';
-  if (isShield(r)) return 'ri-shield-line';
-  if (r.subtype === 'armor' || r.armor != null) return 'ri-shield-check-line';
-  if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'ri-car-line';
-  if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'ri-building-line';
-  if (r.type === 'Gadget' || r.subtype === 'gadget') return 'ri-smartphone-line';
-  return 'ri-archive-line';
-}
-
-function getSubtypeLabel(r) {
-  if (r.subtype === 'weapon_ranged') return 'RANGED WEAPON';
-  if (r.subtype === 'weapon_melee') return 'MELEE WEAPON';
-  if (r.weapon) return r.weapon.range === 'Ranged' ? 'RANGED WEAPON' : 'MELEE WEAPON';
-  if (isShield(r)) return 'SHIELD';
-  if (r.subtype === 'armor') return 'BODY ARMOR';
-  if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'VEHICLE';
-  if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'HEADQUARTERS';
-  return (r.type || 'GEAR').toUpperCase();
-}
-
-function isWeapon(r) {
-  return r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor') && !r.subtype?.includes('shield'));
-}
-
-function isShield(r) {
-  return r.subtype === 'shield' || (r.armor && (r.armor.shieldRank || r.armor.activeDefenseBonus)) || /Active Defense/i.test(r.desc || '') || /Shield/i.test(r.name || '');
-}
-
-function isArmor(r) {
-  return (r.subtype === 'armor' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')) && !isShield(r);
-}
-
-function getShieldBonus(r) {
-  const a = r.armor || {};
-  let bonus = Number(a.activeDefenseBonus ?? a.shieldRank ?? 0);
-  if (isNaN(bonus) || bonus <= 0) {
-    const m = (r.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (r.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
-    bonus = m ? parseInt(m[1], 10) : 2;
-  }
-  return bonus;
-}
-
-function getWeaponAttackBonus(r) {
-  const w = r.weapon || {};
-  const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
-  const skills = heroStore.character.skills || [];
-
-  const isThrown = /thrown/i.test(r.subtype || '') || /thrown/i.test(r.desc || '') || (w.traits || []).some(t => /thrown/i.test(t));
-  const attackContext = {
-    name: r.name,
-    weaponType: r.subtype,
-    description: r.desc,
-    traits: w.traits || [],
-    descriptors: w.traits || [],
-    isThrown,
-    range: isRanged ? 'Ranged' : 'Close'
-  };
-
-  const skillBonus = getCombatSkillBonus(skills, attackContext, isRanged);
-
-  if (isRanged) {
-    const dex = Number(heroStore.effectiveAbilities.DEX) || 0;
-    const rangedAdv = Number(heroStore.getAdvantageRanks('Ranged Attack')) || 0;
-    return dex + rangedAdv + skillBonus + (w.attackBonus || 0);
-  } else {
-    const fgt = Number(heroStore.effectiveAbilities.FGT) || 0;
-    const closeAdv = Number(heroStore.getAdvantageRanks('Close Attack')) || 0;
-    return fgt + closeAdv + skillBonus + (w.attackBonus || 0);
-  }
-}
-
-function getWeaponDC(r) {
-  const w = r.weapon || {};
-  const str = Number(heroStore.effectiveAbilities.STR) || 0;
-  const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
-  let dmgRank = w.damageRank;
-  if (dmgRank === undefined) {
-    const m = (r.desc || '').match(/Damage\s+(\d+)/i) || (r.desc || '').match(/Affliction\s+(\d+)/i);
-    dmgRank = m ? parseInt(m[1], 10) : 1;
-  }
-  const effectiveDmg = isStrengthBased ? (str + dmgRank) : dmgRank;
-  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(r.desc || '');
-  return (isAffliction ? 10 : 15) + effectiveDmg;
-}
-
-function getWeaponResistance(r) {
-  const w = r.weapon || {};
-  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(r.desc || '');
-  return w.resistance || (isAffliction ? 'Fortitude' : 'Toughness');
-}
-
-function getWeaponRange(r) {
-  const w = r.weapon || {};
-  if (w.range === 'Ranged' || /Ranged/i.test(r.desc || '')) return 'Ranged';
-  if (w.isStrengthBased ?? /Strength-based/i.test(r.desc || '')) return 'Melee (STR)';
-  return 'Close';
-}
-
-function getArmorProtection(r) {
-  const a = r.armor || {};
-  if (a.protectionRank !== undefined) return a.protectionRank;
-  const m = (r.desc || '').match(/Protection\s+(\d+)/i);
-  return m ? parseInt(m[1], 10) : 1;
-}
+const {
+  activeFilter,
+  showPresetModal,
+  showCustomStudio,
+  customStudioCategory,
+  presetSearch,
+  budgetInfo,
+  openCustomStudio,
+  getCategoryCount,
+  filteredResources,
+  filteredPresets,
+  syncEquipmentAdvantage,
+  toggleStatus,
+  formatStatus,
+  deleteResource,
+  addPreset,
+  getResIconClass,
+  getSubtypeLabel,
+  getItemCategoryKey,
+  isWeapon,
+  isShield,
+  isArmor,
+  getShieldBonus,
+  getWeaponAttackBonus,
+  getWeaponDC,
+  getWeaponResistance,
+  getWeaponRange,
+  getArmorProtection
+} = useEquipmentWorkflow(heroStore, uiStore);
 
 function rollWeaponAttack(item) {
   const bonus = getWeaponAttackBonus(item);
@@ -493,7 +361,7 @@ function exportRoll20(item) {
 .equipment-workshop {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.95rem;
 }
 
 .workshop-header {
@@ -508,144 +376,191 @@ function exportRoll20(item) {
   font-size: 1.15rem;
   font-weight: 800;
   color: #fff;
-  margin: 0 0 0.2rem 0;
+  margin: 0 0 0.15rem 0;
+  letter-spacing: -0.01em;
 }
 
 .workshop-sub {
-  font-size: 0.75rem;
-  color: var(--text-muted);
+  font-size: 0.74rem;
+  color: var(--text-muted, #94a3b8);
   margin: 0;
 }
 
-.btn-primary-add {
-  background: #dc2626;
-  border: 1px solid #ef4444;
-  color: #fff;
-  font-size: 0.8rem;
-  font-weight: 800;
-  padding: 0.45rem 0.95rem;
-  border-radius: var(--radius-sm);
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-secondary-custom {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #e2e8f0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--radius-xs, 4px);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.4);
-  transition: all var(--trans-fast);
+  transition: all 0.15s ease;
+}
+
+.btn-secondary-custom:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.btn-primary-add {
+  background: rgba(56, 189, 248, 0.14);
+  border: 1px solid rgba(56, 189, 248, 0.35);
+  color: #38bdf8;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.45rem 0.95rem;
+  border-radius: var(--radius-xs, 4px);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
 }
 
 .btn-primary-add:hover {
-  background: #ef4444;
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.6);
+  background: #38bdf8;
+  color: #090d16;
+  border-color: #7dd3fc;
+  box-shadow: 0 2px 12px rgba(56, 189, 248, 0.35);
 }
 
-/* Equipment Budget Banner */
-.equipment-budget-banner {
+/* ==========================================================================
+   MINIMALIST STAT STRIP (TACTICAL EP BUDGET BAR)
+   ========================================================================== */
+.eq-stat-strip {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 1.15rem;
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border-color);
+  padding: 0.6rem 0.95rem;
+  background: rgba(15, 23, 42, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-sm, 6px);
   gap: 1rem;
   flex-wrap: wrap;
+  backdrop-filter: blur(8px);
 }
 
-.equipment-budget-banner.banner-ok {
-  background: rgba(16, 185, 129, 0.08);
-  border-color: rgba(16, 185, 129, 0.3);
+.eq-stat-strip.strip-deficit {
+  border-color: rgba(245, 158, 11, 0.35);
+  background: rgba(28, 24, 18, 0.7);
 }
 
-.equipment-budget-banner.banner-warn {
-  background: rgba(239, 68, 68, 0.08);
-  border-color: rgba(239, 68, 68, 0.4);
-}
-
-.budget-banner-left {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-.budget-stat-group {
-  display: flex;
-  flex-direction: column;
-  gap: 0.15rem;
-}
-
-.budget-label {
-  font-size: 0.65rem;
-  font-weight: 800;
-  color: var(--text-muted);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
-
-.budget-val {
-  font-size: 1.15rem;
-  font-weight: 900;
-  color: #fff;
-  font-variant-numeric: tabular-nums;
-}
-
-.budget-val.highlight {
-  color: #38bdf8;
-}
-
-.budget-divider {
-  font-size: 1.25rem;
-  color: var(--text-muted);
-  font-weight: 300;
-}
-
-.budget-banner-right {
+.strip-metrics-cluster {
   display: flex;
   align-items: center;
   gap: 0.85rem;
   flex-wrap: wrap;
 }
 
-.budget-status-ok {
+.strip-metric-item {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 0.35rem;
-  color: #34d399;
-  font-size: 0.78rem;
-  font-weight: 700;
 }
 
-.budget-status-alert {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  color: #f87171;
-  font-size: 0.78rem;
+.strip-label {
+  font-size: 0.65rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  color: #94a3b8;
+  text-transform: uppercase;
 }
 
-.btn-sync-warn {
-  background: #dc2626;
-  border: 1px solid #ef4444;
+.strip-value {
+  font-size: 0.95rem;
+  font-weight: 800;
   color: #fff;
-  font-size: 0.74rem;
+}
+
+.strip-value small {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.strip-sub {
+  font-size: 0.7rem;
+  color: #94a3b8;
+}
+
+.strip-sep {
+  color: rgba(255, 255, 255, 0.15);
+  font-weight: 300;
+  font-size: 0.9rem;
+}
+
+.val-warn {
+  color: #fbbf24 !important;
+}
+
+.val-ok {
+  color: #34d399 !important;
+}
+
+.strip-actions-cluster {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-strip-sync {
+  font-size: 0.72rem;
   font-weight: 800;
   padding: 0.3rem 0.65rem;
-  border-radius: var(--radius-xs);
+  border-radius: var(--radius-xs, 4px);
   cursor: pointer;
   display: inline-flex;
   align-items: center;
   gap: 0.3rem;
+  transition: all 0.15s ease;
+}
+
+.btn-sync-deficit {
+  background: rgba(245, 158, 11, 0.15);
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  color: #fbbf24;
+}
+
+.btn-sync-deficit:hover {
+  background: #f59e0b;
+  color: #090d16;
+  border-color: #fbbf24;
 }
 
 .btn-sync-adjust {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
   border: 1px solid rgba(255, 255, 255, 0.15);
-  color: var(--text-secondary);
-  font-size: 0.74rem;
-  padding: 0.25rem 0.55rem;
-  border-radius: var(--radius-xs);
-  cursor: pointer;
+  color: #94a3b8;
 }
 
-/* Category Pills & Quick Add */
+.btn-sync-adjust:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+
+.strip-badge-ok {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #34d399;
+}
+
+/* ==========================================================================
+   CATEGORY FILTERS BAR
+   ========================================================================== */
 .res-categories-bar {
   display: flex;
   align-items: center;
@@ -657,40 +572,47 @@ function exportRoll20(item) {
 .filter-pills-bar {
   display: flex;
   align-items: center;
-  gap: 0.35rem;
+  gap: 0.4rem;
   overflow-x: auto;
-  padding-bottom: 0.2rem;
+  padding-bottom: 2px;
 }
 
 .filter-chip {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-sm, 4px);
-  color: var(--text-secondary);
-  font-size: 0.72rem;
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+  font-size: 0.74rem;
   font-weight: 700;
-  padding: 0.25rem 0.65rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: var(--radius-xs, 4px);
+  cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.3rem;
-  cursor: pointer;
+  gap: 0.35rem;
+  transition: all 0.15s ease;
   white-space: nowrap;
-  transition: all var(--trans-fast);
 }
 
 .filter-chip:hover {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
   color: #fff;
 }
 
 .filter-chip.active {
-  background: #dc2626;
-  border-color: #ef4444;
-  color: #fff;
-  box-shadow: 0 2px 8px rgba(220, 38, 38, 0.35);
+  background: rgba(56, 189, 248, 0.15);
+  border-color: rgba(56, 189, 248, 0.45);
+  color: #38bdf8;
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
-/* Items Grid */
+.chip-count {
+  font-size: 0.68rem;
+  opacity: 0.75;
+}
+
+/* ==========================================================================
+   POLISHED TACTICAL ITEM CARDS
+   ========================================================================== */
 .res-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -698,24 +620,35 @@ function exportRoll20(item) {
 }
 
 .res-card {
-  background: rgba(20, 20, 28, 0.6);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-md);
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid rgba(255, 255, 255, 0.2);
+  border-radius: var(--radius-sm, 6px);
   padding: 0.85rem;
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-  transition: all var(--trans-fast);
+  transition: all 0.15s ease;
+  position: relative;
 }
 
+.res-card.cat-border-weapon { border-left-color: #f87171; }
+.res-card.cat-border-armor { border-left-color: #60a5fa; }
+.res-card.cat-border-gadget { border-left-color: #34d399; }
+.res-card.cat-border-vehicle { border-left-color: #38bdf8; }
+.res-card.cat-border-hq { border-left-color: #c084fc; }
+
 .res-card:hover {
-  border-color: rgba(220, 38, 38, 0.35);
-  background: rgba(25, 25, 35, 0.8);
+  background: rgba(22, 33, 56, 0.75);
+  border-color: rgba(255, 255, 255, 0.15);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
 .card-unequipped {
   opacity: 0.65;
   border-style: dashed;
+  border-left-style: solid;
 }
 
 .res-card-top {
@@ -733,18 +666,24 @@ function exportRoll20(item) {
 }
 
 .res-icon {
-  width: 34px;
-  height: 34px;
-  border-radius: var(--radius-sm);
-  background: rgba(220, 38, 38, 0.12);
-  border: 1px solid rgba(220, 38, 38, 0.3);
-  color: #f87171;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-xs, 4px);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #94a3b8;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.1rem;
+  font-size: 1.15rem;
   flex-shrink: 0;
 }
+
+.res-icon.icon-weapon { background: rgba(248, 113, 113, 0.12); border-color: rgba(248, 113, 113, 0.3); color: #f87171; }
+.res-icon.icon-armor { background: rgba(96, 165, 250, 0.12); border-color: rgba(96, 165, 250, 0.3); color: #60a5fa; }
+.res-icon.icon-gadget { background: rgba(52, 211, 153, 0.12); border-color: rgba(52, 211, 153, 0.3); color: #34d399; }
+.res-icon.icon-vehicle { background: rgba(56, 189, 248, 0.12); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8; }
+.res-icon.icon-hq { background: rgba(192, 132, 252, 0.12); border-color: rgba(192, 132, 252, 0.3); color: #c084fc; }
 
 .res-naming {
   display: flex;
@@ -760,48 +699,73 @@ function exportRoll20(item) {
 }
 
 .badge-subtle {
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   font-weight: 800;
-  padding: 0.1rem 0.35rem;
+  padding: 0.08rem 0.4rem;
   background: rgba(255, 255, 255, 0.06);
   border-radius: 3px;
-  color: var(--text-muted);
+  color: #94a3b8;
   text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
+
+.badge-weapon { color: #f87171; background: rgba(248, 113, 113, 0.08); }
+.badge-armor { color: #60a5fa; background: rgba(96, 165, 250, 0.08); }
+.badge-gadget { color: #34d399; background: rgba(52, 211, 153, 0.08); }
+.badge-vehicle { color: #38bdf8; background: rgba(56, 189, 248, 0.08); }
+.badge-hq { color: #c084fc; background: rgba(192, 132, 252, 0.08); }
 
 .res-status-pill {
   font-size: 0.62rem;
   font-weight: 700;
-  padding: 0.08rem 0.35rem;
+  padding: 0.08rem 0.45rem;
   border-radius: 3px;
   border: 1px solid transparent;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 0.2rem;
+  gap: 0.3rem;
   background: transparent;
+  transition: all 0.15s ease;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .res-status-pill.status-equipped {
   color: #34d399;
-  border-color: rgba(52, 211, 153, 0.3);
+  border-color: rgba(52, 211, 153, 0.25);
   background: rgba(52, 211, 153, 0.1);
+}
+.res-status-pill.status-equipped .status-dot {
+  background: #34d399;
+  box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
 }
 
 .res-status-pill.status-carried {
   color: #38bdf8;
-  border-color: rgba(56, 189, 248, 0.3);
+  border-color: rgba(56, 189, 248, 0.25);
   background: rgba(56, 189, 248, 0.1);
+}
+.res-status-pill.status-carried .status-dot {
+  background: #38bdf8;
 }
 
 .res-status-pill.status-stored {
   color: #94a3b8;
-  border-color: rgba(148, 163, 184, 0.3);
+  border-color: rgba(148, 163, 184, 0.25);
   background: rgba(148, 163, 184, 0.1);
+}
+.res-status-pill.status-stored .status-dot {
+  background: #94a3b8;
 }
 
 .res-card-name {
-  font-size: 0.9rem;
+  font-size: 0.92rem;
   font-weight: 800;
   color: #fff;
   white-space: nowrap;
@@ -829,23 +793,30 @@ function exportRoll20(item) {
 .btn-icon-subtle {
   background: transparent;
   border: none;
-  color: var(--text-muted);
+  color: #94a3b8;
   cursor: pointer;
-  font-size: 0.9rem;
-  padding: 0.2rem;
-  border-radius: 3px;
-  transition: all var(--trans-fast);
+  font-size: 0.95rem;
+  padding: 0.25rem;
+  border-radius: 4px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-icon-subtle:hover {
   color: #fff;
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.1);
 }
 
 .btn-icon-subtle.btn-delete:hover {
   color: #ef4444;
+  background: rgba(239, 68, 68, 0.15);
 }
 
+/* ==========================================================================
+   TACTICAL CHIPS ROW
+   ========================================================================== */
 .res-tactical-chips {
   display: flex;
   align-items: center;
@@ -860,43 +831,86 @@ function exportRoll20(item) {
   border-radius: 3px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  color: var(--text-secondary);
+  color: #cbd5e1;
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
 
 .res-chip.chip-atk {
-  background: rgba(220, 38, 38, 0.12);
-  border-color: rgba(239, 68, 68, 0.35);
-  color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fca5a5;
 }
 
 .interactive-chip {
   cursor: pointer;
-  transition: all var(--trans-fast);
+  transition: all 0.15s ease;
 }
 
 .interactive-chip:hover {
   background: #dc2626;
   color: #fff;
+  border-color: #ef4444;
 }
 
 .res-chip.chip-dc {
   background: rgba(56, 189, 248, 0.1);
   border-color: rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
+}
+
+.res-chip.chip-range {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+}
+
+.res-chip.chip-crit {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  color: #fbbf24;
+}
+
+.res-chip.chip-trait {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.08);
+  color: #94a3b8;
+}
+
+.res-chip.chip-shield {
+  background: rgba(56, 189, 248, 0.12);
+  border-color: rgba(56, 189, 248, 0.3);
   color: #38bdf8;
 }
 
 .res-chip.chip-armor {
-  background: rgba(16, 185, 129, 0.1);
-  border-color: rgba(16, 185, 129, 0.25);
+  background: rgba(52, 211, 153, 0.12);
+  border-color: rgba(52, 211, 153, 0.3);
   color: #34d399;
+}
+
+.res-chip.chip-imperv {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+}
+
+.res-chip.chip-vehicle {
+  background: rgba(56, 189, 248, 0.1);
+  border-color: rgba(56, 189, 248, 0.25);
+  color: #7dd3fc;
+}
+
+.res-chip.chip-hq {
+  background: rgba(192, 132, 252, 0.1);
+  border-color: rgba(192, 132, 252, 0.25);
+  color: #d8b4fe;
 }
 
 .res-desc {
   font-size: 0.74rem;
-  color: var(--text-secondary);
+  color: #94a3b8;
   line-height: 1.4;
   margin: 0;
 }
@@ -904,7 +918,7 @@ function exportRoll20(item) {
 .empty-hint {
   padding: 2.5rem 1rem;
   text-align: center;
-  color: var(--text-muted);
+  color: #64748b;
   display: flex;
   flex-direction: column;
   align-items: center;

@@ -1,52 +1,15 @@
 import { BASE_EFFECTS, CONFIGURABLE_EFFECTS, calculatePowerTotalCost, calculateEffectCost } from './powerEngine.js';
-import { resolveEffectRulesBlock, formatTimeRank, formatDistanceRank } from './powerRuleDescriptions.js';
+import {
+  resolveEffectRulesBlock,
+  formatTimeRank,
+  formatDistanceRank,
+  SPEED_RANK_TABLE,
+  formatSpeedRank,
+  getSpeedMph
+} from './powerRuleDescriptions.js';
 import { formatMeasurementDistance } from './powerCalculator.js';
 
-/**
- * Speed rank table for real-world velocity in Mutants & Masterminds 3E.
- * Rank 0 is 2 MPH, Rank 1 is 4 MPH, doubling with each rank.
- */
-const SPEED_RANK_TABLE = {
-  0: '2 MPH (30 ft/round)',
-  1: '4 MPH (60 ft/round)',
-  2: '8 MPH (120 ft/round)',
-  3: '16 MPH (250 ft/round)',
-  4: '30 MPH (500 ft/round)',
-  5: '60 MPH (900 ft/round)',
-  6: '120 MPH (1,800 ft/round)',
-  7: '250 MPH (0.5 mile/round)',
-  8: '500 MPH (1 mile/round)',
-  9: '1,000 MPH (2 miles/round)',
-  10: '2,000 MPH (Mach 2.5 • 4 miles/round)',
-  11: '4,000 MPH (Mach 5 • 8 miles/round)',
-  12: '8,000 MPH (Mach 10 • 16 miles/round)',
-  13: '16,000 MPH (Mach 20 • 30 miles/round)',
-  14: '32,000 MPH (Escape Velocity)',
-  15: '64,000 MPH (120 miles/sec)',
-  16: '125,000 MPH',
-  17: '250,000 MPH',
-  18: '500,000 MPH',
-  19: 'Near Light Speed',
-  20: 'Speed of Light (186,000 miles/sec)'
-};
-
-/**
- * Calculates speed description for movement powers.
- */
-export function formatSpeedRank(rank, options = {}) {
-  const r = parseInt(rank, 10) || 0;
-  if (SPEED_RANK_TABLE[r]) {
-    const raw = SPEED_RANK_TABLE[r];
-    if (options.compact || options.inline) {
-      return raw.replace(/\s*\((.*?)\)\s*/, (match, p1) => ` • ${p1}`);
-    }
-    return raw;
-  }
-  if (r > 20) return `Faster Than Light (Rank ${r})`;
-  const mph = Math.round(Math.pow(2, r) * 2);
-  const ftRound = Math.round((mph * 5280) / 600);
-  return `${mph.toLocaleString()} MPH • ${ftRound.toLocaleString()} ft/round`;
-}
+export { SPEED_RANK_TABLE, formatSpeedRank, getSpeedMph };
 
 /**
  * Calculates Resistance Check DC according to M&M 3E rules.

@@ -1,164 +1,230 @@
 <template>
-      <div  class="config-body config-affliction">
-      <div class="affliction-modifiers-strip">
+  <div class="config-body config-affliction">
+    <!-- Level 1: Quick Presets Bar (Pills Ramping) -->
+    <div class="affliction-presets-section">
+      <div class="presets-header-row">
+        <span class="section-label">
+          <i class="ri-bookmark-3-line"></i> Quick Affliction Presets:
+        </span>
+      </div>
+      <div class="presets-chips-row">
+        <button
+          v-for="preset in cfg.presets"
+          :key="preset.id"
+          type="button"
+          class="preset-chip-btn"
+          :class="['res-accent-' + (preset.res || 'fortitude').toLowerCase(), { active: isPresetActive(preset) }]"
+          @click="applyAfflictionPreset(preset)"
+        >
+          <span class="preset-defense-dot"></span>
+          <span class="preset-name">{{ preset.name }}</span>
+          <span class="preset-res">{{ preset.res }}</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Level 2: Modifiers & Mechanics Strip (Segmented Rank Counters) -->
+    <div class="affliction-modifiers-strip">
+      <div class="strip-header-row">
         <span class="strip-label">
           <i class="ri-equalizer-line"></i> Affliction Modifiers & Mechanics:
         </span>
-        <div class="strip-chips-row">
-          <div class="mod-chip-group">
+      </div>
+      <div class="strip-chips-row">
+        <!-- Segmented Extra Condition -->
+        <div class="segmented-mod-group" :class="{ active: extraConditionRanks > 0 }">
+          <span class="seg-label" title="Extra Condition: +1 condition per degree (+1 PP/rank per rank)">
+            <i class="ri-add-circle-line"></i> Extra Cond
+          </span>
+          <div class="segmented-rank-control">
             <button
               type="button"
-              class="mod-toggle-chip"
-              :class="{ active: extraConditionRanks > 0 }"
-              @click="toggleAfflictionModifier('Extra Condition', false)"
-              title="Add extra condition per degree (+1 PP/rank per rank)"
-            >
-              <i class="ri-add-circle-line"></i>
-              <span>Extra Condition</span>
-              <span v-if="extraConditionRanks > 0" class="chip-rank-badge">Rk {{ extraConditionRanks }}</span>
-            </button>
-            <div v-if="extraConditionRanks > 0" class="chip-step-controls">
-              <button
-                type="button"
-                class="step-btn"
-                :disabled="extraConditionRanks <= 1"
-                @click.stop="stepModifierRanks('Extra Condition', false, -1)"
-              >-</button>
-              <button
-                type="button"
-                class="step-btn"
-                :disabled="extraConditionRanks >= 2"
-                @click.stop="stepModifierRanks('Extra Condition', false, 1)"
-              >+</button>
-            </div>
-          </div>
-          <div class="mod-chip-group">
+              class="seg-btn"
+              :class="{ active: extraConditionRanks === 0 }"
+              @click="setModifierRank('Extra Condition', false, 0)"
+              title="No Extra Condition"
+            >0</button>
             <button
               type="button"
-              class="mod-toggle-chip flaw"
-              :class="{ active: limitedDegreeRanks > 0 }"
-              @click="toggleAfflictionModifier('Limited Degree', true)"
-              title="Limit max degrees of failure (-1 PP/rank per rank)"
-            >
-              <i class="ri-indeterminate-circle-line"></i>
-              <span>Limited Degree</span>
-              <span v-if="limitedDegreeRanks > 0" class="chip-rank-badge flaw">Rk {{ limitedDegreeRanks }}</span>
-            </button>
-            <div v-if="limitedDegreeRanks > 0" class="chip-step-controls">
-              <button
-                type="button"
-                class="step-btn"
-                :disabled="limitedDegreeRanks <= 1"
-                @click.stop="stepModifierRanks('Limited Degree', true, -1)"
-              >-</button>
-              <button
-                type="button"
-                class="step-btn"
-                :disabled="limitedDegreeRanks >= 2"
-                @click.stop="stepModifierRanks('Limited Degree', true, 1)"
-              >+</button>
-            </div>
-          </div>
-          <button
-            type="button"
-            class="mod-toggle-chip"
-            :class="{ active: isCumulative }"
-            @click="toggleAfflictionModifier('Cumulative', false)"
-            title="Degrees accumulate over successive failed checks (+1 PP/rank)"
-          >
-            <i class="ri-stack-line"></i>
-            <span>Cumulative</span>
-          </button>
-          <button
-            type="button"
-            class="mod-toggle-chip"
-            :class="{ active: isProgressive }"
-            @click="toggleAfflictionModifier('Progressive', false)"
-            title="Condition escalates round-by-round until resisted (+2 PP/rank)"
-          >
-            <i class="ri-flashlight-fill"></i>
-            <span>Progressive</span>
-          </button>
-          <button
-            type="button"
-            class="mod-toggle-chip"
-            :class="{ active: Boolean(altResistanceMod) }"
-            @click="toggleAfflictionModifier('Alternate Resistance', false)"
-            title="Resisted by Dodge, Parry, Toughness, or Will (+0 or +1 PP/rank)"
-          >
-            <i class="ri-shield-flash-line"></i>
-            <span>Alternate Res.</span>
-          </button>
-          <button
-            type="button"
-            class="mod-toggle-chip flaw"
-            :class="{ active: hasInstantRecovery }"
-            @click="toggleAfflictionModifier('Instant Recovery', true)"
-            title="Target instantly recovers when effect ceases (-1 PP/rank)"
-          >
-            <i class="ri-speed-line"></i>
-            <span>Instant Recovery</span>
-          </button>
-        </div>
-      </div>
-      <div v-if="progressionBadge" class="affliction-progression-ribbon" :class="progressionBadge.type">
-        <div class="progression-ribbon-left">
-          <i :class="progressionBadge.icon"></i>
-          <div class="progression-text-col">
-            <span class="progression-title">{{ progressionBadge.label }}</span>
-            <span class="progression-desc">{{ progressionBadge.desc }}</span>
+              class="seg-btn"
+              :class="{ active: extraConditionRanks === 1 }"
+              @click="setModifierRank('Extra Condition', false, 1)"
+              title="Extra Condition Rank 1 (+1 PP/rank)"
+            >1</button>
+            <button
+              type="button"
+              class="seg-btn"
+              :class="{ active: extraConditionRanks === 2 }"
+              @click="setModifierRank('Extra Condition', false, 2)"
+              title="Extra Condition Rank 2 (+2 PP/rank)"
+            >2</button>
           </div>
         </div>
-        <div class="progression-track-stepper">
-          <div class="step-pill" :class="{ disabled: !isDegree1Active }">
-            <span class="pill-deg">1st</span>
-            <span class="pill-name">{{ getDegreeSummary(1) }}</span>
-          </div>
-          <i class="ri-arrow-right-line step-arrow"></i>
-          <div class="step-pill" :class="{ disabled: !isDegree2Active }">
-            <span class="pill-deg">2nd</span>
-            <span class="pill-name">{{ isDegree2Active ? getDegreeSummary(2) : 'Eliminated' }}</span>
-          </div>
-          <i class="ri-arrow-right-line step-arrow"></i>
-          <div class="step-pill" :class="{ disabled: !isDegree3Active }">
-            <span class="pill-deg">3rd</span>
-            <span class="pill-name">{{ isDegree3Active ? getDegreeSummary(3) : 'Eliminated' }}</span>
-          </div>
-        </div>
-      </div>
-      <div class="affliction-presets-section">
-        <span class="section-label">
-          <i class="ri-bookmark-line"></i> Quick Affliction Presets:
-        </span>
-        <div class="presets-chips-row">
-          <button
-            v-for="preset in cfg.presets"
-            :key="preset.id"
-            type="button"
-            class="preset-chip-btn"
-            :class="{ active: isPresetActive(preset) }"
-            @click="applyAfflictionPreset(preset)"
-          >
-            <span class="preset-name">{{ preset.name }}</span>
-            <span class="preset-res">Resisted by {{ preset.res }}</span>
-          </button>
-        </div>
-      </div>
-      <div class="degrees-grid" :class="{ 'has-multi-conditions': conditionsPerDegree > 1 }">
-        <div class="degree-box deg-box-1" :class="{ 'eliminated-box': !isDegree1Active }">
-          <div class="degree-header deg-1">
-            <div class="deg-title-group">
-              <span class="degree-num">1st Degree</span>
-              <span class="degree-sub">Failure by 1-5</span>
-            </div>
-            <span v-if="conditionsPerDegree > 1" class="multi-cond-badge">
-              {{ conditionsPerDegree }} Conditions
-            </span>
-          </div>
 
-          <div class="degree-conditions-container">
-            <div class="condition-slot">
-              <label v-if="conditionsPerDegree > 1" class="cond-slot-label">Condition 1:</label>
+        <!-- Segmented Limited Degree -->
+        <div class="segmented-mod-group flaw" :class="{ active: limitedDegreeRanks > 0 }">
+          <span class="seg-label" title="Limited Degree: Limits max degrees of failure (-1 PP/rank per rank)">
+            <i class="ri-indeterminate-circle-line"></i> Limited Deg
+          </span>
+          <div class="segmented-rank-control flaw">
+            <button
+              type="button"
+              class="seg-btn"
+              :class="{ active: limitedDegreeRanks === 0 }"
+              @click="setModifierRank('Limited Degree', true, 0)"
+              title="No Limited Degree (All 3 Degrees active)"
+            >0</button>
+            <button
+              type="button"
+              class="seg-btn"
+              :class="{ active: limitedDegreeRanks === 1 }"
+              @click="setModifierRank('Limited Degree', true, 1)"
+              title="Limited Degree Rank 1 (No 3rd Degree, -1 PP/rank)"
+            >1</button>
+            <button
+              type="button"
+              class="seg-btn"
+              :class="{ active: limitedDegreeRanks === 2 }"
+              @click="setModifierRank('Limited Degree', true, 2)"
+              title="Limited Degree Rank 2 (1st Degree only, -2 PP/rank)"
+            >2</button>
+          </div>
+        </div>
+
+        <!-- Toggle Chips -->
+        <button
+          type="button"
+          class="mod-toggle-chip"
+          :class="{ active: isCumulative }"
+          @click="toggleAfflictionModifier('Cumulative', false)"
+          title="Degrees accumulate over successive failed checks (+1 PP/rank)"
+        >
+          <i class="ri-stack-line"></i>
+          <span>Cumulative</span>
+        </button>
+
+        <button
+          type="button"
+          class="mod-toggle-chip"
+          :class="{ active: isProgressive }"
+          @click="toggleAfflictionModifier('Progressive', false)"
+          title="Condition escalates round-by-round until resisted (+2 PP/rank)"
+        >
+          <i class="ri-history-line"></i>
+          <span>Progressive</span>
+        </button>
+
+        <button
+          type="button"
+          class="mod-toggle-chip"
+          :class="{ active: Boolean(altResistanceMod) }"
+          @click="toggleAfflictionModifier('Alternate Resistance', false)"
+          title="Resisted by Dodge, Parry, Toughness, or Will (+0 or +1 PP/rank)"
+        >
+          <i class="ri-shield-flash-line"></i>
+          <span>Alternate Res.</span>
+        </button>
+
+        <button
+          type="button"
+          class="mod-toggle-chip flaw"
+          :class="{ active: hasInstantRecovery }"
+          @click="toggleAfflictionModifier('Instant Recovery', true)"
+          title="Target instantly recovers when effect ceases (-1 PP/rank)"
+        >
+          <i class="ri-speed-line"></i>
+          <span>Instant Recovery</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Contextual Progression Ribbon -->
+    <div v-if="progressionBadge" class="affliction-progression-ribbon" :class="progressionBadge.type">
+      <div class="progression-ribbon-left">
+        <i :class="progressionBadge.icon"></i>
+        <div class="progression-text-col">
+          <span class="progression-title">{{ progressionBadge.label }}</span>
+          <span class="progression-desc">{{ progressionBadge.desc }}</span>
+        </div>
+      </div>
+      <div class="progression-track-stepper">
+        <div class="step-pill" :class="{ disabled: !isDegree1Active }">
+          <span class="pill-deg">1st</span>
+          <span class="pill-name">{{ getDegreeSummary(1) }}</span>
+        </div>
+        <i class="ri-arrow-right-line step-arrow"></i>
+        <div class="step-pill" :class="{ disabled: !isDegree2Active }">
+          <span class="pill-deg">2nd</span>
+          <span class="pill-name">{{ isDegree2Active ? getDegreeSummary(2) : 'Eliminated' }}</span>
+        </div>
+        <i class="ri-arrow-right-line step-arrow"></i>
+        <div class="step-pill" :class="{ disabled: !isDegree3Active }">
+          <span class="pill-deg">3rd</span>
+          <span class="pill-name">{{ isDegree3Active ? getDegreeSummary(3) : 'Eliminated' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level 3: Resistance Check & Save DC Banner (Moved Above Degrees) -->
+    <div class="resistance-defense-row">
+      <div class="res-left-col">
+        <div class="res-label-wrap">
+          <span class="res-label">
+            <i class="ri-shield-check-line"></i> Target Resistance Check:
+          </span>
+          <span v-if="altResistanceMod" class="alt-res-badge">
+            <i class="ri-shield-cross-line"></i> Alternate Resistance Active
+          </span>
+        </div>
+        <div class="res-toggle-group">
+          <button
+            v-for="resOpt in afflictionResistanceOptions"
+            :key="resOpt"
+            type="button"
+            class="res-btn"
+            :class="['res-' + resOpt.toLowerCase(), { active: activeResistance === resOpt }]"
+            @click="selectAfflictionResistance(resOpt)"
+          >
+            <i :class="getDefenseIcon(resOpt)"></i>
+            <span>{{ resOpt }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Live Dynamic DC Formula Badge -->
+      <div class="res-dc-callout-pill" :class="'dc-' + activeResistance.toLowerCase()">
+        <div class="dc-calc-badge">
+          <span class="dc-calc-formula">DC 10 + Rk {{ Number(effect.ranks) || 1 }}</span>
+          <span class="dc-calc-val">DC {{ saveDC }}</span>
+        </div>
+        <div class="dc-calc-target">
+          <span class="dc-target-label">Resisted by</span>
+          <span class="dc-target-name">{{ activeResistance }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Level 4: 3-Column Polished Degrees Grid -->
+    <div class="degrees-grid" :class="{ 'has-multi-conditions': conditionsPerDegree > 1 }">
+      <!-- 1st Degree Card -->
+      <div class="degree-box deg-box-1" :class="{ 'eliminated-box': !isDegree1Active }">
+        <div class="degree-header deg-1">
+          <div class="deg-title-group">
+            <span class="degree-badge-indicator">1</span>
+            <div class="deg-title-text">
+              <span class="degree-num">1st Degree</span>
+              <span class="degree-sub">Failure by 1–5</span>
+            </div>
+          </div>
+          <span v-if="conditionsPerDegree > 1" class="multi-cond-badge">
+            +{{ extraConditionRanks }} Extra
+          </span>
+        </div>
+
+        <div class="degree-conditions-container">
+          <div class="condition-slot">
+            <label v-if="conditionsPerDegree > 1" class="cond-slot-label">Condition 1</label>
+            <div class="select-wrap">
               <select
                 :value="getDegreeCondition('first', 0)"
                 class="degree-select select-input"
@@ -169,8 +235,10 @@
                 </option>
               </select>
             </div>
-            <div v-if="conditionsPerDegree >= 2" class="condition-slot">
-              <label class="cond-slot-label">Condition 2 (+Extra):</label>
+          </div>
+          <div v-if="conditionsPerDegree >= 2" class="condition-slot">
+            <label class="cond-slot-label">Condition 2 (+Extra)</label>
+            <div class="select-wrap">
               <select
                 :value="getDegreeCondition('first', 1)"
                 class="degree-select select-input slot-secondary"
@@ -181,8 +249,10 @@
                 </option>
               </select>
             </div>
-            <div v-if="conditionsPerDegree >= 3" class="condition-slot">
-              <label class="cond-slot-label">Condition 3 (+Extra Rk 2):</label>
+          </div>
+          <div v-if="conditionsPerDegree >= 3" class="condition-slot">
+            <label class="cond-slot-label">Condition 3 (+Extra Rk 2)</label>
+            <div class="select-wrap">
               <select
                 :value="getDegreeCondition('first', 2)"
                 class="degree-select select-input slot-tertiary"
@@ -194,24 +264,35 @@
               </select>
             </div>
           </div>
-          <span class="degree-note">Mild impairing condition</span>
         </div>
-        <div class="degree-box deg-box-2" :class="{ 'eliminated-box': !isDegree2Active }">
-          <div class="degree-header deg-2">
-            <div class="deg-title-group">
+        <div class="degree-footer-note">
+          <i class="ri-information-line"></i>
+          <span>Mild impairing condition</span>
+        </div>
+      </div>
+
+      <!-- 2nd Degree Card -->
+      <div class="degree-box deg-box-2" :class="{ 'eliminated-box': !isDegree2Active }">
+        <div class="degree-header deg-2">
+          <div class="deg-title-group">
+            <span class="degree-badge-indicator">2</span>
+            <div class="deg-title-text">
               <span class="degree-num">2nd Degree</span>
-              <span class="degree-sub">Failure by 6-10</span>
+              <span class="degree-sub">Failure by 6–10</span>
             </div>
-            <span v-if="!isDegree2Active" class="eliminated-badge">
-              <i class="ri-lock-line"></i> Eliminated
-            </span>
-            <span v-else-if="conditionsPerDegree > 1" class="multi-cond-badge">
-              {{ conditionsPerDegree }} Conditions
-            </span>
           </div>
-          <div v-if="isDegree2Active" class="degree-conditions-container">
-            <div class="condition-slot">
-              <label v-if="conditionsPerDegree > 1" class="cond-slot-label">Condition 1:</label>
+          <span v-if="!isDegree2Active" class="eliminated-badge">
+            <i class="ri-lock-2-line"></i> Eliminated
+          </span>
+          <span v-else-if="conditionsPerDegree > 1" class="multi-cond-badge">
+            +{{ extraConditionRanks }} Extra
+          </span>
+        </div>
+
+        <div v-if="isDegree2Active" class="degree-conditions-container">
+          <div class="condition-slot">
+            <label v-if="conditionsPerDegree > 1" class="cond-slot-label">Condition 1</label>
+            <div class="select-wrap">
               <select
                 :value="getDegreeCondition('second', 0)"
                 class="degree-select select-input"
@@ -222,8 +303,10 @@
                 </option>
               </select>
             </div>
-            <div v-if="conditionsPerDegree >= 2" class="condition-slot">
-              <label class="cond-slot-label">Condition 2 (+Extra):</label>
+          </div>
+          <div v-if="conditionsPerDegree >= 2" class="condition-slot">
+            <label class="cond-slot-label">Condition 2 (+Extra)</label>
+            <div class="select-wrap">
               <select
                 :value="getDegreeCondition('second', 1)"
                 class="degree-select select-input slot-secondary"
@@ -234,8 +317,10 @@
                 </option>
               </select>
             </div>
-            <div v-if="conditionsPerDegree >= 3" class="condition-slot">
-              <label class="cond-slot-label">Condition 3 (+Extra Rk 2):</label>
+          </div>
+          <div v-if="conditionsPerDegree >= 3" class="condition-slot">
+            <label class="cond-slot-label">Condition 3 (+Extra Rk 2)</label>
+            <div class="select-wrap">
               <select
                 :value="getDegreeCondition('second', 2)"
                 class="degree-select select-input slot-tertiary"
@@ -246,30 +331,43 @@
                 </option>
               </select>
             </div>
-            <span class="degree-note">Significant debilitating condition</span>
           </div>
-          <div v-else class="eliminated-lock-card">
-            <i class="ri-forbid-2-line lock-icon"></i>
-            <span class="eliminated-title">Eliminated by Limited Degree (Rank 2)</span>
-            <p class="eliminated-desc">Target only suffers first-degree conditions; second and third degrees cannot be achieved.</p>
+          <div class="degree-footer-note">
+            <i class="ri-alert-line"></i>
+            <span>Significant debilitating condition</span>
           </div>
         </div>
-        <div class="degree-box deg-box-3" :class="{ 'eliminated-box': !isDegree3Active }">
-          <div class="degree-header deg-3">
-            <div class="deg-title-group">
+        <div v-else class="clean-muted-card">
+          <div class="muted-badge-pill">
+            <i class="ri-lock-2-line"></i>
+            <span>Eliminated (Limited Degree Rk {{ limitedDegreeRanks }})</span>
+          </div>
+          <p class="muted-desc">Target only suffers first-degree conditions; second and third degrees cannot be achieved.</p>
+        </div>
+      </div>
+
+      <!-- 3rd Degree Card -->
+      <div class="degree-box deg-box-3" :class="{ 'eliminated-box': !isDegree3Active }">
+        <div class="degree-header deg-3">
+          <div class="deg-title-group">
+            <span class="degree-badge-indicator">3</span>
+            <div class="deg-title-text">
               <span class="degree-num">3rd Degree</span>
               <span class="degree-sub">Failure by 11+</span>
             </div>
-            <span v-if="!isDegree3Active" class="eliminated-badge">
-              <i class="ri-lock-line"></i> Eliminated
-            </span>
-            <span v-else-if="conditionsPerDegree > 1" class="multi-cond-badge">
-              {{ conditionsPerDegree }} Conditions
-            </span>
           </div>
-          <div v-if="isDegree3Active" class="degree-conditions-container">
-            <div class="condition-slot">
-              <label v-if="conditionsPerDegree > 1" class="cond-slot-label">Condition 1:</label>
+          <span v-if="!isDegree3Active" class="eliminated-badge">
+            <i class="ri-lock-2-line"></i> Eliminated
+          </span>
+          <span v-else-if="conditionsPerDegree > 1" class="multi-cond-badge">
+            +{{ extraConditionRanks }} Extra
+          </span>
+        </div>
+
+        <div v-if="isDegree3Active" class="degree-conditions-container">
+          <div class="condition-slot">
+            <label v-if="conditionsPerDegree > 1" class="cond-slot-label">Condition 1</label>
+            <div class="select-wrap">
               <select
                 :value="getDegreeCondition('third', 0)"
                 class="degree-select select-input"
@@ -280,8 +378,10 @@
                 </option>
               </select>
             </div>
-            <div v-if="conditionsPerDegree >= 2" class="condition-slot">
-              <label class="cond-slot-label">Condition 2 (+Extra):</label>
+          </div>
+          <div v-if="conditionsPerDegree >= 2" class="condition-slot">
+            <label class="cond-slot-label">Condition 2 (+Extra)</label>
+            <div class="select-wrap">
               <select
                 :value="getDegreeCondition('third', 1)"
                 class="degree-select select-input slot-secondary"
@@ -292,8 +392,10 @@
                 </option>
               </select>
             </div>
-            <div v-if="conditionsPerDegree >= 3" class="condition-slot">
-              <label class="cond-slot-label">Condition 3 (+Extra Rk 2):</label>
+          </div>
+          <div v-if="conditionsPerDegree >= 3" class="condition-slot">
+            <label class="cond-slot-label">Condition 3 (+Extra Rk 2)</label>
+            <div class="select-wrap">
               <select
                 :value="getDegreeCondition('third', 2)"
                 class="degree-select select-input slot-tertiary"
@@ -304,50 +406,31 @@
                 </option>
               </select>
             </div>
-            <span class="degree-note">Total incapacitating condition</span>
           </div>
-          <div v-else class="eliminated-lock-card">
-            <i class="ri-forbid-2-line lock-icon"></i>
-            <span class="eliminated-title">Eliminated by Limited Degree (Rank {{ limitedDegreeRanks }})</span>
-            <p class="eliminated-desc">Third-degree conditions (Incapacitated, Paralyzed, etc.) can never be achieved.</p>
+          <div class="degree-footer-note">
+            <i class="ri-skull-line"></i>
+            <span>Total incapacitating condition</span>
           </div>
         </div>
-      </div>
-      <div class="resistance-defense-row">
-        <div class="res-label-wrap">
-          <label class="res-label">
-            <i class="ri-shield-line"></i> Resistance Defense Check:
-          </label>
-          <span v-if="altResistanceMod" class="alt-res-badge">
-            <i class="ri-shield-cross-line"></i> Alternate Resistance Active
-          </span>
-        </div>
-        <div class="res-toggle-group">
-          <button
-            v-for="resOpt in afflictionResistanceOptions"
-            :key="resOpt"
-            type="button"
-            class="res-btn"
-            :class="['res-' + resOpt.toLowerCase(), { active: (effect.config?.resistance || effect.resistance) === resOpt }]"
-            @click="selectAfflictionResistance(resOpt)"
-          >
-            <i :class="getDefenseIcon(resOpt)"></i>
-            <span>{{ resOpt }}</span>
-          </button>
-        </div>
-        <span class="res-help-text">
-          Target makes a <strong>{{ effect.config?.resistance || effect.resistance || 'Fortitude' }}</strong> resistance check vs <strong>DC {{ 10 + (Number(effect.ranks) || 1) }}</strong> (DC 10 + Effect Rank).
-        </span>
-      </div>
-      <div v-if="hasInstantRecovery" class="mechanic-callout-box instant-recovery-callout">
-        <i class="ri-speed-line callout-icon"></i>
-        <div class="callout-content">
-          <span class="callout-title">Instant Recovery Flaw Active</span>
-          <span class="callout-desc">Target recovers immediately from all conditions the moment the effect stops being applied (no lingering recovery checks needed).</span>
+        <div v-else class="clean-muted-card">
+          <div class="muted-badge-pill">
+            <i class="ri-lock-2-line"></i>
+            <span>Eliminated (Limited Degree Rk {{ limitedDegreeRanks }})</span>
+          </div>
+          <p class="muted-desc">Third-degree conditions (Incapacitated, Paralyzed, etc.) can never be achieved.</p>
         </div>
       </div>
     </div>
 
+    <!-- Instant Recovery Flaw Callout -->
+    <div v-if="hasInstantRecovery" class="mechanic-callout-box instant-recovery-callout">
+      <i class="ri-speed-line callout-icon"></i>
+      <div class="callout-content">
+        <span class="callout-title">Instant Recovery Flaw Active</span>
+        <span class="callout-desc">Target recovers immediately from all conditions the moment the effect stops being applied (no lingering recovery checks needed).</span>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -364,7 +447,6 @@ const emit = defineEmits(['update']);
 function updateConfig() {
   emit('update');
 }
-
 
 const extraConditionMod = computed(() =>
   (props.effect?.extras || []).find(e => e.name === 'Extra Condition')
@@ -407,7 +489,7 @@ const progressionBadge = computed(() => {
     return {
       label: 'Progressive Auto-Escalation Track',
       desc: 'Target must make a recurring resistance check each round; failure advances condition to the next degree.',
-      icon: 'ri-flashlight-fill',
+      icon: 'ri-history-line',
       type: 'progressive'
     };
   }
@@ -424,6 +506,14 @@ const progressionBadge = computed(() => {
 
 const hasInstantRecovery = computed(() =>
   (props.effect?.flaws || []).some(f => f.name === 'Instant Recovery')
+);
+
+const activeResistance = computed(() =>
+  props.effect?.config?.resistance || props.effect?.resistance || 'Fortitude'
+);
+
+const saveDC = computed(() =>
+  10 + (Number(props.effect?.ranks) || 1)
 );
 
 function getDefenseIcon(resOpt) {
@@ -591,29 +681,60 @@ function toggleAfflictionModifier(modName, isFlaw = false) {
   updateConfig();
 }
 
-function stepModifierRanks(modName, isFlaw = false, delta = 1) {
+function setModifierRank(modName, isFlaw = false, targetRank = 0) {
   if (!props.effect) return;
-  const list = isFlaw ? props.effect.flaws : props.effect.extras;
-  if (!Array.isArray(list)) return;
-  const mod = list.find(m => m.name === modName);
-  if (mod) {
-    const current = Number(mod.ranks) || 1;
-    const next = Math.max(1, Math.min(2, current + delta));
-    mod.ranks = next;
-    if (modName === 'Extra Condition' && props.effect.config) {
-      const perDeg = 1 + next;
-      if (props.effect.config.firstConditions) {
-        props.effect.config.firstDegree = props.effect.config.firstConditions.slice(0, perDeg).join(' & ');
-      }
-      if (props.effect.config.secondConditions) {
-        props.effect.config.secondDegree = props.effect.config.secondConditions.slice(0, perDeg).join(' & ');
-      }
-      if (props.effect.config.thirdConditions) {
-        props.effect.config.thirdDegree = props.effect.config.thirdConditions.slice(0, perDeg).join(' & ');
+  const list = isFlaw
+    ? (props.effect.flaws = Array.isArray(props.effect.flaws) ? props.effect.flaws : [])
+    : (props.effect.extras = Array.isArray(props.effect.extras) ? props.effect.extras : []);
+
+  const idx = list.findIndex(m => m.name === modName);
+
+  if (targetRank <= 0) {
+    if (idx !== -1) {
+      list.splice(idx, 1);
+      if (modName === 'Extra Condition' && props.effect.config) {
+        if (props.effect.config.firstConditions?.[0]) props.effect.config.firstDegree = props.effect.config.firstConditions[0];
+        if (props.effect.config.secondConditions?.[0]) props.effect.config.secondDegree = props.effect.config.secondConditions[0];
+        if (props.effect.config.thirdConditions?.[0]) props.effect.config.thirdDegree = props.effect.config.thirdConditions[0];
       }
     }
-    updateConfig();
-  }
-}
+  } else {
+    if (idx !== -1) {
+      list[idx].ranks = targetRank;
+    } else {
+      const source = isFlaw ? FLAWS : EXTRAS;
+      const found = source.find(m => m.name === modName) || { name: modName, cost: isFlaw ? -1 : 1, type: 'per_rank' };
+      list.push(normalizeModifier({
+        name: found.name,
+        cost: found.cost,
+        type: found.type,
+        ranks: targetRank,
+        hasRanks: found.hasRanks,
+        maxRanks: found.maxRanks,
+        desc: found.desc,
+        category: found.category,
+        options: found.options
+      }));
+    }
 
+    if (modName === 'Extra Condition' && props.effect.config) {
+      const perDeg = 1 + targetRank;
+      const p1 = getDegreeCondition('first', 0);
+      const s1 = getDegreeCondition('first', 1);
+      const t1 = getDegreeCondition('first', 2);
+      props.effect.config.firstDegree = [p1, s1, t1].slice(0, perDeg).join(' & ');
+
+      const p2 = getDegreeCondition('second', 0);
+      const s2 = getDegreeCondition('second', 1);
+      const t2 = getDegreeCondition('second', 2);
+      props.effect.config.secondDegree = [p2, s2, t2].slice(0, perDeg).join(' & ');
+
+      const p3 = getDegreeCondition('third', 0);
+      const s3 = getDegreeCondition('third', 1);
+      const t3 = getDegreeCondition('third', 2);
+      props.effect.config.thirdDegree = [p3, s3, t3].slice(0, perDeg).join(' & ');
+    }
+  }
+  updateConfig();
+}
 </script>

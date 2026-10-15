@@ -470,3 +470,128 @@ export function getCombatSkillBonus(skills = [], attackContext = {}, isRanged = 
   return skill ? (Number(skill.ranks ?? skill.rank ?? 0) || 0) : 0;
 }
 
+// =========================================================================
+// Centralized Skill Evaluation & Formatting Utilities
+// =========================================================================
+
+export const SKILL_CATEGORIES = ['All', 'Trained', 'Combat', 'Physical', 'Mental', 'Interaction'];
+
+export function getSubtypeInstances(skills = [], skillName = '') {
+  return (skills || []).filter(s => (s.name || '').toLowerCase() === skillName.toLowerCase());
+}
+
+export function getStandardRanks(skills = [], skillName = '') {
+  const found = (skills || []).find(s => (s.name || '').toLowerCase() === skillName.toLowerCase() && !s.subtype);
+  return found ? (Number(found.ranks ?? found.rank) || 0) : 0;
+}
+
+export function getEnhancedRanks(enhancedTraits = {}, skillName = '', subtype = '') {
+  const traits = enhancedTraits?.skills || enhancedTraits || {};
+  const fullKey = subtype ? `${skillName} (${subtype})`.toLowerCase() : skillName.toLowerCase();
+  return (traits[fullKey] || traits[skillName.toLowerCase()] || 0);
+}
+
+export function isStandardTrained(skills = [], enhancedTraits = {}, skillName = '') {
+  const base = getStandardRanks(skills, skillName);
+  const enh = getEnhancedRanks(enhancedTraits, skillName);
+  return (base + enh) > 0;
+}
+
+export function isSpecializationTrained(inst) {
+  return (Number(inst?.ranks ?? inst?.rank) || 0) > 0;
+}
+
+export function getAdvantageNameForSkill(skillName = '') {
+  if (skillName === 'Close Combat') return 'Close Attack';
+  if (skillName === 'Ranged Combat') return 'Ranged Attack';
+  return '';
+}
+
+export function getAdvantageBonusForSkill(skillName = '', heroStore = null) {
+  const adv = getAdvantageNameForSkill(skillName);
+  return adv ? (heroStore?.getAdvantageRanks?.(adv) || 0) : 0;
+}
+
+export function calculateTotalSkillBonus({
+  abilityKey,
+  ranks = 0,
+  enhRanks = 0,
+  skillName = '',
+  heroStore = null,
+  includeCircumstance = false
+}) {
+  const abilMod = Number(heroStore?.effectiveAbilities?.[abilityKey]) || 0;
+  const advBonus = getAdvantageBonusForSkill(skillName, heroStore);
+  const circ = includeCircumstance ? (Number(heroStore?.circumstancePenalty) || 0) : 0;
+  return abilMod + (Number(ranks) || 0) + (Number(enhRanks) || 0) + advBonus + circ;
+}
+
+export { formatMod, formatModifier } from './abilities.js';
+
+export function getPlaceholderForSkill(skillName = '') {
+  if (skillName === 'Close Combat') return 'e.g. Unarmed, Swords, Knives, Claws...';
+  if (skillName === 'Ranged Combat') return 'e.g. Firearms, Bows, Energy Blast, Thrown...';
+  if (skillName === 'Expertise') return 'e.g. Science, Technology, Magic, Criminology...';
+  return 'Specialty or field name...';
+}
+
+export function isSignatureSkill(bonus, ranks) {
+  return (Number(ranks) || 0) >= 5 || (Number(bonus) || 0) >= 10;
+}
+
+export function getTrainedSkillsCount(skills = [], enhancedTraits = {}) {
+  let count = 0;
+  for (const s of SKILLS) {
+    if (s.requiresSubtype) {
+      count += (skills || []).filter(inst =>
+        (inst.name || '').toLowerCase() === s.name.toLowerCase() &&
+        ((inst.ranks || 0) > 0 || getEnhancedRanks(enhancedTraits, s.name, inst.subtype) > 0)
+      ).length;
+    } else {
+      if (isStandardTrained(skills, enhancedTraits, s.name)) count++;
+    }
+  }
+  return count;
+}
+
+export function filterRuleSkills(skills = [], enhancedTraits = {}, activeCategory = 'All', searchQuery = '') {
+  const q = (searchQuery || '').toLowerCase().trim();
+
+  return SKILLS.filter(s => {
+    // 1. Category Filter
+    if (activeCategory === 'Trained') {
+      if (s.requiresSubtype) {
+        const hasTrainedSpec = getSubtypeInstances(skills, s.name).some(inst => 
+          (inst.ranks || 0) > 0 || getEnhancedRanks(enhancedTraits, s.name, inst.subtype) > 0
+        );
+        if (!hasTrainedSpec) return false;
+      } else {
+        if (!isStandardTrained(skills, enhancedTraits, s.name)) return false;
+      }
+    } else if (activeCategory !== 'All') {
+      if ((s.category || '').toLowerCase() !== activeCategory.toLowerCase()) {
+        return false;
+      }
+    }
+
+    // 2. Search Query Match
+    if (!q) return true;
+    if (s.name.toLowerCase().includes(q)) return true;
+    if (s.ability.toLowerCase().includes(q)) return true;
+    if (s.desc && s.desc.toLowerCase().includes(q)) return true;
+
+    // Subtype matching
+    if (s.requiresSubtype) {
+      const matchingInstance = (skills || []).some(inst =>
+        inst.name.toLowerCase() === s.name.toLowerCase() &&
+        inst.subtype &&
+        inst.subtype.toLowerCase().includes(q)
+      );
+      if (matchingInstance) return true;
+      if (s.commonSubtypes && s.commonSubtypes.some(cs => cs.toLowerCase().includes(q))) return true;
+    }
+
+    return false;
+  });
+}
+

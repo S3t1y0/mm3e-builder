@@ -188,40 +188,13 @@ function toggleOrigin(origin) {
 
 <style scoped>
 .step-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 1.25rem;
-  padding: 1rem 1.25rem;
   background: rgba(59, 130, 246, 0.08);
-  border: 1px solid rgba(59, 130, 246, 0.25);
-  border-radius: var(--radius-md);
+  border-color: rgba(59, 130, 246, 0.25);
 }
 
 .step-banner-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
   background: rgba(59, 130, 246, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
   color: #60a5fa;
-}
-
-.step-title {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 0;
-}
-
-.step-subtitle {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  margin: 0.25rem 0 0;
-  line-height: 1.45;
 }
 
 .section-title {

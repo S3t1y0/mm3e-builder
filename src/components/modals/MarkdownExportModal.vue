@@ -137,32 +137,7 @@ function downloadTextFile() {
 </script>
 
 <style scoped>
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 15, 29, 0.85);
-  backdrop-filter: blur(8px);
-  z-index: 9998;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  overscroll-behavior: contain;
-}
 
-.modal-card {
-  width: 100%;
-  max-width: 900px;
-  max-height: 90vh;
-  background: var(--bg-card, #0f172a);
-  border: 1px solid var(--border-color, rgba(255, 255, 255, 0.08));
-  border-radius: var(--radius-lg, 12px);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  overscroll-behavior: contain;
-}
 
 .modal-header {
   display: flex;

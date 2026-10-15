@@ -657,21 +657,6 @@ function confirmCreateCustomAdv() {
   gap: 0.85rem;
 }
 
-.clear-search-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-}
-
-.clear-search-btn:hover {
-  color: #fff;
-}
-
 .advantage-modal-body {
   flex: 1 1 0;
   min-height: 0;
@@ -687,68 +672,6 @@ function confirmCreateCustomAdv() {
   gap: 0.75rem;
   margin-bottom: 0.85rem;
   flex-shrink: 0;
-}
-
-.filter-pills-bar {
-  display: flex;
-  align-items: center;
-  gap: 0.35rem;
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 0.35rem 0.25rem;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
-  flex-shrink: 0;
-}
-
-.filter-pills-bar::-webkit-scrollbar {
-  height: 4px;
-}
-
-.filter-pills-bar::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.filter-pills-bar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 4px;
-}
-
-.filter-pills-bar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.35);
-}
-
-.filter-chip {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: var(--radius-pill);
-  color: var(--text-secondary);
-  font-size: 0.72rem;
-  font-weight: 700;
-  padding: 0.24rem 0.75rem;
-  cursor: pointer;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  transition: all var(--trans-fast);
-}
-
-.filter-chip:hover {
-  background: rgba(255, 255, 255, 0.09);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-.filter-chip.active {
-  background: rgba(37, 99, 235, 0.22);
-  border-color: #3b82f6;
-  color: #93c5fd;
-  box-shadow: 0 2px 10px rgba(59, 130, 246, 0.25);
-}
-
-.filter-chip i {
-  font-size: 0.82rem;
 }
 
 .adv-catalog-grid {

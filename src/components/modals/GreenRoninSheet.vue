@@ -707,31 +707,10 @@ import { useUiStore } from '../../stores/uiStore.js';
 import { compileTargetedAttacks } from '../../rules/attacks.js';
 import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
 import { formatPowerStatblock } from '../../rules/powerFormatter.js';
-import { getAllCharacterSkills } from '../../utils/exporters/helpers.js';
+import { getAllCharacterSkills, formatMod, getSkillAbility } from '../../utils/exporters/helpers.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
-
-// Format modifier helper (+5, -2, +0, or - for absent)
-function formatMod(val) {
-  if (val === null || val === undefined) return '-';
-  const num = Number(val);
-  if (isNaN(num)) return '-';
-  return num >= 0 ? `+${num}` : `${num}`;
-}
-
-// Skill ability code resolver
-function getSkillAbility(skillName) {
-  const clean = (skillName || '').toLowerCase().trim();
-  if (clean.includes('acrobatics') || clean.includes('stealth')) return 'AGL';
-  if (clean.includes('athletics')) return 'STR';
-  if (clean.includes('close combat') || clean.includes('fighting')) return 'FGT';
-  if (clean.includes('ranged combat') || clean.includes('sleight of hand') || clean.includes('vehicles')) return 'DEX';
-  if (clean.includes('deception') || clean.includes('intimidation') || clean.includes('persuasion')) return 'PRE';
-  if (clean.includes('insight') || clean.includes('perception')) return 'AWE';
-  if (clean.includes('expertise') || clean.includes('investigation') || clean.includes('technology') || clean.includes('treatment')) return 'INT';
-  return 'FGT';
-}
 
 // Attacks compilation (exactly 3 rows on Page 1)
 const compiledAttacks = computed(() => {

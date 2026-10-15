@@ -11,3 +11,17 @@ export const ABILITIES = [
 ];
 
 export const ABILITY_COST_PER_RANK = 2;
+
+/**
+ * Format numeric value with +/- sign for M&M 3e modifiers (e.g. +3, -1, +0).
+ * Handles absent/null/undefined or non-numeric values gracefully by returning '-'.
+ */
+export function formatMod(val) {
+  if (val === null || val === undefined || val === '') return '-';
+  const num = Number(val);
+  if (Number.isNaN(num)) return '-';
+  return num >= 0 ? `+${num}` : `${num}`;
+}
+
+export const formatModifier = formatMod;
+

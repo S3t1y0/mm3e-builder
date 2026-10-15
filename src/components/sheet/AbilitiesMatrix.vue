@@ -95,6 +95,7 @@
 <script setup>
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
+import { formatModifier } from '../../rules/abilities.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
@@ -159,11 +160,6 @@ function getEffectiveRank(code) {
   const enh = getEnhancedRanks(code);
   return base + enh;
 }
-
-function formatModifier(val) {
-  return val >= 0 ? `+${val}` : `${val}`;
-}
-
 function handleRollCheck(ab) {
   const eff = getEffectiveRank(ab.key);
   heroStore.rollCheck(`${ab.name} (${ab.key}) Check`, eff, null, 'Ability');

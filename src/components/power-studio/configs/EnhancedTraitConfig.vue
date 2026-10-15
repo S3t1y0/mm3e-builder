@@ -142,8 +142,9 @@
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue';
+import { computed, ref } from 'vue';
 import { calculateEffectCost } from '../../../rules/powerEngine.js';
+import { useCustomSubModal } from './useCustomSubModal.js';
 
 const props = defineProps({
   effect: { type: Object, required: true },
@@ -152,31 +153,13 @@ const props = defineProps({
 const cfg = computed(() => props.cfg);
 const emit = defineEmits(['update', 'open-custom']);
 
-const customSubModal = inject('customSubModal', null);
-
-function updateConfig() {
-  emit('update');
-}
-
-function openCustomSubModal(type) {
-  if (customSubModal?.open) {
-    customSubModal.open(type);
-  } else {
-    emit('open-custom', type);
-  }
-}
-
-function isCustomTrait(traitName) {
-  return customSubModal?.isTrait ? customSubModal.isTrait(traitName) : (props.effect?.config?.customItems || []).some(c => c.name === traitName || c.id === traitName);
-}
-
-function editCustomTrait(traitName) {
-  customSubModal?.editTrait?.(traitName);
-}
-
-function deleteCustomTrait(traitName) {
-  customSubModal?.deleteTrait?.(traitName);
-}
+const {
+  updateConfig,
+  openCustomSubModal,
+  isCustomTrait,
+  editCustomTrait,
+  deleteCustomTrait
+} = useCustomSubModal(emit, props);
 
 const traitSearch = ref('');
 

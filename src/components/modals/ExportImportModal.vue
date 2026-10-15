@@ -494,7 +494,6 @@ function applyImport() {
 watch(() => uiStore.modals.exportImport, (open) => {
   if (open) {
     activeMode.value = uiStore.exportImportInitialTab || 'storage';
-    copied.value = false;
     importError.value = '';
     rawImportText.value = '';
     parsedPreview.value = null;
@@ -504,32 +503,7 @@ watch(() => uiStore.modals.exportImport, (open) => {
 </script>
 
 <style scoped>
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 15, 29, 0.85);
-  backdrop-filter: blur(8px);
-  z-index: 9998;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  overscroll-behavior: contain;
-}
 
-.modal-card {
-  width: 100%;
-  max-width: 860px;
-  max-height: 90vh;
-  background: var(--bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-lg);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  overscroll-behavior: contain;
-}
 
 .modal-header {
   display: flex;

@@ -4,15 +4,9 @@ import { compileTargetedAttacks } from '../../rules/attacks.js';
 import { calculateDC, resolveSpecialConfig, formatRange, formatPowerStatblock } from '../../rules/powerFormatter.js';
 import { resolveEffectRulesBlock, formatDistanceRank } from '../../rules/powerRuleDescriptions.js';
 
-/**
- * Format number as a D20 modifier (+5, -2, +0).
- */
-export function formatMod(val) {
-  if (val === null || val === undefined) return '-';
-  const num = Number(val);
-  if (isNaN(num)) return '-';
-  return num >= 0 ? `+${num}` : `${num}`;
-}
+import { formatMod, formatModifier } from '../../rules/abilities.js';
+
+export { formatMod, formatModifier };
 
 /**
  * Resolves standard ability key for a skill name.

@@ -816,10 +816,6 @@ function broadcastAdvantage(adv) {
   letter-spacing: 0.03em;
 }
 
-.adv-cat-tag.combat { background: rgba(239, 68, 68, 0.15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.28); }
-.adv-cat-tag.fortune { background: rgba(16, 185, 129, 0.15); color: #6ee7b7; border: 1px solid rgba(16, 185, 129, 0.28); }
-.adv-cat-tag.skill { background: rgba(56, 189, 248, 0.15); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, 0.28); }
-.adv-cat-tag.general { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, 0.28); }
 .adv-cat-tag.power {
   background: rgba(56, 189, 248, 0.15);
   color: #38bdf8;
@@ -1150,29 +1146,4 @@ function broadcastAdvantage(adv) {
   color: #ef4444;
 }
 
-.step-btn-xs {
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fff;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
-.step-btn-xs:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-.step-val-xs {
-  font-size: 0.8rem;
-  font-weight: 700;
-  min-width: 16px;
-  text-align: center;
-  color: #fff;
-}
 </style>

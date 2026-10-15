@@ -244,221 +244,44 @@
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
-import { RESOURCE_CATEGORIES, RESOURCE_PRESETS } from '../../rules/resources.js';
-import { getCombatSkillBonus } from '../../rules/skills.js';
+import { RESOURCE_CATEGORIES } from '../../rules/resources.js';
+import { useEquipmentWorkflow } from '../../rules/useEquipmentWorkflow.js';
 import CustomEquipmentModal from '../modals/CustomEquipmentModal.vue';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
-
-const activeFilter = ref('all');
-const showPresetModal = ref(false);
-const showCustomStudio = ref(false);
-const customStudioCategory = ref('Weapons');
-const presetSearch = ref('');
-
-function openCustomStudio(cat = 'Weapons') {
-  customStudioCategory.value = cat;
-  showCustomStudio.value = true;
-  showPresetModal.value = false;
-}
-
 const categories = RESOURCE_CATEGORIES;
 
-const budgetInfo = computed(() => {
-  return heroStore.getEquipmentBudgetInfo();
-});
-
-function getCategoryCount(catId) {
-  const list = heroStore.character.resources || [];
-  if (catId === 'all') return list.length;
-  if (catId === 'Weapons') {
-    return list.filter(r => isWeapon(r)).length;
-  }
-  if (catId === 'Armor') {
-    return list.filter(r => isArmor(r) || isShield(r)).length;
-  }
-  if (catId === 'Gadget') {
-    return list.filter(r => r.type === 'Gadget' || r.subtype === 'gadget').length;
-  }
-  if (catId === 'Vehicle') {
-    return list.filter(r => r.type === 'Vehicle' || r.subtype === 'vehicle').length;
-  }
-  if (catId === 'Headquarters') {
-    return list.filter(r => r.type === 'Headquarters' || r.subtype === 'headquarters').length;
-  }
-  return list.filter(r => r.type === catId).length;
-}
-
-const filteredResources = computed(() => {
-  const list = heroStore.character.resources || [];
-  if (activeFilter.value === 'all') return list;
-  if (activeFilter.value === 'Weapons') {
-    return list.filter(r => isWeapon(r));
-  }
-  if (activeFilter.value === 'Armor') {
-    return list.filter(r => isArmor(r) || isShield(r));
-  }
-  if (activeFilter.value === 'Gadget') {
-    return list.filter(r => r.type === 'Gadget' || r.subtype === 'gadget');
-  }
-  if (activeFilter.value === 'Vehicle') {
-    return list.filter(r => r.type === 'Vehicle' || r.subtype === 'vehicle');
-  }
-  if (activeFilter.value === 'Headquarters') {
-    return list.filter(r => r.type === 'Headquarters' || r.subtype === 'headquarters');
-  }
-  return list.filter(r => r.type === activeFilter.value);
-});
-
-const filteredPresets = computed(() => {
-  const q = presetSearch.value.toLowerCase().trim();
-  if (!q) return RESOURCE_PRESETS;
-  return RESOURCE_PRESETS.filter(p =>
-    p.name.toLowerCase().includes(q) ||
-    (p.desc && p.desc.toLowerCase().includes(q)) ||
-    (p.subtype && p.subtype.toLowerCase().includes(q)) ||
-    (p.type && p.type.toLowerCase().includes(q))
-  );
-});
-
-function syncEquipmentAdvantage() {
-  heroStore.syncEquipmentAdvantage();
-  uiStore.showToast('Synchronized Equipment Advantage PP budget!', 'success');
-}
-
-function toggleStatus(id) {
-  heroStore.toggleResourceStatus(id);
-}
-
-function formatStatus(status) {
-  if (status === 'carried') return 'In Bag';
-  if (status === 'stored') return 'Stored';
-  return 'Equipped';
-}
-
-function deleteResource(id, name) {
-  heroStore.removeResource(id);
-  uiStore.showToast(`Deleted ${name}`, 'info');
-}
-
-function addPreset(preset) {
-  heroStore.addResource({
-    ...preset,
-    id: 'res_' + Date.now() + Math.random().toString(36).substr(2, 4)
-  });
-  uiStore.showToast(`Added ${preset.name} (${preset.epCost} EP)!`, 'success');
-}
-
-function getResIconClass(r) {
-  if (isShield(r) || r.subtype === 'shield') return 'ri-shield-line';
-  if (r.subtype === 'weapon_ranged' || (r.weapon?.range === 'Ranged')) return 'ri-focus-2-line';
-  if (r.subtype?.startsWith('weapon') || r.weapon != null) return 'ri-sword-line';
-  if (r.subtype === 'armor') return 'ri-shield-check-line';
-  if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'ri-car-line';
-  if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'ri-building-line';
-  if (r.type === 'Gadget' || r.subtype === 'gadget') return 'ri-smartphone-line';
-  return 'ri-archive-line';
-}
-
-function getSubtypeLabel(r) {
-  if (isShield(r) || r.subtype === 'shield') return 'SHIELD';
-  if (r.subtype === 'weapon_ranged') return 'RANGED WEAPON';
-  if (r.subtype === 'weapon_melee') return 'MELEE WEAPON';
-  if (r.weapon) return r.weapon.range === 'Ranged' ? 'RANGED WEAPON' : 'MELEE WEAPON';
-  if (r.subtype === 'armor') return 'BODY ARMOR';
-  if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'VEHICLE';
-  if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'HEADQUARTERS';
-  return (r.type || 'GEAR').toUpperCase();
-}
-
-function isWeapon(r) {
-  return r.subtype?.startsWith('weapon') || r.weapon != null || (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor') && !r.subtype?.includes('shield'));
-}
-
-function isShield(r) {
-  return r.subtype === 'shield' || (r.armor && (r.armor.shieldRank || r.armor.activeDefenseBonus)) || /Active Defense/i.test(r.desc || '') || /Shield/i.test(r.name || '');
-}
-
-function isArmor(r) {
-  return (r.subtype === 'armor' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')) && !isShield(r);
-}
-
-function getShieldBonus(r) {
-  const a = r.armor || {};
-  let bonus = Number(a.activeDefenseBonus ?? a.shieldRank ?? 0);
-  if (isNaN(bonus) || bonus <= 0) {
-    const m = (r.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (r.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
-    bonus = m ? parseInt(m[1], 10) : 2;
-  }
-  return bonus;
-}
-
-function getWeaponAttackBonus(r) {
-  const w = r.weapon || {};
-  const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
-  const skills = heroStore.character.skills || [];
-
-  const isThrown = /thrown/i.test(r.subtype || '') || /thrown/i.test(r.desc || '') || (w.traits || []).some(t => /thrown/i.test(t));
-  const attackContext = {
-    name: r.name,
-    weaponType: r.subtype,
-    description: r.desc,
-    traits: w.traits || [],
-    descriptors: w.traits || [],
-    isThrown,
-    range: isRanged ? 'Ranged' : 'Close'
-  };
-
-  const skillBonus = getCombatSkillBonus(skills, attackContext, isRanged);
-
-  if (isRanged) {
-    const dex = Number(heroStore.effectiveAbilities.DEX) || 0;
-    const rangedAdv = Number(heroStore.getAdvantageRanks('Ranged Attack')) || 0;
-    return dex + rangedAdv + skillBonus + (w.attackBonus || 0);
-  } else {
-    const fgt = Number(heroStore.effectiveAbilities.FGT) || 0;
-    const closeAdv = Number(heroStore.getAdvantageRanks('Close Attack')) || 0;
-    return fgt + closeAdv + skillBonus + (w.attackBonus || 0);
-  }
-}
-
-function getWeaponDC(r) {
-  const w = r.weapon || {};
-  const str = Number(heroStore.effectiveAbilities.STR) || 0;
-  const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
-  let dmgRank = w.damageRank;
-  if (dmgRank === undefined) {
-    const m = (r.desc || '').match(/Damage\s+(\d+)/i) || (r.desc || '').match(/Affliction\s+(\d+)/i);
-    dmgRank = m ? parseInt(m[1], 10) : 1;
-  }
-  const effectiveDmg = isStrengthBased ? (str + dmgRank) : dmgRank;
-  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(r.desc || '');
-  return (isAffliction ? 10 : 15) + effectiveDmg;
-}
-
-function getWeaponResistance(r) {
-  const w = r.weapon || {};
-  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(r.desc || '');
-  return w.resistance || (isAffliction ? 'Fortitude' : 'Toughness');
-}
-
-function getWeaponRange(r) {
-  const w = r.weapon || {};
-  if (w.range === 'Ranged' || /Ranged/i.test(r.desc || '')) return 'Ranged';
-  if (w.isStrengthBased ?? /Strength-based/i.test(r.desc || '')) return 'Melee (STR)';
-  return 'Close';
-}
-
-function getArmorProtection(r) {
-  const a = r.armor || {};
-  if (a.protectionRank !== undefined) return a.protectionRank;
-  const m = (r.desc || '').match(/Protection\s+(\d+)/i);
-  return m ? parseInt(m[1], 10) : 1;
-}
+const {
+  activeFilter,
+  showPresetModal,
+  showCustomStudio,
+  customStudioCategory,
+  presetSearch,
+  budgetInfo,
+  openCustomStudio,
+  getCategoryCount,
+  filteredResources,
+  filteredPresets,
+  syncEquipmentAdvantage,
+  toggleStatus,
+  formatStatus,
+  deleteResource,
+  addPreset,
+  getResIconClass,
+  getSubtypeLabel,
+  isWeapon,
+  isShield,
+  isArmor,
+  getShieldBonus,
+  getWeaponAttackBonus,
+  getWeaponDC,
+  getWeaponResistance,
+  getWeaponRange,
+  getArmorProtection
+} = useEquipmentWorkflow(heroStore, uiStore);
 </script>
 
 <style scoped>
@@ -467,41 +290,13 @@ function getArmorProtection(r) {
 }
 
 .step-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 1.25rem;
-  padding: 1rem 1.25rem;
   background: rgba(6, 182, 212, 0.08);
-  border: 1px solid rgba(6, 182, 212, 0.25);
-  border-radius: var(--radius-md);
+  border-color: rgba(6, 182, 212, 0.25);
 }
 
 .step-banner-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
   background: rgba(6, 182, 212, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
   color: #22d3ee;
-}
-
-.step-title {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.step-subtitle {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin: 0.25rem 0 0;
-  line-height: 1.5;
 }
 
 /* EP Budget */
@@ -602,36 +397,8 @@ function getArmorProtection(r) {
   scrollbar-width: thin;
 }
 
-.filter-chip {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid var(--border-color);
-  border-radius: var(--radius-xs);
-  color: var(--text-secondary);
-  font-size: 0.74rem;
-  font-weight: 700;
-  padding: 0.28rem 0.65rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
-}
-
-.filter-chip:hover {
-  background: rgba(255, 255, 255, 0.08);
-  color: #fff;
-}
-
 .filter-container-card {
   padding: 0.75rem 1.25rem;
-}
-
-.filter-chip.active {
-  background: var(--accent-primary);
-  border-color: var(--accent-primary);
-  color: #fff;
-  box-shadow: var(--shadow-sm);
 }
 
 /* Empty Card */

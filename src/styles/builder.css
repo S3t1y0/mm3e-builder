@@ -23,6 +23,36 @@
   display: flex;
 }
 
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  background: rgba(10, 15, 29, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 9998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  overscroll-behavior: contain;
+}
+
+.modal-card {
+  width: 100%;
+  max-width: 860px;
+  max-height: 90vh;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.6);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  overscroll-behavior: contain;
+}
+
 /* ==========================================================================
    MODAL DIALOG (Concentric radius, Liquid Glass refraction)
    ========================================================================== */
@@ -862,9 +892,31 @@
    ========================================================================== */
 .filter-pills-bar {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.35rem;
   align-items: center;
+  gap: 0.35rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.35rem 0.25rem;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+  flex-shrink: 0;
+}
+
+.filter-pills-bar::-webkit-scrollbar {
+  height: 4px;
+}
+
+.filter-pills-bar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.filter-pills-bar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+}
+
+.filter-pills-bar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.35);
 }
 
 .filter-chip {
@@ -2861,12 +2913,23 @@
 
 .clear-search-btn {
   position: absolute;
-  right: 0.5rem;
-  background: none;
+  right: 0.65rem;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  font-size: 0.85rem;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  transition: color var(--trans-fast);
+}
+
+.clear-search-btn:hover {
+  color: #fff;
 }
 
 .palette-type-tabs {

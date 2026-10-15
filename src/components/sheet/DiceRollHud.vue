@@ -189,6 +189,7 @@ import { ref, computed, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { onBridgeStatus } from '../../services/vttBridge.js';
 import { rollD20 } from '../../utils/diceRoller.js';
+import { formatMod } from '../../rules/abilities.js';
 
 const heroStore = useHeroStore();
 
@@ -210,11 +211,6 @@ let cleanupBridge = null;
 const heroPointsCount = computed(() => {
   return Number(heroStore.character.heroPoints) || 0;
 });
-
-function formatMod(mod) {
-  const n = Number(mod) || 0;
-  return n >= 0 ? `+${n}` : `${n}`;
-}
 
 // Scramble rolling suspense effect on new roll
 function triggerRollAnimation() {

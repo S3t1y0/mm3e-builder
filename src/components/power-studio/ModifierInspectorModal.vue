@@ -722,20 +722,7 @@ const netEffectCost = computed(() => {
   border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.clear-search-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  font-size: 1.1rem;
-}
 
-.clear-search-btn:hover {
-  color: #fff;
-}
 
 .mod-category-filters {
   display: flex;

@@ -120,39 +120,13 @@ function getTypeBadgeClass(type) {
 
 <style scoped>
 .step-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 1.25rem;
-  padding: 1rem 1.25rem;
   background: rgba(0, 111, 184, 0.08);
-  border: 1px solid rgba(0, 111, 184, 0.25);
-  border-radius: var(--radius-md);
+  border-color: rgba(0, 111, 184, 0.25);
 }
 
 .step-banner-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
   background: rgba(0, 111, 184, 0.15);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
   color: #38bdf8;
-}
-
-.step-title {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 0;
-}
-
-.step-subtitle {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin: 0.2rem 0 0;
 }
 
 .powers-deck-grid {

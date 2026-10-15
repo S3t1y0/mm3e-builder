@@ -369,6 +369,7 @@ import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
 import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
 import { generateRoll20Macros } from '../../utils/exporters.js';
+import { getSkillAbility } from '../../utils/exporters/helpers.js';
 
 const { copy } = useClipboard();
 
@@ -415,15 +416,6 @@ const movementData = computed(() => {
   return list;
 });
 
-function getSkillAbility(name) {
-  const map = {
-    'Acrobatics': 'AGL', 'Athletics': 'STR', 'Close Combat': 'FGT', 'Deception': 'PRE',
-    'Expertise': 'INT', 'Insight': 'AWE', 'Intimidation': 'PRE', 'Investigation': 'INT',
-    'Perception': 'AWE', 'Persuasion': 'PRE', 'Ranged Combat': 'DEX', 'Sleight of Hand': 'DEX',
-    'Stealth': 'AGL', 'Technology': 'INT', 'Treatment': 'INT', 'Vehicles': 'DEX'
-  };
-  return map[name] || 'INT';
-}
 
 const macrosList = computed(() => {
   return generateRoll20Macros(heroStore.character, heroStore);

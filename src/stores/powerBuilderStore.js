@@ -315,6 +315,10 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
       this.isOpen = true;
     },
 
+    openPowerStudio(type = 'standard') {
+      return this.openNewPower(type);
+    },
+
     openEditPower(index, rawPower) {
       this.editingIndex = index;
       let powerData = rawPower;
@@ -347,6 +351,10 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
       this.activeLinkedIndex = 0;
       this.activeSlotIndex = 0;
       this.isOpen = true;
+    },
+
+    openPowerForEdit(index, rawPower) {
+      return this.openEditPower(index, rawPower);
     },
 
     closeModal() {

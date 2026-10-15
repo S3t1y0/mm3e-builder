@@ -1423,22 +1423,7 @@ function removeAdvantage(idOrName) {
   box-shadow: 0 0 0 3px rgba(0, 111, 184, 0.25);
 }
 
-.clear-search-btn {
-  position: absolute;
-  right: 0.75rem;
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-}
 
-.clear-search-btn:hover {
-  color: #fff;
-}
 
 .filter-chips-row {
   display: flex;

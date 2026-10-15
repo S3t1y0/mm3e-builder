@@ -275,20 +275,7 @@
   width: 100%;
 }
 
-.clear-search-btn {
-  background: none;
-  border: none;
-  color: #94a3b8;
-  cursor: pointer;
-  font-size: 0.85rem;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
 
-.clear-search-btn:hover {
-  color: #f8fafc;
-}
 
 .trait-chips-grid {
   display: flex;
@@ -882,30 +869,39 @@
 .affliction-presets-section {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.45rem;
+}
+
+.presets-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .section-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #cbd5e1;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #94a3b8;
   display: flex;
   align-items: center;
   gap: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
 }
 
 .presets-chips-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: 0.4rem;
 }
 
 .preset-chip-btn {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.15rem;
-  padding: 0.45rem 0.75rem;
+  display: inline-flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.65rem;
+  min-height: 30px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -917,27 +913,63 @@
 .preset-chip-btn:hover {
   background: rgba(255, 255, 255, 0.07);
   border-color: rgba(255, 255, 255, 0.18);
+  transform: translateY(-1px);
 }
 
-.preset-chip-btn.active {
-  background: rgba(168, 85, 247, 0.15);
-  border-color: #a855f7;
-  box-shadow: var(--shadow-sm);
+.preset-chip-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
+}
+
+.preset-defense-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #94a3b8;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.preset-chip-btn.res-accent-fortitude .preset-defense-dot {
+  background: #10b981;
+}
+
+.preset-chip-btn.res-accent-will .preset-defense-dot {
+  background: #c084fc;
+}
+
+.preset-chip-btn.res-accent-dodge .preset-defense-dot {
+  background: #38bdf8;
 }
 
 .preset-name {
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
   color: #f1f5f9;
 }
 
 .preset-res {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.08rem 0.35rem;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.05);
   color: #94a3b8;
 }
 
+.preset-chip-btn.active {
+  background: rgba(168, 85, 247, 0.18);
+  border-color: #a855f7;
+}
+
+.preset-chip-btn.active .preset-name {
+  color: #ffffff;
+  font-weight: 700;
+}
+
 .preset-chip-btn.active .preset-res {
-  color: #d8b4fe;
+  background: rgba(168, 85, 247, 0.3);
+  color: #f3e8ff;
 }
 
 /* Quick Affliction Modifiers Strip */
@@ -966,16 +998,88 @@
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.45rem;
+  gap: 0.5rem;
 }
 
-.mod-chip-group {
+/* Segmented Rank Controls for Extra Condition & Limited Degree */
+.segmented-mod-group {
   display: inline-flex;
   align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.4rem;
   border-radius: 6px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  overflow: hidden;
+  transition: all 0.15s ease;
+}
+
+.segmented-mod-group.active {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: rgba(59, 130, 246, 0.35);
+}
+
+.segmented-mod-group.flaw.active {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.35);
+}
+
+.seg-label {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0 0.25rem;
+  cursor: default;
+}
+
+.segmented-rank-control {
+  display: inline-flex;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 4px;
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.seg-btn {
+  min-width: 24px;
+  height: 22px;
+  padding: 0 0.35rem;
+  background: transparent;
+  border: none;
+  border-radius: 3px;
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.12s ease;
+}
+
+.seg-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+.seg-btn:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 1px;
+  z-index: 2;
+}
+
+.seg-btn.active {
+  background: #3b82f6;
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.segmented-rank-control.flaw .seg-btn.active {
+  background: #f59e0b;
+  color: #0f172a;
 }
 
 .mod-toggle-chip {
@@ -993,15 +1097,14 @@
   transition: all 0.15s ease;
 }
 
-.mod-chip-group .mod-toggle-chip {
-  border: none;
-  border-radius: 0;
-  background: transparent;
-}
-
 .mod-toggle-chip:hover {
   background: rgba(255, 255, 255, 0.08);
   color: #f1f5f9;
+}
+
+.mod-toggle-chip:focus-visible {
+  outline: 2px solid #38bdf8;
+  outline-offset: 2px;
 }
 
 .mod-toggle-chip.active {
@@ -1016,56 +1119,6 @@
   border-color: #ef4444;
   color: #fca5a5;
   box-shadow: var(--shadow-sm);
-}
-
-.chip-rank-badge {
-  font-size: 0.65rem;
-  font-weight: 800;
-  padding: 0.05rem 0.3rem;
-  border-radius: 4px;
-  background: rgba(59, 130, 246, 0.35);
-  color: #ffffff;
-}
-
-.chip-rank-badge.flaw {
-  background: rgba(239, 68, 68, 0.35);
-}
-
-.chip-step-controls {
-  display: inline-flex;
-  border-left: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(0, 0, 0, 0.25);
-}
-
-.chip-step-controls .step-btn {
-  min-width: 32px;
-  min-height: 32px;
-  padding: 0.2rem 0.4rem;
-  background: transparent;
-  border: none;
-  color: #cbd5e1;
-  font-size: 0.8rem;
-  font-weight: 800;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.15s ease;
-}
-
-.chip-step-controls .step-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.15);
-  color: #ffffff;
-}
-
-.chip-step-controls .step-btn:focus-visible {
-  outline: 2px solid #38bdf8;
-  outline-offset: -2px;
-}
-
-.chip-step-controls .step-btn:disabled {
-  opacity: 0.3;
-  cursor: not-allowed;
 }
 
 /* Progression Track Ribbon */
@@ -1161,186 +1214,25 @@
   font-size: 0.85rem;
 }
 
-/* Degrees Grid & Multi-Conditions */
-.degrees-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 0.75rem;
-}
-
-.degree-box {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  padding: 0.75rem;
-  border-radius: 8px;
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  position: relative;
-  transition: all 0.2s ease;
-}
-
-.deg-title-group {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-}
-
-.multi-cond-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 999px;
-  background: rgba(56, 239, 125, 0.15);
-  border: 1px solid rgba(56, 239, 125, 0.3);
-  color: #4ade80;
-}
-
-.eliminated-badge {
-  font-size: 0.65rem;
-  font-weight: 700;
-  padding: 0.1rem 0.4rem;
-  border-radius: 999px;
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #f87171;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.2rem;
-}
-
-.degree-conditions-container {
-  display: flex;
-  flex-direction: column;
-  gap: 0.45rem;
-}
-
-.condition-slot {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.cond-slot-label {
-  font-size: 0.68rem;
-  font-weight: 600;
-  color: #94a3b8;
-}
-
-.degree-select.slot-secondary {
-  border-color: rgba(56, 239, 125, 0.35);
-  background: #0f1c18;
-}
-
-.degree-select.slot-tertiary {
-  border-color: rgba(234, 179, 8, 0.35);
-  background: #1c180f;
-}
-
-/* Eliminated / Locked State */
-.degree-box.eliminated-box {
-  background: repeating-linear-gradient(
-    -45deg,
-    rgba(0, 0, 0, 0.35),
-    rgba(0, 0, 0, 0.35) 8px,
-    rgba(239, 68, 68, 0.04) 8px,
-    rgba(239, 68, 68, 0.04) 16px
-  );
-  border-color: rgba(239, 68, 68, 0.2);
-  opacity: 0.85;
-}
-
-.eliminated-lock-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  padding: 1.25rem 0.75rem;
-  gap: 0.35rem;
-}
-
-.lock-icon {
-  font-size: 1.75rem;
-  color: #f87171;
-  opacity: 0.8;
-}
-
-.eliminated-title {
-  font-size: 0.78rem;
-  font-weight: 700;
-  color: #fca5a5;
-}
-
-.eliminated-desc {
-  font-size: 0.68rem;
-  color: #94a3b8;
-  margin: 0;
-  line-height: 1.35;
-}
-
-.degree-header {
+/* Level 3: Resistance Defense Check & Dynamic DC Formula Banner */
+.resistance-defense-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.85rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
-.degree-num {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #f8fafc;
-}
-
-.degree-sub {
-  font-size: 0.68rem;
-  font-weight: 600;
-  padding: 0.1rem 0.35rem;
-  border-radius: 4px;
-}
-
-.degree-header.deg-1 .degree-sub {
-  background: rgba(59, 130, 246, 0.15);
-  color: #60a5fa;
-}
-
-.degree-header.deg-2 .degree-sub {
-  background: rgba(234, 179, 8, 0.15);
-  color: #facc15;
-}
-
-.degree-header.deg-3 .degree-sub {
-  background: rgba(239, 68, 68, 0.15);
-  color: #f87171;
-}
-
-.degree-select {
-  width: 100%;
-  background: #111827;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: #f8fafc;
-  padding: 0.45rem 0.6rem;
-  border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 500;
-  outline: none;
-}
-
-.degree-note {
-  font-size: 0.7rem;
-  color: var(--text-secondary, #94a3b8);
-  font-style: italic;
-}
-
-/* Resistance Row Enhancements */
-.resistance-defense-row {
+.res-left-col {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: 0.75rem;
-  padding: 0.65rem 0.85rem;
-  border-radius: 8px;
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .res-label-wrap {
@@ -1351,7 +1243,7 @@
 
 .res-label {
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #cbd5e1;
   display: flex;
   align-items: center;
@@ -1373,7 +1265,7 @@
 
 .res-toggle-group {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.35rem;
   flex-wrap: wrap;
 }
 
@@ -1381,13 +1273,13 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.4rem 0.8rem;
-  min-height: 36px;
+  padding: 0.35rem 0.75rem;
+  min-height: 32px;
   border-radius: 6px;
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
   color: #94a3b8;
-  font-size: 0.8rem;
+  font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -1403,7 +1295,7 @@
   outline-offset: 2px;
 }
 
-/* DESIGN.md Canonical 5 Combat Defense Accents */
+/* DESIGN.md Canonical Combat Defense Accents */
 .res-btn.res-fortitude.active {
   background: rgba(16, 185, 129, 0.2);
   border-color: #10b981;
@@ -1434,10 +1326,315 @@
   color: #a7f3d0;
 }
 
-.res-btn.active {
-  background: rgba(56, 189, 248, 0.2);
-  border-color: #38bdf8;
+/* Dynamic Live DC Formula Callout Pill */
+.res-dc-callout-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dc-calc-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+.dc-calc-formula {
+  font-size: 0.62rem;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.02em;
+}
+
+.dc-calc-val {
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: #38ef7d;
+  line-height: 1.1;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+}
+
+.dc-calc-target {
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid rgba(255, 255, 255, 0.12);
+  padding-left: 0.5rem;
+}
+
+.dc-target-label {
+  font-size: 0.6rem;
+  color: #94a3b8;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.dc-target-name {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.res-dc-callout-pill.dc-fortitude {
+  border-color: rgba(16, 185, 129, 0.35);
+}
+.res-dc-callout-pill.dc-fortitude .dc-calc-val {
+  color: #34d399;
+}
+
+.res-dc-callout-pill.dc-will {
+  border-color: rgba(192, 132, 252, 0.35);
+}
+.res-dc-callout-pill.dc-will .dc-calc-val {
+  color: #c084fc;
+}
+
+.res-dc-callout-pill.dc-dodge {
+  border-color: rgba(56, 189, 248, 0.35);
+}
+.res-dc-callout-pill.dc-dodge .dc-calc-val {
+  color: #38bdf8;
+}
+
+.res-dc-callout-pill.dc-parry {
+  border-color: rgba(129, 140, 248, 0.35);
+}
+.res-dc-callout-pill.dc-parry .dc-calc-val {
+  color: #818cf8;
+}
+
+.res-dc-callout-pill.dc-toughness {
+  border-color: rgba(52, 211, 153, 0.35);
+}
+.res-dc-callout-pill.dc-toughness .dc-calc-val {
+  color: #34d399;
+}
+
+/* Level 4: 3-Column Degrees Grid & Cards */
+.degrees-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+@media (max-width: 860px) {
+  .degrees-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.degree-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 0.85rem;
+  border-radius: 8px;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  position: relative;
+  transition: all 0.2s ease;
+  min-height: 240px;
+}
+
+/* Color Accent Bars for 1st, 2nd, 3rd */
+.degree-box.deg-box-1 {
+  border-top: 3px solid #38bdf8;
+}
+
+.degree-box.deg-box-2 {
+  border-top: 3px solid #f59e0b;
+}
+
+.degree-box.deg-box-3 {
+  border-top: 3px solid #f43f5e;
+}
+
+.degree-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.35rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.deg-title-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.degree-badge-indicator {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  font-weight: 800;
   color: #ffffff;
+  flex-shrink: 0;
+}
+
+.degree-header.deg-1 .degree-badge-indicator {
+  background: #0284c7;
+}
+
+.degree-header.deg-2 .degree-badge-indicator {
+  background: #d97706;
+}
+
+.degree-header.deg-3 .degree-badge-indicator {
+  background: #e11d48;
+}
+
+.deg-title-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.degree-num {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.15;
+}
+
+.degree-sub {
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.multi-cond-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(56, 239, 125, 0.15);
+  border: 1px solid rgba(56, 239, 125, 0.3);
+  color: #4ade80;
+}
+
+.eliminated-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.15);
+  border: 1px solid rgba(148, 163, 184, 0.3);
+  color: #cbd5e1;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.degree-conditions-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.condition-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.cond-slot-label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #94a3b8;
+}
+
+.degree-select {
+  width: 100%;
+  background: #0f172a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #f8fafc;
+  padding: 0.45rem 0.6rem;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  outline: none;
+  transition: all 0.15s ease;
+}
+
+.degree-select:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+.degree-select.slot-secondary {
+  border-color: rgba(56, 239, 125, 0.35);
+  background: #0b1a14;
+}
+
+.degree-select.slot-tertiary {
+  border-color: rgba(234, 179, 8, 0.35);
+  background: #1a150b;
+}
+
+.degree-footer-note {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  color: #94a3b8;
+  padding-top: 0.45rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.degree-footer-note i {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+
+/* Clean Muted State (No Aggressive Stripes!) */
+.degree-box.eliminated-box {
+  background: rgba(15, 23, 42, 0.3);
+  border-color: rgba(148, 163, 184, 0.15);
+  border-top: 3px solid rgba(148, 163, 184, 0.25);
+  opacity: 0.78;
+}
+
+.clean-muted-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 1.5rem 0.5rem;
+  gap: 0.5rem;
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+.muted-badge-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: 6px;
+  background: rgba(148, 163, 184, 0.1);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #cbd5e1;
+}
+
+.muted-desc {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  margin: 0;
+  line-height: 1.4;
+  max-width: 220px;
 }
 
 .res-help-text {
@@ -1457,9 +1654,10 @@
     min-height: 44px;
     padding: 0.45rem 0.85rem;
   }
-  .chip-step-controls .step-btn {
+  .seg-btn {
     min-width: 44px;
     min-height: 44px;
+    font-size: 0.85rem;
   }
   .res-btn {
     min-height: 44px;
@@ -1467,6 +1665,7 @@
   }
   .preset-chip-btn {
     min-height: 44px;
+    padding: 0.45rem 0.85rem;
   }
 }
 

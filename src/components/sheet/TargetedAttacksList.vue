@@ -158,7 +158,7 @@
               <span
                 v-for="sub in atk.linkedTargets"
                 :key="sub.id"
-                class="spec-linked-dc-pill"
+                class="spec-linked-dc-entry"
                 :class="getTrackThemeClass(sub)"
               >
                 DC {{ sub.dc }} vs {{ sub.resistance }}
@@ -225,74 +225,67 @@
               <span>Linked Hit: Target makes separate resistance checks against each linked effect</span>
             </div>
 
-            <!-- Tab Switcher for Tracks -->
-            <div class="linked-tab-nav" role="tablist" aria-label="Linked effect tracks">
-              <button
-                v-for="(sub, sIdx) in atk.linkedTargets"
-                :key="sub.id || sIdx"
-                type="button"
-                role="tab"
-                :aria-selected="getActiveTrackIndex(atk.id) === sIdx"
-                class="track-tab-btn"
-                :class="[
-                  getTrackThemeClass(sub),
-                  { 'is-active': getActiveTrackIndex(atk.id) === sIdx }
-                ]"
-                @click="setActiveTrackIndex(atk.id, sIdx)"
-              >
-                <span class="tab-index-badge">Track {{ sIdx + 1 }}</span>
-                <span class="tab-name">{{ getTrackDisplayName(sub, atk) }}</span>
-                <span class="tab-dc-tag">DC {{ sub.dc }} vs {{ sub.resistance }}</span>
-              </button>
-            </div>
+            <!-- Sequential Vertical Flow of All Linked Tracks -->
+            <div class="linked-tracks-flow">
+              <template v-for="(sub, sIdx) in atk.linkedTargets" :key="sub.id || sIdx">
+                <!-- Minimalist Divider between consecutive tracks -->
+                <div v-if="sIdx > 0" class="linked-track-divider" aria-hidden="true"></div>
 
-            <!-- Active Track View -->
-            <div v-if="getActiveTrack(atk)" class="active-track-content">
-              <!-- Contextual Resistance Guide -->
-              <div class="resistance-guide-bar contextual" :class="getTrackThemeClass(getActiveTrack(atk))">
-                <i class="ri-shield-check-line"></i>
-                <span>Target makes <strong>{{ getActiveTrack(atk).resistance }} check vs DC {{ getActiveTrack(atk).dc }}</strong></span>
-              </div>
-
-              <!-- Degree Ladder Grid for Active Track -->
-              <div v-if="getActiveTrack(atk).degrees?.length" class="degree-ladder-grid">
-                <div
-                  v-for="deg in getActiveTrack(atk).degrees"
-                  :key="deg.degree || deg.label"
-                  class="degree-step-card"
-                  :class="{ 'is-severe': deg.isSevere }"
-                >
-                  <div class="step-card-header">
-                    <span class="deg-step-badge" :class="{ 'severe': deg.isSevere }">{{ deg.label || deg.degree }}</span>
-                    <span class="deg-margin-tag">{{ deg.margin || '' }}</span>
+                <!-- Individual Track Tactical Panel -->
+                <div class="linked-track-panel" :class="getTrackThemeClass(sub)">
+                  <!-- Track Header Bar with Left-Accent Border -->
+                  <div class="track-panel-header" :class="getTrackThemeClass(sub)">
+                    <div class="track-title-group">
+                      <span class="track-index-tag">Track {{ sIdx + 1 }}</span>
+                      <strong class="track-title-text">{{ getTrackDisplayName(sub, atk) }}</strong>
+                    </div>
+                    <div class="track-dc-guide">
+                      <i class="ri-shield-check-line"></i>
+                      <span>Target makes <strong>{{ sub.resistance }} check vs DC {{ sub.dc }}</strong></span>
+                    </div>
                   </div>
-                  <div class="deg-conditions-row">
-                    <span
-                      v-for="cond in (deg.conditions || [deg.label])"
-                      :key="cond"
-                      class="deg-cond-pill"
-                      :class="{ 'severe': deg.isSevere }"
+
+                  <!-- Degree Ladder Grid for Track -->
+                  <div v-if="sub.degrees?.length" class="degree-ladder-grid">
+                    <div
+                      v-for="deg in sub.degrees"
+                      :key="deg.degree || deg.label"
+                      class="degree-step-card"
+                      :class="{ 'is-severe': deg.isSevere }"
                     >
-                      {{ cond }}
-                    </span>
+                      <div class="step-card-header">
+                        <span class="deg-step-badge" :class="{ 'severe': deg.isSevere }">{{ deg.label || deg.degree }}</span>
+                        <span class="deg-margin-tag">{{ deg.margin || '' }}</span>
+                      </div>
+                      <div class="deg-conditions-row">
+                        <span
+                          v-for="cond in (deg.conditions || [deg.label])"
+                          :key="cond"
+                          class="deg-cond-pill"
+                          :class="{ 'severe': deg.isSevere }"
+                        >
+                          {{ cond }}
+                        </span>
+                      </div>
+                      <p class="deg-desc-text">{{ deg.desc || deg.label }}</p>
+                    </div>
                   </div>
-                  <p class="deg-desc-text">{{ deg.desc || deg.label }}</p>
-                </div>
-              </div>
 
-              <!-- Tactical Modifiers for Active Track (if any) -->
-              <div v-if="getActiveTrack(atk).tacticalModifiers?.length" class="tactical-modifiers-box mt-2">
-                <div class="tactical-mod-header">
-                  <i class="ri-information-line"></i>
-                  <span>Tactical Modifiers & Traits ({{ getTrackDisplayName(getActiveTrack(atk), atk) }}):</span>
-                </div>
-                <div class="tactical-chips-grid">
-                  <div v-for="mod in getActiveTrack(atk).tacticalModifiers" :key="mod.name" class="tactical-mod-chip">
-                    <strong class="mod-chip-name">{{ mod.name }}:</strong>
-                    <span class="mod-chip-desc">{{ mod.desc }}</span>
+                  <!-- Tactical Modifiers for Track (if any) -->
+                  <div v-if="sub.tacticalModifiers?.length" class="tactical-modifiers-box mt-2">
+                    <div class="tactical-mod-header">
+                      <i class="ri-information-line"></i>
+                      <span>Tactical Modifiers & Traits ({{ getTrackDisplayName(sub, atk) }}):</span>
+                    </div>
+                    <div class="tactical-chips-grid">
+                      <div v-for="mod in sub.tacticalModifiers" :key="mod.name" class="tactical-mod-chip">
+                        <strong class="mod-chip-name">{{ mod.name }}:</strong>
+                        <span class="mod-chip-desc">{{ mod.desc }}</span>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </div>
+              </template>
             </div>
           </div>
 
@@ -975,43 +968,56 @@ function handleTurnOnAndRoll(atk) {
   gap: 0.25rem;
 }
 
-.spec-linked-dc-pill {
-  display: inline-flex;
+.spec-linked-dc-entry {
+  display: flex;
   align-items: center;
+  gap: 0.35rem;
   font-size: 0.72rem;
   font-weight: 700;
   font-family: var(--font-mono);
-  padding: 0.1rem 0.45rem;
-  border-radius: 3px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--border-subtle);
   color: var(--text-primary);
   white-space: nowrap;
+  line-height: 1.25;
 }
 
-.spec-linked-dc-pill.theme-damage {
+.spec-linked-dc-entry::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.spec-linked-dc-entry.theme-damage {
   color: #fca5a5;
-  border-color: rgba(239, 68, 68, 0.35);
-  background: rgba(239, 68, 68, 0.1);
+}
+.spec-linked-dc-entry.theme-damage::before {
+  background: #f87171;
 }
 
-.spec-linked-dc-pill.theme-affliction {
+.spec-linked-dc-entry.theme-affliction {
   color: #fda4af;
-  border-color: rgba(244, 63, 94, 0.35);
-  background: rgba(244, 63, 94, 0.1);
+}
+.spec-linked-dc-entry.theme-affliction::before {
+  background: #fb7185;
 }
 
-.spec-linked-dc-pill.theme-weaken {
+.spec-linked-dc-entry.theme-weaken {
   color: #c4b5fd;
-  border-color: rgba(139, 92, 246, 0.35);
-  background: rgba(139, 92, 246, 0.1);
+}
+.spec-linked-dc-entry.theme-weaken::before {
+  background: #a78bfa;
 }
 
-.spec-linked-dc-pill.theme-nullify,
-.spec-linked-dc-pill.theme-default {
+.spec-linked-dc-entry.theme-nullify,
+.spec-linked-dc-entry.theme-default {
   color: #5eead4;
-  border-color: rgba(20, 184, 166, 0.35);
-  background: rgba(20, 184, 166, 0.1);
+}
+.spec-linked-dc-entry.theme-nullify::before,
+.spec-linked-dc-entry.theme-default::before {
+  background: #2dd4bf;
 }
 
 .spec-val.crit {
@@ -1418,149 +1424,129 @@ function handleTurnOnAndRoll(atk) {
   border-radius: var(--radius-xs);
 }
 
-/* Linked Tab Navigation */
-.linked-tab-nav {
+/* Linked Tracks Sequential Flow */
+.linked-tracks-flow {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.linked-track-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0.25rem 0;
+  width: 100%;
+}
+
+.linked-track-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  background: rgba(15, 23, 42, 0.45);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 0.75rem 0.85rem;
+  transition: border-color var(--trans-fast);
+}
+
+.linked-track-panel.theme-damage {
+  border-left: 3px solid #ef4444;
+}
+
+.linked-track-panel.theme-affliction {
+  border-left: 3px solid #f43f5e;
+}
+
+.linked-track-panel.theme-weaken {
+  border-left: 3px solid #8b5cf6;
+}
+
+.linked-track-panel.theme-nullify,
+.linked-track-panel.theme-default {
+  border-left: 3px solid #14b8a6;
+}
+
+.track-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  padding-bottom: 0.45rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.track-title-group {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  flex-wrap: wrap;
-  padding-bottom: 0.35rem;
-  border-bottom: 1px solid var(--border-subtle);
 }
 
-.track-tab-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.45rem;
-  padding: 0.35rem 0.7rem;
-  min-height: 36px;
-  background: rgba(15, 23, 42, 0.6);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xs);
-  color: var(--text-secondary);
-  font-size: 0.75rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all var(--trans-fast);
-}
-
-.track-tab-btn:hover {
-  background: rgba(255, 255, 255, 0.05);
-  color: var(--text-primary);
-  border-color: var(--border-color);
-}
-
-.track-tab-btn:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-}
-
-.tab-index-badge {
-  font-size: 0.62rem;
+.track-index-tag {
+  font-size: 0.65rem;
   font-weight: 800;
   text-transform: uppercase;
-  padding: 0.06rem 0.35rem;
-  border-radius: 3px;
+  letter-spacing: 0.05em;
+  padding: 0.12rem 0.45rem;
+  border-radius: 2px;
   background: rgba(255, 255, 255, 0.08);
   color: var(--text-muted);
 }
 
-.tab-name {
-  color: var(--text-primary);
-}
-
-.tab-dc-tag {
-  font-size: 0.68rem;
-  font-family: var(--font-mono);
-  color: var(--text-muted);
-}
-
-/* Functional theme accents for active tabs */
-.track-tab-btn.is-active {
-  background: rgba(15, 23, 42, 0.95);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
-}
-
-.track-tab-btn.is-active.theme-damage {
-  border-color: rgba(239, 68, 68, 0.7);
-  background: rgba(239, 68, 68, 0.12);
-  color: #fca5a5;
-}
-.track-tab-btn.is-active.theme-damage .tab-index-badge {
-  background: rgba(239, 68, 68, 0.25);
+.track-panel-header.theme-damage .track-index-tag {
+  background: rgba(239, 68, 68, 0.2);
   color: #f87171;
 }
-.track-tab-btn.is-active.theme-damage .tab-dc-tag {
+
+.track-panel-header.theme-affliction .track-index-tag {
+  background: rgba(244, 63, 94, 0.2);
+  color: #fb7185;
+}
+
+.track-panel-header.theme-weaken .track-index-tag {
+  background: rgba(139, 92, 246, 0.2);
+  color: #a78bfa;
+}
+
+.track-panel-header.theme-nullify .track-index-tag,
+.track-panel-header.theme-default .track-index-tag {
+  background: rgba(20, 184, 166, 0.2);
+  color: #2dd4bf;
+}
+
+.track-title-text {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.track-dc-guide {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  color: var(--text-secondary);
+}
+
+.track-dc-guide strong {
+  color: #fff;
+}
+
+.track-panel-header.theme-damage .track-dc-guide strong {
   color: #fca5a5;
 }
 
-.track-tab-btn.is-active.theme-affliction {
-  border-color: rgba(244, 63, 94, 0.7);
-  background: rgba(244, 63, 94, 0.12);
-  color: #fda4af;
-}
-.track-tab-btn.is-active.theme-affliction .tab-index-badge {
-  background: rgba(244, 63, 94, 0.25);
-  color: #fb7185;
-}
-.track-tab-btn.is-active.theme-affliction .tab-dc-tag {
+.track-panel-header.theme-affliction .track-dc-guide strong {
   color: #fda4af;
 }
 
-.track-tab-btn.is-active.theme-weaken {
-  border-color: rgba(139, 92, 246, 0.7);
-  background: rgba(139, 92, 246, 0.12);
-  color: #c4b5fd;
-}
-.track-tab-btn.is-active.theme-weaken .tab-index-badge {
-  background: rgba(139, 92, 246, 0.25);
-  color: #a78bfa;
-}
-.track-tab-btn.is-active.theme-weaken .tab-dc-tag {
+.track-panel-header.theme-weaken .track-dc-guide strong {
   color: #c4b5fd;
 }
 
-.track-tab-btn.is-active.theme-nullify,
-.track-tab-btn.is-active.theme-default {
-  border-color: rgba(20, 184, 166, 0.7);
-  background: rgba(20, 184, 166, 0.12);
+.track-panel-header.theme-nullify .track-dc-guide strong,
+.track-panel-header.theme-default .track-dc-guide strong {
   color: #5eead4;
-}
-.track-tab-btn.is-active.theme-nullify .tab-index-badge,
-.track-tab-btn.is-active.theme-default .tab-index-badge {
-  background: rgba(20, 184, 166, 0.25);
-  color: #2dd4bf;
-}
-.track-tab-btn.is-active.theme-nullify .tab-dc-tag,
-.track-tab-btn.is-active.theme-default .tab-dc-tag {
-  color: #5eead4;
-}
-
-.active-track-content {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-}
-
-.resistance-guide-bar.contextual {
-  margin-bottom: 0.35rem;
-}
-
-.resistance-guide-bar.contextual.theme-damage {
-  border-color: rgba(239, 68, 68, 0.4);
-  background: rgba(239, 68, 68, 0.08);
-}
-.resistance-guide-bar.contextual.theme-affliction {
-  border-color: rgba(244, 63, 94, 0.4);
-  background: rgba(244, 63, 94, 0.08);
-}
-.resistance-guide-bar.contextual.theme-weaken {
-  border-color: rgba(139, 92, 246, 0.4);
-  background: rgba(139, 92, 246, 0.08);
-}
-.resistance-guide-bar.contextual.theme-nullify,
-.resistance-guide-bar.contextual.theme-default {
-  border-color: rgba(20, 184, 166, 0.4);
-  background: rgba(20, 184, 166, 0.08);
 }
 </style>

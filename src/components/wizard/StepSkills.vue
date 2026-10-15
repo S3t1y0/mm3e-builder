@@ -371,219 +371,52 @@
 </template>
 
 <script setup>
-import { ref, computed, nextTick } from 'vue';
 import { useHeroStore } from '../../stores/heroStore.js';
 import { useUiStore } from '../../stores/uiStore.js';
-import { SKILLS } from '../../rules/skills.js';
+import { useSkillsWorkflow } from '../../rules/useSkillsWorkflow.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
 
-const categories = ['All', 'Trained', 'Combat', 'Physical', 'Mental', 'Interaction'];
-const activeCategory = ref('All');
-const searchQuery = ref('');
-
-const showSpecialtyDialog = ref(false);
-const specialtyType = ref('Close Combat');
-const specialtyFocus = ref('');
-const initialRankInput = ref(2);
-const focusInputRef = ref(null);
-
-const suggestedSubtypes = computed(() => {
-  const current = SKILLS.find(s => s.name === specialtyType.value);
-  return current?.commonSubtypes || [];
-});
-
-const totalRanks = computed(() => {
-  return (heroStore.character?.skills || []).reduce((sum, s) => {
-    return sum + (parseInt(s.ranks ?? s.rank ?? 0, 10) || 0);
-  }, 0);
-});
-
-const trainedCount = computed(() => {
-  const added = heroStore.character?.skills || [];
-  let count = 0;
-  for (const s of SKILLS) {
-    if (s.requiresSubtype) {
-      count += added.filter(inst => (inst.name || '').toLowerCase() === s.name.toLowerCase() && ((inst.ranks || 0) > 0 || getEnhancedRanks(s.name, inst.subtype) > 0)).length;
-    } else {
-      if (isStandardTrained(s.name)) count++;
-    }
-  }
-  return count;
-});
-
-const filteredSkills = computed(() => {
-  const added = heroStore.character?.skills || [];
-  const q = searchQuery.value.toLowerCase().trim();
-
-  return SKILLS.filter(s => {
-    // 1. Category filter
-    if (activeCategory.value === 'Trained') {
-      if (s.requiresSubtype) {
-        const hasTrained = getSubtypeInstances(s.name).some(inst => (inst.ranks || 0) > 0 || getEnhancedRanks(s.name, inst.subtype) > 0);
-        if (!hasTrained) return false;
-      } else {
-        if (!isStandardTrained(s.name)) return false;
-      }
-    } else if (activeCategory.value !== 'All') {
-      if ((s.category || '').toLowerCase() !== activeCategory.value.toLowerCase()) {
-        return false;
-      }
-    }
-
-    // 2. Search query match
-    if (!q) return true;
-    if (s.name.toLowerCase().includes(q)) return true;
-    if (s.ability.toLowerCase().includes(q)) return true;
-    if (s.desc && s.desc.toLowerCase().includes(q)) return true;
-
-    if (s.requiresSubtype) {
-      const matchInstance = added.some(inst =>
-        inst.name.toLowerCase() === s.name.toLowerCase() &&
-        inst.subtype &&
-        inst.subtype.toLowerCase().includes(q)
-      );
-      if (matchInstance) return true;
-      if (s.commonSubtypes && s.commonSubtypes.some(cs => cs.toLowerCase().includes(q))) return true;
-    }
-
-    return false;
-  });
-});
-
-function getSubtypeInstances(skillName) {
-  const skills = heroStore.character?.skills || [];
-  return skills.filter(s => (s.name || '').toLowerCase() === skillName.toLowerCase());
-}
-
-function getStandardRanks(skillName) {
-  const skills = heroStore.character?.skills || [];
-  const found = skills.find(s => (s.name || '').toLowerCase() === skillName.toLowerCase() && !s.subtype);
-  return found ? (Number(found.ranks ?? found.rank) || 0) : 0;
-}
-
-function getEnhancedRanks(skillName, subtype = '') {
-  const traits = heroStore.activeEnhancedTraits?.skills || {};
-  const fullKey = subtype ? `${skillName} (${subtype})`.toLowerCase() : skillName.toLowerCase();
-  return (traits[fullKey] || traits[skillName.toLowerCase()] || 0);
-}
-
-function isStandardTrained(skillName) {
-  const base = getStandardRanks(skillName);
-  const enh = getEnhancedRanks(skillName);
-  return (base + enh) > 0;
-}
-
-function getAdvantageNameForSkill(skillName) {
-  if (skillName === 'Close Combat') return 'Close Attack';
-  if (skillName === 'Ranged Combat') return 'Ranged Attack';
-  return '';
-}
-
-function getAdvantageBonusForSkill(skillName) {
-  const adv = getAdvantageNameForSkill(skillName);
-  return adv ? (heroStore.getAdvantageRanks(adv) || 0) : 0;
-}
-
-function calculateTotalBonus(abilityKey, ranks, enhRanks = 0, skillName = '') {
-  const abilMod = Number(heroStore.effectiveAbilities?.[abilityKey]) || 0;
-  const advBonus = getAdvantageBonusForSkill(skillName);
-  return abilMod + (Number(ranks) || 0) + (Number(enhRanks) || 0) + advBonus;
-}
-
-function formatMod(val) {
-  return val >= 0 ? `+${val}` : `${val}`;
-}
-
-function stepStandardSkill(skillName, delta) {
-  const cur = getStandardRanks(skillName);
-  const newRank = Math.max(0, cur + delta);
-  heroStore.setSkillRank(skillName, '', newRank);
-}
-
-function stepSpecialization(inst, delta) {
-  const cur = Number(inst.ranks ?? inst.rank) || 0;
-  const newRank = Math.max(0, cur + delta);
-  heroStore.setSkillRank(inst.name, inst.subtype || '', newRank);
-}
-
-function removeSpecialtySkill(inst) {
-  const skills = heroStore.character?.skills || [];
-  const idx = skills.findIndex(s => s === inst || (s.name === inst.name && (s.subtype || '') === (inst.subtype || '')));
-  if (idx !== -1) {
-    heroStore.removeSkill(idx);
-    uiStore.showToast(`Removed ${inst.name} (${inst.subtype})`, 'info');
-  }
-}
-
-function openAddSpecialtyDialog(skillName = 'Close Combat') {
-  specialtyType.value = skillName;
-  specialtyFocus.value = '';
-  initialRankInput.value = 2;
-  showSpecialtyDialog.value = true;
-  nextTick(() => {
-    focusInputRef.value?.focus();
-  });
-}
-
-function getPlaceholderForSkill(skillName) {
-  if (skillName === 'Close Combat') return 'e.g. Unarmed, Swords, Knives, Claws...';
-  if (skillName === 'Ranged Combat') return 'e.g. Firearms, Bows, Energy Blast, Thrown...';
-  if (skillName === 'Expertise') return 'e.g. Science, Technology, Magic, Criminology...';
-  return 'Specialization focus name...';
-}
-
-function confirmSpecialtySkill() {
-  const sub = specialtyFocus.value.trim();
-  if (!sub) {
-    uiStore.showToast('Please enter a specialization focus (e.g. Unarmed, Swords)', 'error');
-    return;
-  }
-  const ranks = Math.max(0, Number(initialRankInput.value) || 0);
-  heroStore.setSkillRank(specialtyType.value, sub, ranks);
-  uiStore.showToast(`Added ${specialtyType.value}: ${sub} (+${ranks} ranks)`, 'success');
-  specialtyFocus.value = '';
-  showSpecialtyDialog.value = false;
-}
+const {
+  categories,
+  activeCategory,
+  searchQuery,
+  showSpecialtyDialog,
+  specialtyType,
+  specialtyFocus,
+  initialRankInput,
+  focusInputRef,
+  suggestedSubtypes,
+  totalRanks,
+  trainedCount,
+  filteredSkills,
+  getSubtypeInstances,
+  getStandardRanks,
+  getEnhancedRanks,
+  isStandardTrained,
+  getAdvantageNameForSkill,
+  getAdvantageBonusForSkill,
+  calculateTotalBonus,
+  formatMod,
+  stepStandardSkill,
+  stepSpecialization,
+  removeSpecialtySkill,
+  openAddSpecialtyDialog,
+  getPlaceholderForSkill,
+  confirmSpecialtySkill
+} = useSkillsWorkflow(heroStore, uiStore, { includeCircumstance: false });
 </script>
 
 <style scoped>
 .step-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 1.25rem;
-  padding: 1rem 1.25rem;
   background: rgba(234, 179, 8, 0.08);
-  border: 1px solid rgba(234, 179, 8, 0.25);
-  border-radius: var(--radius-md);
+  border-color: rgba(234, 179, 8, 0.25);
 }
 
 .step-banner-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
   background: rgba(234, 179, 8, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
   color: #facc15;
-}
-
-.step-title {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 0;
-}
-
-.step-subtitle {
-  font-size: 0.82rem;
-  color: var(--text-secondary);
-  margin: 0.25rem 0 0;
-  line-height: 1.45;
 }
 
 /* Skills Summary Strip */
@@ -737,19 +570,7 @@ function confirmSpecialtySkill() {
   width: 100%;
 }
 
-.clear-search-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-}
 
-.clear-search-btn:hover {
-  color: #fff;
-}
 
 /* Skills Card & Table */
 .wizard-skills-card {

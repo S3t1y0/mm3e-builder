@@ -581,41 +581,13 @@ function removeTrait(item) {
 }
 
 .step-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
-  margin-bottom: 1.25rem;
-  padding: 1rem 1.25rem;
   background: rgba(249, 115, 22, 0.08);
-  border: 1px solid rgba(249, 115, 22, 0.25);
-  border-radius: var(--radius-md);
+  border-color: rgba(249, 115, 22, 0.25);
 }
 
 .step-banner-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: var(--radius-sm);
   background: rgba(249, 115, 22, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.3rem;
   color: #fb923c;
-}
-
-.step-title {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.step-subtitle {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-  margin: 0.25rem 0 0;
-  line-height: 1.5;
 }
 
 .section-title {

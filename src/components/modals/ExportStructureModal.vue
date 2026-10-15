@@ -400,16 +400,7 @@ async function copyPreviewText() {
 
 <style scoped>
 .modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(10, 15, 29, 0.82);
-  backdrop-filter: blur(8px);
   z-index: 10050;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.25rem;
-  overscroll-behavior: contain;
 }
 
 .export-structure-dialog {

@@ -413,20 +413,7 @@ const filteredConditions = computed(() => {
   outline-offset: 2px;
 }
 
-.clear-search-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  font-size: 1rem;
-}
 
-.clear-search-btn:hover {
-  color: #fff;
-}
 
 .cond-type-tabs {
   display: flex;

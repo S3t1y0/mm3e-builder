@@ -33,7 +33,6 @@ function loadStoredExportOptions() {
 
 export const useUiStore = defineStore('ui', {
   state: () => ({
-    activeNavTab: 'sheet', // 'wizard' | 'sheet' | 'rules'
     activeTab: 'sheet',
     activeActionHubTab: 'actions',
     modals: {
@@ -62,15 +61,7 @@ export const useUiStore = defineStore('ui', {
     },
 
     setNavTab(tab) {
-      if (tab === 'rules') {
-        if (typeof window !== 'undefined') {
-          window.open('https://s3t1y0.github.io/mm3e-reference/', '_blank', 'noopener,noreferrer');
-        }
-        return;
-      }
-      this.activeNavTab = tab;
-      this.activeTab = tab;
-      syncUiStateToUrl(this);
+      this.setActiveTab(tab);
     },
 
     setActiveTab(tab) {
@@ -80,7 +71,6 @@ export const useUiStore = defineStore('ui', {
         }
         return;
       }
-      this.activeNavTab = tab;
       this.activeTab = tab;
       syncUiStateToUrl(this);
     },

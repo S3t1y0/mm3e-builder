@@ -18,7 +18,7 @@
             <span v-else class="tabular-nums">{{ step.id }}</span>
           </div>
           <div class="step-meta">
-            <span class="step-num">Step {{ step.id }}</span>
+            <span class="step-index-label">Step {{ step.id }}</span>
             <span class="step-name">{{ step.title }}</span>
           </div>
         </button>
@@ -211,23 +211,30 @@ function finishWizard() {
   justify-content: space-between;
   align-items: center;
   overflow-x: auto;
-  gap: 0.75rem;
-  scrollbar-width: thin;
+  gap: 0.35rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
   position: relative;
+  padding: 0.1rem 0;
+}
+
+.stepper-track::-webkit-scrollbar {
+  display: none;
 }
 
 .step-node {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.45rem;
   background: transparent;
   border: none;
   cursor: pointer;
-  padding: 0.35rem 0.6rem;
+  padding: 0.35rem 0.5rem;
   border-radius: var(--radius-sm);
   transition-property: background-color, transform, opacity;
   transition-duration: 0.2s;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .step-node:hover {
@@ -270,15 +277,20 @@ function finishWizard() {
   line-height: 1.25;
 }
 
-.step-num {
+.step-index-label {
   font-size: 0.65rem;
   color: var(--text-secondary);
   text-transform: uppercase;
   font-weight: 700;
   letter-spacing: 0.06em;
+  width: auto;
+  height: auto;
+  background: none;
+  border-radius: 0;
+  display: block;
 }
 
-.step-node.active .step-num {
+.step-node.active .step-index-label {
   color: var(--accent-primary);
 }
 

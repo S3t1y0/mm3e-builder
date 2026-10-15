@@ -3,6 +3,15 @@
 // Mathematical Calculation Engine for Custom Equipment
 
 import { VEHICLE_SIZES, VEHICLE_FEATURES, HQ_FEATURES, WEAPON_TRAITS } from './resources.js';
+import { getCombatSkillBonus } from './skills.js';
+import {
+  SPEED_RANK_TABLE,
+  SPEED_RANK_LIST,
+  formatSpeedRank,
+  getSpeedMph
+} from './powerRuleDescriptions.js';
+
+export { SPEED_RANK_TABLE, SPEED_RANK_LIST, formatSpeedRank, getSpeedMph };
 
 export const HQ_SIZES = [
   { size: 'Small', epCost: 0, toughBase: 8, desc: '1 room, hidden bunker, shed, small safehouse' },
@@ -12,21 +21,6 @@ export const HQ_SIZES = [
   { size: 'Gargantuan', epCost: 4, toughBase: 12, desc: 'Castle fortress, deep subterranean complex, mountain redoubt' },
   { size: 'Colossal', epCost: 5, toughBase: 14, desc: 'Remote volcanic island, orbital space station' },
   { size: 'Awesome', epCost: 6, toughBase: 16, desc: 'Subterranean metropolis, planetary redoubt' }
-];
-
-export const SPEED_RANK_TABLE = [
-  { rank: 1, mph: '4 MPH' },
-  { rank: 2, mph: '8 MPH' },
-  { rank: 3, mph: '16 MPH' },
-  { rank: 4, mph: '30 MPH' },
-  { rank: 5, mph: '60 MPH' },
-  { rank: 6, mph: '120 MPH' },
-  { rank: 7, mph: '250 MPH' },
-  { rank: 8, mph: '500 MPH' },
-  { rank: 9, mph: '1,000 MPH' },
-  { rank: 10, mph: '2,000 MPH' },
-  { rank: 11, mph: '4,000 MPH' },
-  { rank: 12, mph: '8,000 MPH' }
 ];
 
 export const ARMOR_EXTRAS = [
@@ -364,7 +358,7 @@ export function generateEquipmentDescription(category, config) {
   }
 
   if (category === 'Vehicle') {
-    const speedMph = SPEED_RANK_TABLE.find(s => s.rank === Number(config.speedRank))?.mph || `${config.speedRank} Ranks`;
+    const speedMph = getSpeedMph(config.speedRank);
     const parts = [
       `Size: ${config.size || 'Medium'}`,
       `Strength: ${config.str || 2}`,
@@ -395,4 +389,233 @@ export function generateEquipmentDescription(category, config) {
     if (pack) return `${pack.name}. ${pack.desc}`;
   }
   return config.customDesc || 'Custom technological device or gadget.';
+}
+
+// =========================================================================
+// Equipment Item Inspection & Mechanical Calculation Functions
+// =========================================================================
+
+/**
+ * Predicate to identify if a resource is a weapon.
+ */
+export function isWeapon(r) {
+  if (!r) return false;
+  return Boolean(
+    r.subtype?.startsWith('weapon') ||
+    r.weapon != null ||
+    (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor') && !r.subtype?.includes('shield'))
+  );
+}
+
+/**
+ * Predicate to identify if a resource is a tactical shield.
+ */
+export function isShield(r) {
+  if (!r) return false;
+  return Boolean(
+    r.subtype === 'shield' ||
+    (r.armor && (r.armor.shieldRank || r.armor.activeDefenseBonus)) ||
+    /Active Defense/i.test(r.desc || '') ||
+    /Shield/i.test(r.name || '')
+  );
+}
+
+/**
+ * Predicate to identify if a resource is body armor.
+ */
+export function isArmor(r) {
+  if (!r) return false;
+  return Boolean(
+    (r.subtype === 'armor' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')) && !isShield(r)
+  );
+}
+
+/**
+ * Calculate shield bonus (Active Defense to Dodge and Parry).
+ */
+export function getShieldBonus(r) {
+  if (!r) return 0;
+  const a = r.armor || {};
+  let bonus = Number(a.activeDefenseBonus ?? a.shieldRank ?? 0);
+  if (isNaN(bonus) || bonus <= 0) {
+    const m = (r.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (r.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
+    bonus = m ? parseInt(m[1], 10) : 2;
+  }
+  return bonus;
+}
+
+/**
+ * Calculate weapon attack bonus with skills and advantages.
+ */
+export function getWeaponAttackBonus(r, heroStore) {
+  if (!r) return 0;
+  const w = r.weapon || {};
+  const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
+  const skills = heroStore?.character?.skills || [];
+
+  const isThrown = /thrown/i.test(r.subtype || '') || /thrown/i.test(r.desc || '') || (w.traits || []).some(t => /thrown/i.test(t));
+  const attackContext = {
+    name: r.name,
+    weaponType: r.subtype,
+    description: r.desc,
+    traits: w.traits || [],
+    descriptors: w.traits || [],
+    isThrown,
+    range: isRanged ? 'Ranged' : 'Close'
+  };
+
+  const skillBonus = getCombatSkillBonus(skills, attackContext, isRanged);
+
+  if (isRanged) {
+    const dex = Number(heroStore?.effectiveAbilities?.DEX) || 0;
+    const rangedAdv = Number(heroStore?.getAdvantageRanks?.('Ranged Attack')) || 0;
+    return dex + rangedAdv + skillBonus + (w.attackBonus || 0);
+  } else {
+    const fgt = Number(heroStore?.effectiveAbilities?.FGT) || 0;
+    const closeAdv = Number(heroStore?.getAdvantageRanks?.('Close Attack')) || 0;
+    return fgt + closeAdv + skillBonus + (w.attackBonus || 0);
+  }
+}
+
+/**
+ * Calculate weapon difficulty class (DC) and effect type.
+ */
+export function getWeaponDC(r, heroStore) {
+  if (!r) return 15;
+  const w = r.weapon || {};
+  const str = Number(heroStore?.effectiveAbilities?.STR) || 0;
+  const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
+  let dmgRank = w.damageRank;
+  if (dmgRank === undefined) {
+    const m = (r.desc || '').match(/Damage\s+(\d+)/i) || (r.desc || '').match(/Affliction\s+(\d+)/i);
+    dmgRank = m ? parseInt(m[1], 10) : 1;
+  }
+  const effectiveDmg = isStrengthBased ? (str + dmgRank) : dmgRank;
+  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(r.desc || '');
+  return (isAffliction ? 10 : 15) + effectiveDmg;
+}
+
+/**
+ * Get weapon resistance defense (Toughness or Fortitude).
+ */
+export function getWeaponResistance(r) {
+  if (!r) return 'Toughness';
+  const w = r.weapon || {};
+  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(r.desc || '');
+  return w.resistance || (isAffliction ? 'Fortitude' : 'Toughness');
+}
+
+/**
+ * Get weapon range descriptor.
+ */
+export function getWeaponRange(r) {
+  if (!r) return 'Close';
+  const w = r.weapon || {};
+  if (w.range === 'Ranged' || /Ranged/i.test(r.desc || '')) return 'Ranged';
+  if (w.isStrengthBased ?? /Strength-based/i.test(r.desc || '')) return 'Melee (STR)';
+  return 'Close';
+}
+
+/**
+ * Get armor protection rank (Toughness bonus).
+ */
+export function getArmorProtection(r) {
+  if (!r) return 0;
+  const a = r.armor || {};
+  if (a.protectionRank !== undefined) return a.protectionRank;
+  const m = (r.desc || '').match(/Protection\s+(\d+)/i);
+  return m ? parseInt(m[1], 10) : 1;
+}
+
+/**
+ * Icon class helper for equipment resource.
+ */
+export function getResIconClass(r) {
+  if (!r) return 'ri-archive-line';
+  if (r.subtype === 'weapon_ranged' || (r.weapon?.range === 'Ranged')) return 'ri-focus-2-line';
+  if (r.subtype?.startsWith('weapon') || r.weapon != null) return 'ri-sword-line';
+  if (isShield(r)) return 'ri-shield-line';
+  if (r.subtype === 'armor' || r.armor != null) return 'ri-shield-check-line';
+  if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'ri-car-line';
+  if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'ri-building-line';
+  if (r.type === 'Gadget' || r.subtype === 'gadget') return 'ri-smartphone-line';
+  return 'ri-archive-line';
+}
+
+/**
+ * Subtype display label helper for equipment resource.
+ */
+export function getSubtypeLabel(r) {
+  if (!r) return 'GEAR';
+  if (r.subtype === 'weapon_ranged') return 'RANGED WEAPON';
+  if (r.subtype === 'weapon_melee') return 'MELEE WEAPON';
+  if (r.weapon) return r.weapon.range === 'Ranged' ? 'RANGED WEAPON' : 'MELEE WEAPON';
+  if (isShield(r)) return 'SHIELD';
+  if (r.subtype === 'armor') return 'BODY ARMOR';
+  if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'VEHICLE';
+  if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'HEADQUARTERS';
+  return (r.type || 'GEAR').toUpperCase();
+}
+
+/**
+ * Format gear status label.
+ */
+export function formatEquipmentStatus(status) {
+  if (status === 'carried') return 'In Bag';
+  if (status === 'stored') return 'Stored';
+  return 'Equipped';
+}
+
+/**
+ * Get category key for tactical styling and icons.
+ */
+export function getItemCategoryKey(item) {
+  if (!item) return 'gadget';
+  if (isWeapon(item) || item.subtype?.startsWith('weapon') || item.weapon != null) return 'weapon';
+  if (isShield(item) || isArmor(item) || item.subtype === 'armor' || item.armor != null) return 'armor';
+  if (item.type === 'Vehicle' || item.subtype === 'vehicle' || item.vehicle != null) return 'vehicle';
+  if (item.type === 'Headquarters' || item.subtype === 'headquarters' || item.hq != null) return 'hq';
+  return 'gadget';
+}
+
+/**
+ * Count equipment resources by category ID.
+ */
+export function getEquipmentCategoryCount(list = [], catId) {
+  if (!Array.isArray(list)) return 0;
+  if (catId === 'all') return list.length;
+  if (catId === 'Weapons') return list.filter(r => isWeapon(r)).length;
+  if (catId === 'Armor') return list.filter(r => isArmor(r) || isShield(r)).length;
+  if (catId === 'Gadget') return list.filter(r => r.type === 'Gadget' || r.subtype === 'gadget').length;
+  if (catId === 'Vehicle') return list.filter(r => r.type === 'Vehicle' || r.subtype === 'vehicle').length;
+  if (catId === 'Headquarters') return list.filter(r => r.type === 'Headquarters' || r.subtype === 'headquarters').length;
+  return list.filter(r => r.type === catId).length;
+}
+
+/**
+ * Filter equipment resources by active filter ID.
+ */
+export function filterEquipmentResources(list = [], activeFilter) {
+  if (!Array.isArray(list)) return [];
+  if (activeFilter === 'all') return list;
+  if (activeFilter === 'Weapons') return list.filter(r => isWeapon(r));
+  if (activeFilter === 'Armor') return list.filter(r => isArmor(r) || isShield(r));
+  if (activeFilter === 'Gadget') return list.filter(r => r.type === 'Gadget' || r.subtype === 'gadget');
+  if (activeFilter === 'Vehicle') return list.filter(r => r.type === 'Vehicle' || r.subtype === 'vehicle');
+  if (activeFilter === 'Headquarters') return list.filter(r => r.type === 'Headquarters' || r.subtype === 'headquarters');
+  return list.filter(r => r.type === activeFilter);
+}
+
+/**
+ * Filter preset catalog by search query.
+ */
+export function filterEquipmentPresets(presets = [], searchQuery = '') {
+  const q = (searchQuery || '').toLowerCase().trim();
+  if (!q) return presets;
+  return presets.filter(p =>
+    p.name.toLowerCase().includes(q) ||
+    (p.desc && p.desc.toLowerCase().includes(q)) ||
+    (p.subtype && p.subtype.toLowerCase().includes(q)) ||
+    (p.type && p.type.toLowerCase().includes(q))
+  );
 }

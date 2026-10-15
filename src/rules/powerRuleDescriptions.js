@@ -78,8 +78,41 @@ export const SPEED_RANK_TABLE = {
   20: 'Speed of Light (186,000 miles/sec)'
 };
 
+/**
+ * Array representation of speed ranks for vehicle & equipment selectors.
+ */
+export const SPEED_RANK_LIST = Object.entries(SPEED_RANK_TABLE).map(([rk, label]) => ({
+  rank: Number(rk),
+  mph: label.replace(/\s*\(.*\)/, '').trim(),
+  label
+}));
+
+// Provide array method .find on SPEED_RANK_TABLE for backwards compatibility with equipment specs
+Object.defineProperty(SPEED_RANK_TABLE, 'find', {
+  value: (predicate) => SPEED_RANK_LIST.find(predicate),
+  enumerable: false,
+  writable: true,
+  configurable: true
+});
+
+/**
+ * Quick helper to get clean MPH string for a speed rank (e.g. '60 MPH').
+ */
+export function getSpeedMph(rank) {
+  const r = parseInt(rank, 10) || 0;
+  if (SPEED_RANK_TABLE[r]) {
+    return SPEED_RANK_TABLE[r].replace(/\s*\(.*\)/, '').trim();
+  }
+  if (r > 20) return `FTL (Rank ${r})`;
+  const mph = Math.round(Math.pow(2, r) * 2);
+  return `${mph.toLocaleString()} MPH`;
+}
+
 export function formatSpeedRank(rank, options = {}) {
   const r = parseInt(rank, 10) || 0;
+  if (options.mphOnly) {
+    return getSpeedMph(r);
+  }
   if (SPEED_RANK_TABLE[r]) {
     const raw = SPEED_RANK_TABLE[r];
     if (options.compact || options.inline) {

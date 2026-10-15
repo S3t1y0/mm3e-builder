@@ -700,6 +700,10 @@ export const useHeroStore = defineStore('hero', {
       }
     },
 
+    saveCharacter() {
+      return this.saveToStorage();
+    },
+
     refreshRoster() {
       this.savedRoster = getSavedRoster();
     },

@@ -122,7 +122,8 @@
 </template>
 
 <script setup>
-import { computed, ref, inject } from 'vue';
+import { computed, ref } from 'vue';
+import { useCustomSubModal } from './useCustomSubModal.js';
 
 const props = defineProps({
   effect: { type: Object, required: true },
@@ -131,27 +132,12 @@ const props = defineProps({
 const cfg = computed(() => props.cfg);
 const emit = defineEmits(['update', 'open-custom']);
 
-const customSubModal = inject('customSubModal', null);
-
-function updateConfig() {
-  emit('update');
-}
-
-function openCustomSubModal(type) {
-  if (customSubModal?.open) {
-    customSubModal.open(type);
-  } else {
-    emit('open-custom', type);
-  }
-}
-
-function editCustomSubItem(item) {
-  customSubModal?.edit?.(item);
-}
-
-function deleteCustomSubItem(itemId) {
-  customSubModal?.delete?.(itemId);
-}
+const {
+  updateConfig,
+  openCustomSubModal,
+  editCustomSubItem,
+  deleteCustomSubItem
+} = useCustomSubModal(emit);
 
 
 const selectedConcealmentCategory = ref('all');
