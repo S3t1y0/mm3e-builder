@@ -5,15 +5,14 @@
       <button 
         type="button" 
         class="sense-roll-btn" 
-        @click="rollPerception" 
-        title="Roll Active Perception Check"
+        @click="rollPerception"
       >
         <i class="ri-dice-line"></i> Roll Perception
       </button>
     </div>
 
     <div class="dndb-senses-content">
-      <div class="dndb-sense-row" title="10 + Awareness + Perception Ranks">
+      <div class="dndb-sense-row">
         <span class="dndb-sense-val">{{ passivePerception }}</span>
         <div class="dndb-sense-info">
           <span class="dndb-sense-label">PASSIVE PERCEPTION</span>

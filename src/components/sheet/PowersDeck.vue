@@ -11,7 +11,6 @@
           v-if="heroStore.character.powers.length > 0"
           type="button"
           class="btn-expand-all"
-          :title="isAllExpanded ? 'Collapse All Powers' : 'Expand All Powers'"
           @click="toggleExpandAll"
         >
           <i :class="isAllExpanded ? 'ri-contract-up-down-line' : 'ri-expand-up-down-line'"></i>
@@ -23,7 +22,6 @@
           type="button"
           class="btn-toggle-all-powers"
           :class="{ 'all-active': isAnyPowerActive, 'all-off': !isAnyPowerActive }"
-          :title="isAnyPowerActive ? 'Deactivate all powers' : 'Activate all powers'"
           @click="handleToggleAllPowers"
         >
           <i :class="isAnyPowerActive ? 'ri-toggle-fill' : 'ri-toggle-line'"></i>

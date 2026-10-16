@@ -17,7 +17,6 @@
               type="button"
               class="power-toggle-btn"
               :class="{ 'is-active': pow.active !== false, 'is-off': pow.active === false }"
-              :title="pow.active !== false ? 'Power is Active (Click to Deactivate)' : 'Power is Offline (Click to Activate)'"
               @click.stop="handleTogglePower(pow)"
             >
               <i :class="pow.active !== false ? 'ri-toggle-fill' : 'ri-toggle-line'"></i>
@@ -42,7 +41,6 @@
             <button
               type="button"
               class="btn-send-vtt"
-              title="Broadcast power details to Roll20 chat"
               @click="broadcastPower(pow)"
             >
               <i class="ri-broadcast-line"></i>
@@ -52,7 +50,6 @@
             <button
               type="button"
               class="btn-edit-power"
-              title="Edit in Power Studio Tab"
               @click="handleEditPower(idx, pow)"
             >
               <i class="ri-edit-line"></i>
@@ -64,7 +61,6 @@
               type="button"
               class="btn-toggle-expand"
               :class="{ expanded: isExpanded(pow.id || idx) }"
-              :title="isExpanded(pow.id || idx) ? 'Collapse details' : 'Expand full rules & mechanics'"
               @click="toggleExpand(pow.id || idx)"
             >
               <span>{{ isExpanded(pow.id || idx) ? 'Less' : 'Details' }}</span>
@@ -75,7 +71,6 @@
             <button
               type="button"
               class="btn-del-power"
-              title="Delete Power"
               @click="heroStore.removePower(idx)"
             >
               <i class="ri-delete-bin-line"></i>
@@ -207,7 +202,6 @@
                   offline: sub.active === false || pow.active === false
                 }"
                 :disabled="pow.active === false"
-                :title="pow.active === false ? 'Parent device is Offline' : (sub.active !== false ? 'System is Active (Click to Deactivate)' : 'System is Offline (Click to Activate)')"
                 @click.stop="handleToggleSubPower(pow, sIdx, sub)"
               >
                 <span class="chip-status-dot"></span>
@@ -231,7 +225,6 @@
               <span
                 v-if="calculateDC(getSubPowerActiveEffect(sub))"
                 class="chip-dc-tag"
-                :title="calculateDC(getSubPowerActiveEffect(sub))"
               >
                 {{ calculateCompactDC(getSubPowerActiveEffect(sub)) || calculateDC(getSubPowerActiveEffect(sub)) }}
               </span>
@@ -240,7 +233,6 @@
               <button
                 type="button"
                 class="chip-vtt-btn"
-                title="Broadcast this system to Roll20"
                 @click.stop="broadcastSubPower(pow, sub, sIdx)"
               >
                 <i class="ri-broadcast-line"></i>
@@ -260,14 +252,12 @@
                 'is-primary': isCompoundSubPrimary(pow, sub, sIdx),
                 'is-chip-offline': sub.active === false || pow.active === false
               }"
-              :title="isCompoundSubPrimary(pow, sub, sIdx) ? `[Primary Action] ${sub.name || 'Component'}` : (sub.name || 'Component')"
               @click="setActiveCompoundSubIndex(pow.id || idx, sIdx); toggleExpand(pow.id || idx)"
             >
               <!-- Primary / Effect Icon -->
               <span
                 class="compound-icon-wrapper"
                 :class="{ 'is-primary-icon': isCompoundSubPrimary(pow, sub, sIdx) }"
-                :title="isCompoundSubPrimary(pow, sub, sIdx) ? 'Primary Action Effect' : getSubPowerActiveEffect(sub).baseEffect"
               >
                 <i :class="isCompoundSubPrimary(pow, sub, sIdx) ? 'ri-star-fill' : getEffectIcon(getSubPowerActiveEffect(sub).baseEffect)"></i>
               </span>
@@ -290,7 +280,6 @@
               <span
                 v-if="calculateDC(getSubPowerActiveEffect(sub))"
                 class="chip-dc-tag compound"
-                :title="calculateDC(getSubPowerActiveEffect(sub))"
               >
                 {{ calculateCompactDC(getSubPowerActiveEffect(sub)) || calculateDC(getSubPowerActiveEffect(sub)) }}
               </span>
@@ -299,7 +288,6 @@
               <button
                 type="button"
                 class="chip-vtt-btn compound"
-                title="Broadcast this component to Roll20"
                 @click.stop="broadcastSubPower(pow, sub, sIdx)"
               >
                 <i class="ri-broadcast-line"></i>
@@ -336,7 +324,6 @@
                 <button
                   type="button"
                   class="btn-effect-vtt"
-                  title="Broadcast Base Effect rules to Roll20"
                   @click.stop="broadcastEffect(pow, getActiveEffect(pow))"
                 >
                   <i class="ri-broadcast-line"></i>
@@ -425,7 +412,6 @@
                     <button
                       type="button"
                       class="btn-mod-vtt extra"
-                      title="Broadcast Extra to Roll20"
                       @click.stop="broadcastExtra(pow, extra)"
                     >
                       <i class="ri-broadcast-line"></i>
@@ -461,7 +447,6 @@
                     <button
                       type="button"
                       class="btn-mod-vtt flaw"
-                      title="Broadcast Flaw to Roll20"
                       @click.stop="broadcastFlaw(pow, flaw)"
                     >
                       <i class="ri-broadcast-line"></i>
@@ -512,7 +497,6 @@
                       <button
                         type="button"
                         class="btn-linked-broadcast"
-                        title="Broadcast Linked Effect to Roll20"
                         @click.stop="broadcastEffect(pow, linked, true)"
                       >
                         <i class="ri-broadcast-line"></i>
@@ -604,7 +588,6 @@
                           <button
                             type="button"
                             class="btn-mod-vtt extra"
-                            title="Broadcast Extra to Roll20"
                             @click.stop="broadcastExtra({ name: `${pow.name} - ${getLinkedDisplayName(linked)}` }, extra, linked.baseEffect)"
                           >
                             <i class="ri-broadcast-line"></i>
@@ -631,7 +614,6 @@
                           <button
                             type="button"
                             class="btn-mod-vtt flaw"
-                            title="Broadcast Flaw to Roll20"
                             @click.stop="broadcastFlaw({ name: `${pow.name} - ${getLinkedDisplayName(linked)}` }, flaw, linked.baseEffect)"
                           >
                             <i class="ri-broadcast-line"></i>
@@ -676,7 +658,6 @@
                       type="button"
                       class="btn-mod-vtt"
                       :class="mod.type === 'flaw' || (Number(mod.cost) < 0) ? 'flaw' : 'extra'"
-                      title="Broadcast Shared Modifier to Roll20"
                       @click.stop="mod.type === 'flaw' || (Number(mod.cost) < 0) ? broadcastFlaw(pow, mod) : broadcastExtra(pow, mod)"
                     >
                       <i class="ri-broadcast-line"></i>
@@ -744,7 +725,6 @@
                   <button
                     type="button"
                     class="btn-send-vtt-sub"
-                    title="Broadcast this Sub-Effect to Roll20"
                     @click.stop="broadcastSubPower(pow, sub, sIdx)"
                   >
                     <i class="ri-broadcast-line"></i>
@@ -865,7 +845,6 @@
                         <button
                           type="button"
                           class="btn-mod-vtt extra"
-                          title="Broadcast Extra to Roll20"
                           @click.stop="broadcastExtra({ name: `${pow.name} - ${sub.name || 'Component'}` }, extra, getSubPowerActiveEffect(sub).baseEffect)"
                         >
                           <i class="ri-broadcast-line"></i>
@@ -892,7 +871,6 @@
                         <button
                           type="button"
                           class="btn-mod-vtt flaw"
-                          title="Broadcast Flaw to Roll20"
                           @click.stop="broadcastFlaw({ name: `${pow.name} - ${sub.name || 'Component'}` }, flaw, getSubPowerActiveEffect(sub).baseEffect)"
                         >
                           <i class="ri-broadcast-line"></i>
@@ -969,7 +947,6 @@
                         <button
                           type="button"
                           class="btn-linked-broadcast"
-                          title="Broadcast Linked Effect to Roll20"
                           @click.stop="broadcastEffect({ name: `${pow.name} - ${sub.name}` }, linked, true)"
                         >
                           <i class="ri-broadcast-line"></i>
@@ -1035,7 +1012,6 @@
                             <button
                               type="button"
                               class="btn-mod-vtt extra"
-                              title="Broadcast Extra to Roll20"
                               @click.stop="broadcastExtra({ name: `${pow.name} - ${sub.name || 'Component'} (${getLinkedDisplayName(linked)})` }, extra, linked.baseEffect)"
                             >
                               <i class="ri-broadcast-line"></i>
@@ -1062,7 +1038,6 @@
                             <button
                               type="button"
                               class="btn-mod-vtt flaw"
-                              title="Broadcast Flaw to Roll20"
                               @click.stop="broadcastFlaw({ name: `${pow.name} - ${sub.name || 'Component'} (${getLinkedDisplayName(linked)})` }, flaw, linked.baseEffect)"
                             >
                               <i class="ri-broadcast-line"></i>
@@ -1100,7 +1075,6 @@
                   <span
                     class="tab-status-dot"
                     :class="{ online: sub.active !== false && pow.active !== false }"
-                    :title="sub.active !== false && pow.active !== false ? 'Online' : 'Offline'"
                   ></span>
                   <i :class="getEffectIcon(getSubPowerActiveEffect(sub).baseEffect)" class="tab-icon"></i>
                   <span class="tab-label">{{ sub.name || `System ${sIdx + 1}` }}</span>
@@ -1126,7 +1100,6 @@
                       'is-off': sub.active === false || pow.active === false
                     }"
                     :disabled="pow.active === false"
-                    :title="pow.active === false ? 'Parent device is Offline' : (sub.active !== false ? 'System is Active (Click to Deactivate)' : 'System is Offline (Click to Activate)')"
                     @click.stop="handleToggleSubPower(pow, sIdx, sub)"
                   >
                     <i :class="sub.active !== false && pow.active !== false ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'"></i>
@@ -1151,7 +1124,6 @@
                     <button
                       type="button"
                       class="btn-send-vtt-sub"
-                      title="Broadcast this Sub-System to Roll20"
                       @click.stop="broadcastSubPower(pow, sub, sIdx)"
                     >
                       <i class="ri-broadcast-line"></i>
@@ -1307,7 +1279,6 @@
                         <button
                           type="button"
                           class="btn-linked-broadcast"
-                          title="Broadcast Linked Effect to Roll20"
                           @click.stop="broadcastEffect({ name: `${pow.name} - ${sub.name}` }, linked, true)"
                         >
                           <i class="ri-broadcast-line"></i>
@@ -1425,7 +1396,6 @@
                       <button
                         type="button"
                         class="btn-mod-vtt extra"
-                        title="Broadcast Extra to Roll20"
                         @click.stop="broadcastExtra({ name: `${pow.name} - ${sub.name}` }, extra, getSubPowerActiveEffect(sub).baseEffect)"
                       >
                         <i class="ri-broadcast-line"></i>
@@ -1452,7 +1422,6 @@
                       <button
                         type="button"
                         class="btn-mod-vtt flaw"
-                        title="Broadcast Flaw to Roll20"
                         @click.stop="broadcastFlaw({ name: `${pow.name} - ${sub.name}` }, flaw, getSubPowerActiveEffect(sub).baseEffect)"
                       >
                         <i class="ri-broadcast-line"></i>

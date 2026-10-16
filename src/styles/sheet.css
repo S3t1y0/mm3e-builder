@@ -4467,19 +4467,134 @@
 }
 
 /* PP Box */
+/* UNIFIED HERO COMMAND HUB (Header & Abilities in Single Tactical Card) */
+.hero-command-container {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+  transition: border-color var(--trans-fast);
+}
+
+.hero-command-container:hover {
+  border-color: rgba(0, 111, 184, 0.35);
+}
+
+.hero-command-container .dndb-hero-banner {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 1.15rem 1.25rem 0.85rem;
+}
+
+.hero-command-container .dndb-abilities-ribbon {
+  background: rgba(0, 0, 0, 0.18);
+  border: none;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0;
+  box-shadow: none;
+  margin-bottom: 0;
+  padding: 0.85rem 1.25rem 1.15rem;
+}
+
+/* PP Box */
 .dndb-vital-box.pp-box {
-  min-width: 125px;
+  min-width: 140px;
+}
+
+.dndb-vital-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.pp-over-badge {
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #fff;
+  background: #dc2626;
+  border-radius: 3px;
+  padding: 1px 4px;
+  letter-spacing: 0.05em;
+  animation: pulse-danger 1.5s infinite;
+}
+
+@keyframes pulse-danger {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
 .dndb-pp-val-row {
   font-size: 0.95rem;
   font-weight: 800;
   color: #e2e8f0;
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
 }
 
 .dndb-pp-val-row #dndb-pp-spent {
   color: var(--accent-secondary);
   font-size: 1.15rem;
+}
+
+.dndb-pp-val-row #dndb-pp-spent.text-danger {
+  color: #f87171;
+}
+
+.dndb-pp-separator {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.dndb-pp-unit {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.dndb-pp-segmented-bar {
+  width: 100%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 3px;
+  margin-top: 0.4rem;
+  display: flex;
+  overflow: hidden;
+}
+
+.dndb-pp-segmented-bar.overbudget {
+  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+  border: 1px solid #ef4444;
+}
+
+.pp-seg {
+  height: 100%;
+  transition: width 0.3s ease;
+}
+
+.pp-seg.seg-abilities {
+  background: #f59e0b;
+}
+
+.pp-seg.seg-defenses {
+  background: #10b981;
+}
+
+.pp-seg.seg-skills {
+  background: #14b8a6;
+}
+
+.pp-seg.seg-advantages {
+  background: #8b5cf6;
+}
+
+.pp-seg.seg-powers {
+  background: #006fb8;
 }
 
 .dndb-pp-mini-bar {

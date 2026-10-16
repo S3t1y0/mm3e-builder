@@ -46,7 +46,6 @@
             type="button"
             class="btn btn-secondary btn-xs"
             @click="syncEquipmentAdvantage"
-            title="Adjust advantage to exact needed ranks"
           >
             <i class="ri-refresh-line"></i> Adjust to {{ budgetInfo.neededRanks }} Ranks
           </button>
@@ -116,7 +115,6 @@
                   class="status-toggle-pill"
                   :class="{ 'text-emerald': item.status === 'equipped' }"
                   @click="toggleStatus(item.id)"
-                  title="Click to cycle status (Equipped -> In Bag -> Stored)"
                 >
                   <i v-if="item.status === 'equipped' || !item.status" class="ri-checkbox-circle-fill"></i>
                   <i v-else-if="item.status === 'carried'" class="ri-inbox-line"></i>
@@ -136,7 +134,6 @@
               type="button"
               class="btn-icon text-danger"
               @click="deleteResource(item.id, item.name)"
-              title="Delete Item"
             >
               <i class="ri-delete-bin-line"></i>
             </button>

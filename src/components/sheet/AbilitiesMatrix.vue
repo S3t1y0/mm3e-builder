@@ -3,9 +3,9 @@
   <section class="dndb-abilities-ribbon">
     <div class="dndb-ribbon-header">
       <span class="dndb-ribbon-title">ABILITIES</span>
-      <div style="display: flex; align-items: center; gap: 0.65rem;">
+      <div class="dndb-ribbon-meta">
         <span class="dndb-ribbon-cost">2 PP / Rank</span>
-        <span style="font-size: 0.72rem; font-weight: 800; color: var(--text-secondary); font-family: var(--font-mono);">
+        <span class="dndb-ribbon-total font-mono">
           {{ heroStore.totalAbilityPP }} PP Total
         </span>
       </div>
@@ -20,52 +20,36 @@
           'is-absent': heroStore.isAbilityAbsent(ab.key),
           'is-enhanced': getEnhancedRanks(ab.key) > 0
         }"
-        :title="`${ab.desc}${heroStore.isAbilityAbsent(ab.key) ? ` (Absent ${ab.name}: ${ab.absentDesc})` : (getEnhancedRanks(ab.key) > 0 ? ` (Enhanced Trait active: +${getEnhancedRanks(ab.key)})` : '')}`"
       >
-        <div class="ab-top">
+        <!-- Clickable Top Area: Key, Name & Detail Inspector Trigger -->
+        <div
+          class="ab-top-clickable"
+          role="button"
+          tabindex="0"
+          @click="openAbilityDrawer(ab)"
+          @keydown.enter="openAbilityDrawer(ab)"
+          @keydown.space.prevent="openAbilityDrawer(ab)"
+        >
           <div class="ab-title-row">
             <span class="ab-key">{{ ab.key }}</span>
-            <button
-              type="button"
-              class="matrix-absent-toggle"
-              :class="{ active: heroStore.isAbilityAbsent(ab.key) }"
-              :title="heroStore.isAbilityAbsent(ab.key) ? `Restore ${ab.name}` : `Set ${ab.name} to Absent (-10 PP)`"
-              @click.stop="heroStore.toggleAbsentAbility(ab.key)"
-            >
-              {{ heroStore.isAbilityAbsent(ab.key) ? '-' : 'Nil' }}
-            </button>
           </div>
           <span class="ab-name">{{ ab.name }}</span>
-          <span
-            class="ab-cost font-mono"
-            :class="{ 'is-refund': heroStore.isAbilityAbsent(ab.key) }"
-          >
-            {{ heroStore.isAbilityAbsent(ab.key) ? '-10 PP' : `${(heroStore.character.abilities[ab.key] || 0) * 2} PP` }}
-          </span>
-          <span
-            v-if="!heroStore.isAbilityAbsent(ab.key) && getEnhancedRanks(ab.key) > 0"
-            class="ab-enh-badge"
-            :title="`Enhanced Trait active: +${getEnhancedRanks(ab.key)}`"
-          >
-            +{{ getEnhancedRanks(ab.key) }} Enh
-          </span>
         </div>
 
+        <!-- Bottom Controls: Rapid Rank Stepper & d20 Click-to-Roll Chip -->
         <div class="ab-controls">
           <button
             type="button"
             class="step-btn"
             :disabled="heroStore.isAbilityAbsent(ab.key)"
-            title="Decrease Rank"
-            @click="heroStore.setAbility(ab.key, (heroStore.character.abilities[ab.key] || 0) - 1)"
+            @click.stop="heroStore.setAbility(ab.key, (heroStore.character.abilities[ab.key] || 0) - 1)"
           >-</button>
 
           <button
             type="button"
             class="ab-roll-btn"
             :disabled="heroStore.isAbilityAbsent(ab.key)"
-            :title="heroStore.isAbilityAbsent(ab.key) ? `Absent ${ab.name}: ${ab.absentDesc}` : `Click to Roll ${ab.name} Check (d20${getEffectiveRank(ab.key) >= 0 ? '+' + getEffectiveRank(ab.key) : getEffectiveRank(ab.key)})`"
-            @click="!heroStore.isAbilityAbsent(ab.key) && handleRollCheck(ab)"
+            @click.stop="!heroStore.isAbilityAbsent(ab.key) && handleRollCheck(ab)"
           >
             <i :class="heroStore.isAbilityAbsent(ab.key) ? 'ri-close-line' : 'ri-dice-line'"></i>
             <span
@@ -83,8 +67,7 @@
             type="button"
             class="step-btn"
             :disabled="heroStore.isAbilityAbsent(ab.key)"
-            title="Increase Rank"
-            @click="heroStore.setAbility(ab.key, (heroStore.character.abilities[ab.key] || 0) + 1)"
+            @click.stop="heroStore.setAbility(ab.key, (heroStore.character.abilities[ab.key] || 0) + 1)"
           >+</button>
         </div>
       </div>
@@ -104,49 +87,49 @@ const ABILITIES_CONFIG = [
   {
     key: 'STR',
     name: 'Strength',
-    desc: 'Lifting capacity and close combat damage',
+    desc: 'Lifting capacity, physical brute force, and close combat damage bonus.',
     absentDesc: 'Zero lifting capacity (0 kg). Melee attacks cannot deal Strength damage. Athletics checks automatically fail.'
   },
   {
     key: 'STA',
     name: 'Stamina',
-    desc: 'Physical health, recovery, and resistance',
+    desc: 'Physical health, recovery from injury, and bodily resistance to toxins and disease.',
     absentDesc: 'Construct trait. Base Toughness 0, Fortitude defense absent (requires Immunity 30), no natural healing.'
   },
   {
     key: 'AGL',
     name: 'Agility',
-    desc: 'Quick motor reflexes, balance, and coordination',
+    desc: 'Quick motor reflexes, balance, kinetic body control, and physical stealth.',
     absentDesc: 'No physical evasion or reflexes. Base Dodge 0, Initiative 0, and automatic failure on Acrobatics and Stealth checks.'
   },
   {
     key: 'DEX',
     name: 'Dexterity',
-    desc: 'Hand-eye coordination, aim, and manipulation',
+    desc: 'Manual coordination, precision aiming, vehicle piloting, and sleight of hand.',
     absentDesc: 'No manual dexterity. Base Ranged Attack 0, and cannot operate vehicles, tools, or make Sleight of Hand checks.'
   },
   {
     key: 'FGT',
     name: 'Fighting',
-    desc: 'Close combat accuracy and hand-to-hand defense',
+    desc: 'Close combat competence, hand-to-hand skill, and active melee parry defense.',
     absentDesc: 'No close combat competence. Base Parry 0, Base Close Attack 0, and unable to actively parry melee attacks.'
   },
   {
     key: 'INT',
     name: 'Intellect',
-    desc: 'Logic, technical reasoning, and memory',
+    desc: 'Logic, deduction, technical comprehension, memory recall, and science reasoning.',
     absentDesc: 'Mindless automaton. Acts solely on rigid programming or outside commands. Fails all intellect and technical checks.'
   },
   {
     key: 'AWE',
     name: 'Awareness',
-    desc: 'Sensory perception, insight, and mental resolve',
+    desc: 'Sensory perception, empathy, intuitive insight, and willpower fortitude.',
     absentDesc: 'Blind and deaf without sensory powers. Base Will 0, and fails all Perception and Insight checks.'
   },
   {
     key: 'PRE',
     name: 'Presence',
-    desc: 'Force of personality, leadership, and charisma',
+    desc: 'Force of personality, charisma, leadership, social intimidation, and persuasion.',
     absentDesc: 'No personality, ego, or social presence. Fails all Deception, Intimidation, and Persuasion checks.'
   }
 ];
@@ -160,6 +143,16 @@ function getEffectiveRank(code) {
   const enh = getEnhancedRanks(code);
   return base + enh;
 }
+
+function openAbilityDrawer(ab) {
+  uiStore.openInspector(
+    'ability',
+    ab,
+    `${ab.name} (${ab.key})`,
+    ''
+  );
+}
+
 function handleRollCheck(ab) {
   const eff = getEffectiveRank(ab.key);
   heroStore.rollCheck(`${ab.name} (${ab.key}) Check`, eff, null, 'Ability');
@@ -167,60 +160,70 @@ function handleRollCheck(ab) {
 </script>
 
 <style scoped>
+.dndb-ribbon-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+}
+
+.dndb-ribbon-total {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+}
+
+/* Clickable Top Portion */
+.ab-top-clickable {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  width: 100%;
+  padding: 0.45rem 0.25rem 0.35rem;
+  border-radius: var(--radius-sm, 6px);
+  cursor: pointer;
+  transition: all var(--trans-fast, 0.15s ease);
+  user-select: none;
+}
+
+.ab-top-clickable:hover {
+  background: rgba(2, 132, 199, 0.1);
+}
+
+.ab-top-clickable:focus-visible {
+  outline: 2px solid var(--accent-secondary, #2a8fd6);
+  outline-offset: 1px;
+}
+
 .ab-title-row {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
+  gap: 0.25rem;
   width: 100%;
 }
 
-.matrix-absent-toggle {
+/* Enhanced Trait Subtle Accent (Zero Clutter Badge) - crisp solid accent without AI neon glow */
+.ability-card.is-enhanced {
+  border-color: #38bdf8 !important;
+  border-top-width: 2px;
   position: relative;
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  color: var(--text-muted);
-  font-size: 0.6rem;
-  font-weight: 700;
-  border-radius: 3px;
-  padding: 1px 5px;
-  line-height: 1.3;
-  cursor: pointer;
-  transition: all var(--trans-fast);
 }
 
-/* Touch hit-area expansion for mobile ergonomics (WCAG / R-03 >= 44x44px) */
-.matrix-absent-toggle::before {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 44px;
-  height: 44px;
+.ability-card.is-enhanced .ab-key {
+  color: #38bdf8;
 }
 
-.matrix-absent-toggle:hover {
-  background: rgba(239, 68, 68, 0.15);
-  color: #fca5a5;
-  border-color: rgba(239, 68, 68, 0.35);
-}
-
-.matrix-absent-toggle.active {
-  background: rgba(239, 68, 68, 0.25);
-  color: #fca5a5;
-  border-color: rgba(239, 68, 68, 0.5);
-}
-
+/* Absent Trait Subtle Accent */
 .ability-card.is-absent {
   border-color: rgba(239, 68, 68, 0.3) !important;
   background: rgba(239, 68, 68, 0.04) !important;
+  opacity: 0.85;
 }
 
-.ab-cost.is-refund {
-  color: #34d399 !important;
-  background: rgba(16, 185, 129, 0.15) !important;
-  border: 1px solid rgba(16, 185, 129, 0.35);
+.ability-card.is-absent .ab-name {
+  text-decoration: line-through;
+  opacity: 0.65;
 }
 
 .ab-val.absent {

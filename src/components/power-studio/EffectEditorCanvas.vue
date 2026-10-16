@@ -24,7 +24,7 @@
         </span>
       </div>
       <div class="linked-context-right">
-        <span class="sync-lock-pill" title="Action and Range are synchronized with the parent effect">
+        <span class="sync-lock-pill">
           <i class="ri-lock-line"></i>
           <span>Action & Range Locked</span>
         </span>
@@ -61,7 +61,6 @@
             class="btn-primary-role"
             :class="{ active: builderStore.activeCompoundEffect.isPrimaryAction }"
             @click="builderStore.setPrimaryCompoundEffect(builderStore.activeCompoundIndex)"
-            :title="builderStore.activeCompoundEffect.isPrimaryAction ? 'Current Primary Action Effect' : 'Designate as Primary Effect'"
           >
             <i :class="builderStore.activeCompoundEffect.isPrimaryAction ? 'ri-star-fill' : 'ri-star-line'"></i>
             <span>{{ builderStore.activeCompoundEffect.isPrimaryAction ? 'Primary Action Effect' : 'Make Primary' }}</span>
@@ -177,7 +176,6 @@
                 class="btn-step"
                 :disabled="effect.ranks <= 1"
                 @click="builderStore.updateEffectRank(effect, -1)"
-                title="Decrease Rank"
               >
                 <i class="ri-subtract-line"></i>
               </button>
@@ -192,7 +190,6 @@
                 type="button"
                 class="btn-step"
                 @click="builderStore.updateEffectRank(effect, 1)"
-                title="Increase Rank"
               >
                 <i class="ri-add-line"></i>
               </button>
@@ -205,7 +202,6 @@
             class="btn-toggle-rules"
             :class="{ active: showRules }"
             @click="showRules = !showRules"
-            title="Toggle M&M 3e Rules"
           >
             <i class="ri-book-read-line"></i>
             <span>{{ showRules ? 'Hide Rules' : 'M&M Rules' }}</span>
@@ -231,7 +227,7 @@
         <div class="param-status-divider"></div>
         <div class="param-status-item" :class="{ 'is-modified': effectRangeDetails.isModified }">
           <span class="param-lbl">Range:</span>
-          <span class="param-val" :title="effectRangeDetails.tooltip">
+          <span class="param-val">
             {{ effectRangeDetails.effectiveRange }}
             <span
               v-if="effectRangeDetails.isModified && effectRangeDetails.effectiveRange !== effectRangeDetails.baseRange"
@@ -317,7 +313,6 @@
                   <button
                     type="button"
                     class="mod-card-del-btn"
-                    title="Remove Extra"
                     @click="builderStore.removeModifierFromTarget(effect, false, extra.id || idx)"
                   >
                     <i class="ri-close-line"></i>
@@ -435,7 +430,6 @@
                   <button
                     type="button"
                     class="mod-card-del-btn"
-                    title="Remove Flaw"
                     @click="builderStore.removeModifierFromTarget(effect, true, flaw.id || idx)"
                   >
                     <i class="ri-close-line"></i>

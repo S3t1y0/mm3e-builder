@@ -36,5 +36,78 @@ initSeamlessScroll();
 
 app.directive('drag-scroll', vDragScroll);
 
+// Suppress all native browser tooltips globally across the application
+if (typeof window !== 'undefined') {
+  const stripTooltips = (root = document) => {
+    if (!root || !root.querySelectorAll) return;
+    const elements = root.querySelectorAll('[title]');
+    for (let i = 0; i < elements.length; i++) {
+      const el = elements[i];
+      const val = el.getAttribute('title');
+      if (val && !el.hasAttribute('aria-label') && !el.innerText?.trim()) {
+        el.setAttribute('aria-label', val);
+      }
+      el.removeAttribute('title');
+    }
+  };
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => stripTooltips());
+  } else {
+    stripTooltips();
+  }
+
+  // Intercept dynamically added elements via MutationObserver
+  const tooltipObserver = new MutationObserver((mutations) => {
+    for (let i = 0; i < mutations.length; i++) {
+      const mutation = mutations[i];
+      if (mutation.type === 'childList') {
+        const added = mutation.addedNodes;
+        for (let j = 0; j < added.length; j++) {
+          const node = added[j];
+          if (node.nodeType === 1) {
+            if (node.hasAttribute('title')) {
+              const val = node.getAttribute('title');
+              if (val && !node.hasAttribute('aria-label') && !node.innerText?.trim()) {
+                node.setAttribute('aria-label', val);
+              }
+              node.removeAttribute('title');
+            }
+            stripTooltips(node);
+          }
+        }
+      } else if (mutation.type === 'attributes' && mutation.attributeName === 'title') {
+        const target = mutation.target;
+        if (target && target.hasAttribute('title')) {
+          target.removeAttribute('title');
+        }
+      }
+    }
+  });
+
+  tooltipObserver.observe(document.documentElement, {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['title']
+  });
+
+  // Fail-safe: remove title attribute immediately on hover before tooltip delay
+  window.addEventListener(
+    'mouseover',
+    (e) => {
+      const el = e.target?.closest?.('[title]');
+      if (el && el.hasAttribute('title')) {
+        const val = el.getAttribute('title');
+        if (val && !el.hasAttribute('aria-label') && !el.innerText?.trim()) {
+          el.setAttribute('aria-label', val);
+        }
+        el.removeAttribute('title');
+      }
+    },
+    { capture: true, passive: true }
+  );
+}
+
 app.use(pinia);
 app.mount('#app');

@@ -111,7 +111,6 @@
                     type="button"
                     class="btn-edit-active"
                     @click="openEditSpecModal(adv)"
-                    title="Edit Choice & Rank"
                   >
                     <i class="ri-edit-line"></i>
                   </button>
@@ -142,7 +141,6 @@
                       class="step-btn"
                       :disabled="Number(adv.ranks || 1) <= 1"
                       @click="stepAdvantage(adv.id, -1)"
-                      title="Decrease Rank"
                     >-</button>
                     <span class="step-value tabular-nums">{{ adv.ranks || 1 }}</span>
                     <button
@@ -150,7 +148,6 @@
                       class="step-btn"
                       :disabled="getAdvantageMeta(adv.name).maxRanks && Number(adv.ranks || 1) >= getAdvantageMeta(adv.name).maxRanks"
                       @click="stepAdvantage(adv.id, 1)"
-                      title="Increase Rank"
                     >+</button>
                   </div>
                 </div>
@@ -163,7 +160,6 @@
                   type="button"
                   class="btn-remove-active"
                   @click="removeAdvantage(adv.id)"
-                  title="Remove from sheet"
                 >
                   <i class="ri-delete-bin-line"></i>
                   <span>Remove</span>
@@ -201,7 +197,6 @@
               type="button"
               class="clear-search-btn"
               @click="searchQuery = ''"
-              title="Clear search"
             >
               <i class="ri-close-circle-line"></i>
             </button>
@@ -255,7 +250,7 @@
               <div class="catalog-card-header">
                 <strong class="catalog-card-name">{{ item.name }}</strong>
 
-                <span v-if="item.ranked" class="badge-ranked-tag" title="Can be taken multiple times">
+                <span v-if="item.ranked" class="badge-ranked-tag">
                   <i class="ri-star-fill"></i> Ranked
                 </span>
               </div>
@@ -276,7 +271,7 @@
                       :key="inst.id"
                       class="catalog-subtype-chip"
                     >
-                      <div class="subtype-info" :title="inst.specification || 'Default'">
+                      <div class="subtype-info">
                         <i class="ri-checkbox-circle-fill"></i>
                         <span class="subtype-name">{{ inst.specification || 'Default' }}</span>
                       </div>
@@ -287,7 +282,6 @@
                             class="step-btn-mini"
                             :disabled="Number(inst.ranks || 1) <= 1"
                             @click="stepInstance(inst.id, -1)"
-                            title="Decrease Rank"
                           >-</button>
                           <span class="step-val-mini tabular-nums">{{ inst.ranks || 1 }}</span>
                           <button
@@ -295,14 +289,12 @@
                             class="step-btn-mini"
                             :disabled="item.maxRanks && Number(inst.ranks || 1) >= item.maxRanks"
                             @click="stepInstance(inst.id, 1)"
-                            title="Increase Rank"
                           >+</button>
                         </div>
                         <button
                           type="button"
                           class="btn-edit-mini"
                           @click="openEditSpecModal(inst)"
-                          title="Edit Choice"
                         >
                           <i class="ri-edit-line"></i>
                         </button>
@@ -310,7 +302,6 @@
                           type="button"
                           class="btn-delete-mini"
                           @click="deleteInstance(inst.id)"
-                          title="Remove this choice"
                         >
                           <i class="ri-close-line"></i>
                         </button>
@@ -348,7 +339,6 @@
                           class="step-btn-mini"
                           :disabled="getAdvantageRanks(item.name) <= 1"
                           @click="stepAdvantage(item.name, -1)"
-                          title="Decrease Rank"
                         >-</button>
                         <span class="step-val-mini tabular-nums">{{ getAdvantageRanks(item.name) }}</span>
                         <button
@@ -356,7 +346,6 @@
                           class="step-btn-mini"
                           :disabled="item.maxRanks && getAdvantageRanks(item.name) >= item.maxRanks"
                           @click="stepAdvantage(item.name, 1)"
-                          title="Increase Rank"
                         >+</button>
                       </div>
 
@@ -365,7 +354,6 @@
                         type="button"
                         class="btn-delete-mini"
                         @click="removeAdvantage(item.name)"
-                        title="Remove from Sheet"
                       >
                         <i class="ri-close-line"></i>
                       </button>
@@ -473,7 +461,6 @@
                   class="rank-step-btn"
                   :disabled="specRank <= 1"
                   @click="specRank = Math.max(1, specRank - 1)"
-                  title="Decrease Rank"
                 >
                   <i class="ri-subtract-line"></i>
                 </button>
@@ -483,7 +470,6 @@
                   class="rank-step-btn"
                   :disabled="activeSpecAdv.maxRanks && specRank >= activeSpecAdv.maxRanks"
                   @click="specRank++"
-                  title="Increase Rank"
                 >
                   <i class="ri-add-line"></i>
                 </button>
@@ -582,7 +568,6 @@
                     class="rank-step-btn"
                     :disabled="customForm.ranks <= 1"
                     @click="customForm.ranks = Math.max(1, customForm.ranks - 1)"
-                    title="Decrease Rank"
                   >
                     <i class="ri-subtract-line"></i>
                   </button>
@@ -591,7 +576,6 @@
                     type="button"
                     class="rank-step-btn"
                     @click="customForm.ranks++"
-                    title="Increase Rank"
                   >
                     <i class="ri-add-line"></i>
                   </button>

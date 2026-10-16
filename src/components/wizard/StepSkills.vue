@@ -50,7 +50,6 @@
           type="button" 
           class="clear-search-btn" 
           @click="searchQuery = ''"
-          title="Clear search"
         >
           <i class="ri-close-circle-line"></i>
         </button>
@@ -97,7 +96,7 @@
                       </span>
                     </td>
                     <td class="tabular-nums mod-cell">
-                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (-)">-</span>
+                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag">-</span>
                       <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                     </td>
                     <td colspan="2" style="text-align: right; padding-right: 1rem;">
@@ -105,7 +104,6 @@
                         type="button"
                         class="btn btn-xs btn-outline-primary"
                         :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                        :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot add specializations` : `Add new ${ruleSkill.name} specialization`"
                         @click="openAddSpecialtyDialog(ruleSkill.name)"
                       >
                         <i class="ri-add-line"></i> Add Spec
@@ -124,7 +122,6 @@
                         <div class="skill-name-block">
                           <span 
                             class="skill-title"
-                            :title="`${ruleSkill.name} (${inst.subtype || 'General'}): Base ${ruleSkill.ability} (${heroStore.effectiveAbilities[ruleSkill.ability] || 0}) + ${inst.ranks || 0} Rk${getEnhancedRanks(ruleSkill.name, inst.subtype) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name, inst.subtype) + 'p' : ''}${getAdvantageBonusForSkill(ruleSkill.name) > 0 ? ' +' + getAdvantageBonusForSkill(ruleSkill.name) + ' Adv' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))}`"
                           >{{ inst.subtype || ruleSkill.name }}</span>
                         </div>
                       </td>
@@ -134,7 +131,7 @@
                         </span>
                       </td>
                       <td class="tabular-nums mod-cell">
-                        <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (-)">-</span>
+                        <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag">-</span>
                         <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                       </td>
                       <td style="text-align: center;">
@@ -144,20 +141,17 @@
                             class="btn-step-sm"
                             :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || (inst.ranks || 0) <= 0"
                             @click="stepSpecialization(inst, -1)"
-                            title="Decrease Rank"
                           >-</button>
                           <span class="tabular-nums step-value">{{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : (inst.ranks || 0) }}</span>
                           <button
                             type="button"
                             class="btn-step-sm"
                             :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                            :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
                             @click="stepSpecialization(inst, 1)"
                           >+</button>
                           <button
                             type="button"
                             class="btn-delete-row btn-delete-spec-hover"
-                            title="Remove Specialization"
                             @click="removeSpecialtySkill(inst)"
                           >
                             <i class="ri-close-line"></i>
@@ -168,7 +162,6 @@
                         <span 
                           v-if="heroStore.isAbilityAbsent(ruleSkill.ability)"
                           class="badge-absent-check"
-                          title="Absent Ability: Automatic failure"
                         >
                           - (Fail)
                         </span>
@@ -194,7 +187,6 @@
                       <div class="skill-name-block">
                         <span 
                           class="skill-title"
-                          :title="`${ruleSkill.name}: Base ${ruleSkill.ability} (${heroStore.effectiveAbilities[ruleSkill.ability] || 0}) + ${getStandardRanks(ruleSkill.name)} Rk${getEnhancedRanks(ruleSkill.name) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name) + 'p' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)))}`"
                         >{{ ruleSkill.name }}</span>
                       </div>
                     </td>
@@ -204,7 +196,7 @@
                       </span>
                     </td>
                     <td class="tabular-nums mod-cell">
-                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag" title="Absent Ability (-)">-</span>
+                      <span v-if="heroStore.isAbilityAbsent(ruleSkill.ability)" class="absent-mod-tag">-</span>
                       <span v-else>{{ formatMod(heroStore.effectiveAbilities[ruleSkill.ability] || 0) }}</span>
                     </td>
                     <td style="text-align: center;">
@@ -214,14 +206,12 @@
                           class="btn-step-sm"
                           :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || getStandardRanks(ruleSkill.name) <= 0"
                           @click="stepStandardSkill(ruleSkill.name, -1)"
-                          title="Decrease Rank"
                         >-</button>
                         <span class="tabular-nums step-value">{{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : getStandardRanks(ruleSkill.name) }}</span>
                         <button
                           type="button"
                           class="btn-step-sm"
                           :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                          :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
                           @click="stepStandardSkill(ruleSkill.name, 1)"
                         >+</button>
                       </div>
@@ -230,7 +220,6 @@
                       <span 
                         v-if="heroStore.isAbilityAbsent(ruleSkill.ability)"
                         class="badge-absent-check"
-                        title="Absent Ability: Automatic failure"
                       >
                         - (Fail)
                       </span>
@@ -327,7 +316,6 @@
                   class="rank-step-btn" 
                   :disabled="(Number(initialRankInput) || 0) <= 0"
                   @click="initialRankInput = Math.max(0, (Number(initialRankInput) || 0) - 1)"
-                  title="Decrease Rank"
                 >
                   <i class="ri-subtract-line"></i>
                 </button>
@@ -344,7 +332,6 @@
                   type="button" 
                   class="rank-step-btn"
                   @click="initialRankInput = (Number(initialRankInput) || 0) + 1"
-                  title="Increase Rank"
                 >
                   <i class="ri-add-line"></i>
                 </button>

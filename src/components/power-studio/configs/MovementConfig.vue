@@ -27,10 +27,10 @@
             </div>
             <div class="mode-right-header">
               <div v-if="mode.isCustom" class="custom-item-actions" @click.stop>
-                <button type="button" class="btn-custom-action edit" title="Edit" @click="editCustomSubItem(mode)">
+                <button type="button" class="btn-custom-action edit" @click="editCustomSubItem(mode)">
                   <i class="ri-edit-line"></i>
                 </button>
-                <button type="button" class="btn-custom-action delete" title="Delete" @click="deleteCustomSubItem(mode.id)">
+                <button type="button" class="btn-custom-action delete" @click="deleteCustomSubItem(mode.id)">
                   <i class="ri-delete-bin-line"></i>
                 </button>
               </div>

@@ -64,7 +64,6 @@
                 class="mod-compat-toggle"
                 :class="{ active: filterCompatibleOnly }"
                 @click="toggleCompatibilityFilter"
-                :title="filterCompatibleOnly ? 'Showing only modifiers compatible with ' + (currentEffectName || 'Effect') + '. Click to show all modifiers.' : 'Showing all modifiers from all effects. Click to filter for ' + (currentEffectName || 'Effect') + '.'"
               >
                 <i :class="filterCompatibleOnly ? 'ri-shield-check-line' : 'ri-global-line'"></i>
                 <span>{{ filterCompatibleOnly ? (currentEffectName || 'Effect') + ' Only' : 'All Modifiers' }}</span>
@@ -85,7 +84,6 @@
                 type="button"
                 class="clear-search-btn"
                 @click="searchQuery = ''"
-                title="Clear search"
               >
                 <i class="ri-close-circle-line"></i>
               </button>
@@ -149,14 +147,12 @@
                     <span
                       v-if="mod.appliesTo && mod.appliesTo.length"
                       class="mod-applies-badge"
-                      :title="'Designed specifically for: ' + mod.appliesTo.join(', ')"
                     >
                       {{ mod.appliesTo.join(', ') }}
                     </span>
                     <span
                       v-if="!isModCompatible(mod)"
                       class="mod-incompatible-badge"
-                      :title="'Effect-specific modifier designed for: ' + mod.appliesTo?.join(', ') + ' (not ' + (currentEffectName || 'current effect') + ')'"
                     >
                       <i class="ri-alert-line"></i> For: {{ mod.appliesTo?.join(', ') }}
                     </span>
@@ -208,7 +204,6 @@
                       v-if="mod.allowMultiple"
                       type="button"
                       class="btn-add-another-mod"
-                      :title="'Add another ' + mod.name + ' instance'"
                       @click="handleAdd(mod)"
                     >
                       <i class="ri-add-line"></i> Another
@@ -222,14 +217,12 @@
                       class="step-btn-xs"
                       :disabled="getAppliedRanks(mod.name) <= 1"
                       @click="stepAppliedRank(mod.name, -1)"
-                      title="Decrease Rank"
                     >-</button>
                     <span class="step-val-xs">R{{ getAppliedRanks(mod.name) }}</span>
                     <button
                       type="button"
                       class="step-btn-xs"
                       @click="stepAppliedRank(mod.name, 1)"
-                      title="Increase Rank"
                     >+</button>
                   </div>
 
@@ -237,7 +230,6 @@
                     type="button"
                     class="btn-remove-mod"
                     @click="removeApplied(mod.name)"
-                    title="Remove from effect"
                   >
                     <i class="ri-delete-bin-line"></i> Remove
                   </button>

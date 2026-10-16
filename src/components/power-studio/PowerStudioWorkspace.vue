@@ -7,7 +7,6 @@
           type="button"
           class="btn-back-sheet"
           @click="builderStore.closeModal"
-          :title="uiStore.activeTab === 'wizard' ? 'Close Power Studio and return to Wizard' : 'Close Power Studio and return to Character Sheet'"
         >
           <i class="ri-arrow-left-line"></i>
           <span>{{ uiStore.activeTab === 'wizard' ? 'Back' : 'Back' }}</span>
@@ -95,7 +94,6 @@
                 type="button"
                 class="btn-rail-add"
                 @click="builderStore.addLinkedEffect(builderStore.power, 'Affliction')"
-                title="Link an effect to trigger simultaneously with Primary Effect"
               >
                 <i class="ri-links-line"></i>
                 <span>+ Link</span>
@@ -120,7 +118,6 @@
                     <button
                       type="button"
                       class="btn-rail-link-mini"
-                      title="Add Linked Effect (Simultaneous Action)"
                       @click.stop="builderStore.addLinkedEffect(builderStore.power, 'Affliction')"
                     >
                       <i class="ri-links-line"></i>
@@ -153,7 +150,6 @@
                       <button
                         type="button"
                         class="btn-rail-remove"
-                        title="Remove linked effect"
                         @click.stop="builderStore.removeLinkedEffect(builderStore.power, lIdx)"
                       >
                         <i class="ri-close-line"></i>
@@ -173,7 +169,6 @@
                 type="button"
                 class="btn-rail-add"
                 @click="builderStore.addArraySlot(false)"
-                title="Add Alternate Effect (+1 PP or +2 PP Dynamic)"
               >
                 <i class="ri-add-line"></i>
                 <span>Add Alternate</span>
@@ -220,7 +215,6 @@
                           class="btn-slot-dynamic-toggle"
                           :class="{ dynamic: slot.isDynamic }"
                           @click.stop="builderStore.toggleSlotDynamic(false, sIdx)"
-                          :title="slot.isDynamic ? 'Dynamic Alternate Effect (2 PP, share points concurrently)' : 'Standard Alternate Effect (1 PP, exclusive)'"
                         >
                           {{ slot.isDynamic ? 'Dyn' : 'Alt' }}
                         </button>
@@ -228,7 +222,6 @@
                         <button
                           type="button"
                           class="btn-rail-link-mini"
-                          title="Add Linked Effect to this Alternate Effect"
                           @click.stop="builderStore.selectSlotForEditing(false, sIdx); builderStore.addLinkedEffect(slot, 'Affliction')"
                         >
                           <i class="ri-links-line"></i>
@@ -237,7 +230,6 @@
                         <button
                           type="button"
                           class="btn-rail-remove"
-                          title="Remove this alternate effect"
                           @click.stop="builderStore.removeArraySlot(false, sIdx)"
                         >
                           <i class="ri-close-line"></i>
@@ -270,7 +262,6 @@
                           <button
                             type="button"
                             class="btn-rail-remove"
-                            title="Remove linked effect from alternate effect"
                             @click.stop="builderStore.removeLinkedEffect(slot, slIdx)"
                           >
                             <i class="ri-close-line"></i>
@@ -295,7 +286,6 @@
                 type="button"
                 class="btn-rail-add"
                 @click="builderStore.addCompoundEffect('New Effect', 'Damage')"
-                title="Add Sub-Effect to Compound Power"
               >
                 <i class="ri-add-line"></i>
                 <span>Add Effect</span>
@@ -332,7 +322,6 @@
                         <button
                           type="button"
                           class="btn-rail-link-mini"
-                          title="Add Linked Effect (Simultaneous Action)"
                           @click.stop="builderStore.addLinkedEffect(sub, 'Affliction')"
                         >
                           <i class="ri-links-line"></i>
@@ -340,7 +329,6 @@
                         <button
                           type="button"
                           class="btn-rail-stunt-mini"
-                          title="Add Alternate Effect to this sub-effect"
                           @click.stop="builderStore.addCompoundArraySlot(cIdx)"
                         >
                           <i class="ri-shuffle-line"></i>
@@ -351,7 +339,6 @@
                             class="btn-reorder-mini"
                             :disabled="cIdx === 0"
                             @click="builderStore.reorderCompoundEffects(cIdx, cIdx - 1)"
-                            title="Move up"
                           >
                             <i class="ri-arrow-up-s-line"></i>
                           </button>
@@ -360,7 +347,6 @@
                             class="btn-reorder-mini"
                             :disabled="cIdx >= (builderStore.power.compoundEffects?.length || 1) - 1"
                             @click="builderStore.reorderCompoundEffects(cIdx, cIdx + 1)"
-                            title="Move down"
                           >
                             <i class="ri-arrow-down-s-line"></i>
                           </button>
@@ -369,7 +355,6 @@
                           v-if="builderStore.power.compoundEffects?.length > 1"
                           type="button"
                           class="btn-rail-remove"
-                          title="Remove this sub-effect"
                           @click.stop="builderStore.removeCompoundEffect(cIdx)"
                         >
                           <i class="ri-close-line"></i>
@@ -402,7 +387,6 @@
                           <button
                             type="button"
                             class="btn-rail-remove"
-                            title="Remove linked effect"
                             @click.stop="builderStore.removeLinkedEffect(sub, clIdx)"
                           >
                             <i class="ri-close-line"></i>
@@ -441,14 +425,12 @@
                               class="btn-slot-dynamic-toggle"
                               :class="{ dynamic: cSlot.isDynamic }"
                               @click.stop="builderStore.toggleCompoundSlotDynamic(cIdx, csIdx)"
-                              :title="cSlot.isDynamic ? 'Dynamic Alternate Effect (2 PP)' : 'Alternate Effect (1 PP)'"
                             >
                               {{ cSlot.isDynamic ? 'Dyn' : 'Alt' }}
                             </button>
                             <button
                               type="button"
                               class="btn-rail-link-mini"
-                              title="Add Linked Effect to this Alternate Effect"
                               @click.stop="builderStore.activeCompoundIndex = cIdx; builderStore.selectSlotForEditing(false, csIdx, true); builderStore.addLinkedEffect(cSlot, 'Affliction')"
                             >
                               <i class="ri-links-line"></i>
@@ -456,7 +438,6 @@
                             <button
                               type="button"
                               class="btn-rail-remove"
-                              title="Remove alternate effect"
                               @click.stop="builderStore.removeCompoundArraySlot(cIdx, csIdx)"
                             >
                               <i class="ri-close-line"></i>
@@ -489,7 +470,6 @@
                               <button
                                 type="button"
                                 class="btn-rail-remove"
-                                title="Remove linked effect from alternate effect"
                                 @click.stop="builderStore.removeLinkedEffect(cSlot, cslIdx)"
                               >
                                 <i class="ri-close-line"></i>
@@ -516,7 +496,6 @@
                 type="button"
                 class="btn-rail-add"
                 @click="builderStore.addDeviceSubPower('New Power', 'Damage')"
-                title="Add Power to Device"
               >
                 <i class="ri-add-line"></i>
                 <span>Add Power</span>
@@ -549,7 +528,6 @@
                         <button
                           type="button"
                           class="btn-rail-link-mini"
-                          title="Add Linked Effect (Simultaneous Action)"
                           @click.stop="builderStore.addLinkedEffect(sub, 'Affliction')"
                         >
                           <i class="ri-links-line"></i>
@@ -557,7 +535,6 @@
                         <button
                           type="button"
                           class="btn-rail-stunt-mini"
-                          title="Add Alternate Effect to this Power"
                           @click.stop="builderStore.activeSubPowerIndex = dIdx; builderStore.addArraySlot(true)"
                         >
                           <i class="ri-shuffle-line"></i>
@@ -566,7 +543,6 @@
                           v-if="builderStore.power.devicePowers?.length > 1"
                           type="button"
                           class="btn-rail-remove"
-                          title="Remove this power"
                           @click.stop="builderStore.removeDeviceSubPower(dIdx)"
                         >
                           <i class="ri-close-line"></i>
@@ -599,7 +575,6 @@
                           <button
                             type="button"
                             class="btn-rail-remove"
-                            title="Remove linked effect"
                             @click.stop="builderStore.removeLinkedEffect(sub, dlIdx)"
                           >
                             <i class="ri-close-line"></i>
@@ -638,14 +613,12 @@
                               class="btn-slot-dynamic-toggle"
                               :class="{ dynamic: dSlot.isDynamic }"
                               @click.stop="builderStore.toggleSlotDynamic(true, dsIdx)"
-                              :title="dSlot.isDynamic ? 'Dynamic Alternate Effect (2 PP)' : 'Alternate Effect (1 PP)'"
                             >
                               {{ dSlot.isDynamic ? 'Dyn' : 'Alt' }}
                             </button>
                             <button
                               type="button"
                               class="btn-rail-link-mini"
-                              title="Add Linked Effect to this Alternate Effect"
                               @click.stop="builderStore.activeSubPowerIndex = dIdx; builderStore.selectSlotForEditing(true, dsIdx); builderStore.addLinkedEffect(dSlot, 'Affliction')"
                             >
                               <i class="ri-links-line"></i>
@@ -653,7 +626,6 @@
                             <button
                               type="button"
                               class="btn-rail-remove"
-                              title="Remove alternate effect"
                               @click.stop="builderStore.removeArraySlot(true, dsIdx)"
                             >
                               <i class="ri-close-line"></i>
@@ -686,7 +658,6 @@
                               <button
                                 type="button"
                                 class="btn-rail-remove"
-                                title="Remove linked effect from alternate effect"
                                 @click.stop="builderStore.removeLinkedEffect(dSlot, dslIdx)"
                               >
                                 <i class="ri-close-line"></i>
@@ -709,7 +680,6 @@
         <EffectEditorCanvas
           :key="canvasKey"
           :effect="builderStore.currentEditingEffect"
-          :title="canvasTitle"
         />
       </section>
 

@@ -98,10 +98,10 @@
                     {{ adv.category || 'General' }}
                   </span>
                   <div class="adv-header-badges">
-                    <span v-if="adv.requiresSpecification" class="badge-spec" title="Requires specific choice">
+                    <span v-if="adv.requiresSpecification" class="badge-spec">
                       Specifiable
                     </span>
-                    <span v-if="adv.ranked" class="badge-ranked" title="Can be taken for multiple ranks">
+                    <span v-if="adv.ranked" class="badge-ranked">
                       Ranked
                     </span>
                   </div>
@@ -122,7 +122,7 @@
                     >
                       <div class="inst-info">
                         <i class="ri-checkbox-circle-fill inst-icon"></i>
-                        <span class="inst-text" :title="inst.specification || 'Default'">
+                        <span class="inst-text">
                           {{ inst.specification || 'Default' }}
                         </span>
                       </div>
@@ -132,7 +132,6 @@
                           class="step-btn-xs"
                           :disabled="Number(inst.ranks || 1) <= 1"
                           @click="stepInstance(inst.id, -1)"
-                          title="Decrease rank"
                         >-</button>
                         <span class="step-val-xs">{{ inst.ranks || 1 }}</span>
                         <button
@@ -140,13 +139,11 @@
                           class="step-btn-xs"
                           :disabled="adv.maxRanks && Number(inst.ranks || 1) >= adv.maxRanks"
                           @click="stepInstance(inst.id, 1)"
-                          title="Increase rank"
                         >+</button>
                         <button
                           type="button"
                           class="del-btn-tiny"
                           @click="deleteInstance(inst.id)"
-                          title="Remove this choice"
                         >
                           <i class="ri-close-line"></i>
                         </button>
@@ -178,7 +175,6 @@
                         class="step-btn-xs"
                         :disabled="getAdvantageRanks(adv.name) <= 1"
                         @click="stepAdvantage(adv.name, -1)"
-                        title="Decrease Rank"
                       >-</button>
                       <span class="step-val-xs">{{ getAdvantageRanks(adv.name) }}</span>
                       <button
@@ -186,13 +182,11 @@
                         class="step-btn-xs"
                         :disabled="adv.maxRanks && getAdvantageRanks(adv.name) >= adv.maxRanks"
                         @click="stepAdvantage(adv.name, 1)"
-                        title="Increase Rank"
                       >+</button>
                       <button
                         type="button"
                         class="del-btn-tiny"
                         @click="deleteAdvantage(adv.name)"
-                        title="Remove from Sheet"
                       >
                         <i class="ri-close-line"></i>
                       </button>

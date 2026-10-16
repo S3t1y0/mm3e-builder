@@ -154,7 +154,6 @@
           <button
             type="button"
             class="btn-del-slot"
-            title="Delete Alternate Effect"
             @click.stop="builderStore.removeArraySlot(true, idx)"
           >
             <i class="ri-delete-bin-line"></i>

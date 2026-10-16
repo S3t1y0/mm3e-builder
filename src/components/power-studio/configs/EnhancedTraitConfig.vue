@@ -13,7 +13,6 @@
             class="trait-active-pill"
             :disabled="selectedTraitsList.length <= 1"
             @click="toggleTrait(trait)"
-            :title="selectedTraitsList.length <= 1 ? 'At least one target is required' : 'Click to remove'"
           >
             <i class="ri-check-line"></i>
             <span class="pill-name">{{ trait }}</span>
@@ -115,10 +114,10 @@
               <span>{{ trait }}</span>
               <span v-if="isCustomTrait(trait)" class="custom-badge-pill-micro">CUSTOM</span>
               <div v-if="isCustomTrait(trait)" class="custom-chip-actions" @click.stop>
-                <button type="button" class="btn-micro-action edit" title="Edit" @click="editCustomTrait(trait)">
+                <button type="button" class="btn-micro-action edit" @click="editCustomTrait(trait)">
                   <i class="ri-edit-line"></i>
                 </button>
-                <button type="button" class="btn-micro-action delete" title="Delete" @click="deleteCustomTrait(trait)">
+                <button type="button" class="btn-micro-action delete" @click="deleteCustomTrait(trait)">
                   <i class="ri-close-line"></i>
                 </button>
               </div>

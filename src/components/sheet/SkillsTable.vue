@@ -11,11 +11,10 @@
           v-if="heroStore.circumstancePenalty !== 0"
           class="skills-cond-debuff-badge"
           :class="heroStore.conditionModifiers.isDisabled ? 'danger' : 'warn'"
-          :title="heroStore.conditionModifiers.isDisabled ? 'Disabled: -5 circumstance penalty on all skill checks' : 'Impaired: -2 circumstance penalty on all skill checks'"
         >
           {{ heroStore.conditionModifiers.isDisabled ? 'Disabled (-5)' : 'Impaired (-2)' }}
         </span>
-        <div class="skills-budget-pill" :title="`Total points invested in skills: ${heroStore.totalSkillPP} PP (${totalRanksBought} Ranks at 2 Ranks per 1 PP)`">
+        <div class="skills-budget-pill">
           <span class="budget-item ranks">
             <strong class="budget-num">{{ totalRanksBought }}</strong>
             <span class="budget-lbl">Rks</span>
@@ -30,9 +29,18 @@
           type="button" 
           class="btn-spec-add" 
           @click="openAddSpecializationModal()"
-          title="Add Specialization (Close Combat, Ranged Combat, Expertise)"
         >
           <i class="ri-add-line"></i> Spec
+        </button>
+        <button
+          type="button"
+          class="btn-trained-bypass"
+          :class="{ 'is-active': uiStore.bypassTrainedOnly }"
+          :title="uiStore.bypassTrainedOnly ? 'Untrained Bypass Active (Click to re-enable Trained Only restrictions)' : 'Bypass Trained Only skill locks'"
+          @click="uiStore.toggleBypassTrainedOnly()"
+        >
+          <i :class="uiStore.bypassTrainedOnly ? 'ri-lock-unlock-line' : 'ri-lock-line'"></i>
+          <span class="bypass-text">{{ uiStore.bypassTrainedOnly ? 'Bypass' : 'Bypass' }}</span>
         </button>
       </div>
     </div>
@@ -105,7 +113,6 @@
                   class="rank-step-btn" 
                   :disabled="(Number(initialRankInput) || 0) <= 0"
                   @click="initialRankInput = Math.max(0, (Number(initialRankInput) || 0) - 1)"
-                  title="Decrease Rank"
                 >
                   <i class="ri-subtract-line"></i>
                 </button>
@@ -122,7 +129,6 @@
                   type="button" 
                   class="rank-step-btn"
                   @click="initialRankInput = (Number(initialRankInput) || 0) + 1"
-                  title="Increase Rank"
                 >
                   <i class="ri-add-line"></i>
                 </button>
@@ -169,7 +175,6 @@
           type="button" 
           class="clear-search-btn" 
           @click="searchQuery = ''"
-          title="Clear search"
         >
           <i class="ri-close-circle-line"></i>
         </button>
@@ -202,19 +207,17 @@
               v-if="getSubtypeInstances(ruleSkill.name).length === 0"
               class="sheet-skill-row spec-unspecialized-row"
               :class="{ 'is-absent-row': heroStore.isAbilityAbsent(ruleSkill.ability) }"
-              :title="ruleSkill.desc"
             >
               <span 
                 class="sheet-skill-ab-tag"
                 :class="`ab-${ruleSkill.ability.toLowerCase()}`"
-                :title="`Governed by ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0})`"
               >
                 {{ ruleSkill.ability }}
               </span>
 
-              <div class="sheet-skill-info">
+              <div class="sheet-skill-info" @click="openSkillInspector(ruleSkill)">
                 <div class="sheet-skill-title-row">
-                  <span class="sheet-skill-name">{{ ruleSkill.name }}</span>
+                  <span class="sheet-skill-name is-clickable">{{ ruleSkill.name }}</span>
                 </div>
               </div>
 
@@ -224,7 +227,6 @@
                   class="btn-spec-inline-add"
                   :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
                   @click="openInlineSpecModal(ruleSkill.name)"
-                  :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot specialize` : `Add new ${ruleSkill.name} specialization`"
                 >
                   <i class="ri-add-line"></i> Spec
                 </button>
@@ -242,31 +244,34 @@
                   'is-signature': !heroStore.isAbilityAbsent(ruleSkill.ability) && isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks),
                   'is-absent-row': heroStore.isAbilityAbsent(ruleSkill.ability)
                 }"
-                :title="ruleSkill.desc"
               >
                 <!-- Ability tag -->
                 <span 
                   class="sheet-skill-ab-tag"
                   :class="`ab-${ruleSkill.ability.toLowerCase()}`"
-                  :title="`Governed by ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0})`"
                 >
                   {{ ruleSkill.ability }}
                 </span>
 
                 <!-- Name with full category prefix and hover delete button -->
-                <div class="sheet-skill-info">
+                <div class="sheet-skill-info" @click="openSkillInspector(ruleSkill, inst)">
                   <div class="sheet-skill-title-row">
                     <span 
-                      class="sheet-skill-name" 
-                      :title="`${ruleSkill.name} (${inst.subtype || 'General'}): Base ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0}) + ${inst.ranks || 0} Rk${getEnhancedRanks(ruleSkill.name, inst.subtype) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name, inst.subtype) + 'p' : ''}${getAdvantageBonusForSkill(ruleSkill.name) > 0 ? ' +' + getAdvantageBonusForSkill(ruleSkill.name) + ' Adv' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name))}`"
+                      class="sheet-skill-name is-clickable"
                     >
                       {{ inst.subtype || ruleSkill.name }}
+                    </span>
+                    <span
+                      v-if="isUntrainedLocked(ruleSkill.name, (inst.ranks || 0))"
+                      class="sheet-skill-locked-tag"
+                      title="Trained Only (Requires Ranks or Jack-of-all-Trades)"
+                    >
+                      <i class="ri-lock-line"></i>
                     </span>
                     <button
                       type="button"
                       class="btn-delete-spec-hover"
-                      @click="deleteSpecialization(inst)"
-                      title="Remove Specialization"
+                      @click.stop="deleteSpecialization(inst)"
                     >
                       <i class="ri-close-line"></i>
                     </button>
@@ -281,21 +286,18 @@
                       class="step-btn-xs"
                       :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || (inst.ranks || 0) <= 0"
                       @click="stepSpecialization(inst, -1)"
-                      title="Decrease Rank"
                     >-</button>
                     <span class="step-val-xs">
                       {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : (inst.ranks || 0) }}
                       <span
                         v-if="!heroStore.isAbilityAbsent(ruleSkill.ability) && getEnhancedRanks(ruleSkill.name, inst.subtype) > 0"
                         class="enh-pip-tag"
-                        :title="`+${getEnhancedRanks(ruleSkill.name, inst.subtype)} from Power`"
                       >+{{ getEnhancedRanks(ruleSkill.name, inst.subtype) }}p</span>
                     </span>
                     <button
                       type="button"
                       class="step-btn-xs"
                       :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                      :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
                       @click="stepSpecialization(inst, 1)"
                     >+</button>
                   </div>
@@ -307,14 +309,14 @@
                   class="sheet-skill-roll-btn"
                   :class="{ 
                     'is-absent-btn': heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack),
+                    'is-locked-btn': isUntrainedLocked(ruleSkill.name, (inst.ranks || 0)),
                     'btn-trained': !heroStore.isAbilityAbsent(ruleSkill.ability) && (Number(inst.ranks ?? inst.rank) || 0) + getEnhancedRanks(ruleSkill.name, inst.subtype) > 0,
                     'btn-signature': !heroStore.isAbilityAbsent(ruleSkill.ability) && isSignatureSkill(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), inst.ranks)
                   }"
                   :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)"
-                  @click="!(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) && rollSkill(inst.subtype || ruleSkill.name, calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), ruleSkill.name)"
-                  :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Automatic failure. Checks cannot be rolled.` : ((ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack) ? 'Cannot make close attacks while Fighting is Debilitated' : `Roll ${inst.subtype || ruleSkill.name} (${ruleSkill.name}) check`)"
+                  @click="handleSkillRoll(inst.subtype || ruleSkill.name, calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name), (inst.ranks || 0), ruleSkill.name)"
                 >
-                  <i :class="(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) ? 'ri-close-line' : 'ri-dice-line'"></i>
+                  <i :class="(heroStore.isAbilityAbsent(ruleSkill.ability) || (ruleSkill.name === 'Close Combat' && heroStore.conditionModifiers.cannotCloseAttack)) ? 'ri-close-line' : (isUntrainedLocked(ruleSkill.name, (inst.ranks || 0)) ? 'ri-lock-line' : 'ri-dice-line')"></i>
                   <span class="skill-roll-val">
                     {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : formatMod(calculateTotalBonus(ruleSkill.ability, inst.ranks, getEnhancedRanks(ruleSkill.name, inst.subtype), ruleSkill.name)) }}
                   </span>
@@ -332,24 +334,28 @@
                 'is-signature': !heroStore.isAbilityAbsent(ruleSkill.ability) && isSignatureSkill(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)), getStandardRanks(ruleSkill.name)) && isStandardTrained(ruleSkill.name),
                 'is-absent-row': heroStore.isAbilityAbsent(ruleSkill.ability)
               }"
-              :title="ruleSkill.desc"
             >
               <!-- Ability Tag -->
               <span 
                 class="sheet-skill-ab-tag"
                 :class="`ab-${ruleSkill.ability.toLowerCase()}`"
-                :title="`Governed by ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0})`"
               >
                 {{ ruleSkill.ability }}
               </span>
 
               <!-- Name -->
-              <div class="sheet-skill-info">
+              <div class="sheet-skill-info" @click="openSkillInspector(ruleSkill)">
                 <div class="sheet-skill-title-row">
                   <span 
-                    class="sheet-skill-name"
-                    :title="`${ruleSkill.name}: Base ${ruleSkill.ability} (${heroStore.effectiveAbilities?.[ruleSkill.ability] || 0}) + ${getStandardRanks(ruleSkill.name)} Rk${getEnhancedRanks(ruleSkill.name) > 0 ? ' +' + getEnhancedRanks(ruleSkill.name) + 'p' : ''} = Total ${formatMod(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)))}`"
+                    class="sheet-skill-name is-clickable"
                   >{{ ruleSkill.name }}</span>
+                  <span
+                    v-if="isUntrainedLocked(ruleSkill.name, getStandardRanks(ruleSkill.name))"
+                    class="sheet-skill-locked-tag"
+                    title="Trained Only (Requires Ranks or Jack-of-all-Trades)"
+                  >
+                    <i class="ri-lock-line"></i>
+                  </span>
                 </div>
               </div>
 
@@ -361,21 +367,18 @@
                     class="step-btn-xs"
                     :disabled="heroStore.isAbilityAbsent(ruleSkill.ability) || getStandardRanks(ruleSkill.name) <= 0"
                     @click="stepStandardSkill(ruleSkill.name, -1)"
-                    title="Decrease Rank"
                   >-</button>
                   <span class="step-val-xs">
                     {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : getStandardRanks(ruleSkill.name) }}
                     <span
                       v-if="!heroStore.isAbilityAbsent(ruleSkill.ability) && getEnhancedRanks(ruleSkill.name) > 0"
                       class="enh-pip-tag"
-                      :title="`+${getEnhancedRanks(ruleSkill.name)} from Power`"
                     >+{{ getEnhancedRanks(ruleSkill.name) }}p</span>
                   </span>
                   <button
                     type="button"
                     class="step-btn-xs"
                     :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                    :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Cannot purchase ranks` : 'Increase Rank'"
                     @click="stepStandardSkill(ruleSkill.name, 1)"
                   >+</button>
                 </div>
@@ -387,14 +390,14 @@
                 class="sheet-skill-roll-btn"
                 :class="{ 
                   'is-absent-btn': heroStore.isAbilityAbsent(ruleSkill.ability),
+                  'is-locked-btn': isUntrainedLocked(ruleSkill.name, getStandardRanks(ruleSkill.name)),
                   'btn-trained': !heroStore.isAbilityAbsent(ruleSkill.ability) && isStandardTrained(ruleSkill.name),
                   'btn-signature': !heroStore.isAbilityAbsent(ruleSkill.ability) && isSignatureSkill(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)), getStandardRanks(ruleSkill.name)) && isStandardTrained(ruleSkill.name)
                 }"
                 :disabled="heroStore.isAbilityAbsent(ruleSkill.ability)"
-                @click="!heroStore.isAbilityAbsent(ruleSkill.ability) && rollSkill(ruleSkill.name, calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)))"
-                :title="heroStore.isAbilityAbsent(ruleSkill.ability) ? `Absent ${ruleSkill.ability}: Automatic failure. Checks cannot be rolled.` : `Roll ${ruleSkill.name} check (d20 + ${calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name))})`"
+                @click="handleSkillRoll(ruleSkill.name, calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name)), getStandardRanks(ruleSkill.name))"
               >
-                <i :class="heroStore.isAbilityAbsent(ruleSkill.ability) ? 'ri-close-line' : 'ri-dice-line'"></i>
+                <i :class="heroStore.isAbilityAbsent(ruleSkill.ability) ? 'ri-close-line' : (isUntrainedLocked(ruleSkill.name, getStandardRanks(ruleSkill.name)) ? 'ri-lock-line' : 'ri-dice-line')"></i>
                 <span class="skill-roll-val">
                   {{ heroStore.isAbilityAbsent(ruleSkill.ability) ? '-' : formatMod(calculateTotalBonus(ruleSkill.ability, getStandardRanks(ruleSkill.name), getEnhancedRanks(ruleSkill.name))) }}
                 </span>
@@ -414,6 +417,8 @@ import { useSkillsWorkflow } from '../../rules/useSkillsWorkflow.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
+
+import { isSkillUntrainedLocked } from '../../rules/skills.js';
 
 const {
   categories,
@@ -449,6 +454,39 @@ const {
   isSignatureSkill,
   rollSkill
 } = useSkillsWorkflow(heroStore, uiStore, { includeCircumstance: true });
+
+function isUntrainedLocked(skillName, ranks) {
+  return isSkillUntrainedLocked(skillName, ranks, heroStore, uiStore.bypassTrainedOnly);
+}
+
+function handleSkillRoll(skillTitle, bonus, ranks, baseSkill = null) {
+  if (isUntrainedLocked(baseSkill || skillTitle, ranks)) {
+    uiStore.showToast(`Trained Only: ${skillTitle} cannot be rolled untrained without ranks or Jack-of-all-Trades.`, 'warn', 3500);
+    return;
+  }
+  rollSkill(skillTitle, bonus, baseSkill);
+}
+
+function openSkillInspector(ruleSkill, inst = null) {
+  const isSubtype = !!ruleSkill.requiresSubtype;
+  const skillName = ruleSkill.name;
+  const subtype = inst?.subtype || '';
+  const displayName = subtype ? `${skillName}: ${subtype}` : skillName;
+  
+  uiStore.openInspector(
+    'skill',
+    {
+      name: skillName,
+      subtype: subtype,
+      ability: ruleSkill.ability,
+      category: ruleSkill.category,
+      requiresSubtype: isSubtype,
+      instId: inst?.id || null
+    },
+    displayName,
+    `${ruleSkill.ability} | ${ruleSkill.category} Skill`
+  );
+}
 </script>
 
 <style scoped>
@@ -555,6 +593,42 @@ const {
 
 .btn-spec-add:active {
   transform: scale(0.96);
+}
+
+.btn-trained-bypass {
+  height: 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 0 0.5rem;
+  border-radius: var(--radius-xs, 4px);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: all var(--trans-fast);
+}
+
+.btn-trained-bypass:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-trained-bypass.is-active {
+  background: rgba(245, 158, 11, 0.18);
+  border-color: rgba(245, 158, 11, 0.5);
+  color: #fbbf24;
+  box-shadow: 0 0 8px rgba(245, 158, 11, 0.2);
+}
+
+.btn-trained-bypass.is-active:hover {
+  background: rgba(245, 158, 11, 0.28);
+  border-color: #f59e0b;
+  color: #fef3c7;
 }
 
 /* Toolbar & Filter Pills */
@@ -810,6 +884,17 @@ const {
   min-width: 0;
 }
 
+.sheet-skill-name.is-clickable {
+  cursor: pointer;
+  transition: color var(--trans-fast);
+}
+
+.sheet-skill-name.is-clickable:hover {
+  color: #38bdf8;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .sheet-skill-row.is-trained .sheet-skill-name {
   color: #fff;
   font-weight: 800;
@@ -1019,6 +1104,28 @@ const {
   border-color: var(--accent-secondary);
   color: #fff;
   box-shadow: var(--shadow-sm);
+}
+
+/* Trained Only Lock Visuals */
+.sheet-skill-locked-tag {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.68rem;
+  color: #fca5a5;
+  margin-left: 0.35rem;
+  opacity: 0.85;
+}
+
+.sheet-skill-roll-btn.is-locked-btn {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.28);
+  color: #fca5a5;
+}
+
+.sheet-skill-roll-btn.is-locked-btn:hover {
+  background: rgba(239, 68, 68, 0.18);
+  border-color: rgba(239, 68, 68, 0.5);
+  color: #fff;
 }
 
 .spec-unspecialized-row {

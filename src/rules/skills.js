@@ -4,12 +4,18 @@ export const SKILLS = [
     name: 'Acrobatics',
     ability: 'AGL',
     category: 'Physical',
+    trainedOnly: true,
+    actionType: 'Move / Free',
+    traits: ['Trained Only'],
     desc: 'Flips, balancing, contortion, and maneuvering.'
   },
   {
     name: 'Athletics',
     ability: 'STR',
     category: 'Physical',
+    trainedOnly: false,
+    actionType: 'Move',
+    traits: [],
     desc: 'Running, jumping, swimming, and climbing.'
   },
   {
@@ -17,6 +23,9 @@ export const SKILLS = [
     ability: 'FGT',
     category: 'Combat',
     requiresSubtype: true,
+    trainedOnly: false,
+    actionType: 'Standard',
+    traits: [],
     desc: 'Specialized accuracy with specific close attack (e.g., Unarmed, Swords).',
     commonSubtypes: ['Unarmed', 'Swords', 'Knives', 'Claws', 'Bludgeoning', 'Martial Arts']
   },
@@ -24,6 +33,9 @@ export const SKILLS = [
     name: 'Deception',
     ability: 'PRE',
     category: 'Interaction',
+    trainedOnly: false,
+    actionType: 'Standard',
+    traits: ['Interaction'],
     desc: 'Lying, bluffing, disguise, and feinting.'
   },
   {
@@ -31,6 +43,9 @@ export const SKILLS = [
     ability: 'INT',
     category: 'Mental',
     requiresSubtype: true,
+    trainedOnly: true,
+    actionType: 'Varies',
+    traits: ['Trained Only'],
     desc: 'Specific field of knowledge, profession, or craft.',
     commonSubtypes: ['Science', 'Technology', 'Criminology', 'Law', 'Magic', 'History', 'Medicine', 'Streetwise', 'Pop Culture']
   },
@@ -38,30 +53,45 @@ export const SKILLS = [
     name: 'Insight',
     ability: 'AWE',
     category: 'Mental',
+    trainedOnly: false,
+    actionType: 'Free',
+    traits: [],
     desc: 'Detecting falsehoods, sensing motives, and gut feelings.'
   },
   {
     name: 'Intimidation',
     ability: 'PRE',
     category: 'Interaction',
-    desc: 'Coercion, demoralizing opponents, and projecting menace.'
+    trainedOnly: false,
+    actionType: 'Standard',
+    traits: ['Interaction'],
+    desc: 'Coercion, demoralizing opponents, and threats.'
   },
   {
     name: 'Investigation',
     ability: 'INT',
     category: 'Mental',
+    trainedOnly: true,
+    actionType: 'Extended (Area)',
+    traits: ['Trained Only', 'Requires Tools'],
     desc: 'Gathering clues, research, and deductive reasoning.'
   },
   {
     name: 'Perception',
     ability: 'AWE',
     category: 'Mental',
+    trainedOnly: false,
+    actionType: 'Free',
+    traits: [],
     desc: 'Spotting, listening, smelling, and awareness of surroundings.'
   },
   {
     name: 'Persuasion',
     ability: 'PRE',
     category: 'Interaction',
+    trainedOnly: false,
+    actionType: '1 Minute+',
+    traits: ['Interaction'],
     desc: 'Diplomacy, negotiation, and inspiring trust.'
   },
   {
@@ -69,6 +99,9 @@ export const SKILLS = [
     ability: 'DEX',
     category: 'Combat',
     requiresSubtype: true,
+    trainedOnly: false,
+    actionType: 'Standard',
+    traits: [],
     desc: 'Specialized accuracy with specific ranged attack (e.g., Guns, Blasts, Bows).',
     commonSubtypes: ['Firearms / Guns', 'Bows', 'Energy Blast', 'Thrown Weapons', 'Heavy Weapons']
   },
@@ -76,36 +109,66 @@ export const SKILLS = [
     name: 'Sleight of Hand',
     ability: 'DEX',
     category: 'Physical',
+    trainedOnly: true,
+    actionType: 'Standard',
+    traits: ['Trained Only', 'Manipulation', 'Requires Tools'],
     desc: 'Pickpocketing, card tricks, and concealing objects.'
   },
   {
     name: 'Stealth',
     ability: 'AGL',
     category: 'Physical',
+    trainedOnly: false,
+    actionType: 'Move',
+    traits: [],
     desc: 'Moving quietly, hiding, and avoiding detection.'
   },
   {
     name: 'Technology',
     ability: 'INT',
     category: 'Mental',
+    trainedOnly: true,
+    actionType: 'Standard / Extended',
+    traits: ['Trained Only', 'Manipulation', 'Requires Tools'],
     desc: 'Hacking, engineering, electronic security, and invention.'
   },
   {
     name: 'Treatment',
     ability: 'INT',
     category: 'Mental',
+    trainedOnly: true,
+    actionType: 'Standard / 1 Min',
+    traits: ['Trained Only', 'Manipulation', 'Requires Tools'],
     desc: 'First aid, medical diagnosis, surgery, and medicine.'
   },
   {
     name: 'Vehicles',
     ability: 'DEX',
     category: 'Physical',
+    trainedOnly: true,
+    actionType: 'Move',
+    traits: ['Trained Only', 'Manipulation'],
     desc: 'Piloting cars, aircraft, boats, and spaceships.'
   }
 ];
 
 export const SKILL_RANKS_PER_PP = 2; // 1 PP per 2 ranks
 export const SKILLS_CATALOG = SKILLS;
+
+export function isSkillTrainedOnly(skillName) {
+  const sk = SKILLS.find(s => s.name.toLowerCase() === (skillName || '').toLowerCase());
+  return !!sk?.trainedOnly;
+}
+
+export function isSkillUntrainedLocked(skillName, ranks, heroStore, bypassOverride = false) {
+  if (bypassOverride) return false;
+  if (!isSkillTrainedOnly(skillName)) return false;
+  const totalRanks = Number(ranks) || 0;
+  if (totalRanks > 0) return false;
+  const hasJack = (heroStore?.getAdvantageRanks?.('Jack-of-all-trades') || 0) > 0 ||
+                  (heroStore?.getAdvantageRanks?.('Jack-of-All-Trades') || 0) > 0;
+  return !hasJack;
+}
 
 /**
  * Normalizes text for skill matching: lowercases, trims, strips punctuation and prefixes.

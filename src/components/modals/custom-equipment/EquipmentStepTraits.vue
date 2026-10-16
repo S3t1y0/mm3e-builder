@@ -415,7 +415,6 @@
           type="button"
           class="feature-toggle-pill"
           :class="{ active: hqConfig.features.includes(feat.name) }"
-          :title="feat.desc"
           @click="toggleHQFeature(feat.name)"
         >
           <i :class="hqConfig.features.includes(feat.name) ? 'ri-checkbox-circle-fill' : 'ri-add-line'"></i>

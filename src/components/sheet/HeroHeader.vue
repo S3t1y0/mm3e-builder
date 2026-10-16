@@ -4,7 +4,7 @@
     <section class="dndb-hero-banner" :class="{ 'drawer-expanded': showBioDrawer }">
       <div class="dndb-hero-identity">
         <!-- Dynamic Hero Crest / Initials Emblem (F-12) -->
-        <div class="dndb-avatar-crest" :title="heroStore.character.name ? `Hero Crest: ${heroStore.character.name}` : 'Hero Crest'">
+        <div class="dndb-avatar-crest">
           <span v-if="heroInitials" class="avatar-initials">{{ heroInitials }}</span>
           <i v-else class="ri-shield-star-line"></i>
         </div>
@@ -19,20 +19,20 @@
               placeholder="Hero Name / Codename"
               @change="heroStore.pushHistory()"
             />
-            <span v-if="heroStore.isDead" class="hero-status-pill deceased" title="Hero has suffered 3 degrees of failure and is deceased">
+            <span v-if="heroStore.isDead" class="hero-status-pill deceased">
               <i class="ri-skull-line"></i> DECEASED
             </span>
-            <span v-else-if="heroStore.isDying" class="hero-status-pill dying" title="Hero is near death. Fortitude DC 15 required each round">
+            <span v-else-if="heroStore.isDying" class="hero-status-pill dying">
               <i class="ri-heart-pulse-fill"></i> DYING ({{ heroStore.character.dyingFailures || 0 }}/3)
             </span>
-            <span v-else-if="heroStore.character.isDyingStable && !heroStore.isDying" class="hero-status-pill stable" title="Hero has been stabilized and remains incapacitated">
+            <span v-else-if="heroStore.character.isDyingStable && !heroStore.isDying" class="hero-status-pill stable">
               <i class="ri-heart-add-line"></i> STABILIZED
             </span>
           </div>
 
           <!-- Row 2: Sub-Identity Metadata Badges / Fields -->
           <div class="dndb-sub-identity-row">
-            <div class="sub-meta-pill" title="Real Identity">
+            <div class="sub-meta-pill">
               <i :class="heroStore.character.isSecretIdentity ? 'ri-shield-keyhole-line' : 'ri-user-line'" class="sub-meta-icon"></i>
               <input
                 v-model="heroStore.character.identity"
@@ -43,7 +43,7 @@
               />
             </div>
 
-            <div class="sub-meta-pill" title="Player Name">
+            <div class="sub-meta-pill">
               <i class="ri-user-smile-line sub-meta-icon"></i>
               <input
                 v-model="heroStore.character.player"
@@ -54,7 +54,7 @@
               />
             </div>
 
-            <div class="sub-meta-pill" title="Base of Operations">
+            <div class="sub-meta-pill">
               <i class="ri-building-line sub-meta-icon"></i>
               <input
                 v-model="heroStore.character.baseOfOperations"
@@ -70,7 +70,6 @@
               class="btn-bio-drawer-toggle"
               :class="{ active: showBioDrawer }"
               @click="showBioDrawer = !showBioDrawer"
-              title="Edit Physical Demographics, Affiliation & Cover Dossier"
             >
               <i class="ri-fingerprint-line"></i>
               <span>Bio & Traits</span>
@@ -82,7 +81,7 @@
           <div class="dndb-conditions-row" role="region" aria-label="Combat Conditions">
             <!-- When healthy / no conditions active -->
             <div v-if="activeConditionItems.length === 0" class="cond-healthy-wrap">
-              <span class="cond-healthy-pill" title="Hero is unhindered with no debilitating combat conditions">
+              <span class="cond-healthy-pill">
                 <i class="ri-shield-check-fill"></i>
                 <span>Unhindered</span>
               </span>
@@ -90,7 +89,6 @@
                 type="button"
                 class="btn-cond-quick-add"
                 @click="uiStore.openModal('conditions')"
-                title="Apply a combat condition (Dazed, Vulnerable, Stunned, etc.)"
               >
                 <i class="ri-add-line"></i>
                 <span>Condition</span>
@@ -99,7 +97,7 @@
 
             <!-- When active conditions exist -->
             <div v-else class="cond-active-chips-wrap">
-              <span class="cond-strip-label" title="Active combat conditions affecting this character">
+              <span class="cond-strip-label">
                 <i class="ri-heart-pulse-fill"></i>
                 <span>CONDITIONS ({{ activeConditionItems.length }}):</span>
               </span>
@@ -109,7 +107,6 @@
                 :key="item.name"
                 class="dndb-cond-chip"
                 :class="{ 'is-severe': item.isSevere }"
-                :title="item.desc ? `${item.name}: ${item.desc}` : item.name"
               >
                 <span class="cond-chip-name">{{ item.displayName || item.name }}</span>
                 <span v-if="item.briefEffect" class="cond-chip-effect">{{ item.briefEffect }}</span>
@@ -117,7 +114,6 @@
                   type="button"
                   class="btn-cond-dismiss"
                   @click.stop="heroStore.toggleCondition(item.name)"
-                  :title="`Remove ${item.name} condition`"
                   :aria-label="`Remove ${item.name}`"
                 >
                   <i class="ri-close-line"></i>
@@ -128,7 +124,6 @@
                 type="button"
                 class="btn-cond-quick-add"
                 @click="uiStore.openModal('conditions')"
-                title="Add another combat condition"
               >
                 <i class="ri-add-line"></i>
                 <span>Add</span>
@@ -139,7 +134,6 @@
                 type="button"
                 class="btn-cond-clear-all"
                 @click="heroStore.clearConditions()"
-                title="Clear all active combat conditions"
               >
                 <i class="ri-restart-line"></i>
                 <span>Clear All</span>
@@ -149,7 +143,6 @@
                 type="button"
                 class="btn-cond-view-tracker"
                 @click="openTrackerTab"
-                title="Open full Conditions &amp; Injuries Tracker in Action Hub"
               >
                 <i class="ri-external-link-line"></i>
                 <span>Tracker</span>
@@ -169,7 +162,6 @@
               type="button"
               class="step-btn-xs"
               :disabled="heroStore.character.powerLevel <= 1"
-              title="Decrease PL"
               @click="setPL(heroStore.character.powerLevel - 1)"
             >-</button>
             <strong class="dndb-vital-val font-mono">{{ heroStore.character.powerLevel }}</strong>
@@ -177,7 +169,6 @@
               type="button"
               class="step-btn-xs"
               :disabled="heroStore.character.powerLevel >= 20"
-              title="Increase PL"
               @click="setPL(heroStore.character.powerLevel + 1)"
             >+</button>
           </div>
@@ -191,14 +182,12 @@
               type="button"
               class="step-btn-xs"
               :disabled="(heroStore.character.heroPoints || 0) <= 0"
-              title="Spend Hero Point"
               @click="adjustHeroPoints(-1)"
             >-</button>
             <strong class="dndb-vital-val font-mono">{{ heroStore.character.heroPoints ?? 1 }}</strong>
             <button
               type="button"
               class="step-btn-xs"
-              title="Gain Hero Point"
               @click="adjustHeroPoints(1)"
             >+</button>
           </div>
@@ -208,7 +197,6 @@
         <div
           class="dndb-vital-box damage-box"
           :class="{ 'has-injuries': heroStore.character.injuries > 0 }"
-          title="Tracks cumulative bruised penalties from failed Toughness checks"
         >
           <span class="dndb-vital-label"><i class="ri-shield-cross-line"></i> BRUISES & INJURIES</span>
           <div class="dndb-vital-stepper">
@@ -216,7 +204,6 @@
               type="button"
               class="step-btn-xs"
               :disabled="heroStore.character.injuries <= 0"
-              title="Recover 1 bruise (1 minute rest)"
               @click="heroStore.adjustInjuries(-1)"
             >-</button>
             <strong class="dndb-vital-val font-mono" :class="{ wounded: heroStore.character.injuries > 0 }">
@@ -225,7 +212,6 @@
             <button
               type="button"
               class="step-btn-xs"
-              title="Add 1 bruise (+1 injury penalty)"
               @click="heroStore.adjustInjuries(1)"
             >+</button>
           </div>
@@ -236,7 +222,6 @@
             <button
               type="button"
               class="btn-injury-quick-heal"
-              title="Heal all injuries (Reset to 0)"
               @click="heroStore.clearInjuries()"
             >
               <i class="ri-first-aid-kit-line"></i>
@@ -251,7 +236,6 @@
             'is-immobile': heroStore.speedTotal.isImmobile,
             'is-hindered': heroStore.speedTotal.isHindered
           }"
-          :title="heroStore.speedTotal.isImmobile ? 'Immobile: Speed 0 (cannot move)' : (heroStore.speedTotal.isHindered ? 'Hindered: Moves at half speed' : 'Normal movement speed')"
         >
           <span class="dndb-vital-label">SPEED</span>
           <strong class="dndb-vital-val font-mono">{{ heroStore.speedTotal.val }}</strong>
@@ -259,7 +243,7 @@
         </div>
 
         <!-- Initiative Badge -->
-        <div class="dndb-vital-box init-box" title="Click to Roll Initiative" @click="rollInitiative">
+        <div class="dndb-vital-box init-box" @click="rollInitiative">
           <span class="dndb-vital-label">INITIATIVE</span>
           <strong class="dndb-vital-val font-mono">
             {{ heroStore.initiativeTotal >= 0 ? `+${heroStore.initiativeTotal}` : heroStore.initiativeTotal }}
@@ -267,17 +251,48 @@
           <span class="dndb-vital-sub"><i class="ri-dice-line"></i> ROLL</span>
         </div>
 
-        <!-- PP Summary Meter -->
-        <div class="dndb-vital-box pp-box">
-          <span class="dndb-vital-label">POWER POINTS</span>
-          <div class="dndb-pp-val-row font-mono">
-            <span id="dndb-pp-spent">{{ heroStore.totalSpentPP }}</span> / <span id="dndb-pp-budget">{{ heroStore.totalBudgetPP }}</span> PP
+        <!-- PP Summary Meter (Multi-Segment Tabletop Bar) -->
+        <div
+          class="dndb-vital-box pp-box"
+        >
+          <div class="dndb-vital-header-row">
+            <span class="dndb-vital-label">POWER POINTS</span>
+            <span
+              v-if="heroStore.remainingPP < 0"
+              class="pp-over-badge"
+            >
+              {{ Math.abs(heroStore.remainingPP) }} OVER
+            </span>
           </div>
-          <div class="dndb-pp-mini-bar">
+
+          <div class="dndb-pp-val-row font-mono">
+            <span id="dndb-pp-spent" :class="{ 'text-danger': heroStore.remainingPP < 0 }">{{ heroStore.totalSpentPP }}</span>
+            <span class="dndb-pp-separator">/</span>
+            <span id="dndb-pp-budget">{{ heroStore.totalBudgetPP }}</span>
+            <span class="dndb-pp-unit">PP</span>
+          </div>
+
+          <!-- Multi-Segment Segmented Bar -->
+          <div class="dndb-pp-segmented-bar" :class="{ overbudget: heroStore.remainingPP < 0 }">
             <div
-              class="dndb-pp-progress-fill"
-              :class="{ overbudget: heroStore.remainingPP < 0 }"
-              :style="{ width: Math.min(100, Math.max(0, Math.round((heroStore.totalSpentPP / heroStore.totalBudgetPP) * 100))) + '%' }"
+              class="pp-seg seg-abilities"
+              :style="{ width: `${ppSegPercent.abilities}%` }"
+            ></div>
+            <div
+              class="pp-seg seg-defenses"
+              :style="{ width: `${ppSegPercent.defenses}%` }"
+            ></div>
+            <div
+              class="pp-seg seg-skills"
+              :style="{ width: `${ppSegPercent.skills}%` }"
+            ></div>
+            <div
+              class="pp-seg seg-advantages"
+              :style="{ width: `${ppSegPercent.advantages}%` }"
+            ></div>
+            <div
+              class="pp-seg seg-powers"
+              :style="{ width: `${ppSegPercent.powers}%` }"
             ></div>
           </div>
         </div>
@@ -488,6 +503,17 @@ const heroInitials = computed(() => {
   const parts = name.split(/\s+/).filter(Boolean);
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+});
+
+const ppSegPercent = computed(() => {
+  const budget = Math.max(1, heroStore.totalBudgetPP);
+  return {
+    abilities: Math.min(100, Math.max(0, (heroStore.totalAbilityPP / budget) * 100)),
+    defenses: Math.min(100, Math.max(0, (heroStore.totalDefensePP / budget) * 100)),
+    skills: Math.min(100, Math.max(0, (heroStore.totalSkillPP / budget) * 100)),
+    advantages: Math.min(100, Math.max(0, (heroStore.totalAdvantagePP / budget) * 100)),
+    powers: Math.min(100, Math.max(0, (heroStore.totalPowerPP / budget) * 100))
+  };
 });
 
 const conditionDescMap = computed(() => {

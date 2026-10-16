@@ -46,7 +46,6 @@
                 type="button"
                 class="clear-search-btn"
                 @click="searchQuery = ''"
-                title="Clear search"
               >
                 <i class="ri-close-line"></i>
               </button>
@@ -161,7 +160,6 @@
                       'is-absent': heroStore.isAbilityAbsent(code)
                     }"
                     :disabled="heroStore.isAbilityAbsent(code)"
-                    :title="heroStore.isAbilityAbsent(code) ? `${code} is Absent (immune to Weaken)` : getDebilitatedDesc(code)"
                     @click="heroStore.toggleDebilitatedAbility(code)"
                     @mouseenter="hoveredAbility = code"
                     @mouseleave="hoveredAbility = null"

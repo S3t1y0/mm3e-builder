@@ -13,7 +13,6 @@
             class="sense-active-pill"
             :disabled="selectedFacultiesList.length <= 1"
             @click="toggleFaculty(fac.id)"
-            :title="selectedFacultiesList.length <= 1 ? 'At least one faculty is required' : 'Click to remove'"
           >
             <i :class="fac.icon || 'ri-eye-line'"></i>
             <span class="pill-name">{{ fac.name }}</span>
@@ -86,10 +85,10 @@
           </div>
           <div class="sense-card-right">
             <div v-if="fac.isCustom" class="custom-item-actions" @click.stop>
-              <button type="button" class="btn-custom-action edit" title="Edit Custom Sense" @click="editCustomSubItem(fac)">
+              <button type="button" class="btn-custom-action edit" @click="editCustomSubItem(fac)">
                 <i class="ri-edit-line"></i>
               </button>
-              <button type="button" class="btn-custom-action delete" title="Delete Custom Sense" @click="deleteCustomSubItem(fac.id)">
+              <button type="button" class="btn-custom-action delete" @click="deleteCustomSubItem(fac.id)">
                 <i class="ri-delete-bin-line"></i>
               </button>
             </div>

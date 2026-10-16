@@ -65,7 +65,7 @@
   --z-hud: 60;
   --z-modal-backdrop: 80;
   --z-modal: 90;
-  --z-toast: 100;
+  --z-toast: 1050;
 }
 
 /* Reduced Motion Safety Guardrail (Section 6.B) */

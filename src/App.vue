@@ -34,7 +34,6 @@
             target="_blank"
             rel="noopener noreferrer"
             class="nav-tab-btn"
-            title="Open Mutants & Masterminds 3E Rules Reference in a new tab"
           >
             <i class="ri-book-open-line"></i>
             <span>Rules Reference</span>
@@ -45,7 +44,7 @@
 
       <!-- Active Hero Status Bar -->
       <div v-if="heroStore.character.name" class="menubar-center">
-        <div class="header-hero-pill" :title="`Active Character: ${heroStore.character.name} (PL ${heroStore.character.powerLevel})`">
+        <div class="header-hero-pill">
           <i class="ri-shield-user-line hero-pill-icon"></i>
           <span class="hero-pill-name">{{ heroStore.character.name }}</span>
           <span class="hero-pill-pl">PL {{ heroStore.character.powerLevel }}</span>
@@ -58,7 +57,6 @@
         <button
           class="header-save-indicator"
           :class="{ 'is-saving': heroStore.isSaving }"
-          :title="heroStore.isSaving ? 'Saving changes locally...' : 'Auto-saved to browser local storage. Click to open Vault.'"
           @click="handleToolAction('storage')"
         >
           <i :class="heroStore.isSaving ? 'ri-loader-4-line spin' : 'ri-hard-drive-2-line'"></i>
@@ -250,6 +248,9 @@
     <!-- FLOATING TACTICAL DICE ROLL HUD -->
     <DiceRollHud />
 
+    <!-- SLIDING CONTEXTUAL DETAIL INSPECTOR DRAWER -->
+    <SheetInspectorDrawer />
+
     <!-- TOAST NOTIFICATIONS CONTAINER -->
     <div style="position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: var(--z-toast); display: flex; flex-direction: column; gap: 0.5rem;">
       <div
@@ -287,6 +288,7 @@ import AdvantageLibraryModal from './components/modals/AdvantageLibraryModal.vue
 import ConditionPickerModal from './components/modals/ConditionPickerModal.vue';
 import ExportStructureModal from './components/modals/ExportStructureModal.vue';
 import DiceRollHud from './components/sheet/DiceRollHud.vue';
+import SheetInspectorDrawer from './components/sheet/SheetInspectorDrawer.vue';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();

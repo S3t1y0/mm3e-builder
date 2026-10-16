@@ -158,14 +158,12 @@
                 <button
                   class="btn btn-secondary btn-sm"
                   @click="handleExportSlot(slot)"
-                  title="Download JSON file for this character"
                 >
                   <i class="ri-download-2-line"></i>
                 </button>
                 <button
                   class="btn btn-ghost-danger btn-sm"
                   @click="handleDeleteSlot(slot)"
-                  title="Delete this slot from vault"
                 >
                   <i class="ri-delete-bin-line"></i>
                 </button>

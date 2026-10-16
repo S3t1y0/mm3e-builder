@@ -33,7 +33,7 @@
       <div class="strip-chips-row">
         <!-- Segmented Extra Condition -->
         <div class="segmented-mod-group" :class="{ active: extraConditionRanks > 0 }">
-          <span class="seg-label" title="Extra Condition: +1 condition per degree (+1 PP/rank per rank)">
+          <span class="seg-label">
             <i class="ri-add-circle-line"></i> Extra Cond
           </span>
           <div class="segmented-rank-control">
@@ -42,28 +42,25 @@
               class="seg-btn"
               :class="{ active: extraConditionRanks === 0 }"
               @click="setModifierRank('Extra Condition', false, 0)"
-              title="No Extra Condition"
             >0</button>
             <button
               type="button"
               class="seg-btn"
               :class="{ active: extraConditionRanks === 1 }"
               @click="setModifierRank('Extra Condition', false, 1)"
-              title="Extra Condition Rank 1 (+1 PP/rank)"
             >1</button>
             <button
               type="button"
               class="seg-btn"
               :class="{ active: extraConditionRanks === 2 }"
               @click="setModifierRank('Extra Condition', false, 2)"
-              title="Extra Condition Rank 2 (+2 PP/rank)"
             >2</button>
           </div>
         </div>
 
         <!-- Segmented Limited Degree -->
         <div class="segmented-mod-group flaw" :class="{ active: limitedDegreeRanks > 0 }">
-          <span class="seg-label" title="Limited Degree: Limits max degrees of failure (-1 PP/rank per rank)">
+          <span class="seg-label">
             <i class="ri-indeterminate-circle-line"></i> Limited Deg
           </span>
           <div class="segmented-rank-control flaw">
@@ -72,21 +69,18 @@
               class="seg-btn"
               :class="{ active: limitedDegreeRanks === 0 }"
               @click="setModifierRank('Limited Degree', true, 0)"
-              title="No Limited Degree (All 3 Degrees active)"
             >0</button>
             <button
               type="button"
               class="seg-btn"
               :class="{ active: limitedDegreeRanks === 1 }"
               @click="setModifierRank('Limited Degree', true, 1)"
-              title="Limited Degree Rank 1 (No 3rd Degree, -1 PP/rank)"
             >1</button>
             <button
               type="button"
               class="seg-btn"
               :class="{ active: limitedDegreeRanks === 2 }"
               @click="setModifierRank('Limited Degree', true, 2)"
-              title="Limited Degree Rank 2 (1st Degree only, -2 PP/rank)"
             >2</button>
           </div>
         </div>
@@ -97,7 +91,6 @@
           class="mod-toggle-chip"
           :class="{ active: isCumulative }"
           @click="toggleAfflictionModifier('Cumulative', false)"
-          title="Degrees accumulate over successive failed checks (+1 PP/rank)"
         >
           <i class="ri-stack-line"></i>
           <span>Cumulative</span>
@@ -108,7 +101,6 @@
           class="mod-toggle-chip"
           :class="{ active: isProgressive }"
           @click="toggleAfflictionModifier('Progressive', false)"
-          title="Condition escalates round-by-round until resisted (+2 PP/rank)"
         >
           <i class="ri-history-line"></i>
           <span>Progressive</span>
@@ -119,7 +111,6 @@
           class="mod-toggle-chip"
           :class="{ active: Boolean(altResistanceMod) }"
           @click="toggleAfflictionModifier('Alternate Resistance', false)"
-          title="Resisted by Dodge, Parry, Toughness, or Will (+0 or +1 PP/rank)"
         >
           <i class="ri-shield-flash-line"></i>
           <span>Alternate Res.</span>
@@ -130,7 +121,6 @@
           class="mod-toggle-chip flaw"
           :class="{ active: hasInstantRecovery }"
           @click="toggleAfflictionModifier('Instant Recovery', true)"
-          title="Target instantly recovers when effect ceases (-1 PP/rank)"
         >
           <i class="ri-speed-line"></i>
           <span>Instant Recovery</span>

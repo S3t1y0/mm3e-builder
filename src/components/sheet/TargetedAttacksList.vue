@@ -12,7 +12,6 @@
           type="button"
           class="quick-init-btn"
           @click="heroStore.rollInitiative()"
-          title="Roll Combat Initiative (Turn Order)"
         >
           <i class="ri-speed-up-line"></i>
           <span>Init {{ heroStore.initiativeTotal >= 0 ? `+${heroStore.initiativeTotal}` : heroStore.initiativeTotal }}</span>
@@ -92,7 +91,6 @@
               type="button"
               class="btn-turnon-roll"
               :disabled="isAttackDisabled(atk)"
-              :title="getAttackButtonTitle(atk, 'turn-on')"
               @click="handleTurnOnAndRoll(atk)"
             >
               <i class="ri-flashlight-line"></i>
@@ -105,7 +103,6 @@
               type="button"
               class="btn-attack-roll"
               :disabled="isAttackDisabled(atk)"
-              :title="getAttackButtonTitle(atk, 'roll')"
               @click="handleRollAttack(atk)"
             >
               <i class="ri-dice-line"></i>
@@ -118,7 +115,6 @@
               type="button"
               class="btn-switch-roll"
               :disabled="isAttackDisabled(atk)"
-              :title="getAttackButtonTitle(atk, 'switch')"
               @click="handleSwitchAndRoll(atk)"
             >
               <i class="ri-shuffle-line"></i>
@@ -138,14 +134,12 @@
               <span
                 v-if="getAttackPenaltyTag(atk) !== null"
                 class="atk-penalty-tag"
-                :title="atk.range === 'Close' && heroStore.conditionModifiers.isProne ? 'Penalty from conditions and prone (-5 close attack)' : 'Penalty from conditions'"
               >
                 {{ getAttackPenaltyTag(atk) }} Cond
               </span>
               <span
                 v-if="atk.rollBonus !== null && getAttackAdvBonus(atk) > 0"
                 class="atk-adv-tag"
-                :title="`+${getAttackAdvBonus(atk)} from ${atk.range === 'Ranged' ? 'Ranged Attack' : 'Close Attack'} Advantage`"
               >
                 +{{ getAttackAdvBonus(atk) }} Adv
               </span>
@@ -169,7 +163,7 @@
 
           <div class="spec-metric">
             <span class="spec-label">Range</span>
-            <span class="spec-val" :title="atk.rangeDetails?.tooltip || atk.rangeDistance || atk.range">{{ atk.rangeDistance || atk.range }}</span>
+            <span class="spec-val">{{ atk.rangeDistance || atk.range }}</span>
           </div>
 
           <div class="spec-metric">
@@ -195,7 +189,6 @@
                   v-for="mod in atk.tacticalModifiers"
                   :key="mod.name"
                   class="summary-tactical-chip"
-                  :title="mod.desc"
                 >
                   {{ mod.badge || mod.name }}
                 </span>
@@ -209,7 +202,6 @@
             :class="{ 'is-expanded': isExpanded(atk.id) }"
             :aria-expanded="isExpanded(atk.id)"
             @click="toggleDrawer(atk.id)"
-            title="View failure degrees, conditions ladder, and defense check guide"
           >
             <i :class="isExpanded(atk.id) ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
             <span>{{ isExpanded(atk.id) ? 'Hide Details' : 'Effect Details' }}</span>

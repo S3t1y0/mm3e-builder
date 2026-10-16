@@ -170,7 +170,6 @@
       <!-- Segmented Multi-Color Progress Meter -->
       <div
         class="segmented-meter-track"
-        :title="`Abilities: ${heroStore.totalAbilityPP} PP, Defenses: ${heroStore.totalDefensePP} PP, Skills: ${heroStore.totalSkillPP} PP, Advantages: ${heroStore.totalAdvantagePP} PP, Powers: ${projectedPowersCost} PP`"
       >
         <div class="segment segment-abilities" :style="{ width: budgetPercentages.abilities + '%' }"></div>
         <div class="segment segment-defenses" :style="{ width: budgetPercentages.defenses + '%' }"></div>
@@ -259,7 +258,7 @@
         <!-- DC Check: Full Width Prominent Tile -->
         <div class="combat-tile dc-tile">
           <span class="tile-label">DC Check</span>
-          <span class="tile-val font-mono" :title="combatProfile.dcDescription || (combatProfile.dc ? `DC ${combatProfile.dc}` : 'None')">
+          <span class="tile-val font-mono">
             {{ combatProfile.dcDescription || (combatProfile.dc ? `DC ${combatProfile.dc}` : 'None') }}
           </span>
         </div>
@@ -269,7 +268,6 @@
             <span
               v-if="combatProfile?.rangeDetails?.isModified && combatProfile.rangeDetails.effectiveRange !== combatProfile.rangeDetails.baseRange"
               class="tile-mod-tag"
-              :title="combatProfile.rangeDetails.tooltip"
             >
               {{ combatProfile.rangeDetails.effectiveRange }}
             </span>
@@ -277,14 +275,13 @@
           <span
             class="tile-val font-mono"
             :class="{ 'range-highlight': combatProfile?.rangeDetails?.isModified }"
-            :title="combatProfile.rangeDetails?.tooltip || combatProfile.rangeDistance"
           >
             {{ combatProfile.rangeDistance }}
           </span>
         </div>
         <div class="combat-tile">
           <span class="tile-label">Type</span>
-          <span class="tile-val" :title="combatProfile.isOffensive ? (combatProfile.attackBonus !== null ? `Offensive (+${combatProfile.attackBonus})` : 'Offensive') : 'Utility'">
+          <span class="tile-val">
             {{ combatProfile.isOffensive ? (combatProfile.attackBonus !== null ? `Offensive (+${combatProfile.attackBonus})` : 'Offensive') : 'Utility' }}
           </span>
         </div>

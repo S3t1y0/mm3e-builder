@@ -12,7 +12,6 @@
         <div
           class="comp-rules-status"
           :class="narrativeStatus.isValid ? 'status-met' : 'status-pending'"
-          :title="narrativeStatus.message"
         >
           <i :class="narrativeStatus.isValid ? 'ri-shield-check-fill' : 'ri-error-warning-fill'"></i>
           <span v-if="narrativeStatus.isValid">
@@ -32,7 +31,7 @@
 
       <!-- Integrated Hero Points HUD Quick Counter -->
       <div class="comp-toolbar-right">
-        <div class="hp-inline-tracker" title="Hero Points balance (earned via motivation/complication triggers)">
+        <div class="hp-inline-tracker">
           <span class="hp-inline-label">HERO POINTS</span>
           <div class="hp-stepper-compact">
             <button
@@ -40,7 +39,6 @@
               class="hp-step-btn hp-step-minus"
               :disabled="(heroStore.character.heroPoints || 0) <= 0"
               @click="adjustHeroPoints(-1)"
-              title="Spend 1 Hero Point"
               aria-label="Spend 1 Hero Point"
             >
               <i class="ri-subtract-line"></i>
@@ -53,7 +51,6 @@
               type="button"
               class="hp-step-btn hp-step-plus"
               @click="adjustHeroPoints(1)"
-              title="Award +1 Hero Point"
               aria-label="Award +1 Hero Point"
             >
               <i class="ri-add-line"></i>
@@ -61,7 +58,6 @@
           </div>
           <span
             class="hp-info-tip"
-            title="Earned when a motivation creates a dilemma or complication causes trouble. Spend on re-rolls, recovery, or extra effort."
           >
             <i class="ri-information-line"></i>
           </span>
@@ -146,7 +142,7 @@
             <div class="comp-card-top">
               <div class="comp-card-identity">
                 <div class="comp-identity-header">
-                  <div class="comp-icon-indicator indicator-mot" title="Heroic Motivation">
+                  <div class="comp-icon-indicator indicator-mot">
                     <i :class="getComplicationIcon(item)"></i>
                   </div>
                   <h4 class="comp-name">{{ item.name }}</h4>
@@ -159,7 +155,6 @@
                   type="button"
                   class="btn-trigger-pill trigger-mot-pill"
                   @click="triggerTrait(item)"
-                  title="Award +1 Hero Point when this motivation creates a dilemma or setback"
                 >
                   <i class="ri-shield-star-fill"></i>
                   <span>+1 HP Trigger</span>
@@ -168,7 +163,6 @@
                   type="button"
                   class="card-act-btn"
                   @click="openEdit(item)"
-                  title="Edit motivation"
                   aria-label="Edit motivation"
                 >
                   <i class="ri-edit-line"></i>
@@ -177,7 +171,6 @@
                   type="button"
                   class="card-act-btn"
                   @click="broadcastComplication(item)"
-                  title="Broadcast to Roll20 / VTT"
                   aria-label="Broadcast to Roll20"
                 >
                   <i class="ri-broadcast-line"></i>
@@ -186,7 +179,6 @@
                   type="button"
                   class="card-act-btn"
                   @click="copyText(item)"
-                  title="Copy text to clipboard"
                   aria-label="Copy text"
                 >
                   <i class="ri-file-copy-line"></i>
@@ -195,7 +187,6 @@
                   type="button"
                   class="card-act-btn btn-delete"
                   @click="removeComp(item.id, item.name)"
-                  title="Delete motivation"
                   aria-label="Delete motivation"
                 >
                   <i class="ri-delete-bin-line"></i>
@@ -237,7 +228,7 @@
             <div class="comp-card-top">
               <div class="comp-card-identity">
                 <div class="comp-identity-header">
-                  <div class="comp-icon-indicator indicator-comp" :title="getCategoryLabel(item)">
+                  <div class="comp-icon-indicator indicator-comp">
                     <i :class="getComplicationIcon(item)"></i>
                   </div>
                   <h4 class="comp-name">{{ item.name }}</h4>
@@ -250,7 +241,6 @@
                   type="button"
                   class="btn-trigger-pill trigger-comp-pill"
                   @click="triggerTrait(item)"
-                  title="Award +1 Hero Point when this complication causes trouble"
                 >
                   <i class="ri-shield-star-fill"></i>
                   <span>+1 HP Trigger</span>
@@ -259,7 +249,6 @@
                   type="button"
                   class="card-act-btn"
                   @click="openEdit(item)"
-                  title="Edit complication"
                   aria-label="Edit complication"
                 >
                   <i class="ri-edit-line"></i>
@@ -268,7 +257,6 @@
                   type="button"
                   class="card-act-btn"
                   @click="broadcastComplication(item)"
-                  title="Broadcast to Roll20 / VTT"
                   aria-label="Broadcast to Roll20"
                 >
                   <i class="ri-broadcast-line"></i>
@@ -277,7 +265,6 @@
                   type="button"
                   class="card-act-btn"
                   @click="copyText(item)"
-                  title="Copy text to clipboard"
                   aria-label="Copy text"
                 >
                   <i class="ri-file-copy-line"></i>
@@ -286,7 +273,6 @@
                   type="button"
                   class="card-act-btn btn-delete"
                   @click="removeComp(item.id, item.name)"
-                  title="Delete complication"
                   aria-label="Delete complication"
                 >
                   <i class="ri-delete-bin-line"></i>
@@ -411,7 +397,6 @@
                   class="preset-chip"
                   :class="formKind === 'motivation' ? 'chip-motivation' : 'chip-complication'"
                   @click="applyPreset(preset)"
-                  :title="preset.summary"
                 >
                   <i :class="preset.icon"></i>
                   <span>{{ preset.name }}</span>

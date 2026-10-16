@@ -11,7 +11,6 @@
           type="button"
           class="btn-add-advantage"
           @click="uiStore.openModal('advantage')"
-          title="Open Advantages Library Catalog"
         >
           <i class="ri-add-line"></i>
           <span>Add Advantage</span>
@@ -89,10 +88,10 @@
           <div class="adv-card-title-group">
             <i :class="[getCategoryIcon(adv), 'adv-card-icon', getAdvCategory(adv).toLowerCase()]"></i>
             <div class="adv-card-titles">
-              <h4 class="adv-card-name" :title="adv.displayName || adv.name">
+              <h4 class="adv-card-name">
                 {{ adv.name }}
               </h4>
-              <span v-if="adv.specification" class="adv-spec-badge" :title="`Specification: ${adv.specification}`">
+              <span v-if="adv.specification" class="adv-spec-badge">
                 {{ adv.specification }}
               </span>
             </div>
@@ -103,7 +102,6 @@
               type="button"
               class="adv-act-btn btn-broadcast"
               @click="broadcastAdvantage(adv)"
-              :title="`Broadcast ${adv.displayName || adv.name} to Roll20`"
               aria-label="Broadcast to Roll20"
             >
               <i class="ri-broadcast-line"></i>
@@ -113,7 +111,6 @@
               type="button"
               class="adv-act-btn btn-edit"
               @click="openEditModal(adv)"
-              :title="`Edit ${adv.displayName || adv.name}`"
               aria-label="Edit advantage"
             >
               <i class="ri-edit-line"></i>
@@ -122,7 +119,6 @@
               v-if="adv.isPowerGranted"
               type="button"
               class="adv-act-btn btn-locked"
-              title="Granted by active power. Modify or deactivate power to remove."
               aria-label="Granted by power (locked)"
               disabled
             >
@@ -133,7 +129,6 @@
               type="button"
               class="adv-act-btn btn-delete"
               @click="deleteAdvantage(adv)"
-              :title="`Remove ${adv.displayName || adv.name} from sheet`"
               aria-label="Remove advantage"
             >
               <i class="ri-delete-bin-line"></i>
@@ -165,7 +160,6 @@
               class="adv-step-btn"
               :disabled="adv.naturalRanks <= 1"
               @click="stepRank(adv, -1)"
-              title="Decrease Rank"
               aria-label="Decrease Rank"
             >
               <i class="ri-subtract-line"></i>
@@ -176,7 +170,6 @@
               class="adv-step-btn"
               :disabled="getMaxRanks(adv.name) && adv.naturalRanks >= getMaxRanks(adv.name)"
               @click="stepRank(adv, 1)"
-              title="Increase Rank"
               aria-label="Increase Rank"
             >
               <i class="ri-add-line"></i>

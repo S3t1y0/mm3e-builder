@@ -7,7 +7,6 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'actions' }"
         @click="activeTab = 'actions'"
-        title="Combat maneuvers, weapon strikes, and power attacks"
       >
         <i class="ri-sword-line"></i>
         <span>Actions</span>
@@ -19,7 +18,6 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'powers' }"
         @click="activeTab = 'powers'"
-        title="Powers, arrays, and devices"
       >
         <i class="ri-fire-line"></i>
         <span>Powers</span>
@@ -31,7 +29,6 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'advantages' }"
         @click="activeTab = 'advantages'"
-        title="Combat, fortune, and general advantages"
       >
         <i class="ri-medal-line"></i>
         <span>Advantages</span>
@@ -43,7 +40,6 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'equipment' }"
         @click="activeTab = 'equipment'"
-        title="Weapons, armor, utility gadgets, vehicles, and headquarters"
       >
         <i class="ri-archive-line"></i>
         <span>Equipment</span>
@@ -55,7 +51,6 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'conditions' }"
         @click="activeTab = 'conditions'"
-        title="Injuries, bruises, and condition penalties"
       >
         <i class="ri-heart-pulse-line"></i>
         <span>Conditions</span>
@@ -69,7 +64,6 @@
         class="dndb-hub-tab-btn"
         :class="{ active: activeTab === 'complications' }"
         @click="activeTab = 'complications'"
-        title="Motivations and complications for Hero Points"
       >
         <i class="ri-alert-line"></i>
         <span>Complications</span>

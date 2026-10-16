@@ -86,7 +86,6 @@
             <button
               class="btn btn-sm btn-new-link"
               :disabled="isGenerating"
-              title="Create a separate link with its own address"
               @click="generateLink(true)"
             >
               <i class="ri-add-line"></i>

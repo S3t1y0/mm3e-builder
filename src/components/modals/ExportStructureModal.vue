@@ -35,7 +35,6 @@
               class="preset-btn"
               :class="{ active: currentPreset === 'full' }"
               @click="uiStore.applyExportPreset('full')"
-              title="All 16 skills, full effect & modifier rules definitions"
             >
               <i class="ri-file-list-3-line"></i> Full Reference
             </button>
@@ -43,7 +42,6 @@
               class="preset-btn"
               :class="{ active: currentPreset === 'compact' }"
               @click="uiStore.applyExportPreset('compact')"
-              title="Clean statblock, trained skills only, no verbose rules descriptions"
             >
               <i class="ri-compass-3-line"></i> Compact Statblock
             </button>
@@ -51,7 +49,6 @@
               class="preset-btn"
               :class="{ active: currentPreset === 'minimal' }"
               @click="uiStore.applyExportPreset('minimal')"
-              title="Core stats & powers only; hides equipment, skills, and complications"
             >
               <i class="ri-focus-3-line"></i> Minimalist
             </button>

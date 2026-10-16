@@ -33,7 +33,7 @@
           </span>
 
           <!-- Inline Headroom Mini-Meter -->
-          <div class="headroom-inline-meter" :title="`Max Pool: ${arrayCapacity} PP. Safe Headroom: ${headroom} PP`">
+          <div class="headroom-inline-meter">
             <span class="meter-text">Pool: <strong>{{ arrayCapacity }} PP</strong></span>
             <div class="meter-mini-track">
               <div
@@ -51,7 +51,6 @@
           <!-- Rules Info Tooltip -->
           <span
             class="rules-hint-chip"
-            title="M&M 3E Array: Alternate Effects cost +1 PP (Standard) or +2 PP (Dynamic) and share the Primary Effect's PP pool capacity."
           >
             <i class="ri-information-line"></i>
             <span>Rules</span>
@@ -61,7 +60,6 @@
         <button
           type="button"
           class="btn-revert-ghost"
-          title="Clear all alternate modes and return to standard single power"
           @click="builderStore.clearArrayForCurrentPower()"
         >
           <i class="ri-close-circle-line"></i>
@@ -76,7 +74,6 @@
           type="button"
           class="array-mode-tab primary-tab"
           :class="{ active: builderStore.activeTargetType === 'main' }"
-          title="Click to edit Primary Effect"
           @click="builderStore.selectMainForEditing()"
         >
           <i class="ri-star-fill tab-icon-primary"></i>
@@ -95,7 +92,6 @@
             active: builderStore.activeTargetType === 'slot' && builderStore.activeSlotIndex === idx,
             dynamic: slot.isDynamic
           }"
-          title="Click to edit this alternate mode in the canvas"
           @click="builderStore.selectSlotForEditing(false, idx)"
         >
           <i :class="slot.isDynamic ? 'ri-flashlight-fill dyn-icon' : 'ri-swap-line'"></i>
@@ -107,7 +103,6 @@
           <span
             class="tab-cost-pill"
             :class="{ 'cost-overflow': getSlotCost(slot) > arrayCapacity }"
-            :title="`Slot Cost: ${getSlotCost(slot)} PP (Max Pool: ${arrayCapacity} PP)`"
           >
             {{ getSlotCost(slot) }} PP
           </span>
@@ -117,7 +112,6 @@
             type="button"
             class="dyn-badge-btn"
             :class="slot.isDynamic ? 'dyn' : 'std'"
-            :title="slot.isDynamic ? 'Dynamic Mode (+2 PP). Click to change to Standard (+1 PP)' : 'Standard Mode (+1 PP). Click to change to Dynamic (+2 PP)'"
             @click.stop="slot.isDynamic = !slot.isDynamic"
           >
             {{ slot.isDynamic ? 'Dyn (+2)' : 'Std (+1)' }}
@@ -127,7 +121,6 @@
           <button
             type="button"
             class="tab-remove-btn"
-            title="Delete this alternate mode"
             @click.stop="builderStore.removeArraySlot(false, idx)"
           >
             <i class="ri-close-line"></i>
@@ -138,7 +131,6 @@
         <button
           type="button"
           class="btn-add-mode-pill"
-          title="Add new alternate mode"
           @click="builderStore.addArraySlot(false, '', 'Damage')"
         >
           <i class="ri-add-line"></i>

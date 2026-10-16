@@ -48,21 +48,18 @@
             <span
               v-if="sub.isPrimaryAction"
               class="badge-primary-action"
-              title="Primary Action (Sets Action & Range baseline for Linked Effects)"
             >
               PRI
             </span>
             <span
               v-else-if="sub.isLinked"
               class="badge-linked"
-              title="Linked to trigger simultaneously with Primary Action"
             >
               <i class="ri-links-line"></i>
             </span>
             <span
               v-else
               class="badge-standalone"
-              title="Standalone suite trait"
             >
               <i class="ri-checkbox-blank-circle-line"></i>
             </span>
@@ -82,7 +79,6 @@
             v-if="builderStore.power.compoundEffects?.length > 1"
             type="button"
             class="tab-close-icon"
-            title="Remove this sub-effect"
             @click.stop="builderStore.removeCompoundEffect(idx)"
           >
             <i class="ri-close-line"></i>
@@ -120,7 +116,6 @@
             class="btn-primary-toggle"
             :class="{ active: activeSub.isPrimaryAction }"
             @click="builderStore.setPrimaryCompoundEffect(builderStore.activeCompoundIndex)"
-            :title="activeSub.isPrimaryAction ? 'Current Primary Effect' : 'Designate as Primary Effect'"
           >
             <i :class="activeSub.isPrimaryAction ? 'ri-star-fill' : 'ri-star-line'"></i>
             <span>{{ activeSub.isPrimaryAction ? 'Primary Action Effect' : 'Make Primary' }}</span>
@@ -133,7 +128,6 @@
               class="btn-reorder"
               :disabled="builderStore.activeCompoundIndex === 0"
               @click="builderStore.reorderCompoundEffects(builderStore.activeCompoundIndex, builderStore.activeCompoundIndex - 1)"
-              title="Move Left / Earlier"
             >
               <i class="ri-arrow-left-s-line"></i>
             </button>
@@ -142,7 +136,6 @@
               class="btn-reorder"
               :disabled="builderStore.activeCompoundIndex >= (builderStore.power.compoundEffects?.length || 1) - 1"
               @click="builderStore.reorderCompoundEffects(builderStore.activeCompoundIndex, builderStore.activeCompoundIndex + 1)"
-              title="Move Right / Later"
             >
               <i class="ri-arrow-right-s-line"></i>
             </button>
@@ -154,7 +147,6 @@
       <EffectEditorCanvas
         :key="'comp_canvas_' + activeSub.id + '_' + (activeSub.effect?.id || 'eff')"
         :effect="activeSub.effect"
-        :title="editorCanvasTitle"
       />
     </div>
   </div>

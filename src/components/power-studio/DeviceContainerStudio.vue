@@ -155,7 +155,6 @@
           <span
             v-if="builderStore.power.devicePowers.length > 1"
             class="tab-close-btn"
-            title="Delete Sub-Power"
             @click.stop="builderStore.removeDeviceSubPower(idx)"
           >
             <i class="ri-close-line"></i>
@@ -224,7 +223,6 @@
       <EffectEditorCanvas
         :key="'canvas_' + builderStore.currentEditingEffect?.id"
         :effect="builderStore.currentEditingEffect"
-        :title="editorCanvasTitle"
       />
     </div>
   </div>

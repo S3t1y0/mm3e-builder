@@ -31,10 +31,20 @@ function loadStoredExportOptions() {
   return { ...DEFAULT_EXPORT_OPTIONS };
 }
 
+function loadStoredBypassTrainedOnly() {
+  if (typeof window === 'undefined') return false;
+  try {
+    return localStorage.getItem('mm3e_bypass_trained_only') === 'true';
+  } catch {
+    return false;
+  }
+}
+
 export const useUiStore = defineStore('ui', {
   state: () => ({
     activeTab: 'sheet',
     activeActionHubTab: 'actions',
+    bypassTrainedOnly: loadStoredBypassTrainedOnly(),
     modals: {
       powerStudio: false,
       advantage: false,
@@ -52,10 +62,30 @@ export const useUiStore = defineStore('ui', {
     exportImportInitialTab: 'export',
     alwaysIncludePage2: false,
     exportOptions: loadStoredExportOptions(),
-    toasts: []
+    toasts: [],
+    inspector: {
+      isOpen: false,
+      type: 'ability',
+      data: null,
+      title: '',
+      subtitle: ''
+    }
   }),
 
   actions: {
+    openInspector(type, data, title, subtitle) {
+      this.inspector.isOpen = true;
+      this.inspector.type = type || 'ability';
+      this.inspector.data = data || null;
+      this.inspector.title = title || 'Details';
+      this.inspector.subtitle = subtitle || '';
+    },
+
+    closeInspector() {
+      this.inspector.isOpen = false;
+      this.inspector.data = null;
+    },
+
     setActiveActionHubTab(tab) {
       this.activeActionHubTab = tab;
     },
@@ -227,6 +257,26 @@ export const useUiStore = defineStore('ui', {
     resetExportOptions() {
       this.exportOptions = { ...DEFAULT_EXPORT_OPTIONS };
       this.saveExportOptions();
+    },
+
+    toggleBypassTrainedOnly(forceState) {
+      if (typeof forceState === 'boolean') {
+        this.bypassTrainedOnly = forceState;
+      } else {
+        this.bypassTrainedOnly = !this.bypassTrainedOnly;
+      }
+      if (typeof window !== 'undefined') {
+        try {
+          localStorage.setItem('mm3e_bypass_trained_only', String(this.bypassTrainedOnly));
+        } catch (e) {
+          console.warn('Failed to save bypassTrainedOnly to localStorage:', e);
+        }
+      }
+      if (this.bypassTrainedOnly) {
+        this.showToast('Untrained bypass enabled: Trained Only restrictions unlocked.', 'info', 3500);
+      } else {
+        this.showToast('Untrained bypass disabled: Trained Only restrictions restored.', 'info', 3000);
+      }
     }
   },
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="dndb-card combat-initiative-card" title="Combat reaction order (AGL + Improved Initiative)">
+  <div class="dndb-card combat-initiative-card">
     <!-- Card Header -->
     <div class="dndb-card-header init-card-header">
       <div class="dndb-card-title-wrap">
@@ -14,7 +14,6 @@
         type="button"
         class="init-strike-btn"
         @click="handleRollInitiative"
-        title="Click to roll Initiative (Adds to Roll20 Turn Tracker)"
       >
         <div class="init-strike-left">
           <i class="ri-dice-line init-strike-dice"></i>
@@ -33,7 +32,7 @@
 
       <!-- Calculation Breakdown Strip (Segmented & Clean) -->
       <div class="init-breakdown-strip">
-        <div class="init-calc-pill" title="Base Agility ability modifier">
+        <div class="init-calc-pill">
           <span class="calc-lbl">Base AGL</span>
           <span class="calc-num font-mono">{{ baseAgl >= 0 ? `+${baseAgl}` : baseAgl }}</span>
         </div>
@@ -41,7 +40,6 @@
         <div
           class="init-calc-pill"
           :class="{ 'has-feat-bonus': improvedInitBonus > 0 }"
-          title="Improved Initiative advantage (+4 per rank)"
         >
           <span class="calc-lbl">Improved Init</span>
           <span class="calc-num font-mono">+{{ improvedInitBonus }}</span>
@@ -51,7 +49,6 @@
           <span class="calc-operator">-</span>
           <div
             class="init-calc-pill has-penalty"
-            :title="heroStore.conditionModifiers.isDisabled ? 'Disabled: -5 on checks' : 'Impaired: -2 on checks'"
           >
             <span class="calc-lbl">{{ heroStore.conditionModifiers.isDisabled ? 'Disabled' : 'Impaired' }}</span>
             <span class="calc-num font-mono">{{ Math.abs(heroStore.circumstancePenalty) }}</span>
@@ -66,7 +63,6 @@
           class="btn-seize-act"
           :disabled="(heroStore.character.heroPoints || 0) <= 0"
           @click="handleSeizeInitiative"
-          title="Spend 1 Hero Point to automatically act first in combat turn order"
         >
           <div class="seize-act-left">
             <i class="ri-flashlight-fill"></i>

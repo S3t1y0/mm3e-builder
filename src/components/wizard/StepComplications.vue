@@ -141,7 +141,6 @@
                 type="button"
                 class="comp-action-btn btn-edit-comp"
                 @click="openEditDialog(item)"
-                title="Edit motivation"
                 aria-label="Edit motivation"
               >
                 <i class="ri-edit-line"></i>
@@ -150,7 +149,6 @@
                 type="button"
                 class="comp-action-btn btn-remove-comp"
                 @click="removeTrait(item)"
-                title="Remove motivation"
                 aria-label="Remove motivation"
               >
                 <i class="ri-delete-bin-line"></i>
@@ -213,7 +211,6 @@
                 type="button"
                 class="comp-action-btn btn-edit-comp"
                 @click="openEditDialog(item)"
-                title="Edit complication"
                 aria-label="Edit complication"
               >
                 <i class="ri-edit-line"></i>
@@ -222,7 +219,6 @@
                 type="button"
                 class="comp-action-btn btn-remove-comp"
                 @click="removeTrait(item)"
-                title="Remove complication"
                 aria-label="Remove complication"
               >
                 <i class="ri-delete-bin-line"></i>
@@ -304,7 +300,6 @@
                 class="chip-preset-btn chip-mot"
                 :class="{ selected: selectedPresetId === preset.id }"
                 @click="selectMotivationPreset(preset)"
-                :title="preset.summary"
               >
                 <i :class="preset.icon"></i>
                 <span>{{ preset.name }}</span>
@@ -353,7 +348,6 @@
                 class="chip-preset-btn chip-comp"
                 :class="{ selected: selectedPresetId === preset.id }"
                 @click="selectComplicationPreset(preset)"
-                :title="preset.summary"
               >
                 <i :class="preset.icon"></i>
                 <span>{{ preset.name }}</span>

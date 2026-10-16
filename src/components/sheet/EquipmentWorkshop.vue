@@ -49,7 +49,6 @@
           type="button"
           class="btn-strip-sync btn-sync-deficit"
           @click="syncEquipmentAdvantage"
-          title="Auto-Sync Advantage ranks to cover deficit"
         >
           <i class="ri-flashlight-line"></i>
           <span>Auto-Sync (+{{ budgetInfo.neededRanks - budgetInfo.ranks }} PP)</span>
@@ -59,7 +58,6 @@
           type="button"
           class="btn-strip-sync btn-sync-adjust"
           @click="syncEquipmentAdvantage"
-          title="Adjust advantage to exact needed ranks"
         >
           <i class="ri-refresh-line"></i>
           <span>Adjust to {{ budgetInfo.neededRanks }} Rks</span>
@@ -126,7 +124,6 @@
                   class="res-status-pill"
                   :class="'status-' + (item.status || 'equipped')"
                   @click="toggleStatus(item.id)"
-                  title="Click to cycle status: Equipped → Carried → Stored"
                 >
                   <span class="status-dot"></span>
                   <span>{{ formatStatus(item.status) }}</span>
@@ -142,7 +139,6 @@
               type="button"
               class="btn-icon-subtle"
               @click="openCustomStudio(item.category || item.type || 'Weapons')"
-              title="Open in Custom Studio"
             >
               <i class="ri-edit-line"></i>
             </button>
@@ -150,7 +146,6 @@
               type="button"
               class="btn-icon-subtle"
               @click="exportRoll20(item)"
-              title="Copy Roll20 Macro / Text"
             >
               <i class="ri-broadcast-line"></i>
             </button>
@@ -158,7 +153,6 @@
               type="button"
               class="btn-icon-subtle btn-delete"
               @click="deleteResource(item.id, item.name)"
-              title="Delete Item"
             >
               <i class="ri-delete-bin-line"></i>
             </button>
@@ -171,7 +165,6 @@
             type="button"
             class="res-chip chip-atk interactive-chip"
             @click="rollWeaponAttack(item)"
-            title="Click to roll attack check (d20 + bonus)"
           >
             <i class="ri-dice-line"></i> Atk +{{ getWeaponAttackBonus(item) }}
           </button>

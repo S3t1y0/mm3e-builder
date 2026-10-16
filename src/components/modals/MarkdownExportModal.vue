@@ -64,7 +64,7 @@
           </div>
 
           <div class="format-actions">
-            <button class="btn btn-secondary btn-sm" @click="downloadTextFile" title="Download as text file">
+            <button class="btn btn-secondary btn-sm" @click="downloadTextFile">
               <i class="ri-download-2-line"></i> Download .{{ textFormat === 'markdown' ? 'md' : 'txt' }}
             </button>
             <button class="btn btn-primary btn-sm" @click="copyTextExport">

@@ -1,10 +1,10 @@
 <template>
   <div id="character-sheet" class="dndb-sheet-view" ref="sheetViewRef">
-    <!-- Hero Identity & Combat Vitals Banner -->
-    <HeroHeader />
-
-    <!-- Core Abilities Ribbon -->
-    <AbilitiesMatrix />
+    <!-- UNIFIED HERO COMMAND HUB (Single Tactical Container) -->
+    <div class="hero-command-container">
+      <HeroHeader />
+      <AbilitiesMatrix />
+    </div>
 
     <!-- 3-Column Tabletop Grid -->
     <div class="dndb-sheet-grid" ref="sheetGridRef">

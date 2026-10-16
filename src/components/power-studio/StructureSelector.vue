@@ -9,7 +9,6 @@
         :class="{ active: builderStore.power.type === 'standard' || builderStore.power.type === 'array' }"
         :aria-selected="builderStore.power.type === 'standard' || builderStore.power.type === 'array'"
         @click="builderStore.setStructureType('standard')"
-        title="Standard Power: Single effect with optional alternate effects array"
       >
         <i class="ri-flashlight-line"></i>
         <span>Standard</span>
@@ -22,7 +21,6 @@
         :class="{ active: builderStore.power.type === 'compound' }"
         :aria-selected="builderStore.power.type === 'compound'"
         @click="builderStore.setStructureType('compound')"
-        title="Compound Power: Multi-effect linked combo or bundled traits (DHH p. 147)"
       >
         <i class="ri-stack-line"></i>
         <span>Compound</span>
@@ -35,7 +33,6 @@
         :class="{ active: builderStore.power.type === 'device' }"
         :aria-selected="builderStore.power.type === 'device'"
         @click="builderStore.setStructureType('device')"
-        title="Device: Multi-power collection, battlesuit systems, or equipment kit"
       >
         <i class="ri-shield-keyhole-line"></i>
         <span>Device</span>
@@ -46,7 +43,7 @@
     <div class="flaws-strips-wrapper">
       <!-- Device / Removable Flaw Strip -->
       <div class="compact-flaw-strip">
-        <span class="flaw-label" title="Device Flaw: Removable equipment discount applied to total cost">
+        <span class="flaw-label">
           <i class="ri-shield-keyhole-line text-cyan"></i>
           <span>Device:</span>
         </span>
@@ -57,7 +54,6 @@
             class="chip-btn chip-cyan"
             :class="{ active: !builderStore.power.deviceConfig?.type || builderStore.power.deviceConfig.type === 'none' }"
             @click="builderStore.setDeviceDiscountType('none')"
-            title="Inherent Trait: Cannot be removed or disarmed (0 PP discount)"
           >
             Inherent
           </button>
@@ -66,7 +62,6 @@
             class="chip-btn chip-cyan"
             :class="{ active: builderStore.power.deviceConfig?.type === 'removable' }"
             @click="builderStore.setDeviceDiscountType('removable')"
-            title="Removable: Can only be removed when immobilized (-1 per 5 PP)"
           >
             Remov (-1/5)
           </button>
@@ -75,7 +70,6 @@
             class="chip-btn chip-cyan"
             :class="{ active: builderStore.power.deviceConfig?.type === 'easily_removable' }"
             @click="builderStore.setDeviceDiscountType('easily_removable')"
-            title="Easily Removable: Can be disarmed in combat (-2 per 5 PP)"
           >
             Easily (-2/5)
           </button>
@@ -84,7 +78,7 @@
 
       <!-- Activation Flaw Strip -->
       <div class="compact-flaw-strip">
-        <span class="flaw-label" title="Activation Flaw: Requires an action to prepare before use">
+        <span class="flaw-label">
           <i class="ri-timer-flash-line text-amber"></i>
           <span>Action:</span>
         </span>
@@ -95,7 +89,6 @@
             class="chip-btn chip-amber"
             :class="{ active: !builderStore.power.activation || builderStore.power.activation === 'none' }"
             @click="builderStore.setActivation('none')"
-            title="Instant (Free action to use, 0 PP discount)"
           >
             Instant
           </button>
@@ -104,7 +97,6 @@
             class="chip-btn chip-amber"
             :class="{ active: builderStore.power.activation === 'move' }"
             @click="builderStore.setActivation('move')"
-            title="Move Action to activate (-1 Flat PP discount)"
           >
             Move (-1)
           </button>
@@ -113,7 +105,6 @@
             class="chip-btn chip-amber"
             :class="{ active: builderStore.power.activation === 'standard' }"
             @click="builderStore.setActivation('standard')"
-            title="Standard Action to activate (-2 Flat PP discount)"
           >
             Std (-2)
           </button>

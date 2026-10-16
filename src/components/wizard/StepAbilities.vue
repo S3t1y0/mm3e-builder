@@ -38,7 +38,6 @@
               class="absent-toggle-pill"
               :class="{ 'is-absent': heroStore.isAbilityAbsent(ability.key) }"
               @click="heroStore.toggleAbsentAbility(ability.key)"
-              :title="heroStore.isAbilityAbsent(ability.key) ? `Restore ${ability.name} to active (Rank 0)` : `Set ${ability.name} to Absent (-, -10 PP)`"
             >
               <i :class="heroStore.isAbilityAbsent(ability.key) ? 'ri-close-circle-fill' : 'ri-indeterminate-circle-line'"></i>
               <span>Absent (-)</span>
@@ -49,7 +48,6 @@
           <div
             class="ability-cost-tag tabular-nums"
             :class="{ 'is-refund': heroStore.isAbilityAbsent(ability.key) }"
-            :title="heroStore.isAbilityAbsent(ability.key) ? 'Absent Ability refund: -10 PP' : 'Cost: 2 PP per rank'"
           >
             {{ heroStore.isAbilityAbsent(ability.key) ? '-10 PP' : `${(heroStore.character.abilities[ability.key] || 0) * 2} PP` }}
           </div>
@@ -75,7 +73,6 @@
               :disabled="(heroStore.character.abilities[ability.key] || 0) <= -5"
               @click="setAbilityRank(ability.key, (heroStore.character.abilities[ability.key] || 0) - 1)"
               :aria-label="`Decrease ${ability.name} rank`"
-              title="Decrease Rank"
             >
               <i class="ri-subtract-line"></i>
             </button>
@@ -98,7 +95,6 @@
               :disabled="(heroStore.character.abilities[ability.key] || 0) >= 20"
               @click="setAbilityRank(ability.key, (heroStore.character.abilities[ability.key] || 0) + 1)"
               :aria-label="`Increase ${ability.name} rank`"
-              title="Increase Rank"
             >
               <i class="ri-add-line"></i>
             </button>

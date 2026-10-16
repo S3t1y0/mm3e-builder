@@ -143,7 +143,6 @@
               filled: (heroStore.character.dyingFailures || 0) >= pip,
               lethal: pip === 3 && (heroStore.character.dyingFailures || 0) >= 3
             }"
-            :title="pip === 3 ? '3rd Degree Failure: Mortal Death' : `${pip} Degree of Failure`"
           >
             <span class="pip-num">{{ pip }}</span>
             <span class="pip-state">
@@ -158,7 +157,6 @@
             class="btn btn-secondary btn-xs"
             :disabled="(heroStore.character.dyingFailures || 0) <= 0"
             @click="heroStore.adjustDyingFailures(-1)"
-            title="Remove 1 failure degree"
           >-</button>
           <span class="stepper-value" :class="{ wounded: (heroStore.character.dyingFailures || 0) > 0 }">
             {{ heroStore.character.dyingFailures || 0 }}
@@ -168,7 +166,6 @@
             class="btn btn-secondary btn-xs"
             :disabled="(heroStore.character.dyingFailures || 0) >= 3"
             @click="heroStore.adjustDyingFailures(1)"
-            title="Add 1 failure degree"
           >+</button>
         </div>
       </div>
@@ -181,7 +178,6 @@
           type="button"
           class="btn-dying-roll"
           @click="handleRollDying"
-          title="Roll d20 + Fortitude vs DC 15"
         >
           <i class="ri-dice-line"></i>
           <span>Roll Fortitude Survival (DC 15, Bonus {{ heroStore.dyingTacticalState.fortitudeBonus >= 0 ? `+${heroStore.dyingTacticalState.fortitudeBonus}` : heroStore.dyingTacticalState.fortitudeBonus }})</span>
@@ -194,7 +190,6 @@
           class="btn-dying-sec"
           :disabled="heroStore.character.heroPoints <= 0"
           @click="heroStore.spendHeroPointToStabilize()"
-          :title="heroStore.character.heroPoints > 0 ? 'Spend 1 Hero Point to automatically stabilize' : 'No Hero Points available'"
         >
           <i class="ri-copper-coin-line"></i>
           <span>Spend 1 HP (Escape Death)</span>
@@ -206,7 +201,6 @@
           type="button"
           class="btn-dying-sec"
           @click="heroStore.stabilizeHero('Ally Treatment Check (DC 15)')"
-          title="Record successful Treatment check (DC 15) made by an ally"
         >
           <i class="ri-first-aid-kit-line"></i>
           <span>Ally Treatment (DC 15)</span>
@@ -218,7 +212,6 @@
           type="button"
           class="btn-dying-sec"
           @click="heroStore.stabilizeHero('Healing Power Effect')"
-          title="Stabilize character via Healing power effect"
         >
           <i class="ri-heart-pulse-line"></i>
           <span>Heal / Auto-Stabilize</span>
@@ -229,7 +222,6 @@
           type="button"
           class="btn-dying-reset"
           @click="handleResetDying"
-          title="Reset failure counter and dying state"
         >
           <i class="ri-restart-line"></i>
           <span>{{ heroStore.isDead ? 'Revive / Reset' : 'Reset Tracker' }}</span>
@@ -249,7 +241,6 @@
           :key="idx"
           class="tactical-tag"
           :class="tag.type"
-          :title="tag.reason"
         >
           {{ tag.label }}
         </span>
@@ -269,7 +260,6 @@
             'active-inherited': isInheritedActive(c.name),
             'has-subdrawer': c.name === 'Debilitated'
           }"
-          :title="isInheritedActive(c.name) ? `${c.name} (Active via combined condition)` : c.desc"
           @click="handleBasicConditionClick(c.name)"
         >
           <span class="chip-dot"></span>
@@ -308,7 +298,6 @@
               'is-absent': heroStore.isAbilityAbsent(code)
             }"
             :disabled="heroStore.isAbilityAbsent(code)"
-            :title="heroStore.isAbilityAbsent(code) ? `${code} is Absent (immune to Weaken)` : getDebilitatedDesc(code)"
             @click="heroStore.toggleDebilitatedAbility(code)"
             @mouseenter="hoveredAbility = code"
             @mouseleave="hoveredAbility = null"
@@ -335,7 +324,6 @@
           :key="c.name"
           class="cond-chip combined"
           :class="{ active: isDirectlyActive(c.name) }"
-          :title="c.components ? c.components.join(' + ') + ': ' + c.desc : c.desc"
           @click="heroStore.toggleCondition(c.name)"
         >
           <span class="chip-dot"></span>

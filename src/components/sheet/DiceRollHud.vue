@@ -104,7 +104,6 @@
             type="button"
             class="btn-hp-reroll"
             :disabled="heroPointsCount <= 0 || isRolling"
-            :title="heroPointsCount > 0 ? `Spend 1 Hero Point to reroll (Result 1..10 gets +10) • ${heroPointsCount} HP remaining` : 'No Hero Points remaining'"
             @click="handleHeroPointReroll"
           >
             <i class="ri-flashlight-fill"></i>
@@ -117,7 +116,6 @@
               type="button"
               class="btn-hud-tool"
               :class="{ active: isHistoryOpen }"
-              :title="isHistoryOpen ? 'Close Roll History' : 'View Recent Rolls History'"
               @click="isHistoryOpen = !isHistoryOpen"
             >
               <i class="ri-history-line"></i>
@@ -127,7 +125,6 @@
             <button
               type="button"
               class="btn-hud-tool btn-close"
-              title="Dismiss Notification"
               @click="dismissRoll"
             >
               <i class="ri-close-line"></i>

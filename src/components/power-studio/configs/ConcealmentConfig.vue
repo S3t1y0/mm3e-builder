@@ -13,7 +13,6 @@
             class="sense-active-pill"
             :disabled="selectedConcealmentList.length <= 1"
             @click="toggleConcealment(opt.id)"
-            :title="selectedConcealmentList.length <= 1 ? 'At least one concealment sense is required' : 'Click to remove'"
           >
             <i :class="opt.icon || 'ri-eye-close-line'"></i>
             <span class="pill-name">{{ opt.name }}</span>
@@ -96,10 +95,10 @@
             </div>
             <div class="card-top-right">
               <div v-if="item.isCustom" class="custom-item-actions" @click.stop>
-                <button type="button" class="btn-custom-action edit" title="Edit" @click="editCustomSubItem(item)">
+                <button type="button" class="btn-custom-action edit" @click="editCustomSubItem(item)">
                   <i class="ri-edit-line"></i>
                 </button>
-                <button type="button" class="btn-custom-action delete" title="Delete" @click="deleteCustomSubItem(item.id)">
+                <button type="button" class="btn-custom-action delete" @click="deleteCustomSubItem(item.id)">
                   <i class="ri-delete-bin-line"></i>
                 </button>
               </div>

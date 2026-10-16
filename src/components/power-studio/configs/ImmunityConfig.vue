@@ -58,10 +58,10 @@
             </div>
             <div class="card-top-right">
               <div v-if="item.isCustom" class="custom-item-actions" @click.stop>
-                <button type="button" class="btn-custom-action edit" title="Edit" @click="editCustomSubItem(item)">
+                <button type="button" class="btn-custom-action edit" @click="editCustomSubItem(item)">
                   <i class="ri-edit-line"></i>
                 </button>
-                <button type="button" class="btn-custom-action delete" title="Delete" @click="deleteCustomSubItem(item.id)">
+                <button type="button" class="btn-custom-action delete" @click="deleteCustomSubItem(item.id)">
                   <i class="ri-delete-bin-line"></i>
                 </button>
               </div>
