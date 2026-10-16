@@ -58,17 +58,6 @@
           {{ conditionsCount + (heroStore.character.injuries > 0 ? 1 : 0) }}
         </span>
       </button>
-
-      <button
-        type="button"
-        class="dndb-hub-tab-btn"
-        :class="{ active: activeTab === 'complications' }"
-        @click="activeTab = 'complications'"
-      >
-        <i class="ri-alert-line"></i>
-        <span>Complications</span>
-        <span class="hub-tab-badge">{{ complicationsCount }}</span>
-      </button>
     </nav>
 
     <!-- Scrollable Tab Panes Container -->
@@ -96,11 +85,6 @@
     <div class="dndb-tab-pane" :class="{ active: activeTab === 'conditions' }">
       <ConditionsTracker />
     </div>
-
-    <!-- Tab 6: Complications & Motivations -->
-    <div class="dndb-tab-pane" :class="{ active: activeTab === 'complications' }">
-      <ComplicationsHub />
-    </div>
   </div>
 </template>
 
@@ -114,13 +98,15 @@ import PowersDeck from './PowersDeck.vue';
 import AdvantagesList from './AdvantagesList.vue';
 import EquipmentWorkshop from './EquipmentWorkshop.vue';
 import ConditionsTracker from './ConditionsTracker.vue';
-import ComplicationsHub from './ComplicationsHub.vue';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
 
 const activeTab = computed({
-  get: () => uiStore.activeActionHubTab || 'actions',
+  get: () => {
+    const tab = uiStore.activeActionHubTab || 'actions';
+    return tab === 'complications' ? 'actions' : tab;
+  },
   set: (val) => { uiStore.setActiveActionHubTab(val); }
 });
 
@@ -142,10 +128,6 @@ const equipmentCount = computed(() => {
 
 const conditionsCount = computed(() => {
   return (heroStore.character.activeConditions || []).length;
-});
-
-const complicationsCount = computed(() => {
-  return (heroStore.character.complications || []).length;
 });
 </script>
 
