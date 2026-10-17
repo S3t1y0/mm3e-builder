@@ -473,10 +473,16 @@
       <!-- Gear & Equipment -->
       <div v-if="uiStore.exportOptions.showEquipment" class="gr-card gr-gear-card">
         <span class="gr-card-title">GEAR &amp; EQUIPMENT</span>
-        <div v-if="heroStore.character.resources?.length" class="gr-gear-list">
-          <span v-for="(item, idx) in heroStore.character.resources.slice(0, 8)" :key="item.id || item.name" class="gr-gear-item">
-            <strong>{{ item.name }}</strong><span v-if="item.cost" style="color: #0369a1;"> ({{ item.cost }} EP)</span>{{ idx < Math.min(8, heroStore.character.resources.length) - 1 ? ', ' : '' }}
-          </span>
+        <div v-if="formattedEquipment.length" class="gr-gear-list">
+          <div v-for="item in formattedEquipment.slice(0, 6)" :key="item.id || item.name" class="gr-gear-item-line">
+            <strong class="gr-gear-name">{{ item.name }}</strong>
+            <span class="gr-gear-ep">({{ item.cost }} EP)</span>
+            <span v-if="item.tacticalSummary" class="gr-gear-stats">[{{ item.tacticalSummary }}]</span>
+            <span v-else-if="item.desc" class="gr-gear-desc">: {{ item.desc }}</span>
+          </div>
+          <div v-if="formattedEquipment.length > 6" class="gr-gear-overflow-note">
+            +{{ formattedEquipment.length - 6 }} more items detailed on Page 2
+          </div>
         </div>
         <div v-else class="gr-empty-hint">
           No standard equipment or weapons equipped.
@@ -650,13 +656,29 @@
 
         <!-- Overflow Equipment & Vehicles -->
         <div v-if="uiStore.exportOptions.showEquipment" class="gr-card gr-overflow-equipment">
-          <span class="gr-card-title">EQUIPMENT, WEAPONS &amp; VEHICLES</span>
-          <div v-if="heroStore.character.resources?.length" class="gr-gear-list">
-            <span v-for="item in heroStore.character.resources" :key="item.id || item.name" class="gr-gear-pill">
-              <strong>{{ item.name }}</strong>
-              <span v-if="item.cost" style="color: #0284c7; font-weight: 700;">({{ item.cost }} EP)</span>
-              <span v-if="item.desc" style="color: #475569;">: {{ item.desc }}</span>
-            </span>
+          <span class="gr-card-title">EQUIPMENT, WEAPONS &amp; VEHICLES (DETAILED SPECIFICATIONS)</span>
+          <div v-if="equipmentCategories.length" class="gr-equipment-cat-list">
+            <div v-for="cat in equipmentCategories" :key="cat.key" class="gr-equipment-cat-block">
+              <div class="gr-equipment-cat-header">
+                <span class="gr-cat-title">{{ cat.label }}</span>
+                <span class="gr-cat-ep font-mono">{{ cat.totalEP }} EP</span>
+              </div>
+              <div class="gr-equipment-cat-items">
+                <div v-for="item in cat.items" :key="item.id || item.name" class="gr-equipment-detail-item">
+                  <div class="gr-item-headline">
+                    <strong class="gr-item-name">{{ item.name }}</strong>
+                    <span class="gr-item-cost">({{ item.cost }} EP)</span>
+                    <span class="gr-item-status" :class="'status-' + (item.status || 'equipped')">[{{ item.statusLabel }}]</span>
+                  </div>
+                  <div v-if="item.tacticalSummary" class="gr-item-stats">
+                    <strong>Stats:</strong> {{ item.tacticalSummary }}
+                  </div>
+                  <div v-if="item.desc" class="gr-item-desc">
+                    {{ item.desc }}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
           <div v-else class="gr-empty-hint">
             No equipment or vehicles registered.
@@ -707,10 +729,35 @@ import { useUiStore } from '../../stores/uiStore.js';
 import { compileTargetedAttacks } from '../../rules/attacks.js';
 import { calculatePowerTotalCost } from '../../rules/powerEngine.js';
 import { formatPowerStatblock } from '../../rules/powerFormatter.js';
-import { getAllCharacterSkills, formatMod, getSkillAbility } from '../../utils/exporters/helpers.js';
+import { getAllCharacterSkills, formatMod, getSkillAbility, formatEquipmentItem } from '../../utils/exporters/helpers.js';
 
 const heroStore = useHeroStore();
 const uiStore = useUiStore();
+
+// Equipment compilation
+const formattedEquipment = computed(() => {
+  const raw = heroStore.character.resources || [];
+  return raw.map(r => formatEquipmentItem(r, heroStore)).filter(Boolean);
+});
+
+const equipmentCategories = computed(() => {
+  const defs = [
+    { key: 'weapon', label: 'Weapons' },
+    { key: 'armor', label: 'Armor & Shields' },
+    { key: 'vehicle', label: 'Vehicles' },
+    { key: 'hq', label: 'Headquarters' },
+    { key: 'gadget', label: 'Gadgets & Gear' }
+  ];
+  return defs.map(cat => {
+    const items = formattedEquipment.value.filter(r => r.categoryKey === cat.key);
+    return {
+      key: cat.key,
+      label: cat.label,
+      items,
+      totalEP: items.reduce((sum, r) => sum + r.cost, 0)
+    };
+  }).filter(g => g.items.length > 0);
+});
 
 // Attacks compilation (exactly 3 rows on Page 1)
 const compiledAttacks = computed(() => {
@@ -866,7 +913,7 @@ const hasPage2Content = computed(() => {
   return (
     Boolean(uiStore.alwaysIncludePage2) ||
     (uiStore.exportOptions.showPowers && overflowPowers.value.length > 0) ||
-    (uiStore.exportOptions.showEquipment && (heroStore.character.resources?.length || 0) > 8) ||
+    (uiStore.exportOptions.showEquipment && (heroStore.character.resources?.length || 0) > 4) ||
     (uiStore.exportOptions.showNotes && (heroStore.character.notes?.length || 0) > 160) ||
     (uiStore.exportOptions.showComplications && (heroStore.character.complications?.length || 0) > 3)
   );

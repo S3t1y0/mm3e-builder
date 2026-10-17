@@ -808,11 +808,12 @@ export function getActiveSlotTitle(pow) {
 }
 
 export function getSubPowerActiveEffect(sub) {
+  if (!sub) return {};
   if (sub.alternateEffects?.length > 0 && sub.activeSlotId && sub.activeSlotId !== 'main') {
     const alt = sub.alternateEffects.find(a => a.id === sub.activeSlotId);
     if (alt && alt.effect) return alt.effect;
   }
-  return sub.effect || {};
+  return sub.effect || (sub.baseEffect ? sub : {});
 }
 
 export function getSubPowerActiveLinkedEffects(sub) {

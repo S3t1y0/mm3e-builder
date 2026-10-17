@@ -4505,29 +4505,6 @@
   min-width: 140px;
 }
 
-.dndb-vital-header-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  width: 100%;
-}
-
-.pp-over-badge {
-  font-size: 0.62rem;
-  font-weight: 800;
-  color: #fff;
-  background: #dc2626;
-  border-radius: 3px;
-  padding: 1px 4px;
-  letter-spacing: 0.05em;
-  animation: pulse-danger 1.5s infinite;
-}
-
-@keyframes pulse-danger {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
-}
-
 .dndb-pp-val-row {
   font-size: 0.95rem;
   font-weight: 800;
@@ -4544,6 +4521,7 @@
 
 .dndb-pp-val-row #dndb-pp-spent.text-danger {
   color: #f87171;
+  text-shadow: 0 0 8px rgba(248, 113, 113, 0.45);
 }
 
 .dndb-pp-separator {

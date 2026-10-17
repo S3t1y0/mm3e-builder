@@ -1547,7 +1547,9 @@ function setActiveCompoundSubIndex(powId, target) {
   activeCompoundTabs.value[String(powId ?? '')] = target;
 }
 function getSelectedCompoundSub(pow, powId) {
-  const subs = Array.isArray(pow.compoundPowers) ? pow.compoundPowers : [];
+  const subs = Array.isArray(pow.compoundEffects)
+    ? pow.compoundEffects
+    : (Array.isArray(pow.compoundPowers) ? pow.compoundPowers : []);
   if (subs.length === 0) return { sub: null, idx: 0 };
   const targetIdx = getActiveCompoundSubIndex(powId);
   const boundedIdx = targetIdx >= 0 && targetIdx < subs.length ? targetIdx : 0;
@@ -1558,7 +1560,9 @@ function getSelectedCompoundSub(pow, powId) {
 }
 
 function isCompoundSubPrimary(pow, sub, sIdx) {
-  return sIdx === 0;
+  if (sub?.isPrimaryAction) return true;
+  if (!pow?.compoundEffects?.some(c => c.isPrimaryAction) && sIdx === 0) return true;
+  return false;
 }
 </script>
 

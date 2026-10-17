@@ -965,16 +965,57 @@
 }
 
 .gr-gear-list {
-  font-size: 8.5px;
+  font-size: 8px;
   line-height: 1.35;
   color: #334155;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.gr-gear-item-line {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.gr-gear-item strong {
+.gr-gear-name {
   color: #0f172a;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.gr-gear-ep {
+  color: #0284c7;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.gr-gear-stats {
+  color: #475569;
+  font-style: italic;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 7.8px;
+}
+
+.gr-gear-desc {
+  color: #64748b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 7.8px;
+}
+
+.gr-gear-overflow-note {
+  font-size: 7.5px;
+  color: #0284c7;
+  font-style: italic;
+  margin-top: 2px;
 }
 
 /* Complications and Power Points */
@@ -1122,6 +1163,97 @@
 
 .gr-overflow-equipment {
   min-height: 90px;
+  padding-top: 15px;
+}
+
+.gr-equipment-cat-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 4px;
+}
+
+.gr-equipment-cat-block {
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  padding: 5px 7px;
+  background: #f8fafc;
+}
+
+.gr-equipment-cat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #cbd5e1;
+  padding-bottom: 3px;
+  margin-bottom: 4px;
+}
+
+.gr-cat-title {
+  font-size: 8.8px;
+  font-weight: 800;
+  color: #0f172a;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.gr-cat-ep {
+  font-size: 8.5px;
+  font-weight: 700;
+  color: #0284c7;
+}
+
+.gr-equipment-cat-items {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 5px;
+}
+
+.gr-equipment-detail-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 3px;
+  padding: 4px 6px;
+  font-size: 8.2px;
+  line-height: 1.35;
+}
+
+.gr-item-headline {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.gr-item-name {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.gr-item-cost {
+  color: #0284c7;
+  font-weight: 600;
+}
+
+.gr-item-status {
+  font-size: 7.5px;
+  font-weight: 600;
+  color: #16a34a;
+}
+
+.gr-item-status.status-stored {
+  color: #d97706;
+}
+
+.gr-item-stats {
+  color: #334155;
+  font-size: 7.8px;
+  margin-top: 2px;
+}
+
+.gr-item-desc {
+  color: #64748b;
+  font-size: 7.5px;
+  margin-top: 1px;
 }
 
 .gr-overflow-bio {

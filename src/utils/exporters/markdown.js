@@ -177,17 +177,23 @@ export function buildMarkdownSheet(character, heroStore, options = {}) {
 
   if (opts.showEquipment) {
     md += `## Equipment, Vehicles & Headquarters (${data.equipment.totalEP} / ${data.equipment.maxEP} EP)\n\n`;
-    if (data.equipment.resources.length === 0) {
+    if (!data.equipment.categories || data.equipment.categories.length === 0) {
       md += `*No equipment, vehicles, or headquarters registered.*\n\n`;
     } else {
-      data.equipment.resources.forEach(r => {
-        const cost = r.epCost ?? r.cost ?? 1;
-        const subStr = r.subtype ? `(${r.subtype})` : `(${r.type || 'Gear'})`;
-        const statusStr = r.status ? ` [Status: ${r.status}]` : '';
-        const descStr = r.desc ? ` - ${r.desc}` : '';
-        md += `- **${r.name}** ${subStr} (${cost} EP)${statusStr}${descStr}\n`;
+      data.equipment.categories.forEach(cat => {
+        md += `### ${cat.label} (${cat.totalEP} EP)\n\n`;
+        cat.items.forEach(r => {
+          const statusStr = r.statusLabel ? ` [Status: ${r.statusLabel}]` : '';
+          md += `- **${r.name}** (${r.subtypeLabel}) (${r.cost} EP)${statusStr}\n`;
+          if (r.tacticalSummary) {
+            md += `  - *Stats:* ${r.tacticalSummary}\n`;
+          }
+          if (r.desc) {
+            md += `  - *Description:* ${r.desc}\n`;
+          }
+        });
+        md += `\n`;
       });
-      md += `\n`;
     }
     md += `---\n\n`;
   }

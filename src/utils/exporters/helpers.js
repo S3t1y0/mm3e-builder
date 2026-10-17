@@ -5,6 +5,20 @@ import { calculateDC, resolveSpecialConfig, formatRange, formatPowerStatblock } 
 import { resolveEffectRulesBlock, formatDistanceRank } from '../../rules/powerRuleDescriptions.js';
 
 import { formatMod, formatModifier } from '../../rules/abilities.js';
+import {
+  isWeapon,
+  isShield,
+  isArmor,
+  getWeaponAttackBonus,
+  getWeaponDC,
+  getWeaponResistance,
+  getWeaponRange,
+  getArmorProtection,
+  getShieldBonus,
+  getItemCategoryKey,
+  getSubtypeLabel,
+  formatEquipmentStatus
+} from '../../rules/equipmentCalculator.js';
 
 export { formatMod, formatModifier };
 
@@ -419,6 +433,86 @@ export function formatEffectRulesPlainText(eff, baseIndent = '   ') {
 }
 
 /**
+ * Normalizes an equipment item into a rich, tactical export-ready structure.
+ *
+ * @param {Object} r - Equipment item from character.resources
+ * @param {Object} heroStore - Pinia hero store instance
+ * @returns {Object} Normalized equipment item
+ */
+export function formatEquipmentItem(r, heroStore = null) {
+  if (!r) return null;
+  const categoryKey = getItemCategoryKey(r);
+  const subtypeLabel = getSubtypeLabel(r);
+  const statusLabel = formatEquipmentStatus(r.status);
+  const cost = Number(r.epCost ?? r.cost ?? 0);
+
+  const tacticalStats = [];
+
+  if (isWeapon(r)) {
+    const atk = getWeaponAttackBonus(r, heroStore);
+    const dc = getWeaponDC(r, heroStore);
+    const res = getWeaponResistance(r);
+    const range = getWeaponRange(r);
+    tacticalStats.push(`Atk +${atk}`);
+    tacticalStats.push(`DC ${dc} ${res}`);
+    tacticalStats.push(`Range: ${range}`);
+    if (r.weapon?.crit) {
+      tacticalStats.push(`Crit ${r.weapon.crit}`);
+    }
+    const traits = Array.isArray(r.weapon?.traits) && r.weapon.traits.length > 0
+      ? r.weapon.traits.join(', ')
+      : null;
+    if (traits) {
+      tacticalStats.push(`Traits: ${traits}`);
+    }
+  } else if (isShield(r)) {
+    const shieldBonus = getShieldBonus(r);
+    tacticalStats.push(`+${shieldBonus} Active Defense (Dodge & Parry)`);
+  } else if (isArmor(r)) {
+    const prot = getArmorProtection(r);
+    tacticalStats.push(`+${prot} Toughness / Protection`);
+    if (r.armor?.imperviousRank) {
+      tacticalStats.push(`Impervious ${r.armor.imperviousRank}`);
+    }
+    if (Array.isArray(r.armor?.extras) && r.armor.extras.length > 0) {
+      tacticalStats.push(`Extras: ${r.armor.extras.join(', ')}`);
+    }
+  } else if (categoryKey === 'vehicle') {
+    const v = r.vehicle || {};
+    if (v.size) tacticalStats.push(`Size: ${v.size}`);
+    if (v.strength !== undefined) tacticalStats.push(`STR ${v.strength}`);
+    if (v.speedMph) tacticalStats.push(`Speed: ${v.speedMph}`);
+    else if (v.speedRank !== undefined) tacticalStats.push(`Speed Rank ${v.speedRank}`);
+    if (v.defense !== undefined) tacticalStats.push(`Defense ${v.defense}`);
+    if (v.toughness !== undefined) tacticalStats.push(`Toughness ${v.toughness}`);
+    if (Array.isArray(v.features) && v.features.length > 0) {
+      tacticalStats.push(`Features: ${v.features.join(', ')}`);
+    }
+  } else if (categoryKey === 'hq') {
+    const h = r.hq || {};
+    if (h.size) tacticalStats.push(`Size: ${h.size}`);
+    if (h.toughness !== undefined) tacticalStats.push(`Toughness ${h.toughness}`);
+    if (Array.isArray(h.features) && h.features.length > 0) {
+      const featureNames = h.features.map(f => (typeof f === 'string' ? f : f.name)).filter(Boolean);
+      tacticalStats.push(`Features: ${featureNames.join(', ')}`);
+    }
+  }
+
+  const tacticalSummary = tacticalStats.join(' • ');
+
+  return {
+    ...r,
+    categoryKey,
+    subtypeLabel,
+    statusLabel,
+    cost,
+    tacticalStats,
+    tacticalSummary,
+    desc: r.desc || ''
+  };
+}
+
+/**
  * Compiles a canonical, normalized character export dataset.
  * Serves as the single source of truth for Plain Text, Markdown, and BBCode exporters.
  *
@@ -665,8 +759,29 @@ export function compileExportData(character = {}, heroStore = null, options = {}
 
   const movement = getMovementModes(character);
 
-  const resources = character.resources || [];
-  const totalEP = heroStore?.totalEP ?? resources.reduce((sum, r) => sum + (Number(r.epCost ?? r.cost) || 0), 0);
+  const rawResources = Array.isArray(character.resources) ? character.resources : [];
+  const formattedResources = rawResources.map(r => formatEquipmentItem(r, heroStore)).filter(Boolean);
+
+  const categoryDefinitions = [
+    { key: 'weapon', label: 'Weapons' },
+    { key: 'armor', label: 'Armor & Shields' },
+    { key: 'vehicle', label: 'Vehicles' },
+    { key: 'hq', label: 'Headquarters' },
+    { key: 'gadget', label: 'Gadgets & Gear' }
+  ];
+
+  const equipmentCategories = categoryDefinitions.map(cat => {
+    const items = formattedResources.filter(r => r.categoryKey === cat.key);
+    const totalEP = items.reduce((sum, r) => sum + r.cost, 0);
+    return {
+      key: cat.key,
+      label: cat.label,
+      items,
+      totalEP
+    };
+  }).filter(group => group.items.length > 0);
+
+  const totalEP = heroStore?.totalEP ?? formattedResources.reduce((sum, r) => sum + r.cost, 0);
   const maxEP = (heroStore?.getAdvantageRanks ? heroStore.getAdvantageRanks('Equipment') : 0) * 5;
 
   const comps = character.complications || [];
@@ -714,7 +829,8 @@ export function compileExportData(character = {}, heroStore = null, options = {}
     powers,
     movement,
     equipment: {
-      resources,
+      resources: formattedResources,
+      categories: equipmentCategories,
       totalEP,
       maxEP
     },

@@ -169,17 +169,23 @@ export function buildBBCodeSheet(character, heroStore, options = {}) {
 
   if (opts.showEquipment) {
     bb += `[b][size=4][color=#2563eb]■ EQUIPMENT, VEHICLES & HEADQUARTERS (${data.equipment.totalEP} / ${data.equipment.maxEP} EP)[/color][/size][/b]\n`;
-    if (data.equipment.resources.length === 0) {
+    if (!data.equipment.categories || data.equipment.categories.length === 0) {
       bb += `[i]No equipment, vehicles, or headquarters registered.[/i]\n\n`;
     } else {
-      data.equipment.resources.forEach(r => {
-        const cost = r.epCost ?? r.cost ?? 1;
-        const subStr = r.subtype ? `(${r.subtype})` : `(${r.type || 'Gear'})`;
-        const statusStr = r.status ? ` [Status: ${r.status}]` : '';
-        const descStr = r.desc ? ` - ${r.desc}` : '';
-        bb += `• [b]${r.name}[/b] ${subStr} (${cost} EP)${statusStr}${descStr}\n`;
+      data.equipment.categories.forEach(cat => {
+        bb += `[b][color=#1e40af]▶ ${cat.label} (${cat.totalEP} EP)[/color][/b]\n`;
+        cat.items.forEach(r => {
+          const statusStr = r.statusLabel ? ` [color=#15803d][${r.statusLabel}][/color]` : '';
+          bb += `• [b]${r.name}[/b] (${r.subtypeLabel}) (${r.cost} EP)${statusStr}\n`;
+          if (r.tacticalSummary) {
+            bb += `  [i]Stats: ${r.tacticalSummary}[/i]\n`;
+          }
+          if (r.desc) {
+            bb += `  Desc: ${r.desc}\n`;
+          }
+        });
+        bb += `\n`;
       });
-      bb += `\n`;
     }
     bb += `[hr]\n\n`;
   }

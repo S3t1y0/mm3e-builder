@@ -255,15 +255,7 @@
         <div
           class="dndb-vital-box pp-box"
         >
-          <div class="dndb-vital-header-row">
-            <span class="dndb-vital-label">POWER POINTS</span>
-            <span
-              v-if="heroStore.remainingPP < 0"
-              class="pp-over-badge"
-            >
-              {{ Math.abs(heroStore.remainingPP) }} OVER
-            </span>
-          </div>
+          <span class="dndb-vital-label">POWER POINTS</span>
 
           <div class="dndb-pp-val-row font-mono">
             <span id="dndb-pp-spent" :class="{ 'text-danger': heroStore.remainingPP < 0 }">{{ heroStore.totalSpentPP }}</span>
