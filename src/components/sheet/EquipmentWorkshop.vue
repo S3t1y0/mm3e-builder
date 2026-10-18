@@ -138,7 +138,8 @@
             <button
               type="button"
               class="btn-icon-subtle"
-              @click="openCustomStudio(item.category || item.type || 'Weapons')"
+              title="Edit Equipment Item"
+              @click="openCustomStudio(item)"
             >
               <i class="ri-edit-line"></i>
             </button>
@@ -276,6 +277,7 @@
     <CustomEquipmentModal
       v-model="showCustomStudio"
       :initial-category="customStudioCategory"
+      :editing-item="editingEquipmentItem"
     />
   </div>
 </template>
@@ -297,6 +299,7 @@ const {
   showPresetModal,
   showCustomStudio,
   customStudioCategory,
+  editingEquipmentItem,
   presetSearch,
   budgetInfo,
   openCustomStudio,

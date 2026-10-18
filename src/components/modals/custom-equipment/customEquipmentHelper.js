@@ -161,6 +161,7 @@ export function calculateDC(heroStore, weaponConfig) {
 }
 
 export function buildEquipmentResource({
+  id,
   cat,
   name,
   totalEP,
@@ -172,7 +173,7 @@ export function buildEquipmentResource({
   hqConfig
 }) {
   const newResource = {
-    id: 'res_' + Date.now() + Math.random().toString(36).substr(2, 4),
+    id: id || ('res_' + Date.now() + Math.random().toString(36).substr(2, 4)),
     name,
     type: cat === 'Weapons' ? 'Gear' : (cat === 'Armor' ? 'Gear' : cat),
     subtype: cat === 'Weapons'
@@ -233,4 +234,133 @@ export function buildEquipmentResource({
   }
 
   return newResource;
+}
+
+/**
+ * Reconstructs equipment studio form states from an existing saved resource item.
+ * Supports weapons, armor, vehicles, headquarters, and gadgets.
+ */
+export function parseResourceToConfigs(item) {
+  if (!item) return null;
+
+  // 1. Determine Category
+  let category = 'Gadget';
+  if (item.weapon || item.subtype === 'weapon_melee' || item.subtype === 'weapon_ranged' || item.category === 'Weapons') {
+    category = 'Weapons';
+  } else if (item.armor || item.subtype === 'armor' || item.subtype === 'shield' || item.category === 'Armor') {
+    category = 'Armor';
+  } else if (item.vehicle || item.type === 'Vehicle' || item.category === 'Vehicle') {
+    category = 'Vehicle';
+  } else if (item.hq || item.type === 'Headquarters' || item.category === 'Headquarters') {
+    category = 'Headquarters';
+  } else if (item.category === 'Gadget' || item.type === 'Gadget' || item.type === 'Gear') {
+    category = 'Gadget';
+  }
+
+  // 2. Parse Weapon Config
+  const defW = createDefaultWeaponConfig();
+  const w = item.weapon || {};
+  const traits = Array.isArray(w.traits) ? w.traits : [];
+
+  const getTraitRank = (prefix) => {
+    const match = traits.find(t => typeof t === 'string' && t.startsWith(prefix));
+    if (!match) return 0;
+    const parts = match.split(' ');
+    return parts.length > 1 ? (parseInt(parts[1], 10) || 0) : 0;
+  };
+  const hasTrait = (prefix) => traits.some(t => typeof t === 'string' && (t === prefix || t.startsWith(prefix + ' ')));
+
+  let critBonus = 0;
+  if (w.crit) {
+    if (w.crit === '19-20') critBonus = 1;
+    else if (w.crit === '18-20') critBonus = 2;
+    else if (w.crit === '17-20') critBonus = 3;
+    else if (w.crit.includes('-20')) {
+      const lower = parseInt(w.crit.split('-')[0], 10);
+      if (!isNaN(lower)) critBonus = Math.max(0, 20 - lower);
+    }
+  }
+
+  const weaponConfig = {
+    ...defW,
+    rangeType: w.range === 'Ranged' ? 'Ranged' : 'Close',
+    damageRank: w.damageRank ?? (item.subtype === 'weapon_ranged' || item.subtype === 'weapon_melee' ? (item.epCost ?? 3) : defW.damageRank),
+    isStrengthBased: w.isStrengthBased ?? false,
+    critBonus,
+    multiattack: hasTrait('Multiattack'),
+    multiattackRanks: getTraitRank('Multiattack') || (w.damageRank ?? defW.damageRank),
+    burstArea: hasTrait('Area Burst'),
+    burstAreaRanks: getTraitRank('Area Burst') || (w.damageRank ?? defW.damageRank),
+    penetratingRank: getTraitRank('Penetrating'),
+    reachRank: getTraitRank('Reach'),
+    subtle: hasTrait('Subtle') || hasTrait('Suppressed'),
+    thrown: hasTrait('Thrown'),
+    laserSight: (w.attackBonus > 0) || hasTrait('Laser Sight'),
+    laserSightRanks: w.attackBonus || getTraitRank('Laser Sight') || 0,
+    improvedRange: hasTrait('Improved Range'),
+    improvedRangeRanks: getTraitRank('Improved Range'),
+    ricochet: hasTrait('Ricochet'),
+    ricochetRanks: getTraitRank('Ricochet'),
+    homing: hasTrait('Homing'),
+    homingRanks: getTraitRank('Homing')
+  };
+
+  // 3. Parse Armor Config
+  const defA = createDefaultArmorConfig();
+  const a = item.armor || {};
+  const armorConfig = {
+    ...defA,
+    protectionRank: a.protectionRank ?? (item.subtype === 'armor' ? (item.epCost ?? 3) : 0),
+    imperviousRank: a.imperviousRank ?? 0,
+    shieldRank: a.shieldRank ?? a.activeDefenseBonus ?? (item.subtype === 'shield' ? (item.epCost ?? 2) : 0),
+    subtle: Boolean(a.subtle),
+    immunities: Array.isArray(a.immunities) ? [...a.immunities] : [],
+    secondChance: Boolean(a.secondChance)
+  };
+
+  // 4. Parse Vehicle Config
+  const defV = createDefaultVehicleConfig();
+  const v = item.vehicle || {};
+  const vehicleConfig = {
+    ...defV,
+    size: v.size || defV.size,
+    str: v.str ?? defV.str,
+    speedType: v.speedType || defV.speedType,
+    speedRank: v.speedRank ?? defV.speedRank,
+    defense: v.defense ?? defV.defense,
+    toughness: v.toughness ?? defV.toughness,
+    impervious: v.impervious ?? defV.impervious,
+    features: Array.isArray(v.features) ? [...v.features] : []
+  };
+
+  // 5. Parse HQ Config
+  const defH = createDefaultHqConfig();
+  const h = item.hq || {};
+  const hqConfig = {
+    ...defH,
+    size: h.size || defH.size,
+    toughness: h.toughness ?? defH.toughness,
+    features: Array.isArray(h.features) ? [...h.features] : []
+  };
+
+  // 6. Parse Gadget Config
+  const defG = createDefaultGadgetConfig();
+  const gadgetConfig = {
+    ...defG,
+    mode: 'custom',
+    customCost: item.epCost ?? item.cost ?? 1,
+    customDesc: item.desc || ''
+  };
+
+  return {
+    category,
+    itemName: item.name || '',
+    itemStatus: item.status || 'equipped',
+    customDescription: item.desc || '',
+    weaponConfig,
+    armorConfig,
+    vehicleConfig,
+    hqConfig,
+    gadgetConfig
+  };
 }

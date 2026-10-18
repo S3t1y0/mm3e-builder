@@ -5,8 +5,8 @@
         <!-- Studio Header -->
         <div class="eq-studio-header">
           <div class="header-branding">
-            <span class="studio-badge">M&M 3E RULES</span>
-            <h3 class="studio-title">Custom Equipment Workshop</h3>
+            <span class="studio-badge">{{ editingItemId ? 'EDIT ITEM' : 'M&M 3E RULES' }}</span>
+            <h3 class="studio-title">{{ editingItemId ? 'Edit Equipment Item' : 'Custom Equipment Workshop' }}</h3>
           </div>
 
           <!-- Studio Navigation Tabs in Header -->
@@ -167,7 +167,7 @@
                 :class="{ 'btn-step-save-primary': currentStep === 4 }"
                 @click="saveEquipmentItem"
               >
-                <i class="ri-check-line"></i> {{ currentStep === 4 ? 'Create & Add to Sheet' : 'Save Equipment' }}
+                <i class="ri-check-line"></i> {{ editingItemId ? 'Save Changes' : (currentStep === 4 ? 'Create & Add to Sheet' : 'Save Equipment') }}
               </button>
             </div>
           </div>
@@ -180,6 +180,7 @@
             :cost-breakdown="costBreakdown"
             :budget-info="budgetInfo"
             :projected-budget-info="projectedBudgetInfo"
+            :is-editing="Boolean(editingItemId)"
             @sync-budget="syncEquipmentAdvantage"
           />
         </div>
@@ -208,7 +209,8 @@ import {
   getNameSuggestions,
   calculateAtkBonus,
   calculateDC,
-  buildEquipmentResource
+  buildEquipmentResource,
+  parseResourceToConfigs
 } from './custom-equipment/customEquipmentHelper.js';
 import EquipmentStepSpecs from './custom-equipment/EquipmentStepSpecs.vue';
 import EquipmentStepTraits from './custom-equipment/EquipmentStepTraits.vue';
@@ -223,6 +225,10 @@ const props = defineProps({
   initialCategory: {
     type: String,
     default: 'Weapons'
+  },
+  editingItem: {
+    type: Object,
+    default: null
   }
 });
 
@@ -235,6 +241,7 @@ const uiStore = useUiStore();
 const currentStep = ref(1);
 const steps = STEPS;
 const categoryCards = CATEGORY_CARDS;
+const editingItemId = ref(null);
 
 // Selection State
 const selectedCategory = ref('Weapons');
@@ -277,6 +284,7 @@ function ensureItemName() {
 watch(
   () => props.initialCategory,
   (newCat) => {
+    if (props.editingItem) return;
     if (newCat) selectCategory(newCat);
     else ensureItemName();
   },
@@ -288,10 +296,34 @@ watch(
   (val) => {
     if (val) {
       currentStep.value = 1;
-      if (props.initialCategory) {
-        selectCategory(props.initialCategory);
+      if (props.editingItem) {
+        editingItemId.value = props.editingItem.id || null;
+        const parsed = parseResourceToConfigs(props.editingItem);
+        if (parsed) {
+          selectedCategory.value = parsed.category;
+          itemName.value = parsed.itemName;
+          itemStatus.value = parsed.itemStatus;
+          customDescription.value = parsed.customDescription;
+          weaponConfig.value = { ...parsed.weaponConfig };
+          armorConfig.value = { ...parsed.armorConfig };
+          vehicleConfig.value = { ...parsed.vehicleConfig };
+          hqConfig.value = { ...parsed.hqConfig };
+          gadgetConfig.value = { ...parsed.gadgetConfig };
+        }
       } else {
-        ensureItemName();
+        editingItemId.value = null;
+        weaponConfig.value = createDefaultWeaponConfig();
+        armorConfig.value = createDefaultArmorConfig();
+        vehicleConfig.value = createDefaultVehicleConfig();
+        hqConfig.value = createDefaultHqConfig();
+        gadgetConfig.value = createDefaultGadgetConfig();
+        itemStatus.value = 'equipped';
+        customDescription.value = '';
+        if (props.initialCategory) {
+          selectCategory(props.initialCategory);
+        } else {
+          ensureItemName();
+        }
       }
     }
   }
@@ -360,11 +392,18 @@ const calculatedTotalCost = computed(() => costBreakdown.value.total);
 // Hero Budget Calculations
 const budgetInfo = computed(() => heroStore.getEquipmentBudgetInfo());
 
+const editingItemEp = computed(() => {
+  if (!props.editingItem) return 0;
+  return Number(props.editingItem.epCost ?? props.editingItem.cost ?? 0);
+});
+
 const projectedBudgetInfo = computed(() => {
   const currentTotal = budgetInfo.value.totalEP;
   const capacity = budgetInfo.value.maxEP;
   const itemCost = calculatedTotalCost.value;
-  const projectedUsed = currentTotal + itemCost;
+  const projectedUsed = editingItemId.value
+    ? Math.max(0, currentTotal - editingItemEp.value + itemCost)
+    : currentTotal + itemCost;
   const isOverBudget = projectedUsed > capacity;
   const deficit = Math.max(0, projectedUsed - capacity);
   const neededRanks = Math.ceil(projectedUsed / 5);
@@ -423,8 +462,10 @@ function saveEquipmentItem() {
 
   const cat = selectedCategory.value;
   const totalEP = calculatedTotalCost.value;
+  const isEditing = Boolean(editingItemId.value);
 
-  const newResource = buildEquipmentResource({
+  const resourceData = buildEquipmentResource({
+    id: editingItemId.value || undefined,
     cat,
     name,
     totalEP,
@@ -437,9 +478,14 @@ function saveEquipmentItem() {
     gadgetConfig: gadgetConfig.value
   });
 
-  heroStore.addResource(newResource);
-  uiStore.showToast(`Added "${name}" (${totalEP} EP) to equipment!`, 'success');
-  emit('item-created', newResource);
+  if (isEditing) {
+    heroStore.updateResource(editingItemId.value, resourceData);
+    uiStore.showToast(`Updated "${name}" (${totalEP} EP)!`, 'success');
+  } else {
+    heroStore.addResource(resourceData);
+    uiStore.showToast(`Added "${name}" (${totalEP} EP) to equipment!`, 'success');
+  }
+  emit('item-created', resourceData);
   closeModal();
 }
 </script>

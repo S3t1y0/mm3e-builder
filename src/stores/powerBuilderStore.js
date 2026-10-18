@@ -362,6 +362,10 @@ export const usePowerBuilderStore = defineStore('powerBuilder', {
       this.isModifierInspectorOpen = false;
     },
 
+    closeStudio() {
+      this.closeModal();
+    },
+
     setStructureType(newType) {
       if (this.power.type === newType) return;
       const prevType = this.power.type;

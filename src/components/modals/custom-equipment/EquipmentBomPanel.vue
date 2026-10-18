@@ -70,7 +70,7 @@
           <strong class="font-mono">{{ budgetInfo?.totalEP || 0 }} EP</strong>
         </div>
         <div class="b-stat">
-          <span class="b-stat-lbl">After Adding:</span>
+          <span class="b-stat-lbl">{{ isEditing ? 'After Changes:' : 'After Adding:' }}</span>
           <strong class="font-mono" :class="projectedBudgetInfo?.isOverBudget ? 'text-amber' : 'text-emerald'">
             {{ projectedBudgetInfo?.projectedUsed || 0 }} EP
           </strong>
@@ -123,6 +123,10 @@ defineProps({
   projectedBudgetInfo: {
     type: Object,
     default: () => ({ projectedUsed: 0, capacity: 1, isOverBudget: false, deficit: 0, neededRanks: 0, remaining: 0 })
+  },
+  isEditing: {
+    type: Boolean,
+    default: false
   }
 });
 

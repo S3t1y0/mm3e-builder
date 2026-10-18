@@ -28,14 +28,30 @@ export function useEquipmentWorkflow(heroStore, uiStore) {
   const showPresetModal = ref(false);
   const showCustomStudio = ref(false);
   const customStudioCategory = ref('Weapons');
+  const editingEquipmentItem = ref(null);
   const presetSearch = ref('');
 
   const budgetInfo = computed(() => {
     return heroStore.getEquipmentBudgetInfo();
   });
 
-  function openCustomStudio(cat = 'Weapons') {
-    customStudioCategory.value = cat;
+  function openCustomStudio(catOrItem = 'Weapons') {
+    if (typeof catOrItem === 'object' && catOrItem !== null) {
+      editingEquipmentItem.value = catOrItem;
+      const cat = catOrItem.weapon ? 'Weapons'
+        : catOrItem.armor ? 'Armor'
+        : catOrItem.vehicle ? 'Vehicle'
+        : catOrItem.hq ? 'Headquarters'
+        : (catOrItem.subtype?.includes('weapon') ? 'Weapons'
+        : catOrItem.subtype === 'armor' || catOrItem.subtype === 'shield' ? 'Armor'
+        : catOrItem.type === 'Vehicle' ? 'Vehicle'
+        : catOrItem.type === 'Headquarters' ? 'Headquarters'
+        : 'Gadget');
+      customStudioCategory.value = cat;
+    } else {
+      editingEquipmentItem.value = null;
+      customStudioCategory.value = catOrItem || 'Weapons';
+    }
     showCustomStudio.value = true;
     showPresetModal.value = false;
   }
@@ -91,6 +107,7 @@ export function useEquipmentWorkflow(heroStore, uiStore) {
     showPresetModal,
     showCustomStudio,
     customStudioCategory,
+    editingEquipmentItem,
     presetSearch,
     budgetInfo,
     openCustomStudio,
