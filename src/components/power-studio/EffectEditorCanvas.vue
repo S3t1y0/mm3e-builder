@@ -131,14 +131,14 @@
       <div v-else-if="builderStore.power.type === 'standard' && builderStore.activeTargetType === 'main' && !builderStore.isEditingLinkedEffect" class="sub-effect-identity-bar span-full">
         <div class="sub-name-group">
           <label class="sub-name-label">
-            <i class="ri-edit-line"></i>
-            <span>Effect Display Name (Optional)</span>
+            <i class="ri-price-tag-3-line"></i>
+            <span>Effect Sub-Label / Variant Name (Optional)</span>
           </label>
           <input
             v-model="effect.name"
             type="text"
             class="sub-name-input"
-            :placeholder="`e.g. Custom name for ${effect.baseEffect || 'Effect'}...`"
+            :placeholder="`e.g. Custom variant for ${effect.baseEffect || 'Effect'}`"
           />
         </div>
       </div>
@@ -784,8 +784,9 @@ function calculateModSubtotal(mod, isFlaw = false) {
 }
 
 .sub-name-input:focus {
-  border-color: var(--accent-primary);
-  box-shadow: 0 0 0 1px rgba(0, 111, 184, 0.3);
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
 }
 
 .sub-role-actions {

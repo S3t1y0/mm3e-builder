@@ -746,7 +746,7 @@
                     :class="{ active: (sub.activeSlotId || 'main') === 'main' }"
                     @click="heroStore.setActiveCompoundSubSlot(pow.id, sIdx, 'main')"
                   >
-                    <i class="ri-star-fill" style="color: #fbbf24; font-size: 0.75rem; margin-right: 2px;"></i> {{ sub.effect?.name || sub.name || 'Primary' }}
+                    <i class="ri-focus-3-line sub-slot-primary-icon"></i> {{ sub.effect?.name || sub.name || 'Primary' }}
                   </button>
                   <button
                     v-for="alt in sub.alternateEffects"

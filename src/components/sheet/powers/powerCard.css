@@ -589,6 +589,12 @@
   box-shadow: none;
 }
 
+.sub-slot-primary-icon {
+  color: #fbbf24;
+  font-size: 0.75rem;
+  margin-right: 3px;
+}
+
 /* De-boxed Flowing Glance Summary Row (Collapsed State) */
 .glance-specs-flow {
   display: flex;

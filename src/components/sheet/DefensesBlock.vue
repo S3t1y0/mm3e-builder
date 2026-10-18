@@ -292,17 +292,7 @@
           </div>
 
           <div class="def-stepper-wrap">
-            <!-- Derived Resource Chips (Replaces Stepper for Toughness) -->
-            <div class="def-derived-chips">
-              <span v-if="protectionBonus > 0" class="derived-chip power">+{{ protectionBonus }} Pow</span>
-              <span v-if="equipmentArmorBonus > 0" class="derived-chip armor">+{{ equipmentArmorBonus }} Arm</span>
-              <span v-if="defensiveRollBonus > 0" class="derived-chip defroll" :class="{ lost: condMods.defRollLost > 0 }">
-                {{ condMods.defRollLost > 0 ? '0 Roll' : `+${defensiveRollBonus} Roll` }}
-              </span>
-              <span v-if="protectionBonus === 0 && equipmentArmorBonus === 0 && defensiveRollBonus === 0" class="derived-chip base">
-                Via STA
-              </span>
-            </div>
+            <span class="def-non-bought-dash font-mono">-</span>
           </div>
 
           <div class="def-roll-wrap">
@@ -728,51 +718,14 @@ function rollDefense(name, bonus) {
   border-radius: 3px;
 }
 
-/* Derived Resource Chips for Toughness */
-.def-derived-chips {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.derived-chip {
-  font-size: 0.65rem;
+.def-non-bought-dash {
+  font-size: 0.88rem;
   font-weight: 700;
-  padding: 0.12rem 0.35rem;
-  border-radius: 3px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-.derived-chip.power {
-  color: #38bdf8;
-  background: rgba(56, 189, 248, 0.1);
-  border: 1px solid rgba(56, 189, 248, 0.25);
-}
-
-.derived-chip.armor {
-  color: #34d399;
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.25);
-}
-
-.derived-chip.defroll {
-  color: #fbbf24;
-  background: rgba(245, 158, 11, 0.1);
-  border: 1px solid rgba(245, 158, 11, 0.25);
-}
-
-.derived-chip.defroll.lost {
-  color: #f87171;
-  background: rgba(239, 68, 68, 0.1);
-  border-color: rgba(239, 68, 68, 0.25);
-  text-decoration: line-through;
-}
-
-.derived-chip.base {
-  color: #94a3b8;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #64748b;
+  opacity: 0.5;
+  width: 72px;
+  text-align: center;
+  user-select: none;
 }
 
 /* Right Group: Roll Chip */

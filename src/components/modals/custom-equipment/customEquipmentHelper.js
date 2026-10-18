@@ -10,7 +10,7 @@ import {
 export const STEPS = [
   { num: 1, label: 'Identity', icon: 'ri-fingerprint-line' },
   { num: 2, label: 'Base Specs', icon: 'ri-settings-4-line' },
-  { num: 3, label: 'Traits & Features', icon: 'ri-magic-line' },
+  { num: 3, label: 'Traits & Features', icon: 'ri-equalizer-line' },
   { num: 4, label: 'Finalize & Summary', icon: 'ri-check-double-line' }
 ];
 

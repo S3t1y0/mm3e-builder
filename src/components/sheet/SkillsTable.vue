@@ -40,7 +40,7 @@
           @click="uiStore.toggleBypassTrainedOnly()"
         >
           <i :class="uiStore.bypassTrainedOnly ? 'ri-lock-unlock-line' : 'ri-lock-line'"></i>
-          <span class="bypass-text">{{ uiStore.bypassTrainedOnly ? 'Bypass' : 'Bypass' }}</span>
+          <span class="bypass-text">{{ uiStore.bypassTrainedOnly ? 'Bypassed' : 'Bypass' }}</span>
         </button>
       </div>
     </div>

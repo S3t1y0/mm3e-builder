@@ -93,14 +93,24 @@ html {
   overflow-x: hidden;
 }
 
-:focus-visible,
-input:focus-visible,
+/* Interactive Focus (Keyboard navigation for buttons, links, custom toggles) */
 button:focus-visible,
-select:focus-visible,
-textarea:focus-visible,
+[role="button"]:focus-visible,
 [tabindex]:focus-visible {
-  outline: 2px solid var(--accent-secondary) !important;
-  outline-offset: 2px !important;
+  outline: 2px solid var(--accent-secondary);
+  outline-offset: 2px;
+}
+
+/* Global Form Controls (Inputs, Textareas, Selects) - Single Clean Border, No Double Ring */
+input:focus,
+input:focus-visible,
+textarea:focus,
+textarea:focus-visible,
+select:focus,
+select:focus-visible {
+  outline: none !important;
+  border-color: #38bdf8 !important;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4) !important;
 }
 
 input::placeholder, textarea::placeholder {

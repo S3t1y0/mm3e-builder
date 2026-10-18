@@ -4521,7 +4521,6 @@
 
 .dndb-pp-val-row #dndb-pp-spent.text-danger {
   color: #f87171;
-  text-shadow: 0 0 8px rgba(248, 113, 113, 0.45);
 }
 
 .dndb-pp-separator {
@@ -4546,7 +4545,6 @@
 }
 
 .dndb-pp-segmented-bar.overbudget {
-  box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
   border: 1px solid #ef4444;
 }
 

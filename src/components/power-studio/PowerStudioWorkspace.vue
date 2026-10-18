@@ -9,19 +9,16 @@
           @click="builderStore.closeModal"
         >
           <i class="ri-arrow-left-line"></i>
-          <span>{{ uiStore.activeTab === 'wizard' ? 'Back' : 'Back' }}</span>
+          <span>{{ uiStore.activeTab === 'wizard' ? 'Back to Wizard' : 'Back to Sheet' }}</span>
         </button>
 
-        <div class="power-title-editor">
-          <input
-            v-model="builderStore.power.name"
-            type="text"
-            class="power-name-input"
-            placeholder="Power Name (e.g. Solar Blast, Aegis Suit)..."
-          />
-          <span class="power-type-badge" :class="builderStore.power.type">
-            {{ builderStore.power.type === 'device' ? 'Device' : builderStore.power.type === 'compound' ? 'Compound' : 'Standard' }}
+        <div class="power-header-title-wrap">
+          <span class="power-header-icon-badge">
+            <i class="ri-focus-3-line"></i>
           </span>
+          <h2 class="power-header-title">
+            {{ builderStore.power.name || 'Untitled Power' }}
+          </h2>
         </div>
 
         <div class="power-switcher-dropdown-group" v-if="heroStore.character.powers?.length > 0">
@@ -677,6 +674,32 @@
 
       <!-- PANE 2: CENTER STAGE (Crafting Canvas flex: 1) -->
       <section class="workspace-center-col" data-seamless-scroll>
+        <!-- DEDICATED HERO POWER IDENTITY BANNER -->
+        <div class="power-hero-banner">
+          <div class="power-hero-header">
+            <div class="power-hero-label-wrap">
+              <i class="ri-focus-3-line power-hero-icon"></i>
+              <span class="power-hero-label">Power Name</span>
+            </div>
+            <div class="power-hero-meta">
+              <span class="power-cost-summary font-mono">{{ builderStore.totalCost }} PP</span>
+            </div>
+          </div>
+
+          <div class="power-hero-input-wrap">
+            <input
+              v-model="builderStore.power.name"
+              type="text"
+              class="power-hero-name-input"
+              placeholder="Power Name (e.g. Solar Blast, Aegis Armor, Telepathic Scan)"
+              aria-label="Power Name"
+            />
+            <span class="power-hero-edit-indicator" title="Edit Power Name">
+              <i class="ri-edit-2-line"></i>
+            </span>
+          </div>
+        </div>
+
         <EffectEditorCanvas
           :key="canvasKey"
           :effect="builderStore.currentEditingEffect"
@@ -884,33 +907,31 @@ function handleSave() {
   border-color: var(--border-color);
 }
 
-.power-title-editor {
+.power-header-title-wrap {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  flex: 1;
-  max-width: 480px;
-  min-width: 180px;
+  gap: 0.55rem;
+  min-width: 0;
+  max-width: 440px;
 }
 
-.power-name-input {
-  width: 100%;
-  background: transparent;
-  border: 1px solid transparent;
-  color: #fff;
+.power-header-icon-badge {
+  color: #38bdf8;
+  font-size: 1.15rem;
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.power-header-title {
+  margin: 0;
   font-size: 1.05rem;
   font-weight: 800;
-  padding: 0.25rem 0.5rem;
-  border-radius: var(--radius-xs);
-  outline: none;
-  font-family: inherit;
-  transition: all var(--trans-fast);
-}
-
-.power-name-input:hover,
-.power-name-input:focus {
-  background: var(--bg-surface);
-  border-color: var(--border-color);
+  color: #f8fafc;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  letter-spacing: -0.01em;
 }
 
 .power-type-badge {
@@ -1484,6 +1505,142 @@ function handleSave() {
   overflow-y: auto;
   min-width: 0;
   padding-right: 0.25rem;
+}
+
+/* ==========================================================================
+   CENTER HERO POWER IDENTITY BANNER
+   ========================================================================== */
+.power-hero-banner {
+  background: linear-gradient(180deg, rgba(30, 41, 59, 0.75) 0%, rgba(15, 23, 42, 0.85) 100%);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: var(--radius-sm, 6px);
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.95rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  flex-shrink: 0;
+}
+
+.power-hero-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.power-hero-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.power-hero-icon {
+  font-size: 0.95rem;
+  color: #38bdf8;
+}
+
+.power-hero-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: #94a3b8;
+}
+
+.power-hero-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.power-type-pill {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+}
+
+.power-type-pill.compound {
+  background: rgba(234, 179, 8, 0.12);
+  border-color: rgba(234, 179, 8, 0.3);
+  color: #fbbf24;
+}
+
+.power-type-pill.device {
+  background: rgba(168, 85, 247, 0.12);
+  border-color: rgba(168, 85, 247, 0.3);
+  color: #c084fc;
+}
+
+.power-cost-summary {
+  font-size: 0.78rem;
+  font-weight: 800;
+  color: #38bdf8;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 0.15rem 0.45rem;
+  border-radius: 3px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.power-hero-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.power-hero-name-input {
+  width: 100%;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-xs, 4px);
+  color: #ffffff;
+  font-size: 1.15rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  padding: 0.5rem 2.2rem 0.5rem 0.75rem;
+  font-family: inherit;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+.power-hero-name-input:hover {
+  border-color: rgba(56, 189, 248, 0.4);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.power-hero-name-input:focus {
+  outline: none;
+  border-color: #38bdf8;
+  background: #0b1120;
+  box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+}
+
+.power-hero-name-input::placeholder {
+  color: #64748b;
+  font-weight: 500;
+  font-size: 0.95rem;
+}
+
+.power-hero-edit-indicator {
+  position: absolute;
+  right: 0.75rem;
+  color: #64748b;
+  font-size: 0.95rem;
+  pointer-events: none;
+  transition: color 0.15s ease;
+}
+
+.power-hero-name-input:focus ~ .power-hero-edit-indicator,
+.power-hero-name-input:hover ~ .power-hero-edit-indicator {
+  color: #38bdf8;
 }
 
 /* ==========================================================================
