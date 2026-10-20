@@ -81,11 +81,15 @@ export function buildEffectBreakdown(baseEffect, effect = {}, dc = 15, res = 'To
       desc: 'Inflicts 2 conditions simultaneously at each degree of failure'
     });
   }
-  if (flaws.some(f => f.name === 'Limited Degree')) {
+  const limMod = flaws.find(f => f.name === 'Limited Degree');
+  if (limMod) {
+    const limRanks = Number(limMod.ranks) || 1;
     tacticalModifiers.push({
       name: 'Limited Degree',
-      badge: 'Limited Degree',
-      desc: 'Effect is capped at a specific maximum degree (e.g. 2nd degree)'
+      badge: limRanks > 1 ? `Limited Degree Rk ${limRanks}` : 'Limited Degree',
+      desc: limRanks >= 2
+        ? 'Target only suffers 1st degree conditions; 2nd and 3rd degrees are eliminated'
+        : 'Target suffers up to 2nd degree maximum; 3rd degree conditions are eliminated'
     });
   }
   if (flaws.some(f => f.name === 'Instant Recovery')) {
@@ -123,17 +127,35 @@ export function buildEffectBreakdown(baseEffect, effect = {}, dc = 15, res = 'To
   let resistanceGuide = `Target makes ${res} resistance check vs DC ${dc}`;
 
   if (baseEffect === 'Affliction') {
-    const parseConditions = (degVal, defVal) => {
-      if (Array.isArray(degVal) && degVal.length > 0) return degVal.filter(Boolean);
-      if (typeof degVal === 'string' && degVal.trim()) {
-        return degVal.split(/\s*(?:&|,)\s*/).filter(Boolean);
+    const extraMod = extras.find(e => e.name === 'Extra Condition');
+    const extraRanks = extraMod ? (Number(extraMod.ranks) || 1) : 0;
+    const condsPerDegree = 1 + extraRanks;
+
+    const limMod = flaws.find(f => f.name === 'Limited Degree');
+    const limRanks = limMod ? (Number(limMod.ranks) || 1) : 0;
+
+    const parseConditions = (degArr, degStr, defVal, defaultExtras = []) => {
+      let list = [];
+      if (Array.isArray(degArr) && degArr.length > 0) {
+        list = [...degArr.filter(Boolean)];
+      } else if (typeof degStr === 'string' && degStr.trim()) {
+        list = degStr.split(/\s*(?:&|,)\s*/).filter(Boolean);
+      } else {
+        list = [defVal];
       }
-      return [defVal];
+      if (list.length < condsPerDegree && typeof degStr === 'string' && degStr.includes('&')) {
+        const fromStr = degStr.split(/\s*(?:&|,)\s*/).filter(Boolean);
+        if (fromStr.length > list.length) list = fromStr;
+      }
+      while (list.length < condsPerDegree) {
+        list.push(defaultExtras[list.length - 1] || 'Vulnerable');
+      }
+      return list.slice(0, condsPerDegree);
     };
 
-    let first = parseConditions(cfg.firstConditions || cfg.firstDegree, 'Dazed');
-    let second = parseConditions(cfg.secondConditions || cfg.secondDegree, 'Stunned');
-    let third = parseConditions(cfg.thirdConditions || cfg.thirdDegree, 'Paralyzed');
+    let first = parseConditions(cfg.firstConditions, cfg.firstDegree, 'Dazed', ['Vulnerable', 'Hindered']);
+    let second = parseConditions(cfg.secondConditions, cfg.secondDegree, 'Stunned', ['Defenseless', 'Immobile']);
+    let third = parseConditions(cfg.thirdConditions, cfg.thirdDegree, 'Paralyzed', ['Incapacitated', 'Controlled']);
 
     const contextName = (opt.slotName || effect.name || '').toLowerCase();
     if (!cfg.firstConditions && !cfg.firstDegree) {
@@ -156,26 +178,33 @@ export function buildEffectBreakdown(baseEffect, effect = {}, dc = 15, res = 'To
         conditions: first,
         desc: first.map(c => getConditionExplanation(c)).join(' • '),
         isSevere: first.some(c => isConditionSevere(c))
-      },
-      {
+      }
+    ];
+
+    if (limRanks < 2) {
+      degrees.push({
         degree: '2nd',
         label: '2nd Degree',
         margin: 'Fail by 6-10',
         conditions: second,
         desc: second.map(c => getConditionExplanation(c)).join(' • '),
         isSevere: second.some(c => isConditionSevere(c))
-      },
-      {
+      });
+    }
+
+    if (limRanks < 1) {
+      degrees.push({
         degree: '3rd',
         label: '3rd Degree',
         margin: 'Fail by 11+',
         conditions: third,
         desc: third.map(c => getConditionExplanation(c)).join(' • '),
         isSevere: third.some(c => isConditionSevere(c))
-      }
-    ];
+      });
+    }
 
-    summary = `Affliction (${first.join(' & ')} > ${second.join(' & ')} > ${third.join(' & ')})`;
+    const summaryParts = degrees.map(d => d.conditions.join(' & '));
+    summary = `Affliction (${summaryParts.join(' > ')})`;
     resistanceGuide = `Target makes ${res} resistance check vs DC ${dc} (DC 10 + Rank ${effect.ranks || (dc - 10)})`;
   } else if (baseEffect === 'Damage' || baseEffect === 'Blast') {
     degrees = [

@@ -220,7 +220,17 @@
 
       <!-- TAB 3: IMPORT -->
       <div v-else-if="activeMode === 'import'" class="modal-body">
-        <div class="import-upload-zone" @dragover.prevent @drop.prevent="handleFileDrop" @click="triggerFileInput">
+        <div
+          class="import-upload-zone"
+          role="button"
+          tabindex="0"
+          aria-label="Upload JSON character file"
+          @dragover.prevent
+          @drop.prevent="handleFileDrop"
+          @click="triggerFileInput"
+          @keydown.enter="triggerFileInput"
+          @keydown.space.prevent="triggerFileInput"
+        >
           <input
             type="file"
             ref="fileInputRef"
@@ -966,6 +976,11 @@ watch(() => uiStore.modals.exportImport, (open) => {
 .import-upload-zone:hover {
   border-color: var(--accent-primary);
   background: rgba(59, 130, 246, 0.08);
+}
+
+.import-upload-zone:focus-visible {
+  outline: 2px solid var(--accent-primary, #006fb8);
+  outline-offset: 2px;
 }
 
 .upload-icon-circle {

@@ -424,7 +424,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, onMounted } from 'vue';
 import { EXTRAS, FLAWS, normalizeModifier } from '../../../rules/powerEngine.js';
 
 const props = defineProps({
@@ -539,6 +539,33 @@ function getDegreeCondition(degreeKey, slotIndex) {
   return '';
 }
 
+function syncConditionsWithModifier(perDeg = conditionsPerDegree.value) {
+  if (!props.effect) return;
+  props.effect.config = props.effect.config || {};
+  const p1 = getDegreeCondition('first', 0);
+  const s1 = getDegreeCondition('first', 1);
+  const t1 = getDegreeCondition('first', 2);
+  const p2 = getDegreeCondition('second', 0);
+  const s2 = getDegreeCondition('second', 1);
+  const t2 = getDegreeCondition('second', 2);
+  const p3 = getDegreeCondition('third', 0);
+  const s3 = getDegreeCondition('third', 1);
+  const t3 = getDegreeCondition('third', 2);
+
+  props.effect.config.firstConditions = [p1, s1, t1].slice(0, perDeg);
+  props.effect.config.firstDegree = props.effect.config.firstConditions.join(' & ');
+
+  props.effect.config.secondConditions = [p2, s2, t2].slice(0, perDeg);
+  props.effect.config.secondDegree = props.effect.config.secondConditions.join(' & ');
+
+  props.effect.config.thirdConditions = [p3, s3, t3].slice(0, perDeg);
+  props.effect.config.thirdDegree = props.effect.config.thirdConditions.join(' & ');
+
+  if (!props.effect.config.resistance && props.effect.resistance) {
+    props.effect.config.resistance = props.effect.resistance;
+  }
+}
+
 function onConditionSelect(degreeKey, slotIndex, val) {
   props.effect.config = props.effect.config || {};
   const keyArr = `${degreeKey}Conditions`;
@@ -549,10 +576,24 @@ function onConditionSelect(degreeKey, slotIndex, val) {
     : [getDegreeCondition(degreeKey, 0), getDegreeCondition(degreeKey, 1), getDegreeCondition(degreeKey, 2)];
 
   currentArr[slotIndex] = val;
+  for (let i = 0; i < conditionsPerDegree.value; i++) {
+    if (!currentArr[i]) {
+      currentArr[i] = getDegreeCondition(degreeKey, i);
+    }
+  }
   props.effect.config[keyArr] = currentArr;
   props.effect.config[keyStr] = currentArr.slice(0, conditionsPerDegree.value).filter(Boolean).join(' & ');
   updateConfig();
 }
+
+onMounted(() => {
+  if (props.effect) {
+    const c = props.effect.config;
+    if (!c || !Array.isArray(c.firstConditions) || c.firstConditions.length < conditionsPerDegree.value) {
+      syncConditionsWithModifier(conditionsPerDegree.value);
+    }
+  }
+});
 
 function getDegreeSummary(degreeNum) {
   const c = props.effect?.config;
@@ -635,10 +676,8 @@ function toggleAfflictionModifier(modName, isFlaw = false) {
   const idx = list.findIndex(m => m.name === modName);
   if (idx !== -1) {
     list.splice(idx, 1);
-    if (modName === 'Extra Condition' && props.effect.config) {
-      if (props.effect.config.firstConditions?.[0]) props.effect.config.firstDegree = props.effect.config.firstConditions[0];
-      if (props.effect.config.secondConditions?.[0]) props.effect.config.secondDegree = props.effect.config.secondConditions[0];
-      if (props.effect.config.thirdConditions?.[0]) props.effect.config.thirdDegree = props.effect.config.thirdConditions[0];
+    if (modName === 'Extra Condition') {
+      syncConditionsWithModifier(1);
     }
   } else {
     const source = isFlaw ? FLAWS : EXTRAS;
@@ -654,18 +693,8 @@ function toggleAfflictionModifier(modName, isFlaw = false) {
       category: found.category,
       options: found.options
     }));
-    if (modName === 'Extra Condition' && props.effect.config) {
-      const p1 = getDegreeCondition('first', 0);
-      const s1 = getDegreeCondition('first', 1);
-      props.effect.config.firstDegree = `${p1} & ${s1}`;
-
-      const p2 = getDegreeCondition('second', 0);
-      const s2 = getDegreeCondition('second', 1);
-      props.effect.config.secondDegree = `${p2} & ${s2}`;
-
-      const p3 = getDegreeCondition('third', 0);
-      const s3 = getDegreeCondition('third', 1);
-      props.effect.config.thirdDegree = `${p3} & ${s3}`;
+    if (modName === 'Extra Condition') {
+      syncConditionsWithModifier(2);
     }
   }
   updateConfig();
@@ -682,10 +711,8 @@ function setModifierRank(modName, isFlaw = false, targetRank = 0) {
   if (targetRank <= 0) {
     if (idx !== -1) {
       list.splice(idx, 1);
-      if (modName === 'Extra Condition' && props.effect.config) {
-        if (props.effect.config.firstConditions?.[0]) props.effect.config.firstDegree = props.effect.config.firstConditions[0];
-        if (props.effect.config.secondConditions?.[0]) props.effect.config.secondDegree = props.effect.config.secondConditions[0];
-        if (props.effect.config.thirdConditions?.[0]) props.effect.config.thirdDegree = props.effect.config.thirdConditions[0];
+      if (modName === 'Extra Condition') {
+        syncConditionsWithModifier(1);
       }
     }
   } else {
@@ -707,22 +734,8 @@ function setModifierRank(modName, isFlaw = false, targetRank = 0) {
       }));
     }
 
-    if (modName === 'Extra Condition' && props.effect.config) {
-      const perDeg = 1 + targetRank;
-      const p1 = getDegreeCondition('first', 0);
-      const s1 = getDegreeCondition('first', 1);
-      const t1 = getDegreeCondition('first', 2);
-      props.effect.config.firstDegree = [p1, s1, t1].slice(0, perDeg).join(' & ');
-
-      const p2 = getDegreeCondition('second', 0);
-      const s2 = getDegreeCondition('second', 1);
-      const t2 = getDegreeCondition('second', 2);
-      props.effect.config.secondDegree = [p2, s2, t2].slice(0, perDeg).join(' & ');
-
-      const p3 = getDegreeCondition('third', 0);
-      const s3 = getDegreeCondition('third', 1);
-      const t3 = getDegreeCondition('third', 2);
-      props.effect.config.thirdDegree = [p3, s3, t3].slice(0, perDeg).join(' & ');
+    if (modName === 'Extra Condition') {
+      syncConditionsWithModifier(1 + targetRank);
     }
   }
   updateConfig();

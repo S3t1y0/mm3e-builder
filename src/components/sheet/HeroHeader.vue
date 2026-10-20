@@ -6,7 +6,7 @@
         <!-- Dynamic Hero Crest / Initials Emblem (F-12) -->
         <div class="dndb-avatar-crest">
           <span v-if="heroInitials" class="avatar-initials">{{ heroInitials }}</span>
-          <i v-else class="ri-shield-star-line"></i>
+          <i v-else class="ri-shield-user-line"></i>
         </div>
 
         <div class="dndb-name-block">
@@ -243,7 +243,15 @@
         </div>
 
         <!-- Initiative Badge -->
-        <div class="dndb-vital-box init-box" @click="rollInitiative">
+        <div
+          class="dndb-vital-box init-box"
+          role="button"
+          tabindex="0"
+          aria-label="Roll Initiative Check"
+          @click="rollInitiative"
+          @keydown.enter="rollInitiative"
+          @keydown.space.prevent="rollInitiative"
+        >
           <span class="dndb-vital-label">INITIATIVE</span>
           <strong class="dndb-vital-val font-mono">
             {{ heroStore.initiativeTotal >= 0 ? `+${heroStore.initiativeTotal}` : heroStore.initiativeTotal }}

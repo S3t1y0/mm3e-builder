@@ -388,7 +388,7 @@ export const CONFIGURABLE_EFFECTS = {
       { id: 'exotic_mystic', name: 'Mystical Awareness', ranks: 1, category: 'mental_exotic', scope: 'single', scopeLabel: 'Single Sense', desc: 'Cloaked from magical divination, aura reading, arcane detection, and witch-sight.', icon: 'ri-sparkling-line' },
       { id: 'exotic_all', name: 'Other Exotic Sense Type', ranks: 2, category: 'mental_exotic', scope: 'type', scopeLabel: 'Entire Sense Type', desc: 'Total concealment from an entire exotic sense type (e.g. Cosmic Awareness, Divine Awareness, or Dimensional Awareness).', icon: 'ri-compass-3-line' },
 
-      { id: 'all_senses', name: 'All Senses (Non-Tactile)', ranks: 10, category: 'all', scope: 'universal', scopeLabel: 'Universal (All Types)', desc: 'Total concealment from all sense types other than tactile (visual, auditory, olfactory, radio, mental, and exotic). The ultimate cloak.', icon: 'ri-shield-star-line' }
+      { id: 'all_senses', name: 'All Senses (Non-Tactile)', ranks: 10, category: 'all', scope: 'universal', scopeLabel: 'Universal (All Types)', desc: 'Total concealment from all sense types other than tactile (visual, auditory, olfactory, radio, mental, and exotic).', icon: 'ri-shield-keyhole-line' }
     ],
     defaultSenses: ['visual_normal'],
     computeRanks: (config) => {

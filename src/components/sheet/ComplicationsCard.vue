@@ -24,7 +24,7 @@
     <div class="dndb-complications-content">
       <!-- Empty State -->
       <div v-if="allComplications.length === 0" class="comp-empty-container">
-        <i class="ri-shield-star-line comp-empty-glyph"></i>
+        <i class="ri-information-line comp-empty-glyph"></i>
         <p class="comp-empty-msg">
           No motivations or complications defined. M&amp;M 3e heroes require at least 1 motivation and 1 complication.
         </p>
@@ -34,14 +34,14 @@
             class="btn-quick-add motivation"
             @click="quickAdd('Motivation', 'Justice', 'Committed to bringing wrongdoers to justice and protecting fairness.')"
           >
-            <i class="ri-scales-3-line"></i> + Justice (Mot)
+            + Add Justice (Motivation)
           </button>
           <button
             type="button"
             class="btn-quick-add complication"
             @click="quickAdd('Secret Identity', 'Secret Identity', 'Must protect mundane civilian double-life and loved ones from villains.')"
           >
-            <i class="ri-spy-line"></i> + Secret Identity
+            + Add Secret Identity
           </button>
         </div>
       </div>

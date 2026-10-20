@@ -151,10 +151,40 @@ export function resolveSpecialConfig(effect) {
   }
 
   if (baseKey === 'affliction') {
-    const first = c.firstDegree || 'Dazed';
-    const second = c.secondDegree || 'Stunned';
-    const third = c.thirdDegree || 'Incapacitated';
-    const degrees = [first, second, third].filter(Boolean).join(' / ');
+    const limDegree = (effect.flaws || []).find(f => f.name === 'Limited Degree');
+    const limRanks = limDegree ? (Number(limDegree.ranks) || 1) : 0;
+    const extraMod = (effect.extras || []).find(e => e.name === 'Extra Condition');
+    const extraRanks = extraMod ? (Number(extraMod.ranks) || 1) : 0;
+    const condsPerDegree = 1 + extraRanks;
+
+    const resolveConditions = (arr, str, defVal, defaultExtras = []) => {
+      let list = [];
+      if (Array.isArray(arr) && arr.length > 0) {
+        list = [...arr.filter(Boolean)];
+      } else if (typeof str === 'string' && str.trim()) {
+        list = str.split(/\s*(?:&|,)\s*/).filter(Boolean);
+      } else {
+        list = [defVal];
+      }
+      if (list.length < condsPerDegree && typeof str === 'string' && str.includes('&')) {
+        const fromStr = str.split(/\s*(?:&|,)\s*/).filter(Boolean);
+        if (fromStr.length > list.length) list = fromStr;
+      }
+      while (list.length < condsPerDegree) {
+        list.push(defaultExtras[list.length - 1] || 'Vulnerable');
+      }
+      return list.slice(0, condsPerDegree).join(' & ');
+    };
+
+    const first = resolveConditions(c.firstConditions, c.firstDegree, 'Dazed', ['Vulnerable', 'Hindered']);
+    const second = resolveConditions(c.secondConditions, c.secondDegree, 'Stunned', ['Defenseless', 'Immobile']);
+    const third = resolveConditions(c.thirdConditions, c.thirdDegree, 'Incapacitated', ['Paralyzed', 'Controlled']);
+
+    const activeDegrees = [first];
+    if (limRanks < 2) activeDegrees.push(second);
+    if (limRanks < 1) activeDegrees.push(third);
+    const degrees = activeDegrees.join(' / ');
+
     const isProg = (effect.extras || []).some(e => e.name === 'Progressive');
     const isCum = (effect.extras || []).some(e => e.name === 'Cumulative');
     let mod = '';
@@ -398,11 +428,41 @@ export function formatEffectInlineSummary(effect, options = {}) {
       : `${rawBase} ${ranks}`;
   } else if (baseKey === 'affliction') {
     const dc = 10 + ranks;
-    const res = eff.resistance || 'Fortitude';
-    const first = c.firstDegree || 'Dazed';
-    const second = c.secondDegree || 'Stunned';
-    const third = c.thirdDegree || 'Incapacitated';
-    const degrees = [first, second, third].filter(Boolean).join('/');
+    const res = c.resistance || eff.resistance || 'Fortitude';
+    const limDegree = (eff.flaws || []).find(f => f.name === 'Limited Degree');
+    const limRanks = limDegree ? (Number(limDegree.ranks) || 1) : 0;
+    const extraMod = (eff.extras || []).find(e => e.name === 'Extra Condition');
+    const extraRanks = extraMod ? (Number(extraMod.ranks) || 1) : 0;
+    const condsPerDegree = 1 + extraRanks;
+
+    const resolveConditions = (arr, str, defVal, defaultExtras = []) => {
+      let list = [];
+      if (Array.isArray(arr) && arr.length > 0) {
+        list = [...arr.filter(Boolean)];
+      } else if (typeof str === 'string' && str.trim()) {
+        list = str.split(/\s*(?:&|,)\s*/).filter(Boolean);
+      } else {
+        list = [defVal];
+      }
+      if (list.length < condsPerDegree && typeof str === 'string' && str.includes('&')) {
+        const fromStr = str.split(/\s*(?:&|,)\s*/).filter(Boolean);
+        if (fromStr.length > list.length) list = fromStr;
+      }
+      while (list.length < condsPerDegree) {
+        list.push(defaultExtras[list.length - 1] || 'Vulnerable');
+      }
+      return list.slice(0, condsPerDegree).join(' & ');
+    };
+
+    const first = resolveConditions(c.firstConditions, c.firstDegree, 'Dazed', ['Vulnerable', 'Hindered']);
+    const second = resolveConditions(c.secondConditions, c.secondDegree, 'Stunned', ['Defenseless', 'Immobile']);
+    const third = resolveConditions(c.thirdConditions, c.thirdDegree, 'Incapacitated', ['Paralyzed', 'Controlled']);
+
+    const activeDegrees = [first];
+    if (limRanks < 2) activeDegrees.push(second);
+    if (limRanks < 1) activeDegrees.push(third);
+    const degrees = activeDegrees.join('/');
+
     const rng = eff.range === 'Ranged' ? 'Ranged ' : (eff.range === 'Perception' ? 'Perception ' : '');
     coreDesc = includeMech
       ? `${rng}Affliction ${ranks} (DC ${dc} vs ${res}; ${degrees})`

@@ -480,20 +480,35 @@ export function normalizeEffect(rawEffect) {
       }
       eff.config.traitName = eff.config.selectedTraits[0] || cfg.defaultTrait || 'Strength';
     } else if (cfg.type === 'affliction_builder') {
-      eff.config.resistance = eff.config.resistance || cfg.defaultResistance || 'Fortitude';
+      eff.config.resistance = eff.config.resistance || eff.resistance || cfg.defaultResistance || 'Fortitude';
       eff.config.preset = eff.config.preset || 'stun';
       
-      const parseConditions = (degVal, defVal) => {
-        if (Array.isArray(degVal) && degVal.length > 0) return degVal.filter(Boolean);
-        if (typeof degVal === 'string' && degVal.trim()) {
-          return degVal.split(/\s*(?:&|,)\s*/).filter(Boolean);
+      const extraMod = (eff.extras || []).find(e => e.name === 'Extra Condition');
+      const extraRanks = extraMod ? (Number(extraMod.ranks) || 1) : 0;
+      const condsPerDegree = 1 + extraRanks;
+
+      const parseConditions = (degArr, degStr, defVal, defaultExtras = []) => {
+        let list = [];
+        if (Array.isArray(degArr) && degArr.length > 0) {
+          list = [...degArr.filter(Boolean)];
+        } else if (typeof degStr === 'string' && degStr.trim()) {
+          list = degStr.split(/\s*(?:&|,)\s*/).filter(Boolean);
+        } else {
+          list = [defVal];
         }
-        return [defVal];
+        if (list.length < condsPerDegree && typeof degStr === 'string' && degStr.includes('&')) {
+          const fromStr = degStr.split(/\s*(?:&|,)\s*/).filter(Boolean);
+          if (fromStr.length > list.length) list = fromStr;
+        }
+        while (list.length < condsPerDegree) {
+          list.push(defaultExtras[list.length - 1] || 'Vulnerable');
+        }
+        return list.slice(0, condsPerDegree);
       };
 
-      eff.config.firstConditions = parseConditions(eff.config.firstConditions || eff.config.firstDegree, 'Dazed');
-      eff.config.secondConditions = parseConditions(eff.config.secondConditions || eff.config.secondDegree, 'Stunned');
-      eff.config.thirdConditions = parseConditions(eff.config.thirdConditions || eff.config.thirdDegree, 'Paralyzed');
+      eff.config.firstConditions = parseConditions(eff.config.firstConditions, eff.config.firstDegree, 'Dazed', ['Vulnerable', 'Hindered']);
+      eff.config.secondConditions = parseConditions(eff.config.secondConditions, eff.config.secondDegree, 'Stunned', ['Defenseless', 'Immobile']);
+      eff.config.thirdConditions = parseConditions(eff.config.thirdConditions, eff.config.thirdDegree, 'Paralyzed', ['Incapacitated', 'Controlled']);
 
       eff.config.firstDegree = eff.config.firstConditions.join(' & ');
       eff.config.secondDegree = eff.config.secondConditions.join(' & ');

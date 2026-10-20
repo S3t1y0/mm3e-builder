@@ -329,16 +329,32 @@ export function getEffectConfigDetails(eff) {
   if (base === 'Affliction') {
     const limDegree = (eff.flaws || []).find(f => f.name === 'Limited Degree');
     const limRanks = limDegree ? (Number(limDegree.ranks) || 1) : 0;
+    const extraMod = (eff.extras || []).find(e => e.name === 'Extra Condition');
+    const extraRanks = extraMod ? (Number(extraMod.ranks) || 1) : 0;
+    const condsPerDegree = 1 + extraRanks;
 
-    const first = Array.isArray(c.firstConditions) && c.firstConditions.length > 0
-      ? c.firstConditions.join(' & ')
-      : (c.firstDegree || 'Dazed');
-    const second = Array.isArray(c.secondConditions) && c.secondConditions.length > 0
-      ? c.secondConditions.join(' & ')
-      : (c.secondDegree || 'Stunned');
-    const third = Array.isArray(c.thirdConditions) && c.thirdConditions.length > 0
-      ? c.thirdConditions.join(' & ')
-      : (c.thirdDegree || 'Paralyzed');
+    const resolveConditions = (arr, str, defVal, defaultExtras = []) => {
+      let list = [];
+      if (Array.isArray(arr) && arr.length > 0) {
+        list = [...arr.filter(Boolean)];
+      } else if (typeof str === 'string' && str.trim()) {
+        list = str.split(/\s*(?:&|,)\s*/).filter(Boolean);
+      } else {
+        list = [defVal];
+      }
+      if (list.length < condsPerDegree && typeof str === 'string' && str.includes('&')) {
+        const fromStr = str.split(/\s*(?:&|,)\s*/).filter(Boolean);
+        if (fromStr.length > list.length) list = fromStr;
+      }
+      while (list.length < condsPerDegree) {
+        list.push(defaultExtras[list.length - 1] || 'Vulnerable');
+      }
+      return list.slice(0, condsPerDegree).join(' & ');
+    };
+
+    const first = resolveConditions(c.firstConditions, c.firstDegree, 'Dazed', ['Vulnerable', 'Hindered']);
+    const second = resolveConditions(c.secondConditions, c.secondDegree, 'Stunned', ['Defenseless', 'Immobile']);
+    const third = resolveConditions(c.thirdConditions, c.thirdDegree, 'Paralyzed', ['Incapacitated', 'Controlled']);
     const res = c.resistance || eff.resistance || 'Fortitude';
 
     const isProg = (eff.extras || []).some(e => e.name === 'Progressive');

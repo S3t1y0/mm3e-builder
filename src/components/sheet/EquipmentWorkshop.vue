@@ -598,7 +598,6 @@ function exportRoll20(item) {
   background: rgba(56, 189, 248, 0.15);
   border-color: rgba(56, 189, 248, 0.45);
   color: #38bdf8;
-  box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
 }
 
 .chip-count {
@@ -739,7 +738,6 @@ function exportRoll20(item) {
 }
 .res-status-pill.status-equipped .status-dot {
   background: #34d399;
-  box-shadow: 0 0 6px rgba(52, 211, 153, 0.6);
 }
 
 .res-status-pill.status-carried {

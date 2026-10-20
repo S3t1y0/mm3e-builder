@@ -222,7 +222,15 @@
               </span>
 
               <!-- Name with full category prefix and hover delete button -->
-              <div class="sheet-skill-info" @click="openSkillInspector(ruleSkill, inst)">
+              <div
+                class="sheet-skill-info"
+                role="button"
+                tabindex="0"
+                :aria-label="`Inspect skill ${formatSpecializationName(ruleSkill.name, inst.subtype)}`"
+                @click="openSkillInspector(ruleSkill, inst)"
+                @keydown.enter="openSkillInspector(ruleSkill, inst)"
+                @keydown.space.prevent="openSkillInspector(ruleSkill, inst)"
+              >
                 <div class="sheet-skill-title-row">
                   <span 
                     class="sheet-skill-name is-clickable"
@@ -314,7 +322,15 @@
               </span>
 
               <!-- Name -->
-              <div class="sheet-skill-info" @click="openSkillInspector(ruleSkill)">
+              <div
+                class="sheet-skill-info"
+                role="button"
+                tabindex="0"
+                :aria-label="`Inspect skill ${ruleSkill.name}`"
+                @click="openSkillInspector(ruleSkill)"
+                @keydown.enter="openSkillInspector(ruleSkill)"
+                @keydown.space.prevent="openSkillInspector(ruleSkill)"
+              >
                 <div class="sheet-skill-title-row">
                   <span 
                     class="sheet-skill-name is-clickable"
@@ -858,6 +874,13 @@ function openSkillInspector(ruleSkill, inst = null) {
   flex-direction: column;
   gap: 0.1rem;
   min-width: 0;
+  cursor: pointer;
+}
+
+.sheet-skill-info:focus-visible {
+  outline: 2px solid var(--accent-secondary, #2a8fd6);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 .sheet-skill-title-row {
