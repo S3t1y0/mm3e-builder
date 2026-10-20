@@ -643,11 +643,13 @@
   background: transparent;
   border: none;
   padding: 0;
-  margin-bottom: 0.35rem;
+  margin-bottom: 0.15rem;
 }
 
 .pow-glance-summary.is-expanded-mode-strip .array-glance-switcher {
-  padding-bottom: 0.35rem;
+  padding-bottom: 0.3rem;
+  margin-top: 0.15rem;
+  margin-bottom: 0.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 }
 
@@ -830,9 +832,9 @@
   gap: 0.35rem 0.55rem;
   font-size: 0.74rem;
   color: var(--text-secondary);
-  padding: 0.15rem 0.2rem 0.45rem 0.2rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  margin-bottom: 0.45rem;
+  padding: 0.15rem 0.2rem 0.4rem 0.2rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 0.15rem;
 }
 
 .submeta-item {
@@ -1049,9 +1051,9 @@
 
 /* Expanded Systems Nav Bar */
 .expanded-systems-nav {
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.45rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding-bottom: 0.4rem;
+  padding-bottom: 0.35rem;
 }
 
 /* Horizontal Systems Nav Bar */
@@ -1062,6 +1064,12 @@
   border-top: 1px solid rgba(255, 255, 255, 0.05);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
   overflow-x: auto;
+}
+
+.drawer-content-flow .device-systems-nav-bar {
+  border-top: none;
+  padding-top: 0;
+  margin-top: 0;
 }
 
 .systems-tab-scroll {
@@ -1123,7 +1131,8 @@
 /* Compound Components Nav Tabs */
 .device-systems-nav-bar.compound-components-nav {
   border-color: rgba(14, 165, 233, 0.15);
-  margin-bottom: 0.6rem;
+  margin-bottom: 0.45rem;
+  padding-bottom: 0.35rem;
 }
 
 .compound-tab-item {
@@ -1526,9 +1535,17 @@
   border: none;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 0;
-  padding: 0.85rem 0 0.25rem 0;
-  margin-top: 0.75rem;
+  padding: 0.35rem 0 0.25rem 0;
+  margin-top: 0.35rem;
   animation: fadeIn 180ms ease-out;
+}
+
+/* When submeta or expanded glance summary is above drawer, remove duplicate top border & collapse gap */
+.pow-card-submeta ~ .pow-expanded-drawer,
+.pow-glance-summary.is-expanded-mode-strip + .pow-expanded-drawer {
+  border-top: none;
+  margin-top: 0.15rem;
+  padding-top: 0.1rem;
 }
 
 @keyframes fadeIn {
@@ -2329,13 +2346,22 @@
 }
 
 .sub-sys-heading {
-  font-size: 1.02rem;
-  font-weight: 800;
+  font-size: 0.92rem;
+  font-weight: 700;
   color: #ffffff;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.01em;
   margin: 0;
   display: inline-flex;
   align-items: center;
+  text-transform: none;
+}
+
+.standard-effect-custom-heading {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: -0.01em;
+  text-transform: none;
 }
 
 .sub-effect-chip {

@@ -728,14 +728,35 @@ export function broadcastFlaw(pow, flaw, parentEffectName = null) {
   uiStore.showToast(`Broadcasted Flaw "${displayName}" to Roll20!`, 'info');
 }
 
-// Set tracking expanded cards
+export function getPowerDescriptorsText(pow) {
+  if (!pow) return '';
+  if (pow.descriptor && typeof pow.descriptor === 'string' && pow.descriptor.trim()) {
+    return pow.descriptor.trim();
+  }
+  if (Array.isArray(pow.descriptors)) {
+    const list = pow.descriptors.filter(d => typeof d === 'string' && d.trim().length > 0);
+    return list.join(', ');
+  }
+  if (typeof pow.descriptors === 'string' && pow.descriptors.trim()) {
+    return pow.descriptors.trim();
+  }
+  return '';
+}
 
 export function hasPowerSubMeta(pow) {
   if (!pow) return false;
-  if (pow.type && pow.type !== 'standard') return true;
+  if (pow.type === 'device') return true;
+  if (pow.type === 'compound') {
+    return Boolean(
+      (pow.sharedModifiers && pow.sharedModifiers.length > 0) ||
+      getPowerDescriptorsText(pow) ||
+      (pow.activation && pow.activation !== 'none') ||
+      (pow.compoundEffects && pow.compoundEffects.length > 0)
+    );
+  }
   if (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0) return true;
   if (pow.activation && pow.activation !== 'none') return true;
-  if (pow.descriptor || pow.descriptors) return true;
+  if (getPowerDescriptorsText(pow)) return true;
   return false;
 }
 

@@ -81,10 +81,9 @@
             ARRAY ({{ (pow.alternateEffects?.length || 0) + 1 }} MODES)
           </span>
 
-          <span v-if="(pow.type && pow.type !== 'standard') || (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0)" class="submeta-dot">•</span>
-
           <!-- Device Details -->
           <template v-if="pow.type === 'device'">
+            <span class="submeta-dot">•</span>
             <span class="submeta-item">
               <i class="ri-shield-keyhole-line text-cyan"></i>
               <span>{{ pow.deviceConfig?.descriptor || 'High-Tech Equipment' }}</span>
@@ -103,34 +102,52 @@
           </template>
 
           <!-- Compound Details -->
-          <template v-else-if="pow.type === 'compound' && pow.sharedModifiers?.length > 0">
-            <span class="submeta-item">
-              <i class="ri-links-line"></i>
-              <span>Shared: {{ formatModifiersInline(pow.sharedModifiers) }}</span>
-            </span>
+          <template v-else-if="pow.type === 'compound'">
+            <template v-if="pow.sharedModifiers?.length > 0">
+              <span class="submeta-dot">•</span>
+              <span class="submeta-item">
+                <i class="ri-links-line"></i>
+                <span>Shared: {{ formatModifiersInline(pow.sharedModifiers) }}</span>
+              </span>
+            </template>
+            <template v-if="getPowerDescriptorsText(pow)">
+              <span class="submeta-dot">•</span>
+              <span class="submeta-item">
+                <i class="ri-price-tag-3-line"></i>
+                <span>{{ getPowerDescriptorsText(pow) }}</span>
+              </span>
+            </template>
           </template>
 
           <!-- Array Details -->
           <template v-else-if="pow.type === 'array' || (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0)">
-            <span v-if="pow.dynamic" class="submeta-item text-amber">
-              <i class="ri-shuffle-line"></i>
-              <span>Dynamic Array</span>
-            </span>
-            <span v-if="pow.descriptor || pow.descriptors" class="submeta-item">
-              {{ pow.descriptor || pow.descriptors }}
-            </span>
+            <template v-if="pow.dynamic">
+              <span class="submeta-dot">•</span>
+              <span class="submeta-item text-amber">
+                <i class="ri-shuffle-line"></i>
+                <span>Dynamic Array</span>
+              </span>
+            </template>
+            <template v-if="getPowerDescriptorsText(pow)">
+              <span class="submeta-dot">•</span>
+              <span class="submeta-item">
+                <i class="ri-price-tag-3-line"></i>
+                <span>{{ getPowerDescriptorsText(pow) }}</span>
+              </span>
+            </template>
           </template>
 
           <!-- Standard Power Descriptor -->
-          <template v-else-if="pow.descriptor || pow.descriptors">
+          <template v-else-if="getPowerDescriptorsText(pow)">
             <span class="submeta-item">
-              {{ pow.descriptor || pow.descriptors }}
+              <i class="ri-price-tag-3-line"></i>
+              <span>{{ getPowerDescriptorsText(pow) }}</span>
             </span>
           </template>
 
           <!-- Activation Flaw -->
           <template v-if="pow.activation && pow.activation !== 'none'">
-            <span class="submeta-dot">•</span>
+            <span v-if="pow.type !== 'standard' || getPowerDescriptorsText(pow)" class="submeta-dot">•</span>
             <span class="submeta-item flaw-text">
               <i class="ri-timer-flash-line"></i>
               Activation: {{ pow.activation === 'move' ? 'Move (-1 PP)' : 'Standard (-2 PP)' }}
@@ -346,23 +363,35 @@
           <div v-if="pow.type !== 'device' && pow.type !== 'compound'" class="drawer-content-flow">
             <!-- 1. Base Effect Core Rules & Mechanics -->
             <div class="dossier-block effect-rules-block">
-              <div class="dossier-block-head">
-                <div class="dossier-head-left">
-                  <i class="ri-flashlight-line dossier-effect-icon"></i>
-                  <span v-if="getActiveSlotTitle(pow)" class="active-stunt-mode-title">{{ getActiveSlotTitle(pow) }}:</span>
-                  <span class="sub-effect-chip standard-effect-chip">
-                    <strong v-if="!isEffectNameRedundant(pow.name, getActiveEffect(pow).baseEffect)" class="sub-effect-name">{{ getActiveEffect(pow).baseEffect }}</strong>
-                    <span class="sub-effect-rank">Rank {{ getActiveEffect(pow).ranks }}</span>
-                  </span>
+              <div class="sub-card-master-header standard-power-master-header">
+                <div class="sub-sys-title-block">
+                  <div class="sub-sys-title-line">
+                    <span v-if="getActiveSlotTitle(pow)" class="active-stunt-mode-title">{{ getActiveSlotTitle(pow) }}:</span>
+                    <h4
+                      v-if="getActiveEffect(pow).name && !isEffectNameRedundant(getActiveEffect(pow).name, getActiveEffect(pow).baseEffect) && !isEffectNameRedundant(pow.name, getActiveEffect(pow).name)"
+                      class="sub-sys-heading standard-effect-custom-heading"
+                    >
+                      {{ getActiveEffect(pow).name }}
+                    </h4>
+                    <span class="sub-effect-chip standard-effect-chip">
+                      <strong v-if="!isEffectNameRedundant(pow.name, getActiveEffect(pow).baseEffect)" class="sub-effect-name">{{ getActiveEffect(pow).baseEffect }}</strong>
+                      <span class="sub-effect-rank">Rank {{ getActiveEffect(pow).ranks }}</span>
+                    </span>
+                  </div>
                 </div>
-                <button
-                  type="button"
-                  class="btn-effect-vtt"
-                  title="Broadcast Effect to Roll20"
-                  @click.stop="broadcastEffect(pow, getActiveEffect(pow))"
-                >
-                  <i class="ri-broadcast-line"></i>
-                </button>
+                <div class="sub-sys-actions">
+                  <span v-if="calculateDC(getActiveEffect(pow))" class="sub-dc-tag-lg">
+                    {{ calculateDC(getActiveEffect(pow)) }}
+                  </span>
+                  <button
+                    type="button"
+                    class="btn-send-vtt-sub"
+                    title="Broadcast Effect to Roll20"
+                    @click.stop="broadcastEffect(pow, getActiveEffect(pow))"
+                  >
+                    <i class="ri-broadcast-line"></i>
+                  </button>
+                </div>
               </div>
 
               <!-- Combat Specs Matrix Grid (Placed First for instant battle reference) -->
@@ -1637,6 +1666,7 @@ import {
   broadcastExtra,
   broadcastFlaw,
   hasPowerSubMeta,
+  getPowerDescriptorsText,
   formatModifiersInline,
   formatLinkedInline,
   getEffectIcon,
