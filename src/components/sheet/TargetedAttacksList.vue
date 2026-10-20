@@ -6,17 +6,8 @@
         <h3>Targeted Attacks</h3>
       </div>
 
-      <!-- Quick Initiative & Filter Controls -->
+      <!-- Filter Controls -->
       <div class="header-actions-wrap">
-        <button
-          type="button"
-          class="quick-init-btn"
-          @click="heroStore.rollInitiative()"
-        >
-          <i class="ri-speed-up-line"></i>
-          <span>Init {{ heroStore.initiativeTotal >= 0 ? `+${heroStore.initiativeTotal}` : heroStore.initiativeTotal }}</span>
-        </button>
-
         <div class="filter-pills-row">
           <button
             v-for="flt in ['All', 'Active Only', 'Close', 'Ranged']"
@@ -65,10 +56,10 @@
               <span class="atk-title">{{ atk.name }}</span>
               <span v-if="atk.source && atk.source !== atk.name" class="atk-source-tag">({{ atk.source }})</span>
             </div>
-            <div class="atk-meta-row">
-              <span class="atk-type-pill" :class="atk.range === 'Ranged' ? 'ranged' : 'close'">
-                {{ atk.range }} Attack
-              </span>
+            <div
+              v-if="((atk.isCompoundLinked || atk.isLinkedCombo) && atk.linkedTargets?.length > 1) || atk.isPowerDisabled || atk.isStandby"
+              class="atk-meta-row"
+            >
               <span v-if="(atk.isCompoundLinked || atk.isLinkedCombo) && atk.linkedTargets?.length > 1" class="atk-linked-badge">
                 <i class="ri-git-merge-line"></i> LINKED COMBO
               </span>

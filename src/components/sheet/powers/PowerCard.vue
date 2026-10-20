@@ -317,7 +317,6 @@
               <div class="chip-label-group">
                 <div class="chip-title-line">
                   <strong class="chip-sys-name">{{ sub.name || `Component #${sIdx + 1}` }}</strong>
-                  <span v-if="sub.alternateEffects?.length > 0" class="array-indicator-pill">ARRAY</span>
                 </div>
                 <span class="chip-sys-effect">
                   {{ getSubPowerActiveEffect(sub).baseEffect }} {{ getSubPowerActiveEffect(sub).ranks || 1 }}R
@@ -568,10 +567,6 @@
                     @keydown.space.prevent="toggleLinkedCard(String(pow.id ?? idx) + '_std_linked_' + lIdx)"
                   >
                     <div class="linked-master-left">
-                      <div class="linked-index-badge">
-                        <i class="ri-links-line"></i>
-                        <span>#{{ lIdx + 1 }}</span>
-                      </div>
                       <div class="linked-title-group">
                         <div class="linked-title-row">
                           <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
@@ -797,7 +792,6 @@
                 >
                   <i :class="isCompoundSubPrimary(pow, sub, sIdx) ? 'ri-star-fill' : getEffectIcon(getSubPowerActiveEffect(sub).baseEffect)" class="tab-icon"></i>
                   <span class="tab-label">{{ sub.name || `Component #${sIdx + 1}` }}</span>
-                  <span v-if="isCompoundSubPrimary(pow, sub, sIdx)" class="tab-primary-badge">PRIMARY</span>
                   <span class="tab-ranks-pill">{{ getSubPowerActiveEffect(sub).ranks || 1 }}R</span>
                 </button>
               </div>
@@ -824,9 +818,6 @@
                     >
                       <strong v-if="!isEffectNameRedundant(sub.name, getSubPowerActiveEffect(sub).baseEffect)" class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
                       <span class="sub-effect-rank">Rank {{ getSubPowerActiveEffect(sub).ranks || 1 }}</span>
-                    </span>
-                    <span v-if="sub.alternateEffects?.length > 0" class="sub-array-indicator">
-                      <i class="ri-shuffle-line"></i> Array ({{ sub.alternateEffects.length + 1 }} Modes)
                     </span>
                   </div>
                 </div>
@@ -1066,10 +1057,6 @@
                       @keydown.space.prevent="toggleLinkedCard(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx)"
                     >
                       <div class="linked-master-left">
-                        <div class="linked-index-badge">
-                          <i class="ri-links-line"></i>
-                          <span>#{{ lIdx + 1 }}</span>
-                        </div>
                         <div class="linked-title-group">
                           <div class="linked-title-row">
                             <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
@@ -1272,9 +1259,6 @@
                         <strong v-if="!isEffectNameRedundant(sub.name, getSubPowerActiveEffect(sub).baseEffect)" class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
                         <span class="sub-effect-rank">Rank {{ getSubPowerActiveEffect(sub).ranks }}</span>
                       </span>
-                      <span v-if="sub.alternateEffects?.length > 0" class="sub-array-indicator">
-                        <i class="ri-shuffle-line"></i> Array ({{ sub.alternateEffects.length + 1 }} Modes)
-                      </span>
                     </div>
                   </div>
                   <div class="sub-sys-actions">
@@ -1446,10 +1430,6 @@
                       @keydown.space.prevent="toggleLinkedCard(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx)"
                     >
                       <div class="linked-master-left">
-                        <div class="linked-index-badge">
-                          <i class="ri-links-line"></i>
-                          <span>#{{ lIdx + 1 }}</span>
-                        </div>
                         <div class="linked-title-group">
                           <div class="linked-title-row">
                             <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>

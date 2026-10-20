@@ -39,7 +39,6 @@
             <i class="ri-shield-keyhole-line"></i> + Device
           </button>
         </div>
-        <span class="header-total-badge">{{ heroStore.totalPowerPP }} PP Total</span>
       </div>
     </div>
 
@@ -292,16 +291,7 @@ function handleCreatePower(type) {
   transform: scale(0.96);
 }
 
-.header-total-badge {
-  font-size: 0.78rem;
-  font-weight: 800;
-  color: #60a5fa;
-  background: rgba(0, 111, 184, 0.12);
-  border: 1px solid rgba(0, 111, 184, 0.3);
-  padding: 0.2rem 0.65rem;
-  border-radius: var(--radius-pill);
-  font-variant-numeric: tabular-nums;
-}
+
 
 .empty-powers-box {
   padding: 2.5rem;

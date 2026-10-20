@@ -4,7 +4,6 @@
     <div class="dndb-ribbon-header">
       <span class="dndb-ribbon-title">ABILITIES</span>
       <div class="dndb-ribbon-meta">
-        <span class="dndb-ribbon-cost">2 PP / Rank</span>
         <span class="dndb-ribbon-total font-mono">
           {{ heroStore.totalAbilityPP }} PP Total
         </span>

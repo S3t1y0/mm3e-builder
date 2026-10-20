@@ -7,17 +7,6 @@
         <h3 class="dndb-card-title">COMPLICATIONS</h3>
       </div>
       <div class="dndb-comp-header-right">
-        <!-- Rules Met / Needs Metric Badge -->
-        <span
-          class="comp-rules-badge"
-          :class="narrativeStatus.isValid ? 'is-valid' : 'is-pending'"
-          :title="narrativeStatus.isValid ? 'Rules met: Character has at least 1 motivation and 1 complication' : (!narrativeStatus.hasMotivation ? 'Needs 1 motivation' : 'Needs 1 complication')"
-        >
-          <i :class="narrativeStatus.isValid ? 'ri-shield-check-fill' : 'ri-error-warning-fill'"></i>
-          <span class="badge-label">{{ narrativeStatus.isValid ? 'Rules Met' : 'Needs 1' }}</span>
-          <span class="badge-count">{{ allComplications.length }}</span>
-        </span>
-
         <!-- Quick Add Button -->
         <button
           type="button"

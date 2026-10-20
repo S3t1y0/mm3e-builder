@@ -11,7 +11,6 @@
           <strong class="budget-num">{{ totalDefensePP }}</strong>
           <span class="budget-lbl">PP</span>
         </span>
-        <span class="dndb-cost-indicator">1 PP / Rank</span>
       </div>
     </div>
 
@@ -203,12 +202,11 @@
 
         <!-- Badges Subrow (Conditional) -->
         <div v-if="hasFortitudeBadges" class="def-badges-subrow">
-          <span v-if="isStaAbsent" class="def-badge immune">Immune (No Stamina)</span>
-          <span v-else-if="heroStore.isDying" class="def-badge danger pulse">Dying (DC 15 Check)</span>
-          <span v-if="!isStaAbsent && condMods.checkPenalty !== 0" class="def-badge danger">
+          <span v-if="heroStore.isDying" class="def-badge danger pulse">Dying (DC 15 Check)</span>
+          <span v-if="condMods.checkPenalty !== 0" class="def-badge danger">
             {{ condMods.checkPenalty }} {{ condMods.isDisabled ? 'Disabled' : 'Impaired' }}
           </span>
-          <span v-if="!isStaAbsent && enhDefenses.FORTITUDE > 0" class="def-badge enh">
+          <span v-if="enhDefenses.FORTITUDE > 0" class="def-badge enh">
             +{{ enhDefenses.FORTITUDE }} Enh
           </span>
         </div>
@@ -393,7 +391,8 @@ const hasParryBadges = computed(() => {
 });
 
 const hasFortitudeBadges = computed(() => {
-  return isStaAbsent.value || heroStore.isDying || (!isStaAbsent.value && condMods.value.checkPenalty !== 0) || enhDefenses.value.FORTITUDE > 0;
+  if (isStaAbsent.value) return false;
+  return heroStore.isDying || condMods.value.checkPenalty !== 0 || enhDefenses.value.FORTITUDE > 0;
 });
 
 const hasWillBadges = computed(() => {
@@ -497,12 +496,7 @@ function rollDefense(name, bonus) {
   text-transform: uppercase;
 }
 
-.dndb-cost-indicator {
-  font-size: 0.68rem;
-  font-weight: 700;
-  color: var(--text-muted, #94a3b8);
-  letter-spacing: 0.02em;
-}
+
 
 /* Minimalist PL Cap Alert Banner */
 .def-cap-alert-banner {

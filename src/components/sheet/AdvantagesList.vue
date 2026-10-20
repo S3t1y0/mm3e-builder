@@ -4,7 +4,6 @@
     <div class="dndb-pane-toolbar">
       <div class="dndb-pane-info">
         <span class="dndb-pane-title">Combat & General Advantages</span>
-        <span class="adv-pp-badge">{{ heroStore.totalAdvantagePP }} PP Total</span>
       </div>
       <div class="dndb-pane-actions">
         <button
