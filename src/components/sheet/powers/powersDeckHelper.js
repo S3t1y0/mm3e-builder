@@ -124,7 +124,7 @@ export function getEffectConfigDetails(eff) {
 
     return {
       type: 'enhanced_trait',
-      title: targets.length > 1 ? 'Enhanced Trait Targets' : 'Enhanced Trait Target',
+      title: '',
       badge: `${catLabels[cat] || 'Traits'} (+${ranks})`,
       quickText: targets.map(t => `${t} +${ranks}`).join(', '),
       items: targets.map(t => {
@@ -467,7 +467,7 @@ export function broadcastPower(pow) {
   // Configured choices (Senses, Enhanced Trait, Movement, Immunity, etc.)
   const cfgDetails = getEffectConfigDetails(eff);
   const configuredChoices = cfgDetails?.quickText || '';
-  const configuredTitle = cfgDetails?.title || 'Selections';
+  const configuredTitle = cfgDetails?.title || (eff?.baseEffect === 'Enhanced Trait' ? 'Enhanced Trait' : 'Selections');
 
   // Descriptors
   const descriptors = Array.isArray(pow.descriptors) && pow.descriptors.length > 0
@@ -595,7 +595,7 @@ export function broadcastSubPower(parentPow, subPow, subIdx) {
 
   const cfgDetails = getEffectConfigDetails(eff);
   const configuredChoices = cfgDetails?.quickText || '';
-  const configuredTitle = cfgDetails?.title || 'Selections';
+  const configuredTitle = cfgDetails?.title || (eff?.baseEffect === 'Enhanced Trait' ? 'Enhanced Trait' : 'Selections');
 
   const extras = formatModifierList(eff?.extras, false);
   const flaws = formatModifierList(eff?.flaws, true);
@@ -646,7 +646,7 @@ export function broadcastEffect(pow, effect, isLinked = false) {
 
   const cfgDetails = getEffectConfigDetails(effect);
   const configuredChoices = cfgDetails?.quickText || '';
-  const configuredTitle = cfgDetails?.title || 'Selections';
+  const configuredTitle = cfgDetails?.title || (effect?.baseEffect === 'Enhanced Trait' ? 'Enhanced Trait' : 'Selections');
   const activeTitle = getActiveSlotTitle(pow);
   const displayName = isLinked
     ? getLinkedDisplayName(effect)
@@ -732,9 +732,18 @@ export function broadcastFlaw(pow, flaw, parentEffectName = null) {
 
 export function hasPowerSubMeta(pow) {
   if (!pow) return false;
+  if (pow.type && pow.type !== 'standard') return true;
+  if (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0) return true;
   if (pow.activation && pow.activation !== 'none') return true;
-  if (pow.type === 'device') return true;
+  if (pow.descriptor || pow.descriptors) return true;
   return false;
+}
+
+export function isEffectNameRedundant(name, baseEffect) {
+  if (!name || !baseEffect) return false;
+  const n = String(name).toLowerCase().trim();
+  const b = String(baseEffect).toLowerCase().trim();
+  return n.includes(b);
 }
 
 export function formatModifiersInline(list) {

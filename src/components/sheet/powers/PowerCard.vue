@@ -12,26 +12,18 @@
         <!-- Card Top Header (Row 1: Identity & Primary Actions) -->
         <div class="pow-card-header">
           <div class="pow-title-area">
-            <!-- Active / Offline Switch -->
+            <!-- Active / Offline Switch (Tactile Dot Toggle) -->
             <button
               type="button"
-              class="power-toggle-btn"
+              class="power-toggle-btn tactile-dot"
               :class="{ 'is-active': pow.active !== false, 'is-off': pow.active === false }"
+              :title="pow.active !== false ? 'Power Active (Click to Deactivate)' : 'Power Offline (Click to Activate)'"
               @click.stop="handleTogglePower(pow)"
             >
-              <i :class="pow.active !== false ? 'ri-toggle-fill' : 'ri-toggle-line'"></i>
-              <span class="toggle-status-text">{{ pow.active !== false ? 'ACTIVE' : 'OFFLINE' }}</span>
+              <span class="status-glow-dot"></span>
             </button>
 
-            <h4 class="pow-name">{{ pow.name || 'Unnamed Power' }}</h4>
-
-            <!-- Structure Type Badge (Device / Compound / Array) -->
-            <span v-if="pow.type && pow.type !== 'standard'" class="structure-badge" :class="`badge-${pow.type}`">
-              {{ pow.type === 'compound' ? `COMPOUND (${pow.compoundEffects?.length || 0})` : pow.type.toUpperCase() }}
-            </span>
-            <span v-else-if="Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0" class="structure-badge badge-array">
-              ARRAY
-            </span>
+            <h4 class="pow-name" :title="pow.name || 'Unnamed Power'">{{ pow.name || 'Unnamed Power' }}</h4>
           </div>
 
           <div class="pow-card-actions">
@@ -41,7 +33,8 @@
             <button
               type="button"
               class="btn-send-vtt"
-              @click="broadcastPower(pow)"
+              title="Broadcast Power to Roll20"
+              @click.stop="broadcastPower(pow)"
             >
               <i class="ri-broadcast-line"></i>
             </button>
@@ -50,10 +43,10 @@
             <button
               type="button"
               class="btn-edit-power"
-              @click="handleEditPower(idx, pow)"
+              title="Edit in Power Studio"
+              @click.stop="handleEditPower(idx, pow)"
             >
               <i class="ri-edit-line"></i>
-              <span>Edit</span>
             </button>
 
             <!-- Expand / Collapse Toggle -->
@@ -61,9 +54,9 @@
               type="button"
               class="btn-toggle-expand"
               :class="{ expanded: isExpanded(pow.id || idx) }"
-              @click="toggleExpand(pow.id || idx)"
+              :title="isExpanded(pow.id || idx) ? 'Collapse Details' : 'Expand Details'"
+              @click.stop="toggleExpand(pow.id || idx)"
             >
-              <span>{{ isExpanded(pow.id || idx) ? 'Less' : 'Details' }}</span>
               <i :class="isExpanded(pow.id || idx) ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
             </button>
 
@@ -71,30 +64,71 @@
             <button
               type="button"
               class="btn-del-power"
-              @click="heroStore.removePower(idx)"
+              title="Delete Power"
+              @click.stop="heroStore.removePower(idx)"
             >
               <i class="ri-delete-bin-line"></i>
             </button>
           </div>
         </div>
 
-        <!-- Card Sub-Meta Strip (Row 2: Subtle Editorial Details) -->
+        <!-- Card Sub-Meta Strip (Row 2: Structure Tag & Subtle Editorial Details) -->
         <div v-if="hasPowerSubMeta(pow)" class="pow-card-submeta">
-          <span v-if="pow.type === 'device'" class="submeta-item">
-            <i class="ri-shield-keyhole-line text-cyan"></i>
-            <span>{{ pow.deviceConfig?.descriptor || 'High-Tech Device' }}</span>
+          <!-- Structure Type Tag -->
+          <span v-if="pow.type === 'device'" class="structure-badge badge-device">DEVICE</span>
+          <span v-else-if="pow.type === 'compound'" class="structure-badge badge-compound">COMPOUND ({{ pow.compoundEffects?.length || 0 }})</span>
+          <span v-else-if="pow.type === 'array' || (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0)" class="structure-badge badge-array">
+            ARRAY ({{ (pow.alternateEffects?.length || 0) + 1 }} MODES)
           </span>
-          <span v-if="pow.type === 'device'" class="submeta-dot">•</span>
-          <span v-if="pow.type === 'device'" class="submeta-item">
-            Toughness {{ pow.deviceConfig?.toughness || 10 }}
-          </span>
-          <template v-if="pow.type === 'device' && pow.deviceConfig?.type && pow.deviceConfig.type !== 'none'">
+
+          <span v-if="(pow.type && pow.type !== 'standard') || (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0)" class="submeta-dot">•</span>
+
+          <!-- Device Details -->
+          <template v-if="pow.type === 'device'">
+            <span class="submeta-item">
+              <i class="ri-shield-keyhole-line text-cyan"></i>
+              <span>{{ pow.deviceConfig?.descriptor || 'High-Tech Equipment' }}</span>
+            </span>
             <span class="submeta-dot">•</span>
-            <span class="submeta-item removable-text">
-              <i class="ri-hand-coin-line"></i>
-              {{ pow.deviceConfig.type === 'easily_removable' ? 'Easily Removable (-2/5 PP)' : 'Removable (-1/5 PP)' }}
+            <span class="submeta-item">
+              Toughness {{ pow.deviceConfig?.toughness || 10 }}
+            </span>
+            <template v-if="pow.deviceConfig?.type && pow.deviceConfig.type !== 'none'">
+              <span class="submeta-dot">•</span>
+              <span class="submeta-item removable-text">
+                <i class="ri-hand-coin-line"></i>
+                {{ pow.deviceConfig.type === 'easily_removable' ? 'Easily Removable (-2/5 PP)' : 'Removable (-1/5 PP)' }}
+              </span>
+            </template>
+          </template>
+
+          <!-- Compound Details -->
+          <template v-else-if="pow.type === 'compound' && pow.sharedModifiers?.length > 0">
+            <span class="submeta-item">
+              <i class="ri-links-line"></i>
+              <span>Shared: {{ formatModifiersInline(pow.sharedModifiers) }}</span>
             </span>
           </template>
+
+          <!-- Array Details -->
+          <template v-else-if="pow.type === 'array' || (Array.isArray(pow.alternateEffects) && pow.alternateEffects.length > 0)">
+            <span v-if="pow.dynamic" class="submeta-item text-amber">
+              <i class="ri-shuffle-line"></i>
+              <span>Dynamic Array</span>
+            </span>
+            <span v-if="pow.descriptor || pow.descriptors" class="submeta-item">
+              {{ pow.descriptor || pow.descriptors }}
+            </span>
+          </template>
+
+          <!-- Standard Power Descriptor -->
+          <template v-else-if="pow.descriptor || pow.descriptors">
+            <span class="submeta-item">
+              {{ pow.descriptor || pow.descriptors }}
+            </span>
+          </template>
+
+          <!-- Activation Flaw -->
           <template v-if="pow.activation && pow.activation !== 'none'">
             <span class="submeta-dot">•</span>
             <span class="submeta-item flaw-text">
@@ -317,17 +351,17 @@
                   <i class="ri-flashlight-line dossier-effect-icon"></i>
                   <span v-if="getActiveSlotTitle(pow)" class="active-stunt-mode-title">{{ getActiveSlotTitle(pow) }}:</span>
                   <span class="sub-effect-chip standard-effect-chip">
-                    <strong class="sub-effect-name">{{ getActiveEffect(pow).baseEffect }}</strong>
+                    <strong v-if="!isEffectNameRedundant(pow.name, getActiveEffect(pow).baseEffect)" class="sub-effect-name">{{ getActiveEffect(pow).baseEffect }}</strong>
                     <span class="sub-effect-rank">Rank {{ getActiveEffect(pow).ranks }}</span>
                   </span>
                 </div>
                 <button
                   type="button"
                   class="btn-effect-vtt"
+                  title="Broadcast Effect to Roll20"
                   @click.stop="broadcastEffect(pow, getActiveEffect(pow))"
                 >
                   <i class="ri-broadcast-line"></i>
-                  <span>Broadcast Effect</span>
                 </button>
               </div>
 
@@ -364,26 +398,27 @@
 
             <!-- Configured Choices / Selections Block (e.g. Senses, Enhanced Trait, Movement, Immunity) -->
             <div v-if="getEffectConfigDetails(getActiveEffect(pow))" class="dossier-block config-choices-block">
-              <div class="dossier-block-head config-head">
+              <div v-if="getEffectConfigDetails(getActiveEffect(pow)).title" class="dossier-block-head config-head">
                 <div class="dossier-head-left">
-                  <i class="ri-checkbox-circle-fill"></i>
+                  <i class="ri-equalizer-line"></i>
                   <span>{{ getEffectConfigDetails(getActiveEffect(pow)).title }}</span>
                 </div>
-                <span class="dossier-config-badge">{{ getEffectConfigDetails(getActiveEffect(pow)).badge }}</span>
               </div>
-              <div class="config-choices-grid">
+              <div class="config-choices-flat-list">
                 <div
                   v-for="item in getEffectConfigDetails(getActiveEffect(pow)).items"
                   :key="item.name"
-                  class="config-choice-card"
+                  class="config-flat-item"
                 >
-                  <div class="config-choice-top">
-                    <i :class="item.icon || 'ri-checkbox-circle-line'" class="choice-icon"></i>
-                    <strong class="choice-name">{{ item.name }}</strong>
+                  <div class="config-flat-head">
+                    <div class="config-flat-identity">
+                      <i :class="item.icon || 'ri-checkbox-circle-line'" class="choice-icon"></i>
+                      <strong class="choice-name">{{ item.name }}</strong>
+                    </div>
                     <span v-if="item.pts" class="choice-pts">{{ item.pts }} PP</span>
                     <span v-else-if="item.ranks" class="choice-pts">Rank {{ item.ranks }}</span>
                   </div>
-                  <p v-if="item.desc" class="choice-desc">{{ item.desc }}</p>
+                  <p v-if="item.desc" class="config-flat-desc">{{ item.desc }}</p>
                 </div>
               </div>
             </div>
@@ -412,10 +447,10 @@
                     <button
                       type="button"
                       class="btn-mod-vtt extra"
+                      title="Broadcast Extra to Roll20"
                       @click.stop="broadcastExtra(pow, extra)"
                     >
                       <i class="ri-broadcast-line"></i>
-                      <span>Roll20</span>
                     </button>
                   </div>
                   <p class="dossier-mod-desc">{{ extra.desc || getModifierInfo(extra.name, false).desc }}</p>
@@ -447,10 +482,10 @@
                     <button
                       type="button"
                       class="btn-mod-vtt flaw"
+                      title="Broadcast Flaw to Roll20"
                       @click.stop="broadcastFlaw(pow, flaw)"
                     >
                       <i class="ri-broadcast-line"></i>
-                      <span>Roll20</span>
                     </button>
                   </div>
                   <p class="dossier-mod-desc">{{ flaw.desc || getModifierInfo(flaw.name, true).desc }}</p>
@@ -459,22 +494,50 @@
             </div>
 
             <!-- 4. Linked Effects (Simultaneous Powers) -->
+            <!-- 4. Linked Effects (Simultaneous Powers) -->
             <div v-if="getActiveLinkedEffects(pow).length > 0" class="dossier-block linked-block">
-              <div class="dossier-block-head linked-head">
+              <div
+                class="dossier-block-head linked-head is-clickable-section"
+                role="button"
+                tabindex="0"
+                :aria-expanded="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_std_linked')"
+                @click="toggleLinkedSection(String(pow.id ?? idx) + '_std_linked')"
+                @keydown.enter.prevent="toggleLinkedSection(String(pow.id ?? idx) + '_std_linked')"
+                @keydown.space.prevent="toggleLinkedSection(String(pow.id ?? idx) + '_std_linked')"
+              >
                 <div class="dossier-head-left">
                   <i class="ri-links-line"></i>
                   <span>Simultaneous Linked Effects ({{ getActiveLinkedEffects(pow).length }})</span>
                 </div>
-                <span class="linked-suite-hint">Active together on the exact same action</span>
+                <div class="linked-section-right">
+                  <span class="linked-suite-hint">Active together on the exact same action</span>
+                  <button
+                    type="button"
+                    class="btn-toggle-linked-section"
+                    :class="{ expanded: !isLinkedSectionCollapsed(String(pow.id ?? idx) + '_std_linked') }"
+                    :title="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_std_linked') ? 'Collapse Linked Section' : 'Expand Linked Section'"
+                    @click.stop="toggleLinkedSection(String(pow.id ?? idx) + '_std_linked')"
+                  >
+                    <i :class="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_std_linked') ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+                  </button>
+                </div>
               </div>
-              <div class="linked-effects-roster">
+              <div v-show="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_std_linked')" class="linked-effects-roster">
                 <div
                   v-for="(linked, lIdx) in getActiveLinkedEffects(pow)"
                   :key="'dl_' + lIdx"
                   class="linked-full-dossier-card"
                 >
                   <!-- 1. Master Header Card -->
-                  <div class="linked-card-master-header">
+                  <div
+                    class="linked-card-master-header is-clickable"
+                    role="button"
+                    tabindex="0"
+                    :aria-expanded="isLinkedCardExpanded(String(pow.id ?? idx) + '_std_linked_' + lIdx)"
+                    @click="toggleLinkedCard(String(pow.id ?? idx) + '_std_linked_' + lIdx)"
+                    @keydown.enter.prevent="toggleLinkedCard(String(pow.id ?? idx) + '_std_linked_' + lIdx)"
+                    @keydown.space.prevent="toggleLinkedCard(String(pow.id ?? idx) + '_std_linked_' + lIdx)"
+                  >
                     <div class="linked-master-left">
                       <div class="linked-index-badge">
                         <i class="ri-links-line"></i>
@@ -484,9 +547,16 @@
                         <div class="linked-title-row">
                           <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
                           <span class="linked-effect-chip">
-                            <strong class="linked-effect-name">{{ linked.baseEffect }}</strong>
+                            <strong v-if="!isEffectNameRedundant(getLinkedDisplayName(linked), linked.baseEffect)" class="linked-effect-name">{{ linked.baseEffect }}</strong>
                             <span class="linked-effect-rank">Rank {{ linked.ranks }}</span>
                           </span>
+                        </div>
+                        <div class="linked-inline-specs">
+                          <span class="inline-spec-pill"><i class="ri-flashlight-line"></i> {{ linked.action || 'Standard' }}</span>
+                          <span class="inline-spec-dot">•</span>
+                          <span class="inline-spec-pill"><i class="ri-focus-line"></i> {{ formatRange(linked) }}</span>
+                          <span class="inline-spec-dot">•</span>
+                          <span class="inline-spec-pill"><i class="ri-time-line"></i> {{ linked.duration || 'Instant' }}</span>
                         </div>
                       </div>
                     </div>
@@ -497,130 +567,143 @@
                       <button
                         type="button"
                         class="btn-linked-broadcast"
+                        title="Broadcast Linked Effect to Roll20"
                         @click.stop="broadcastEffect(pow, linked, true)"
                       >
                         <i class="ri-broadcast-line"></i>
-                        <span>Roll20</span>
+                      </button>
+                      <button
+                        type="button"
+                        class="btn-toggle-linked-card"
+                        :class="{ expanded: isLinkedCardExpanded(String(pow.id ?? idx) + '_std_linked_' + lIdx) }"
+                        :title="isLinkedCardExpanded(String(pow.id ?? idx) + '_std_linked_' + lIdx) ? 'Collapse Details' : 'Expand Details'"
+                        @click.stop="toggleLinkedCard(String(pow.id ?? idx) + '_std_linked_' + lIdx)"
+                      >
+                        <i :class="isLinkedCardExpanded(String(pow.id ?? idx) + '_std_linked_' + lIdx) ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
                       </button>
                     </div>
                   </div>
 
-                  <!-- 2. Specs Matrix Grid (Placed First for instant battle reference) -->
-                  <div class="dossier-specs-grid linked-specs-grid">
-                    <div class="spec-item">
-                      <span class="spec-label"><i class="ri-flashlight-line"></i> Action</span>
-                      <span class="spec-value">{{ linked.action || 'Standard' }}</span>
-                    </div>
-                    <div class="spec-item">
-                      <span class="spec-label"><i class="ri-focus-line"></i> Range</span>
-                      <span class="spec-value">{{ formatRange(linked) }}</span>
-                    </div>
-                    <div class="spec-item">
-                      <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
-                      <span class="spec-value">{{ linked.duration || 'Instant' }}</span>
-                    </div>
-                    <div v-if="hasResistanceCheck(linked)" class="spec-item">
-                      <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
-                      <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : '') }}</span>
-                    </div>
-                  </div>
-
-                  <!-- 3. Configured Choices / Selections Block -->
-                  <div v-if="getEffectConfigDetails(linked)" class="linked-config-block">
-                    <div class="linked-config-head">
-                      <div class="dossier-head-left">
-                        <i class="ri-checkbox-circle-fill"></i>
-                        <span>{{ getEffectConfigDetails(linked).title }}</span>
+                  <!-- 2. Expanded Details Body -->
+                  <div v-show="isLinkedCardExpanded(String(pow.id ?? idx) + '_std_linked_' + lIdx)" class="linked-card-expanded-body">
+                    <!-- Specs Matrix Grid (Placed First for instant battle reference) -->
+                    <div class="dossier-specs-grid linked-specs-grid">
+                      <div class="spec-item">
+                        <span class="spec-label"><i class="ri-flashlight-line"></i> Action</span>
+                        <span class="spec-value">{{ linked.action || 'Standard' }}</span>
                       </div>
-                      <span class="dossier-config-badge">{{ getEffectConfigDetails(linked).badge }}</span>
-                    </div>
-                    <div class="config-choices-grid">
-                      <div
-                        v-for="item in getEffectConfigDetails(linked).items"
-                        :key="item.name"
-                        class="config-choice-card linked-choice-card"
-                      >
-                        <div class="config-choice-top">
-                          <i :class="item.icon || 'ri-focus-3-line'" class="choice-icon"></i>
-                          <strong class="choice-name">{{ item.name }}</strong>
-                          <span v-if="item.pts" class="choice-pts">{{ item.pts }} PP</span>
-                          <span v-else-if="item.ranks" class="choice-pts">Rank {{ item.ranks }}</span>
-                        </div>
-                        <p v-if="item.desc" class="choice-desc">{{ item.desc }}</p>
+                      <div class="spec-item">
+                        <span class="spec-label"><i class="ri-focus-line"></i> Range</span>
+                        <span class="spec-value">{{ formatRange(linked) }}</span>
+                      </div>
+                      <div class="spec-item">
+                        <span class="spec-label"><i class="ri-time-line"></i> Duration</span>
+                        <span class="spec-value">{{ linked.duration || 'Instant' }}</span>
+                      </div>
+                      <div v-if="hasResistanceCheck(linked)" class="spec-item">
+                        <span class="spec-label"><i class="ri-shield-check-line"></i> Resistance Check</span>
+                        <span class="spec-value highlight">{{ calculateDC(linked) || (linked.resistance ? `vs ${linked.resistance}` : '') }}</span>
                       </div>
                     </div>
-                  </div>
 
-                  <!-- 4. Core Rules Reference in Callout Box -->
-                  <div class="rulebook-callout-box linked">
-                    <span class="rulebook-caption">
-                      <i class="ri-book-open-line"></i> Core Rulebook Mechanics:
-                    </span>
-                    <p class="dossier-desc-text linked-rules-text">
-                      {{ getEffectDesc(linked.baseEffect) }}
-                    </p>
-                  </div>
-
-                  <!-- 5. Applied Modifiers Section with Rules Description -->
-                  <div
-                    v-if="(linked.extras?.length || 0) + (linked.flaws?.length || 0) > 0"
-                    class="linked-mods-details-block"
-                  >
-                    <div class="sub-dossier-label linked-mods-heading">
-                      <i class="ri-shield-star-line"></i>
-                      <span>Active Modifiers ({{ (linked.extras?.length || 0) + (linked.flaws?.length || 0) }})</span>
-                    </div>
-                    <div class="dossier-mods-grid sub-mods-grid">
-                      <div
-                        v-for="extra in (linked.extras || [])"
-                        :key="'plnk_extra_' + extra.name"
-                        class="dossier-mod-card extra-mod"
-                      >
-                        <div class="dossier-mod-top">
-                          <strong class="dossier-mod-name">
-                            {{ extra.name }}
-                            <span v-if="extra.customText" class="dossier-mod-custom-text">: {{ extra.customText }}</span>
-                          </strong>
-                          <span class="dossier-cost-tag extra">
-                            +{{ extra.cost }} {{ extra.type === 'per_rank' ? 'PP/R' : 'Flat' }}
-                          </span>
-                          <span v-if="(extra.ranks || 1) > 1" class="dossier-rank-badge">Rank {{ extra.ranks }}</span>
-                          <button
-                            type="button"
-                            class="btn-mod-vtt extra"
-                            @click.stop="broadcastExtra({ name: `${pow.name} - ${getLinkedDisplayName(linked)}` }, extra, linked.baseEffect)"
-                          >
-                            <i class="ri-broadcast-line"></i>
-                            <span>Roll20</span>
-                          </button>
+                    <!-- Configured Choices / Selections Block -->
+                    <div v-if="getEffectConfigDetails(linked)" class="linked-config-block">
+                      <div v-if="getEffectConfigDetails(linked).title" class="linked-config-head">
+                        <div class="dossier-head-left">
+                          <i class="ri-equalizer-line"></i>
+                          <span>{{ getEffectConfigDetails(linked).title }}</span>
                         </div>
-                        <p class="dossier-mod-desc">{{ extra.desc || getModifierInfo(extra.name, false).desc }}</p>
                       </div>
-
-                      <div
-                        v-for="flaw in (linked.flaws || [])"
-                        :key="'plnk_flaw_' + flaw.name"
-                        class="dossier-mod-card flaw-mod"
-                      >
-                        <div class="dossier-mod-top">
-                          <strong class="dossier-mod-name">
-                            {{ flaw.name }}
-                            <span v-if="flaw.customText" class="dossier-mod-custom-text">: {{ flaw.customText }}</span>
-                          </strong>
-                          <span class="dossier-cost-tag flaw">
-                            {{ flaw.cost }} {{ flaw.type === 'per_rank' ? 'PP/R' : 'Flat' }}
-                          </span>
-                          <span v-if="(flaw.ranks || 1) > 1" class="dossier-rank-badge">Rank {{ flaw.ranks }}</span>
-                          <button
-                            type="button"
-                            class="btn-mod-vtt flaw"
-                            @click.stop="broadcastFlaw({ name: `${pow.name} - ${getLinkedDisplayName(linked)}` }, flaw, linked.baseEffect)"
-                          >
-                            <i class="ri-broadcast-line"></i>
-                            <span>Roll20</span>
-                          </button>
+                      <div class="config-choices-flat-list">
+                        <div
+                          v-for="item in getEffectConfigDetails(linked).items"
+                          :key="item.name"
+                          class="config-flat-item"
+                        >
+                          <div class="config-flat-head">
+                            <div class="config-flat-identity">
+                              <i :class="item.icon || 'ri-focus-3-line'" class="choice-icon"></i>
+                              <strong class="choice-name">{{ item.name }}</strong>
+                            </div>
+                            <span v-if="item.pts" class="choice-pts">{{ item.pts }} PP</span>
+                            <span v-else-if="item.ranks" class="choice-pts">Rank {{ item.ranks }}</span>
+                          </div>
+                          <p v-if="item.desc" class="config-flat-desc">{{ item.desc }}</p>
                         </div>
-                        <p class="dossier-mod-desc">{{ flaw.desc || getModifierInfo(flaw.name, true).desc }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Core Rules Reference in Callout Box -->
+                    <div class="rulebook-callout-box linked">
+                      <span class="rulebook-caption">
+                        <i class="ri-book-open-line"></i> Core Rulebook Mechanics:
+                      </span>
+                      <p class="dossier-desc-text linked-rules-text">
+                        {{ getEffectDesc(linked.baseEffect) }}
+                      </p>
+                    </div>
+
+                    <!-- Applied Modifiers Section with Rules Description -->
+                    <div
+                      v-if="(linked.extras?.length || 0) + (linked.flaws?.length || 0) > 0"
+                      class="linked-mods-details-block"
+                    >
+                      <div class="sub-dossier-label linked-mods-heading">
+                        <i class="ri-shield-star-line"></i>
+                        <span>Active Modifiers ({{ (linked.extras?.length || 0) + (linked.flaws?.length || 0) }})</span>
+                      </div>
+                      <div class="dossier-mods-grid sub-mods-grid">
+                        <div
+                          v-for="extra in (linked.extras || [])"
+                          :key="'plnk_extra_' + extra.name"
+                          class="dossier-mod-card extra-mod"
+                        >
+                          <div class="dossier-mod-top">
+                            <strong class="dossier-mod-name">
+                              {{ extra.name }}
+                              <span v-if="extra.customText" class="dossier-mod-custom-text">: {{ extra.customText }}</span>
+                            </strong>
+                            <span class="dossier-cost-tag extra">
+                              +{{ extra.cost }} {{ extra.type === 'per_rank' ? 'PP/R' : 'Flat' }}
+                            </span>
+                            <span v-if="(extra.ranks || 1) > 1" class="dossier-rank-badge">Rank {{ extra.ranks }}</span>
+                            <button
+                              type="button"
+                              class="btn-mod-vtt extra"
+                              title="Broadcast Extra to Roll20"
+                              @click.stop="broadcastExtra({ name: `${pow.name} - ${getLinkedDisplayName(linked)}` }, extra, linked.baseEffect)"
+                            >
+                              <i class="ri-broadcast-line"></i>
+                            </button>
+                          </div>
+                          <p class="dossier-mod-desc">{{ extra.desc || getModifierInfo(extra.name, false).desc }}</p>
+                        </div>
+
+                        <div
+                          v-for="flaw in (linked.flaws || [])"
+                          :key="'plnk_flaw_' + flaw.name"
+                          class="dossier-mod-card flaw-mod"
+                        >
+                          <div class="dossier-mod-top">
+                            <strong class="dossier-mod-name">
+                              {{ flaw.name }}
+                              <span v-if="flaw.customText" class="dossier-mod-custom-text">: {{ flaw.customText }}</span>
+                            </strong>
+                            <span class="dossier-cost-tag flaw">
+                              {{ flaw.cost }} {{ flaw.type === 'per_rank' ? 'PP/R' : 'Flat' }}
+                            </span>
+                            <span v-if="(flaw.ranks || 1) > 1" class="dossier-rank-badge">Rank {{ flaw.ranks }}</span>
+                            <button
+                              type="button"
+                              class="btn-mod-vtt flaw"
+                              title="Broadcast Flaw to Roll20"
+                              @click.stop="broadcastFlaw({ name: `${pow.name} - ${getLinkedDisplayName(linked)}` }, flaw, linked.baseEffect)"
+                            >
+                              <i class="ri-broadcast-line"></i>
+                            </button>
+                          </div>
+                          <p class="dossier-mod-desc">{{ flaw.desc || getModifierInfo(flaw.name, true).desc }}</p>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -658,10 +741,10 @@
                       type="button"
                       class="btn-mod-vtt"
                       :class="mod.type === 'flaw' || (Number(mod.cost) < 0) ? 'flaw' : 'extra'"
+                      :title="`Broadcast ${mod.type === 'flaw' || (Number(mod.cost) < 0) ? 'Flaw' : 'Extra'} to Roll20`"
                       @click.stop="mod.type === 'flaw' || (Number(mod.cost) < 0) ? broadcastFlaw(pow, mod) : broadcastExtra(pow, mod)"
                     >
                       <i class="ri-broadcast-line"></i>
-                      <span>Roll20</span>
                     </button>
                   </div>
                   <p class="dossier-mod-desc">{{ mod.desc || getModifierInfo(mod.name, mod.type === 'flaw' || (Number(mod.cost) < 0)).desc }}</p>
@@ -710,7 +793,7 @@
                       class="sub-effect-chip"
                       :class="{ 'is-primary-effect': isCompoundSubPrimary(pow, sub, sIdx) }"
                     >
-                      <strong class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
+                      <strong v-if="!isEffectNameRedundant(sub.name, getSubPowerActiveEffect(sub).baseEffect)" class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
                       <span class="sub-effect-rank">Rank {{ getSubPowerActiveEffect(sub).ranks || 1 }}</span>
                     </span>
                     <span v-if="sub.alternateEffects?.length > 0" class="sub-array-indicator">
@@ -725,10 +808,10 @@
                   <button
                     type="button"
                     class="btn-send-vtt-sub"
+                    title="Broadcast Component to Roll20"
                     @click.stop="broadcastSubPower(pow, sub, sIdx)"
                   >
                     <i class="ri-broadcast-line"></i>
-                    <span>Roll20</span>
                   </button>
                 </div>
               </div>
@@ -845,10 +928,10 @@
                         <button
                           type="button"
                           class="btn-mod-vtt extra"
+                          title="Broadcast Extra to Roll20"
                           @click.stop="broadcastExtra({ name: `${pow.name} - ${sub.name || 'Component'}` }, extra, getSubPowerActiveEffect(sub).baseEffect)"
                         >
                           <i class="ri-broadcast-line"></i>
-                          <span>Roll20</span>
                         </button>
                       </div>
                       <p class="dossier-mod-desc">{{ extra.desc || getModifierInfo(extra.name, false).desc }}</p>
@@ -871,10 +954,10 @@
                         <button
                           type="button"
                           class="btn-mod-vtt flaw"
+                          title="Broadcast Flaw to Roll20"
                           @click.stop="broadcastFlaw({ name: `${pow.name} - ${sub.name || 'Component'}` }, flaw, getSubPowerActiveEffect(sub).baseEffect)"
                         >
                           <i class="ri-broadcast-line"></i>
-                          <span>Roll20</span>
                         </button>
                       </div>
                       <p class="dossier-mod-desc">{{ flaw.desc || getModifierInfo(flaw.name, true).desc }}</p>
@@ -885,46 +968,74 @@
 
               <!-- Sub-Effect Configured Choices Block (e.g. Senses, Affliction, Movement, Immunity) -->
               <div v-if="getEffectConfigDetails(getSubPowerActiveEffect(sub))" class="sub-dossier-block config-choices-block sub">
-                <div class="sub-dossier-label config-head">
+                <div v-if="getEffectConfigDetails(getSubPowerActiveEffect(sub)).title" class="sub-dossier-label config-head">
                   <div class="dossier-head-left">
-                    <i class="ri-checkbox-circle-fill"></i>
+                    <i class="ri-equalizer-line"></i>
                     <span>{{ getEffectConfigDetails(getSubPowerActiveEffect(sub)).title }}</span>
                   </div>
-                  <span class="dossier-config-badge sub">{{ getEffectConfigDetails(getSubPowerActiveEffect(sub)).badge }}</span>
                 </div>
-                <div class="config-choices-grid">
+                <div class="config-choices-flat-list">
                   <div
                     v-for="item in getEffectConfigDetails(getSubPowerActiveEffect(sub)).items"
                     :key="item.name"
-                    class="config-choice-card"
+                    class="config-flat-item"
                   >
-                    <div class="config-choice-top">
-                      <i :class="item.icon || 'ri-checkbox-circle-line'" class="choice-icon"></i>
-                      <strong class="choice-name">{{ item.name }}</strong>
+                    <div class="config-flat-head">
+                      <div class="config-flat-identity">
+                        <i :class="item.icon || 'ri-checkbox-circle-line'" class="choice-icon"></i>
+                        <strong class="choice-name">{{ item.name }}</strong>
+                      </div>
                       <span v-if="item.pts" class="choice-pts">{{ item.pts }} PP</span>
                       <span v-else-if="item.ranks" class="choice-pts">Rank {{ item.ranks }}</span>
                     </div>
-                    <p v-if="item.desc" class="choice-desc">{{ item.desc }}</p>
+                    <p v-if="item.desc" class="config-flat-desc">{{ item.desc }}</p>
                   </div>
                 </div>
               </div>
 
               <!-- Simultaneous Linked Effects Pod (if this compound sub-effect has linked effects) -->
               <div v-if="getSubPowerActiveLinkedEffects(sub).length > 0" class="sub-dossier-block sub-linked-block">
-                <div class="sub-dossier-label linked-accent">
+                <div
+                  class="sub-dossier-label linked-accent is-clickable-section"
+                  role="button"
+                  tabindex="0"
+                  :aria-expanded="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked')"
+                  @click="toggleLinkedSection(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked')"
+                  @keydown.enter.prevent="toggleLinkedSection(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked')"
+                  @keydown.space.prevent="toggleLinkedSection(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked')"
+                >
                   <div class="dossier-head-left">
                     <i class="ri-links-line"></i>
                     <span>Simultaneous Linked Effects ({{ getSubPowerActiveLinkedEffects(sub).length }})</span>
                   </div>
-                  <span class="linked-suite-hint">Active together on the exact same action</span>
+                  <div class="linked-section-right">
+                    <span class="linked-suite-hint">Active together on the exact same action</span>
+                    <button
+                      type="button"
+                      class="btn-toggle-linked-section"
+                      :class="{ expanded: !isLinkedSectionCollapsed(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked') }"
+                      :title="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked') ? 'Collapse Linked Section' : 'Expand Linked Section'"
+                      @click.stop="toggleLinkedSection(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked')"
+                    >
+                      <i :class="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked') ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="linked-effects-roster">
+                <div v-show="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked')" class="linked-effects-roster">
                   <div
                     v-for="(linked, lIdx) in getSubPowerActiveLinkedEffects(sub)"
                     :key="'csub_lnk_' + lIdx"
                     class="linked-full-dossier-card"
                   >
-                    <div class="linked-card-master-header">
+                    <div
+                      class="linked-card-master-header is-clickable"
+                      role="button"
+                      tabindex="0"
+                      :aria-expanded="isLinkedCardExpanded(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx)"
+                      @click="toggleLinkedCard(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx)"
+                      @keydown.enter.prevent="toggleLinkedCard(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx)"
+                      @keydown.space.prevent="toggleLinkedCard(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx)"
+                    >
                       <div class="linked-master-left">
                         <div class="linked-index-badge">
                           <i class="ri-links-line"></i>
@@ -934,9 +1045,16 @@
                           <div class="linked-title-row">
                             <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
                             <span class="linked-effect-chip">
-                              <strong class="linked-effect-name">{{ linked.baseEffect }}</strong>
+                              <strong v-if="!isEffectNameRedundant(getLinkedDisplayName(linked), linked.baseEffect)" class="linked-effect-name">{{ linked.baseEffect }}</strong>
                               <span class="linked-effect-rank">Rank {{ linked.ranks }}</span>
                             </span>
+                          </div>
+                          <div class="linked-inline-specs">
+                            <span class="inline-spec-pill"><i class="ri-flashlight-line"></i> {{ linked.action || 'Standard' }}</span>
+                            <span class="inline-spec-dot">•</span>
+                            <span class="inline-spec-pill"><i class="ri-focus-line"></i> {{ formatRange(linked) }}</span>
+                            <span class="inline-spec-dot">•</span>
+                            <span class="inline-spec-pill"><i class="ri-time-line"></i> {{ linked.duration || 'Instant' }}</span>
                           </div>
                         </div>
                       </div>
@@ -947,13 +1065,25 @@
                         <button
                           type="button"
                           class="btn-linked-broadcast"
+                          title="Broadcast Linked Effect to Roll20"
                           @click.stop="broadcastEffect({ name: `${pow.name} - ${sub.name}` }, linked, true)"
                         >
                           <i class="ri-broadcast-line"></i>
-                          <span>Roll20</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-toggle-linked-card"
+                          :class="{ expanded: isLinkedCardExpanded(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx) }"
+                          :title="isLinkedCardExpanded(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx) ? 'Collapse Details' : 'Expand Details'"
+                          @click.stop="toggleLinkedCard(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx)"
+                        >
+                          <i :class="isLinkedCardExpanded(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx) ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
                         </button>
                       </div>
                     </div>
+
+                    <!-- 2. Expanded Details Body -->
+                    <div v-show="isLinkedCardExpanded(String(pow.id ?? idx) + '_cmp_' + sIdx + '_linked_' + lIdx)" class="linked-card-expanded-body">
 
                     <!-- Specs Matrix -->
                     <div class="dossier-specs-grid linked-specs-grid">
@@ -1012,10 +1142,10 @@
                             <button
                               type="button"
                               class="btn-mod-vtt extra"
+                              title="Broadcast Extra to Roll20"
                               @click.stop="broadcastExtra({ name: `${pow.name} - ${sub.name || 'Component'} (${getLinkedDisplayName(linked)})` }, extra, linked.baseEffect)"
                             >
                               <i class="ri-broadcast-line"></i>
-                              <span>Roll20</span>
                             </button>
                           </div>
                           <p class="dossier-mod-desc">{{ extra.desc || getModifierInfo(extra.name, false).desc }}</p>
@@ -1038,10 +1168,10 @@
                             <button
                               type="button"
                               class="btn-mod-vtt flaw"
+                              title="Broadcast Flaw to Roll20"
                               @click.stop="broadcastFlaw({ name: `${pow.name} - ${sub.name || 'Component'} (${getLinkedDisplayName(linked)})` }, flaw, linked.baseEffect)"
                             >
                               <i class="ri-broadcast-line"></i>
-                              <span>Roll20</span>
                             </button>
                           </div>
                           <p class="dossier-mod-desc">{{ flaw.desc || getModifierInfo(flaw.name, true).desc }}</p>
@@ -1051,6 +1181,7 @@
                   </div>
                 </div>
               </div>
+            </div>
             </div>
           </template>
         </template>
@@ -1094,22 +1225,22 @@
                 <div class="sub-card-master-header">
                   <button
                     type="button"
-                    class="sub-power-toggle-btn master-toggle"
+                    class="sub-power-toggle-btn master-toggle tactile-dot"
                     :class="{
                       'is-active': sub.active !== false && pow.active !== false,
                       'is-off': sub.active === false || pow.active === false
                     }"
                     :disabled="pow.active === false"
+                    :title="sub.active !== false && pow.active !== false ? 'System Online (Click to Deactivate)' : 'System Offline (Click to Activate)'"
                     @click.stop="handleToggleSubPower(pow, sIdx, sub)"
                   >
-                    <i :class="sub.active !== false && pow.active !== false ? 'ri-checkbox-circle-fill' : 'ri-close-circle-line'"></i>
-                    <span class="sub-toggle-text">{{ sub.active !== false && pow.active !== false ? 'ONLINE' : 'OFFLINE' }}</span>
+                    <span class="status-glow-dot sub-dot"></span>
                   </button>
                   <div class="sub-sys-title-block">
                     <div class="sub-sys-title-line">
                       <h4 class="sub-sys-heading">{{ sub.name }}</h4>
                       <span class="sub-effect-chip">
-                        <strong class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
+                        <strong v-if="!isEffectNameRedundant(sub.name, getSubPowerActiveEffect(sub).baseEffect)" class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
                         <span class="sub-effect-rank">Rank {{ getSubPowerActiveEffect(sub).ranks }}</span>
                       </span>
                       <span v-if="sub.alternateEffects?.length > 0" class="sub-array-indicator">
@@ -1124,10 +1255,10 @@
                     <button
                       type="button"
                       class="btn-send-vtt-sub"
+                      title="Broadcast System to Roll20"
                       @click.stop="broadcastSubPower(pow, sub, sIdx)"
                     >
                       <i class="ri-broadcast-line"></i>
-                      <span>Roll20</span>
                     </button>
                   </div>
                 </div>
@@ -1216,47 +1347,75 @@
 
               <!-- Sub-power Configured Choices Block -->
               <div v-if="getEffectConfigDetails(getSubPowerActiveEffect(sub))" class="sub-dossier-block config-choices-block sub">
-                <div class="sub-dossier-label config-head">
+                <div v-if="getEffectConfigDetails(getSubPowerActiveEffect(sub)).title" class="sub-dossier-label config-head">
                   <div class="dossier-head-left">
-                    <i class="ri-checkbox-circle-fill"></i>
+                    <i class="ri-equalizer-line"></i>
                     <span>{{ getEffectConfigDetails(getSubPowerActiveEffect(sub)).title }}</span>
                   </div>
-                  <span class="dossier-config-badge sub">{{ getEffectConfigDetails(getSubPowerActiveEffect(sub)).badge }}</span>
                 </div>
-                <div class="config-choices-grid">
+                <div class="config-choices-flat-list">
                   <div
                     v-for="item in getEffectConfigDetails(getSubPowerActiveEffect(sub)).items"
                     :key="item.name"
-                    class="config-choice-card"
+                    class="config-flat-item"
                   >
-                    <div class="config-choice-top">
-                      <i :class="item.icon || 'ri-checkbox-circle-line'" class="choice-icon"></i>
-                      <strong class="choice-name">{{ item.name }}</strong>
+                    <div class="config-flat-head">
+                      <div class="config-flat-identity">
+                        <i :class="item.icon || 'ri-checkbox-circle-line'" class="choice-icon"></i>
+                        <strong class="choice-name">{{ item.name }}</strong>
+                      </div>
                       <span v-if="item.pts" class="choice-pts">{{ item.pts }} PP</span>
                       <span v-else-if="item.ranks" class="choice-pts">Rank {{ item.ranks }}</span>
                     </div>
-                    <p v-if="item.desc" class="choice-desc">{{ item.desc }}</p>
+                    <p v-if="item.desc" class="config-flat-desc">{{ item.desc }}</p>
                   </div>
                 </div>
               </div>
 
               <!-- Simultaneous Linked Effects Pod (if sub-power has linked effects) -->
               <div v-if="getSubPowerActiveLinkedEffects(sub).length > 0" class="sub-dossier-block sub-linked-block">
-                <div class="sub-dossier-label linked-accent">
+                <div
+                  class="sub-dossier-label linked-accent is-clickable-section"
+                  role="button"
+                  tabindex="0"
+                  :aria-expanded="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked')"
+                  @click="toggleLinkedSection(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked')"
+                  @keydown.enter.prevent="toggleLinkedSection(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked')"
+                  @keydown.space.prevent="toggleLinkedSection(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked')"
+                >
                   <div class="dossier-head-left">
                     <i class="ri-links-line"></i>
                     <span>Simultaneous Linked Sub-Effects ({{ getSubPowerActiveLinkedEffects(sub).length }})</span>
                   </div>
-                  <span class="linked-suite-hint">Active together on the exact same action</span>
+                  <div class="linked-section-right">
+                    <span class="linked-suite-hint">Active together on the exact same action</span>
+                    <button
+                      type="button"
+                      class="btn-toggle-linked-section"
+                      :class="{ expanded: !isLinkedSectionCollapsed(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked') }"
+                      :title="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked') ? 'Collapse Linked Section' : 'Expand Linked Section'"
+                      @click.stop="toggleLinkedSection(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked')"
+                    >
+                      <i :class="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked') ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
+                    </button>
+                  </div>
                 </div>
-                <div class="linked-effects-roster">
+                <div v-show="!isLinkedSectionCollapsed(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked')" class="linked-effects-roster">
                   <div
                     v-for="(linked, lIdx) in getSubPowerActiveLinkedEffects(sub)"
                     :key="'sub_dl_' + lIdx"
                     class="linked-full-dossier-card"
                   >
                     <!-- 1. Master Header Card -->
-                    <div class="linked-card-master-header">
+                    <div
+                      class="linked-card-master-header is-clickable"
+                      role="button"
+                      tabindex="0"
+                      :aria-expanded="isLinkedCardExpanded(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx)"
+                      @click="toggleLinkedCard(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx)"
+                      @keydown.enter.prevent="toggleLinkedCard(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx)"
+                      @keydown.space.prevent="toggleLinkedCard(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx)"
+                    >
                       <div class="linked-master-left">
                         <div class="linked-index-badge">
                           <i class="ri-links-line"></i>
@@ -1266,9 +1425,16 @@
                           <div class="linked-title-row">
                             <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
                             <span class="linked-effect-chip">
-                              <strong class="linked-effect-name">{{ linked.baseEffect }}</strong>
+                              <strong v-if="!isEffectNameRedundant(getLinkedDisplayName(linked), linked.baseEffect)" class="linked-effect-name">{{ linked.baseEffect }}</strong>
                               <span class="linked-effect-rank">Rank {{ linked.ranks }}</span>
                             </span>
+                          </div>
+                          <div class="linked-inline-specs">
+                            <span class="inline-spec-pill"><i class="ri-flashlight-line"></i> {{ linked.action || 'Standard' }}</span>
+                            <span class="inline-spec-dot">•</span>
+                            <span class="inline-spec-pill"><i class="ri-focus-line"></i> {{ formatRange(linked) }}</span>
+                            <span class="inline-spec-dot">•</span>
+                            <span class="inline-spec-pill"><i class="ri-time-line"></i> {{ linked.duration || 'Instant' }}</span>
                           </div>
                         </div>
                       </div>
@@ -1279,13 +1445,25 @@
                         <button
                           type="button"
                           class="btn-linked-broadcast"
+                          title="Broadcast Linked Effect to Roll20"
                           @click.stop="broadcastEffect({ name: `${pow.name} - ${sub.name}` }, linked, true)"
                         >
                           <i class="ri-broadcast-line"></i>
-                          <span>Roll20</span>
+                        </button>
+                        <button
+                          type="button"
+                          class="btn-toggle-linked-card"
+                          :class="{ expanded: isLinkedCardExpanded(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx) }"
+                          :title="isLinkedCardExpanded(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx) ? 'Collapse Details' : 'Expand Details'"
+                          @click.stop="toggleLinkedCard(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx)"
+                        >
+                          <i :class="isLinkedCardExpanded(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx) ? 'ri-arrow-up-s-line' : 'ri-arrow-down-s-line'"></i>
                         </button>
                       </div>
                     </div>
+
+                    <!-- 2. Expanded Details Body -->
+                    <div v-show="isLinkedCardExpanded(String(pow.id ?? idx) + '_dev_' + sIdx + '_linked_' + lIdx)" class="linked-card-expanded-body">
 
                     <!-- 2. Specs Matrix Grid (Placed First for instant battle reference) -->
                     <div class="dossier-specs-grid linked-specs-grid">
@@ -1309,26 +1487,27 @@
 
                     <!-- 3. Configured Choices / Selections Block -->
                     <div v-if="getEffectConfigDetails(linked)" class="linked-config-block">
-                      <div class="linked-config-head">
+                      <div v-if="getEffectConfigDetails(linked).title" class="linked-config-head">
                         <div class="dossier-head-left">
-                          <i class="ri-checkbox-circle-fill"></i>
+                          <i class="ri-equalizer-line"></i>
                           <span>{{ getEffectConfigDetails(linked).title }}</span>
                         </div>
-                        <span class="dossier-config-badge sub">{{ getEffectConfigDetails(linked).badge }}</span>
                       </div>
-                      <div class="config-choices-grid">
+                      <div class="config-choices-flat-list">
                         <div
                           v-for="item in getEffectConfigDetails(linked).items"
                           :key="item.name"
-                          class="config-choice-card linked-choice-card"
+                          class="config-flat-item"
                         >
-                          <div class="config-choice-top">
-                            <i :class="item.icon || 'ri-focus-3-line'" class="choice-icon"></i>
-                            <strong class="choice-name">{{ item.name }}</strong>
+                          <div class="config-flat-head">
+                            <div class="config-flat-identity">
+                              <i :class="item.icon || 'ri-focus-3-line'" class="choice-icon"></i>
+                              <strong class="choice-name">{{ item.name }}</strong>
+                            </div>
                             <span v-if="item.pts" class="choice-pts">{{ item.pts }} PP</span>
                             <span v-else-if="item.ranks" class="choice-pts">Rank {{ item.ranks }}</span>
                           </div>
-                          <p v-if="item.desc" class="choice-desc">{{ item.desc }}</p>
+                          <p v-if="item.desc" class="config-flat-desc">{{ item.desc }}</p>
                         </div>
                       </div>
                     </div>
@@ -1368,6 +1547,7 @@
                   </div>
                 </div>
               </div>
+            </div>
 
               <!-- Sub-power Extras & Flaws Roster -->
               <div
@@ -1396,10 +1576,10 @@
                       <button
                         type="button"
                         class="btn-mod-vtt extra"
+                        title="Broadcast Extra to Roll20"
                         @click.stop="broadcastExtra({ name: `${pow.name} - ${sub.name}` }, extra, getSubPowerActiveEffect(sub).baseEffect)"
                       >
                         <i class="ri-broadcast-line"></i>
-                        <span>Roll20</span>
                       </button>
                     </div>
                     <p class="dossier-mod-desc">{{ extra.desc || getModifierInfo(extra.name, false).desc }}</p>
@@ -1422,10 +1602,10 @@
                       <button
                         type="button"
                         class="btn-mod-vtt flaw"
+                        title="Broadcast Flaw to Roll20"
                         @click.stop="broadcastFlaw({ name: `${pow.name} - ${sub.name}` }, flaw, getSubPowerActiveEffect(sub).baseEffect)"
                       >
                         <i class="ri-broadcast-line"></i>
-                        <span>Roll20</span>
                       </button>
                     </div>
                     <p class="dossier-mod-desc">{{ flaw.desc || getModifierInfo(flaw.name, true).desc }}</p>
@@ -1470,7 +1650,8 @@ import {
   calculateCompactDC,
   formatRange,
   getEffectDesc,
-  getModifierInfo
+  getModifierInfo,
+  isEffectNameRedundant
 } from './powersDeckHelper.js';
 
 const props = defineProps({
@@ -1563,6 +1744,38 @@ function isCompoundSubPrimary(pow, sub, sIdx) {
   if (sub?.isPrimaryAction) return true;
   if (!pow?.compoundEffects?.some(c => c.isPrimaryAction) && sIdx === 0) return true;
   return false;
+}
+
+// Collapsible Linked Effects Management
+const collapsedLinkedSections = ref(new Set());
+const expandedLinkedCards = ref(new Set());
+
+function isLinkedSectionCollapsed(key) {
+  return collapsedLinkedSections.value.has(key);
+}
+
+function toggleLinkedSection(key) {
+  const next = new Set(collapsedLinkedSections.value);
+  if (next.has(key)) {
+    next.delete(key);
+  } else {
+    next.add(key);
+  }
+  collapsedLinkedSections.value = next;
+}
+
+function isLinkedCardExpanded(key) {
+  return expandedLinkedCards.value.has(key);
+}
+
+function toggleLinkedCard(key) {
+  const next = new Set(expandedLinkedCards.value);
+  if (next.has(key)) {
+    next.delete(key);
+  } else {
+    next.add(key);
+  }
+  expandedLinkedCards.value = next;
 }
 </script>
 

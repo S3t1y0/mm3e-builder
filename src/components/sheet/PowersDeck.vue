@@ -2,7 +2,7 @@
   <div class="sheet-card powers-deck-section">
     <div class="card-header-row">
       <div class="card-title-group">
-        <i class="ri-flashlight-line icon-primary"></i>
+        <i class="ri-pulse-line icon-primary"></i>
         <h3>Powers & Devices Deck</h3>
       </div>
 
@@ -30,7 +30,7 @@
 
         <div class="create-power-btn-group">
           <button type="button" class="btn-create-p" @click="handleCreatePower('standard')">
-            <i class="ri-flashlight-line"></i> + Standard
+            <i class="ri-pulse-line"></i> + Standard
           </button>
           <button type="button" class="btn-create-p compound" @click="handleCreatePower('compound')">
             <i class="ri-stack-line"></i> + Compound
@@ -45,7 +45,7 @@
 
     <!-- Empty Powers Hint -->
     <div v-if="heroStore.character.powers.length === 0" class="empty-powers-box">
-      <i class="ri-flashlight-line"></i>
+      <i class="ri-pulse-line"></i>
       <p>No powers added yet. Select + Standard, + Compound, or + Device to open Power Studio.</p>
     </div>
 
