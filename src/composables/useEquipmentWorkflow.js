@@ -16,7 +16,8 @@ import {
   getItemCategoryKey,
   getEquipmentCategoryCount,
   filterEquipmentResources,
-  filterEquipmentPresets
+  filterEquipmentPresets,
+  getActiveEquipmentItem
 } from '../rules/equipmentCalculator.js';
 
 /**
@@ -70,7 +71,7 @@ export function useEquipmentWorkflow(heroStore, uiStore) {
 
   function syncEquipmentAdvantage() {
     heroStore.syncEquipmentAdvantage();
-    uiStore.showToast('Synchronized Equipment Advantage PP budget!', 'success');
+    uiStore.showToast('Synced Equipment advantage ranks.', 'success');
   }
 
   function toggleStatus(id) {
@@ -83,7 +84,7 @@ export function useEquipmentWorkflow(heroStore, uiStore) {
 
   function deleteResource(id, name) {
     heroStore.removeResource(id);
-    uiStore.showToast(`Deleted ${name}`, 'info');
+    uiStore.showToast(`Deleted ${name}.`, 'info');
   }
 
   function addPreset(preset) {
@@ -91,7 +92,7 @@ export function useEquipmentWorkflow(heroStore, uiStore) {
       ...preset,
       id: 'res_' + Date.now() + Math.random().toString(36).substr(2, 4)
     });
-    uiStore.showToast(`Added ${preset.name} (${preset.epCost} EP)!`, 'success');
+    uiStore.showToast(`Added ${preset.name} (${preset.epCost} EP).`, 'success');
   }
 
   function getWeaponAttackBonus(item) {
@@ -130,6 +131,7 @@ export function useEquipmentWorkflow(heroStore, uiStore) {
     getItemCategoryKey,
     isWeapon,
     isShield,
-    isArmor
+    isArmor,
+    getActiveEquipmentItem
   };
 }

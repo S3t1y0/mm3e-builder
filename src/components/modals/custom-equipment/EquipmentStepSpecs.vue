@@ -1,8 +1,8 @@
 <template>
   <div class="step-pane">
     <div class="step-pane-head">
-      <h4>2. Configure Base Mechanical Specifications</h4>
-      <p>Set up fundamental power ranks, size, strength, and core combat properties.</p>
+      <h4>2. Base Specs</h4>
+      <p>Set the damage rank, defense, size, or core stats for this item.</p>
     </div>
 
     <!-- 2A. WEAPONS SPEC FORM -->

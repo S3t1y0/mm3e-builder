@@ -2,7 +2,7 @@
   <div class="eq-live-bom-panel">
     <div class="bom-head">
       <i class="ri-calculator-line bom-icon"></i>
-      <strong class="bom-title">LIVE COST BREAKDOWN</strong>
+      <strong class="bom-title">Cost Breakdown</strong>
     </div>
 
     <!-- Current Item Card Preview -->
@@ -12,7 +12,7 @@
         <span class="bom-cat-badge" :class="'badge-' + selectedCategory.toLowerCase()">{{ selectedCategory }}</span>
       </div>
       <div class="bom-cost-row">
-        <span class="bom-cost-label">Item Total:</span>
+        <span class="bom-cost-label">Item total:</span>
         <span class="bom-cost-total font-mono">{{ calculatedTotalCost }} EP</span>
       </div>
     </div>
@@ -28,7 +28,7 @@
         <span class="bom-line-cost font-mono">{{ line.cost >= 0 ? `+${line.cost}` : line.cost }} EP</span>
       </div>
       <div v-if="!costBreakdown?.breakdown?.length" class="bom-empty-hint">
-        Standard equipment base configuration
+        Base configuration
       </div>
     </div>
 
@@ -36,7 +36,7 @@
 
     <!-- Total Cost Summary -->
     <div class="bom-total-row">
-      <span class="bom-total-label">TOTAL EQUIPMENT COST:</span>
+      <span class="bom-total-label">Total Cost:</span>
       <span class="bom-total-val font-mono">{{ calculatedTotalCost }} EP</span>
     </div>
 
@@ -45,10 +45,10 @@
       <div class="budget-box-head">
         <div class="budget-head-title">
           <i :class="projectedBudgetInfo?.isOverBudget ? 'ri-error-warning-line text-amber' : 'ri-shield-check-line text-emerald'"></i>
-          <strong>HERO EP BUDGET IMPACT</strong>
+          <strong>Equipment Budget</strong>
         </div>
         <span v-if="projectedBudgetInfo?.isOverBudget" class="budget-status-pill pill-deficit">
-          Deficit
+          Over Budget
         </span>
         <span v-else class="budget-status-pill pill-ok">
           Balanced
@@ -66,28 +66,28 @@
 
       <div class="budget-stats-grid">
         <div class="b-stat">
-          <span class="b-stat-lbl">Current Used:</span>
+          <span class="b-stat-lbl">Current used:</span>
           <strong class="font-mono">{{ budgetInfo?.totalEP || 0 }} EP</strong>
         </div>
         <div class="b-stat">
-          <span class="b-stat-lbl">{{ isEditing ? 'After Changes:' : 'After Adding:' }}</span>
+          <span class="b-stat-lbl">{{ isEditing ? 'After edit:' : 'Projected total:' }}</span>
           <strong class="font-mono" :class="projectedBudgetInfo?.isOverBudget ? 'text-amber' : 'text-emerald'">
             {{ projectedBudgetInfo?.projectedUsed || 0 }} EP
           </strong>
         </div>
         <div class="b-stat full">
-          <span class="b-stat-lbl">Available Capacity:</span>
+          <span class="b-stat-lbl">Budget capacity:</span>
           <strong class="font-mono">{{ budgetInfo?.maxEP || 0 }} EP ({{ budgetInfo?.ranks || 0 }} Ranks)</strong>
         </div>
       </div>
 
       <div v-if="projectedBudgetInfo?.isOverBudget" class="budget-alert-action">
         <p class="budget-deficit-text">
-          Deficit of <strong>{{ projectedBudgetInfo.deficit }} EP</strong>. Requires Rank {{ projectedBudgetInfo.neededRanks }} Equipment Advantage.
+          Over budget by <strong>{{ projectedBudgetInfo.deficit }} EP</strong>. Requires rank {{ projectedBudgetInfo.neededRanks }} Equipment advantage.
         </p>
         <button type="button" class="btn-quick-sync" @click="$emit('sync-budget')">
           <i class="ri-flashlight-line"></i>
-          <span>Auto-Sync Advantage (+{{ (projectedBudgetInfo.neededRanks || 0) - (budgetInfo?.ranks || 0) }} PP)</span>
+          <span>Increase Equipment advantage (+{{ (projectedBudgetInfo.neededRanks || 0) - (budgetInfo?.ranks || 0) }} PP)</span>
         </button>
       </div>
       <div v-else class="budget-ok-badge">

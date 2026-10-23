@@ -1,8 +1,8 @@
 <template>
   <div class="step-pane">
     <div class="step-pane-head">
-      <h4>3. Enhance with Traits, Features & Amenities</h4>
-      <p>Customize tactical capabilities, extras, and amenities (each with automatic EP calculations).</p>
+      <h4>3. Traits and Features</h4>
+      <p>Add weapon traits, armor extras, or vehicle features.</p>
     </div>
 
     <!-- 3A. WEAPONS TRAITS -->

@@ -11,15 +11,15 @@ export const STEPS = [
   { num: 1, label: 'Identity', icon: 'ri-fingerprint-line' },
   { num: 2, label: 'Base Specs', icon: 'ri-settings-4-line' },
   { num: 3, label: 'Traits & Features', icon: 'ri-equalizer-line' },
-  { num: 4, label: 'Finalize & Summary', icon: 'ri-check-double-line' }
+  { num: 4, label: 'Review', icon: 'ri-check-double-line' }
 ];
 
 export const CATEGORY_CARDS = [
-  { id: 'Weapons', label: 'Weapons', icon: 'ri-sword-line', desc: 'Melee blades, firearms, energy weapons & blasters' },
-  { id: 'Armor', label: 'Armor & Defense', icon: 'ri-shield-line', desc: 'Ballistic vests, power suits, tactical shields & hazmat' },
-  { id: 'Vehicle', label: 'Vehicles', icon: 'ri-car-line', desc: 'Motorcycles, sports cars, armored vans, jets & ships' },
-  { id: 'Headquarters', label: 'Headquarters', icon: 'ri-building-line', desc: 'Secret batcaves, skyscrapers, bunkers & orbital stations' },
-  { id: 'Gadget', label: 'Gadgets & Tech', icon: 'ri-smartphone-line', desc: 'Commlinks, tool kits, night vision optics & custom tools' }
+  { id: 'Weapons', label: 'Weapons', icon: 'ri-sword-line', desc: 'Melee weapons, firearms, and energy blasters' },
+  { id: 'Armor', label: 'Armor & Defense', icon: 'ri-shield-line', desc: 'Ballistic vests, protective suits, and shields' },
+  { id: 'Vehicle', label: 'Vehicles', icon: 'ri-car-line', desc: 'Ground, air, water, and space vehicles' },
+  { id: 'Headquarters', label: 'Headquarters', icon: 'ri-building-line', desc: 'Bases, safehouses, bunkers, and orbital stations' },
+  { id: 'Gadget', label: 'Gadgets & Tech', icon: 'ri-smartphone-line', desc: 'Commlinks, tool kits, optics, and utility gear' }
 ];
 
 export function createDefaultWeaponConfig() {
@@ -170,19 +170,37 @@ export function buildEquipmentResource({
   weaponConfig,
   armorConfig,
   vehicleConfig,
-  hqConfig
+  hqConfig,
+  isArray = false,
+  activeSlotId = 'main',
+  alternateItems = []
 }) {
+  const isArr = Boolean(isArray);
+  const alts = Array.isArray(alternateItems) ? alternateItems : [];
+  const baseCost = Math.max(0, Number(totalEP) || 0);
+  const finalEpCost = isArr ? (baseCost + alts.length) : baseCost;
+
   const newResource = {
     id: id || ('res_' + Date.now() + Math.random().toString(36).substr(2, 4)),
     name,
+    category: cat,
     type: cat === 'Weapons' ? 'Gear' : (cat === 'Armor' ? 'Gear' : cat),
-    subtype: cat === 'Weapons'
-      ? (weaponConfig.rangeType === 'Ranged' ? 'weapon_ranged' : 'weapon_melee')
-      : (cat === 'Armor' ? (armorConfig.shieldRank > 0 ? 'shield' : 'armor') : cat.toLowerCase()),
-    epCost: totalEP,
+    subtype: isArr
+      ? 'equipment_array'
+      : (cat === 'Weapons'
+        ? (weaponConfig.rangeType === 'Ranged' ? 'weapon_ranged' : 'weapon_melee')
+        : (cat === 'Armor' ? (armorConfig.shieldRank > 0 ? 'shield' : 'armor') : cat.toLowerCase())),
+    epCost: finalEpCost,
     status: itemStatus,
     desc: (customDescription || '').trim()
   };
+
+  if (isArr) {
+    newResource.isArray = true;
+    newResource.activeSlotId = activeSlotId || 'main';
+    newResource.baseCost = baseCost;
+    newResource.alternateItems = alts;
+  }
 
   if (cat === 'Weapons') {
     newResource.weapon = {
@@ -361,6 +379,9 @@ export function parseResourceToConfigs(item) {
     armorConfig,
     vehicleConfig,
     hqConfig,
-    gadgetConfig
+    gadgetConfig,
+    isArray: Boolean(item.isArray),
+    activeSlotId: item.activeSlotId || 'main',
+    alternateItems: Array.isArray(item.alternateItems) ? [...item.alternateItems] : []
   };
 }

@@ -373,7 +373,7 @@
                       {{ getActiveEffect(pow).name }}
                     </h4>
                     <span class="sub-effect-chip standard-effect-chip">
-                      <strong v-if="!isEffectNameRedundant(pow.name, getActiveEffect(pow).baseEffect)" class="sub-effect-name">{{ getActiveEffect(pow).baseEffect }}</strong>
+                      <strong v-if="getActiveEffect(pow).baseEffect || getActiveEffect(pow).name" class="sub-effect-name">{{ getActiveEffect(pow).baseEffect || getActiveEffect(pow).name }}</strong>
                       <span class="sub-effect-rank">Rank {{ getActiveEffect(pow).ranks }}</span>
                     </span>
                   </div>
@@ -571,7 +571,7 @@
                         <div class="linked-title-row">
                           <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
                           <span class="linked-effect-chip">
-                            <strong v-if="!isEffectNameRedundant(getLinkedDisplayName(linked), linked.baseEffect)" class="linked-effect-name">{{ linked.baseEffect }}</strong>
+                            <strong v-if="linked.baseEffect || linked.name" class="linked-effect-name">{{ linked.baseEffect || linked.name }}</strong>
                             <span class="linked-effect-rank">Rank {{ linked.ranks }}</span>
                           </span>
                         </div>
@@ -816,7 +816,7 @@
                       class="sub-effect-chip"
                       :class="{ 'is-primary-effect': isCompoundSubPrimary(pow, sub, sIdx) }"
                     >
-                      <strong v-if="!isEffectNameRedundant(sub.name, getSubPowerActiveEffect(sub).baseEffect)" class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
+                      <strong v-if="getSubPowerActiveEffect(sub).baseEffect || getSubPowerActiveEffect(sub).name" class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect || getSubPowerActiveEffect(sub).name }}</strong>
                       <span class="sub-effect-rank">Rank {{ getSubPowerActiveEffect(sub).ranks || 1 }}</span>
                     </span>
                   </div>
@@ -1061,7 +1061,7 @@
                           <div class="linked-title-row">
                             <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
                             <span class="linked-effect-chip">
-                              <strong v-if="!isEffectNameRedundant(getLinkedDisplayName(linked), linked.baseEffect)" class="linked-effect-name">{{ linked.baseEffect }}</strong>
+                              <strong v-if="linked.baseEffect || linked.name" class="linked-effect-name">{{ linked.baseEffect || linked.name }}</strong>
                               <span class="linked-effect-rank">Rank {{ linked.ranks }}</span>
                             </span>
                           </div>
@@ -1256,7 +1256,7 @@
                     <div class="sub-sys-title-line">
                       <h4 class="sub-sys-heading">{{ sub.name }}</h4>
                       <span class="sub-effect-chip">
-                        <strong v-if="!isEffectNameRedundant(sub.name, getSubPowerActiveEffect(sub).baseEffect)" class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect }}</strong>
+                        <strong v-if="getSubPowerActiveEffect(sub).baseEffect || getSubPowerActiveEffect(sub).name" class="sub-effect-name">{{ getSubPowerActiveEffect(sub).baseEffect || getSubPowerActiveEffect(sub).name }}</strong>
                         <span class="sub-effect-rank">Rank {{ getSubPowerActiveEffect(sub).ranks }}</span>
                       </span>
                     </div>
@@ -1434,7 +1434,7 @@
                           <div class="linked-title-row">
                             <h5 class="linked-heading">{{ getLinkedDisplayName(linked) }}</h5>
                             <span class="linked-effect-chip">
-                              <strong v-if="!isEffectNameRedundant(getLinkedDisplayName(linked), linked.baseEffect)" class="linked-effect-name">{{ linked.baseEffect }}</strong>
+                              <strong v-if="linked.baseEffect || linked.name" class="linked-effect-name">{{ linked.baseEffect || linked.name }}</strong>
                               <span class="linked-effect-rank">Rank {{ linked.ranks }}</span>
                             </span>
                           </div>

@@ -1,8 +1,8 @@
 <template>
   <div class="step-pane">
     <div class="step-pane-head">
-      <h4>4. Review & Finalize Equipment</h4>
-      <p>Inspect combat metrics, auto-generated M&M 3e rules text, and set item readiness.</p>
+      <h4>4. Review and Finalize</h4>
+      <p>Check stats, edit the rules text if needed, and set item status.</p>
     </div>
 
     <!-- Tactical Stat Preview Card -->
@@ -62,9 +62,9 @@
       <!-- Rules Text Box -->
       <div class="eq-form-group mt-3">
         <div class="eq-label-row">
-          <label>Auto-Generated Rules Text</label>
+          <label>Rules Text</label>
           <button type="button" class="btn-refresh-text" @click="$emit('regenerate-description')">
-            <i class="ri-refresh-line"></i> Reset Text
+            <i class="ri-refresh-line"></i> Reset to default
           </button>
         </div>
         <textarea
@@ -78,7 +78,7 @@
 
       <!-- Initial Status Selector -->
       <div class="status-select-row mt-3">
-        <label>Initial Gear Status:</label>
+        <label>Initial status:</label>
         <div class="status-options">
           <button
             type="button"
@@ -94,7 +94,7 @@
             :class="{ active: itemStatus === 'carried' }"
             @click="$emit('update:itemStatus', 'carried')"
           >
-            <i class="ri-inbox-line"></i> In Bag / Carried
+            <i class="ri-inbox-line"></i> Carried
           </button>
           <button
             type="button"

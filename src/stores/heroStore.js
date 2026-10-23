@@ -257,11 +257,14 @@ export const useHeroStore = defineStore('hero', {
     equipmentArmorBonus(state) {
       const equipped = (state.character.resources || []).filter(r => (r.status || 'equipped') === 'equipped');
       const bonuses = equipped.map(r => {
-        if (r.subtype === 'armor' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')) {
-          const a = r.armor || {};
+        const item = (r.isArray && r.activeSlotId && r.activeSlotId !== 'main')
+          ? ((r.alternateItems || []).find(a => a.id === r.activeSlotId) || r)
+          : r;
+        if (item.subtype === 'armor' || item.armor != null || /Protection\s+\d+/i.test(item.desc || '')) {
+          const a = item.armor || {};
           let rank = Number(a.protectionRank);
           if (isNaN(rank)) {
-            const m = (r.desc || '').match(/Protection\s+(\d+)/i);
+            const m = (item.desc || '').match(/Protection\s+(\d+)/i);
             rank = m ? parseInt(m[1], 10) : 0;
           }
           return rank;
@@ -274,11 +277,14 @@ export const useHeroStore = defineStore('hero', {
     equipmentShieldBonus(state) {
       const equipped = (state.character.resources || []).filter(r => (r.status || 'equipped') === 'equipped');
       const bonuses = equipped.map(r => {
-        if (r.subtype === 'shield' || (r.armor && (r.armor.shieldRank || r.armor.activeDefenseBonus))) {
-          const a = r.armor || {};
+        const item = (r.isArray && r.activeSlotId && r.activeSlotId !== 'main')
+          ? ((r.alternateItems || []).find(a => a.id === r.activeSlotId) || r)
+          : r;
+        if (item.subtype === 'shield' || (item.armor && (item.armor.shieldRank || item.armor.activeDefenseBonus))) {
+          const a = item.armor || {};
           let shieldVal = Number(a.activeDefenseBonus ?? a.shieldRank ?? 0);
           if (isNaN(shieldVal) || shieldVal <= 0) {
-            const m = (r.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (r.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
+            const m = (item.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (item.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
             shieldVal = m ? parseInt(m[1], 10) : 0;
           }
           return shieldVal;
@@ -647,6 +653,14 @@ export const useHeroStore = defineStore('hero', {
       if (!item) return;
       const cycle = { 'equipped': 'carried', 'carried': 'stored', 'stored': 'equipped' };
       item.status = cycle[item.status || 'equipped'] || 'equipped';
+      this.pushHistory();
+    },
+
+    setEquipmentArrayActiveSlot(id, slotId) {
+      if (!this.character.resources) return;
+      const item = this.character.resources.find(r => r.id === id);
+      if (!item || !item.isArray) return;
+      item.activeSlotId = slotId;
       this.pushHistory();
     },
 

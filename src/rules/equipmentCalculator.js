@@ -400,10 +400,11 @@ export function generateEquipmentDescription(category, config) {
  */
 export function isWeapon(r) {
   if (!r) return false;
+  const item = getActiveEquipmentItem(r);
   return Boolean(
-    r.subtype?.startsWith('weapon') ||
-    r.weapon != null ||
-    (/Damage\s+\d+/i.test(r.desc || '') && !r.subtype?.includes('armor') && !r.subtype?.includes('shield'))
+    item.subtype?.startsWith('weapon') ||
+    item.weapon != null ||
+    (/Damage\s+\d+/i.test(item.desc || '') && !item.subtype?.includes('armor') && !item.subtype?.includes('shield'))
   );
 }
 
@@ -412,11 +413,12 @@ export function isWeapon(r) {
  */
 export function isShield(r) {
   if (!r) return false;
+  const item = getActiveEquipmentItem(r);
   return Boolean(
-    r.subtype === 'shield' ||
-    (r.armor && (r.armor.shieldRank || r.armor.activeDefenseBonus)) ||
-    /Active Defense/i.test(r.desc || '') ||
-    /Shield/i.test(r.name || '')
+    item.subtype === 'shield' ||
+    (item.armor && (item.armor.shieldRank || item.armor.activeDefenseBonus)) ||
+    /Active Defense/i.test(item.desc || '') ||
+    /Shield/i.test(item.name || '')
   );
 }
 
@@ -425,8 +427,9 @@ export function isShield(r) {
  */
 export function isArmor(r) {
   if (!r) return false;
+  const item = getActiveEquipmentItem(r);
   return Boolean(
-    (r.subtype === 'armor' || r.armor != null || /Protection\s+\d+/i.test(r.desc || '')) && !isShield(r)
+    (item.subtype === 'armor' || item.armor != null || /Protection\s+\d+/i.test(item.desc || '')) && !isShield(item)
   );
 }
 
@@ -435,10 +438,11 @@ export function isArmor(r) {
  */
 export function getShieldBonus(r) {
   if (!r) return 0;
-  const a = r.armor || {};
+  const item = getActiveEquipmentItem(r);
+  const a = item.armor || {};
   let bonus = Number(a.activeDefenseBonus ?? a.shieldRank ?? 0);
   if (isNaN(bonus) || bonus <= 0) {
-    const m = (r.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (r.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
+    const m = (item.desc || '').match(/Active Defense:\s*\+(\d+)/i) || (item.desc || '').match(/(?:Dodge|Parry)\s*\+(\d+)/i);
     bonus = m ? parseInt(m[1], 10) : 2;
   }
   return bonus;
@@ -449,15 +453,16 @@ export function getShieldBonus(r) {
  */
 export function getWeaponAttackBonus(r, heroStore) {
   if (!r) return 0;
-  const w = r.weapon || {};
-  const isRanged = w.range === 'Ranged' || (/Ranged/i.test(r.desc || '') && !/Close/i.test(w.range || ''));
+  const item = getActiveEquipmentItem(r);
+  const w = item.weapon || {};
+  const isRanged = w.range === 'Ranged' || (/Ranged/i.test(item.desc || '') && !/Close/i.test(w.range || ''));
   const skills = heroStore?.character?.skills || [];
 
-  const isThrown = /thrown/i.test(r.subtype || '') || /thrown/i.test(r.desc || '') || (w.traits || []).some(t => /thrown/i.test(t));
+  const isThrown = /thrown/i.test(item.subtype || '') || /thrown/i.test(item.desc || '') || (w.traits || []).some(t => /thrown/i.test(t));
   const attackContext = {
-    name: r.name,
-    weaponType: r.subtype,
-    description: r.desc,
+    name: item.name,
+    weaponType: item.subtype,
+    description: item.desc,
     traits: w.traits || [],
     descriptors: w.traits || [],
     isThrown,
@@ -482,16 +487,17 @@ export function getWeaponAttackBonus(r, heroStore) {
  */
 export function getWeaponDC(r, heroStore) {
   if (!r) return 15;
-  const w = r.weapon || {};
+  const item = getActiveEquipmentItem(r);
+  const w = item.weapon || {};
   const str = Number(heroStore?.effectiveAbilities?.STR) || 0;
-  const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(r.desc || ''));
+  const isStrengthBased = w.isStrengthBased ?? (/Strength-based/i.test(item.desc || ''));
   let dmgRank = w.damageRank;
   if (dmgRank === undefined) {
-    const m = (r.desc || '').match(/Damage\s+(\d+)/i) || (r.desc || '').match(/Affliction\s+(\d+)/i);
+    const m = (item.desc || '').match(/Damage\s+(\d+)/i) || (item.desc || '').match(/Affliction\s+(\d+)/i);
     dmgRank = m ? parseInt(m[1], 10) : 1;
   }
   const effectiveDmg = isStrengthBased ? (str + dmgRank) : dmgRank;
-  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(r.desc || '');
+  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(item.desc || '');
   return (isAffliction ? 10 : 15) + effectiveDmg;
 }
 
@@ -500,8 +506,9 @@ export function getWeaponDC(r, heroStore) {
  */
 export function getWeaponResistance(r) {
   if (!r) return 'Toughness';
-  const w = r.weapon || {};
-  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(r.desc || '');
+  const item = getActiveEquipmentItem(r);
+  const w = item.weapon || {};
+  const isAffliction = (w.traits || []).includes('Affliction') || /Affliction/i.test(item.desc || '');
   return w.resistance || (isAffliction ? 'Fortitude' : 'Toughness');
 }
 
@@ -510,9 +517,10 @@ export function getWeaponResistance(r) {
  */
 export function getWeaponRange(r) {
   if (!r) return 'Close';
-  const w = r.weapon || {};
-  if (w.range === 'Ranged' || /Ranged/i.test(r.desc || '')) return 'Ranged';
-  if (w.isStrengthBased ?? /Strength-based/i.test(r.desc || '')) return 'Melee (STR)';
+  const item = getActiveEquipmentItem(r);
+  const w = item.weapon || {};
+  if (w.range === 'Ranged' || /Ranged/i.test(item.desc || '')) return 'Ranged';
+  if (w.isStrengthBased ?? /Strength-based/i.test(item.desc || '')) return 'Melee (STR)';
   return 'Close';
 }
 
@@ -521,9 +529,10 @@ export function getWeaponRange(r) {
  */
 export function getArmorProtection(r) {
   if (!r) return 0;
-  const a = r.armor || {};
+  const item = getActiveEquipmentItem(r);
+  const a = item.armor || {};
   if (a.protectionRank !== undefined) return a.protectionRank;
-  const m = (r.desc || '').match(/Protection\s+(\d+)/i);
+  const m = (item.desc || '').match(/Protection\s+(\d+)/i);
   return m ? parseInt(m[1], 10) : 1;
 }
 
@@ -532,13 +541,14 @@ export function getArmorProtection(r) {
  */
 export function getResIconClass(r) {
   if (!r) return 'ri-archive-line';
-  if (r.subtype === 'weapon_ranged' || (r.weapon?.range === 'Ranged')) return 'ri-focus-2-line';
-  if (r.subtype?.startsWith('weapon') || r.weapon != null) return 'ri-sword-line';
-  if (isShield(r)) return 'ri-shield-line';
-  if (r.subtype === 'armor' || r.armor != null) return 'ri-shield-check-line';
-  if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'ri-car-line';
-  if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'ri-building-line';
-  if (r.type === 'Gadget' || r.subtype === 'gadget') return 'ri-smartphone-line';
+  const item = getActiveEquipmentItem(r);
+  if (item.subtype === 'weapon_ranged' || (item.weapon?.range === 'Ranged')) return 'ri-focus-2-line';
+  if (item.subtype?.startsWith('weapon') || item.weapon != null) return 'ri-sword-line';
+  if (isShield(item)) return 'ri-shield-line';
+  if (item.subtype === 'armor' || item.armor != null) return 'ri-shield-check-line';
+  if (item.type === 'Vehicle' || item.subtype === 'vehicle') return 'ri-car-line';
+  if (item.type === 'Headquarters' || item.subtype === 'headquarters') return 'ri-building-line';
+  if (item.type === 'Gadget' || item.subtype === 'gadget') return 'ri-smartphone-line';
   return 'ri-archive-line';
 }
 
@@ -547,14 +557,16 @@ export function getResIconClass(r) {
  */
 export function getSubtypeLabel(r) {
   if (!r) return 'GEAR';
-  if (r.subtype === 'weapon_ranged') return 'RANGED WEAPON';
-  if (r.subtype === 'weapon_melee') return 'MELEE WEAPON';
-  if (r.weapon) return r.weapon.range === 'Ranged' ? 'RANGED WEAPON' : 'MELEE WEAPON';
-  if (isShield(r)) return 'SHIELD';
-  if (r.subtype === 'armor') return 'BODY ARMOR';
-  if (r.type === 'Vehicle' || r.subtype === 'vehicle') return 'VEHICLE';
-  if (r.type === 'Headquarters' || r.subtype === 'headquarters') return 'HEADQUARTERS';
-  return (r.type || 'GEAR').toUpperCase();
+  if (r.isArray) return 'EQUIPMENT ARRAY';
+  const item = getActiveEquipmentItem(r);
+  if (item.subtype === 'weapon_ranged') return 'RANGED WEAPON';
+  if (item.subtype === 'weapon_melee') return 'MELEE WEAPON';
+  if (item.weapon) return item.weapon.range === 'Ranged' ? 'RANGED WEAPON' : 'MELEE WEAPON';
+  if (isShield(item)) return 'SHIELD';
+  if (item.subtype === 'armor') return 'BODY ARMOR';
+  if (item.type === 'Vehicle' || item.subtype === 'vehicle') return 'VEHICLE';
+  if (item.type === 'Headquarters' || item.subtype === 'headquarters') return 'HEADQUARTERS';
+  return (item.type || 'GEAR').toUpperCase();
 }
 
 /**
@@ -569,8 +581,9 @@ export function formatEquipmentStatus(status) {
 /**
  * Get category key for tactical styling and icons.
  */
-export function getItemCategoryKey(item) {
-  if (!item) return 'gadget';
+export function getItemCategoryKey(r) {
+  if (!r) return 'gadget';
+  const item = getActiveEquipmentItem(r);
   if (isWeapon(item) || item.subtype?.startsWith('weapon') || item.weapon != null) return 'weapon';
   if (isShield(item) || isArmor(item) || item.subtype === 'armor' || item.armor != null) return 'armor';
   if (item.type === 'Vehicle' || item.subtype === 'vehicle' || item.vehicle != null) return 'vehicle';
@@ -619,3 +632,34 @@ export function filterEquipmentPresets(presets = [], searchQuery = '') {
     (p.type && p.type.toLowerCase().includes(q))
   );
 }
+
+/**
+ * Calculate total Equipment Array cost:
+ * Primary item standalone cost + 1 EP per alternate item.
+ */
+export function calculateEquipmentArrayTotalCost(primaryCost, alternateItems = []) {
+  const base = Math.max(0, Number(primaryCost) || 0);
+  const altsCount = Array.isArray(alternateItems) ? alternateItems.length : 0;
+  return base + altsCount;
+}
+
+/**
+ * Validate that an alternate equipment item does not exceed the primary item cost (M&M 3e Strict Limit).
+ */
+export function validateAlternateItemLimit(altCost, primaryCost) {
+  return Number(altCost || 0) <= Number(primaryCost || 0);
+}
+
+/**
+ * Resolves the currently active item from an equipment resource.
+ * If resource is an array, returns the alternate item matching activeSlotId, or the primary resource if 'main' or not found.
+ */
+export function getActiveEquipmentItem(resource) {
+  if (!resource) return null;
+  if (!resource.isArray || !resource.activeSlotId || resource.activeSlotId === 'main') {
+    return resource;
+  }
+  const alt = (resource.alternateItems || []).find(a => a.id === resource.activeSlotId);
+  return alt || resource;
+}
+

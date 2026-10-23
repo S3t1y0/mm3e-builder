@@ -129,7 +129,10 @@
                   <span>{{ formatStatus(item.status) }}</span>
                 </button>
               </div>
-              <strong class="res-card-name">{{ item.name }}</strong>
+              <strong class="res-card-name">
+                {{ item.name }}
+                <span v-if="item.isArray" class="array-tag-pill">Array</span>
+              </strong>
             </div>
           </div>
 
@@ -138,7 +141,7 @@
             <button
               type="button"
               class="btn-icon-subtle"
-              title="Edit Equipment Item"
+              title="Edit item"
               @click="openCustomStudio(item)"
             >
               <i class="ri-edit-line"></i>
@@ -160,6 +163,31 @@
           </div>
         </div>
 
+        <!-- Equipment Array Mode Switcher Bar -->
+        <div v-if="item.isArray" class="eq-array-mode-bar">
+          <span class="eq-array-mode-label">
+            <i class="ri-stack-line"></i> Mode:
+          </span>
+          <button
+            type="button"
+            class="eq-mode-chip"
+            :class="{ active: (!item.activeSlotId || item.activeSlotId === 'main') }"
+            @click="heroStore.setEquipmentArrayActiveSlot(item.id, 'main')"
+          >
+            <i class="ri-focus-line"></i> {{ item.name }}
+          </button>
+          <button
+            v-for="alt in (item.alternateItems || [])"
+            :key="alt.id"
+            type="button"
+            class="eq-mode-chip"
+            :class="{ active: item.activeSlotId === alt.id }"
+            @click="heroStore.setEquipmentArrayActiveSlot(item.id, alt.id)"
+          >
+            <i class="ri-git-branch-line"></i> {{ alt.name }}
+          </button>
+        </div>
+
         <!-- Tactical Chips Row -->
         <div v-if="isWeapon(item)" class="res-tactical-chips">
           <button
@@ -175,10 +203,10 @@
           <span class="res-chip chip-range">
             {{ getWeaponRange(item) }}
           </span>
-          <span v-if="item.weapon?.crit" class="res-chip chip-crit">
-            Crit {{ item.weapon.crit }}
+          <span v-if="getActiveItem(item).weapon?.crit" class="res-chip chip-crit">
+            Crit {{ getActiveItem(item).weapon.crit }}
           </span>
-          <span v-for="tr in (item.weapon?.traits || [])" :key="tr" class="res-chip chip-trait">
+          <span v-for="tr in (getActiveItem(item).weapon?.traits || [])" :key="tr" class="res-chip chip-trait">
             {{ tr }}
           </span>
         </div>
@@ -193,25 +221,25 @@
           <span class="res-chip chip-armor">
             <i class="ri-shield-check-line"></i> +{{ getArmorProtection(item) }} Protection
           </span>
-          <span v-if="item.armor?.imperviousRank" class="res-chip chip-imperv">
-            Impervious {{ item.armor.imperviousRank }}
+          <span v-if="getActiveItem(item).armor?.imperviousRank" class="res-chip chip-imperv">
+            Impervious {{ getActiveItem(item).armor.imperviousRank }}
           </span>
         </div>
 
-        <div v-else-if="item.vehicle || item.type === 'Vehicle'" class="res-tactical-chips">
-          <span v-if="item.vehicle?.size" class="res-chip chip-vehicle">Size: {{ item.vehicle.size }}</span>
-          <span v-if="item.vehicle?.speedMph" class="res-chip chip-vehicle">Speed: {{ item.vehicle.speedMph }}</span>
-          <span v-if="item.vehicle?.toughness" class="res-chip chip-vehicle">Tough: {{ item.vehicle.toughness }}</span>
+        <div v-else-if="getActiveItem(item).vehicle || getActiveItem(item).type === 'Vehicle'" class="res-tactical-chips">
+          <span v-if="getActiveItem(item).vehicle?.size" class="res-chip chip-vehicle">Size: {{ getActiveItem(item).vehicle.size }}</span>
+          <span v-if="getActiveItem(item).vehicle?.speedMph" class="res-chip chip-vehicle">Speed: {{ getActiveItem(item).vehicle.speedMph }}</span>
+          <span v-if="getActiveItem(item).vehicle?.toughness" class="res-chip chip-vehicle">Tough: {{ getActiveItem(item).vehicle.toughness }}</span>
         </div>
 
-        <div v-else-if="item.hq || item.type === 'Headquarters'" class="res-tactical-chips">
-          <span v-if="item.hq?.size" class="res-chip chip-hq">Size: {{ item.hq.size }}</span>
-          <span v-if="item.hq?.toughness" class="res-chip chip-hq">Tough: {{ item.hq.toughness }}</span>
-          <span v-if="item.hq?.features?.length" class="res-chip chip-hq">{{ item.hq.features.length }} Features</span>
+        <div v-else-if="getActiveItem(item).hq || getActiveItem(item).type === 'Headquarters'" class="res-tactical-chips">
+          <span v-if="getActiveItem(item).hq?.size" class="res-chip chip-hq">Size: {{ getActiveItem(item).hq.size }}</span>
+          <span v-if="getActiveItem(item).hq?.toughness" class="res-chip chip-hq">Tough: {{ getActiveItem(item).hq.toughness }}</span>
+          <span v-if="getActiveItem(item).hq?.features?.length" class="res-chip chip-hq">{{ getActiveItem(item).hq.features.length }} Features</span>
         </div>
 
         <!-- Description -->
-        <p v-if="item.desc" class="res-desc">{{ item.desc }}</p>
+        <p v-if="getActiveItem(item).desc" class="res-desc">{{ getActiveItem(item).desc }}</p>
       </div>
     </div>
 
@@ -322,33 +350,40 @@ const {
   getWeaponDC,
   getWeaponResistance,
   getWeaponRange,
-  getArmorProtection
+  getArmorProtection,
+  getActiveEquipmentItem
 } = useEquipmentWorkflow(heroStore, uiStore);
 
+function getActiveItem(item) {
+  return getActiveEquipmentItem(item) || item;
+}
+
 function rollWeaponAttack(item) {
+  const active = getActiveItem(item);
   const bonus = getWeaponAttackBonus(item);
-  heroStore.rollCheck(`${item.name} Attack`, bonus, null, 'Attack');
+  heroStore.rollCheck(`${active.name || item.name} Attack`, bonus, null, 'Attack');
 }
 
 function exportRoll20(item) {
-  const text = `**${item.name}** [${item.epCost ?? 0} EP]\n${item.desc || ''}`;
+  const active = getActiveItem(item);
+  const text = `**${active.name || item.name}** [${item.epCost ?? 0} EP]\n${active.desc || item.desc || ''}`;
 
   // Broadcast to Roll20 via Chrome Extension
   sendFeatureToVTT({
-    name: item.name,
+    name: active.name || item.name,
     category: 'equipment',
     type: 'Equipment',
-    subtype: item.category || 'General',
+    subtype: active.category || item.category || 'General',
     cost: item.epCost || 0,
-    description: item.desc || '',
-    details: `${item.category || 'Equipment'} • Cost: ${item.epCost || 0} EP`
+    description: active.desc || item.desc || '',
+    details: `${active.category || item.category || 'Equipment'} • Cost: ${item.epCost || 0} EP`
   }, heroStore.character);
 
   if (navigator.clipboard) {
     navigator.clipboard.writeText(text);
-    uiStore.showToast(`Broadcasted "${item.name}" to Roll20 & copied to clipboard!`, 'info');
+    uiStore.showToast(`Sent ${active.name || item.name} to Roll20 and copied text to clipboard.`, 'info');
   } else {
-    uiStore.showToast(`Broadcasted "${item.name}" to Roll20!`, 'info');
+    uiStore.showToast(`Sent ${active.name || item.name} to Roll20.`, 'info');
   }
 }
 </script>
@@ -1175,4 +1210,71 @@ function exportRoll20(item) {
   color: #38bdf8;
 }
 
+.array-tag-pill {
+  font-size: 0.65rem;
+  font-weight: 800;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: rgba(192, 132, 252, 0.18);
+  border: 1px solid rgba(192, 132, 252, 0.4);
+  color: #d8b4fe;
+  font-family: var(--font-mono, monospace);
+  letter-spacing: 0.05em;
+  margin-left: 0.35rem;
+  vertical-align: middle;
+}
+
+.eq-array-mode-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 6px;
+  padding: 0.35rem 0.55rem;
+  margin: 0.2rem 0 0.5rem 0;
+}
+
+.eq-array-mode-label {
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: #94a3b8;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-right: 0.2rem;
+}
+
+.eq-mode-chip {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 0.25rem 0.55rem;
+  border-radius: 4px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  transition: all var(--trans-fast, 0.15s ease);
+}
+
+.eq-mode-chip:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.eq-mode-chip.active {
+  background: rgba(56, 189, 248, 0.18);
+  border-color: #38bdf8;
+  color: #38bdf8;
+  font-weight: 700;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.2);
+}
+
 </style>
+
